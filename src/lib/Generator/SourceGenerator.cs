@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+// ReSharper disable MemberCanBePrivate.Global
+
 namespace Piot.Surge.Generator
 {
     public static class SourceGenerator
@@ -478,7 +480,7 @@ namespace Piot.Surge.Generator
             foreach (var fieldInfo in fieldInfos)
                 sb.Append(@"                new() { ")
                     .Append(
-                        $"mask = {MaskName(fieldInfo)}, name = new FieldName(nameof(current.{fieldInfo.FieldInfo.Name})), type = typeof({fieldInfo.FieldInfo.FieldType})")
+                        $"mask = {MaskName(fieldInfo)}, name = new TypeInformationFieldName(nameof(current.{fieldInfo.FieldInfo.Name})), type = typeof({fieldInfo.FieldInfo.FieldType})")
                     .Append(@" },
 ");
 
@@ -656,6 +658,7 @@ public class ").Append(EntityGeneratedInternal(logicInfo)).Append(" : IGenerated
             var sb = new StringBuilder();
 
             sb.Append(@"
+using Piot.Surge.FastTypeInformation;
 using Piot.Surge.OctetSerialize;
 using Piot.Surge.TypeSerialization;
 

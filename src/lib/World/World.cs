@@ -10,7 +10,7 @@ using System.Runtime.CompilerServices;
 
 namespace Piot.Surge
 {
-    public class World : IEntityContainer
+    public class World : IEntityContainerWithChanges
     {
         private readonly List<IEntity> created = new();
         private readonly IEntityCreation creator;
@@ -23,10 +23,10 @@ namespace Piot.Surge
             this.creator = creator;
         }
 
+        public Dictionary<ulong, IEntity> Entities { get; } = new();
+
         public IEntity[] Created => created.ToArray();
         public IEntity[] Deleted => deleted.ToArray();
-
-        public Dictionary<ulong, IEntity> Entities { get; } = new();
 
         IEntity[] IEntityContainer.AllEntities => Entities.Values.ToArray();
 

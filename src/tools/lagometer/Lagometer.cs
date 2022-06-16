@@ -100,7 +100,7 @@ namespace Piot.Surge.Tools
             return colorTexture;
         }
 
-        private void DrawBar(int index, int value, Texture2D texture)
+        private static void DrawBar(int index, int value, Texture2D texture)
         {
             var basePos = new Vector2(300, 300);
             var xOffset = index * 2;
@@ -108,7 +108,7 @@ namespace Piot.Surge.Tools
                 ScaleMode.StretchToFill, true, 0);
         }
 
-        private void DrawLine(int index, int y, int value, Texture2D texture)
+        private static void DrawLine(int index, int y, int value, Texture2D texture)
         {
             var basePos = new Vector2(300, 300);
             var xOffset = index * 2;

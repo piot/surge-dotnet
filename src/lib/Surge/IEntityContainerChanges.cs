@@ -5,4 +5,9 @@
 
 namespace Piot.Surge
 {
+    public interface IEntityContainerChanges
+    {
+        public IEntity[] Created { get; }
+        public IEntity[] Deleted { get; }
+    }
 }

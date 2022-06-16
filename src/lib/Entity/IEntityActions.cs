@@ -9,10 +9,4 @@ namespace Piot.Surge
     {
         IAction[] Actions { get; }
     }
-
-    public interface IEntityActionsDoUnDo
-    {
-        void UnDoAction(IAction action);
-        void DoAction(IAction action);
-    }
 }

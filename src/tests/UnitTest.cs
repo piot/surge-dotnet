@@ -369,11 +369,12 @@ public class UnitTest1
 
         var spawnedAvatar = world.SpawnEntity(avatarInfo);
 
+        var scanWorld = (IEntityContainerWithChanges)world;
         var allEntities = (world as IEntityContainer).AllEntities;
         Ticker.Tick(allEntities);
         Assert.Equal(3, ((AvatarLogic)spawnedAvatar.Logic).position.x);
 
-        var snapshotDelta = FromSnapshotDeltaInternal.Convert(SnapshotDeltaCreator.Scan(world));
+        var snapshotDelta = FromSnapshotDeltaInternal.Convert(SnapshotDeltaCreator.Scan(scanWorld));
         world.ClearDelta();
         Assert.Empty(snapshotDelta.deletedIds);
         Assert.Empty(snapshotDelta.updatedEntities);
@@ -382,7 +383,7 @@ public class UnitTest1
 
         Ticker.Tick(allEntities);
 
-        var snapshotDeltaAfter = FromSnapshotDeltaInternal.Convert(SnapshotDeltaCreator.Scan(world));
+        var snapshotDeltaAfter = FromSnapshotDeltaInternal.Convert(SnapshotDeltaCreator.Scan(scanWorld));
         world.ClearDelta();
         Assert.Empty(snapshotDeltaAfter.deletedIds);
         Assert.Empty(snapshotDeltaAfter.createdIds);
@@ -429,7 +430,7 @@ public class UnitTest1
         (world as IEntityContainer).DeleteEntity(spawnedAvatar);
 
         {
-            var snapshotDeltaAfterDelete = FromSnapshotDeltaInternal.Convert(SnapshotDeltaCreator.Scan(world));
+            var snapshotDeltaAfterDelete = FromSnapshotDeltaInternal.Convert(SnapshotDeltaCreator.Scan(scanWorld));
             var (createdForPacker, updateForPacker) = SnapshotDeltaPackPrepare.Prepare(
                 snapshotDeltaAfterDelete.createdIds,
                 snapshotDeltaAfterDelete.updatedEntities, world);
@@ -452,7 +453,9 @@ public class UnitTest1
 
         var spawnedAvatar = world.SpawnEntity(avatarInfo);
 
-        var firstDelta = SnapshotDeltaCreator.Scan(world);
+        var scanWorld = (IEntityContainerWithChanges)world;
+
+        var firstDelta = SnapshotDeltaCreator.Scan(scanWorld);
         world.ClearDelta();
         OverWriter.Overwrite(world);
 
@@ -466,7 +469,7 @@ public class UnitTest1
 
         Ticker.Tick(world);
 
-        var secondDelta = SnapshotDeltaCreator.Scan(world);
+        var secondDelta = SnapshotDeltaCreator.Scan(scanWorld);
         var secondInternalInfo = secondDelta.FetchEntity(spawnedAvatar.Id);
         Assert.Equal(AvatarLogicEntityInternal.PositionMask, secondInternalInfo.changeMask);
         world.ClearDelta();
@@ -493,7 +496,7 @@ public class UnitTest1
 
         Assert.IsType<FireVolley>((serverSpawnedAvatar as IEntityActions).Actions[0]);
 
-        var thirdDelta = SnapshotDeltaCreator.Scan(world);
+        var thirdDelta = SnapshotDeltaCreator.Scan(scanWorld);
         var thirdInternalInfo = thirdDelta.FetchEntity(spawnedAvatar.Id);
         Assert.Equal(
             AvatarLogicEntityInternal.PositionMask | AvatarLogicEntityInternal.AmmoCountMask |

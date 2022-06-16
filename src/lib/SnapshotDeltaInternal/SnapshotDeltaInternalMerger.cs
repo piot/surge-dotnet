@@ -9,6 +9,11 @@ namespace Piot.Surge.SnapshotDeltaInternal
 {
     public static class SnapshotDeltaInternalMerger
     {
+        /// <summary>
+        ///     Merges (creates a union of) all the masks in the SnapshotDeltaInternals passed in.
+        /// </summary>
+        /// <param name="deltas">Array of SnapshotDeltaInternal</param>
+        /// <returns>A complete SnapshotDelta</returns>
         public static SnapshotDelta.SnapshotDelta Merge(SnapshotDeltaInternal[] deltas)
         {
             var baseDelta = new SnapshotDeltaInternal();

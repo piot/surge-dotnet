@@ -3,19 +3,15 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using Piot.Surge.OctetSerialize;
-using Piot.Surge.Types;
-
-namespace Piot.Surge
+namespace Piot.Surge.FastTypeInformation
 {
-    public static class AimingReader
+    public struct TypeInformationFieldName
     {
-        public static Aiming Read(IOctetReader reader)
-        {
-            var yaw = reader.ReadUInt16();
-            var pitch = reader.ReadInt16();
+        public string name;
 
-            return new Aiming(yaw, pitch);
+        public TypeInformationFieldName(string name)
+        {
+            this.name = name;
         }
     }
 }

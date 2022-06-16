@@ -3,73 +3,76 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using System.Numerics;
+using Piot.Surge.FastTypeInformation;
 using Piot.Surge.OctetSerialize;
+using Piot.Surge.Types;
 using Piot.Surge.TypeSerialization;
+using Tests.ExampleGame;
 
-namespace Piot.Surge.Internal.Generated
-{
+namespace Piot.Surge.Internal.Generated;
+
 public static class ArchetypeConstants
 {
     public const ushort AvatarLogic = 1;
     public const ushort FireballLogic = 2;
-
 }
+
 public static class ArchetypeIdConstants
 {
     public static readonly ArchetypeId AvatarLogic = new(ArchetypeConstants.AvatarLogic);
     public static readonly ArchetypeId FireballLogic = new(ArchetypeConstants.FireballLogic);
-
 }
-public class GeneratedEntityCreation : IEntityCreation
-    {
- public IEntity CreateEntity(ArchetypeId archetypeId, EntityId entityId)
-            {
-                IGeneratedEntity generatedEntity = archetypeId.id switch
-                {
-        ArchetypeConstants.AvatarLogic => new AvatarLogicEntityInternal(),
-        ArchetypeConstants.FireballLogic => new FireballLogicEntityInternal(),
-            _ => throw new Exception($"unknown entity to create {archetypeId}"),
 
-                };
-                
-                return new Entity(entityId, generatedEntity);
-            }
-        }
+public class GeneratedEntityCreation : IEntityCreation
+{
+    public IEntity CreateEntity(ArchetypeId archetypeId, EntityId entityId)
+    {
+        IGeneratedEntity generatedEntity = archetypeId.id switch
+        {
+            ArchetypeConstants.AvatarLogic => new AvatarLogicEntityInternal(),
+            ArchetypeConstants.FireballLogic => new FireballLogicEntityInternal(),
+            _ => throw new Exception($"unknown entity to create {archetypeId}")
+        };
+
+        return new Entity(entityId, generatedEntity);
+    }
+}
+
 // --------------- EngineWorld ---------------
 public class EngineWorld
-    {
-public Action<AvatarLogicEntity>? OnSpawnAvatarLogic;
-public Action<FireballLogicEntity>? OnSpawnFireballLogic;
+{
+    public Action<AvatarLogicEntity>? OnSpawnAvatarLogic;
+    public Action<FireballLogicEntity>? OnSpawnFireballLogic;
+}
 
-    }
 public class NotifyEngineWorld
+{
+    public static void NotifyCreation(IEntity entity, EngineWorld engineWorld)
     {
-
-        public static void NotifyCreation(IEntity entity, EngineWorld engineWorld)
+        switch (entity)
         {
-            switch (entity)
-            {
-case AvatarLogicEntityInternal internalEntity:
-engineWorld.OnSpawnAvatarLogic?.Invoke(internalEntity.OutFacing);
-    break;
-case FireballLogicEntityInternal internalEntity:
-engineWorld.OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
-    break;
+            case AvatarLogicEntityInternal internalEntity:
+                engineWorld.OnSpawnAvatarLogic?.Invoke(internalEntity.OutFacing);
+                break;
+            case FireballLogicEntityInternal internalEntity:
+                engineWorld.OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
+                break;
 
-                default:
-                    throw new Exception("Internal error");
-            }
+            default:
+                throw new Exception("Internal error");
         }
-                
     }
+}
+
 // --------------- Internal Action Structs ---------------
 public struct FireVolley : IAction
 {
-    public System.Numerics.Vector3 direction;
-
+    public Vector3 direction;
 }
+
 // --------------- Internal Action Implementation ---------------
-public class AvatarLogicActions : Tests.ExampleGame.AvatarLogic.IAvatarLogicActions
+public class AvatarLogicActions : AvatarLogic.IAvatarLogicActions
 {
     private readonly IActionsContainer actionsContainer;
 
@@ -77,60 +80,59 @@ public class AvatarLogicActions : Tests.ExampleGame.AvatarLogic.IAvatarLogicActi
     {
         this.actionsContainer = actionsContainer;
     }
-    public void FireVolley(System.Numerics.Vector3 direction)
+
+    public void FireVolley(Vector3 direction)
     {
-        actionsContainer.Add(new FireVolley(){direction = direction});
+        actionsContainer.Add(new FireVolley { direction = direction });
     }
 }
+
 public class AvatarLogicEntity
 {
-    public Action? OnDestroyed;
-    public Action? OnSpawned;
-    public Action? OnFireButtonIsDownChanged;
+    public delegate void FireVolleyDelegate(Vector3 direction);
+
+    public FireVolleyDelegate? DoFireVolley;
 
     public Action? OnAimingChanged;
 
-    public Action? OnPositionChanged;
-
     public Action? OnAmmoCountChanged;
+    public Action? OnDestroyed;
+    public Action? OnFireButtonIsDownChanged;
 
     public Action? OnFireCooldownChanged;
 
-    public delegate void FireVolleyDelegate(System.Numerics.Vector3 direction);
-    public FireVolleyDelegate? DoFireVolley;
+    public Action? OnPositionChanged;
+    public Action? OnSpawned;
     public FireVolleyDelegate? UnDoFireVolley;
-
-
 }
-
 
 public class AvatarLogicEntityInternal : IGeneratedEntity
 {
-    private readonly ActionsContainer actionsContainer = new();
-
-
-    Tests.ExampleGame.AvatarLogic current;
-    Tests.ExampleGame.AvatarLogic last;
-
-    public Tests.ExampleGame.AvatarLogic Self => current;
-
- internal Tests.ExampleGame.AvatarLogic Current
-            {
-                set => current = value;
-            }
-     AvatarLogicEntity outFacing = new();
-    public AvatarLogicEntity OutFacing => outFacing;
-
-    public ArchetypeId ArchetypeId => ArchetypeIdConstants.AvatarLogic;
     public const ulong FireButtonIsDownMask = 0x00000001;
     public const ulong AimingMask = 0x00000002;
     public const ulong PositionMask = 0x00000004;
     public const ulong AmmoCountMask = 0x00000008;
     public const ulong FireCooldownMask = 0x00000010;
+    private readonly ActionsContainer actionsContainer = new();
+
+
+    private AvatarLogic current;
+    private AvatarLogic last;
+
+    public AvatarLogic Self => current;
+
+    internal AvatarLogic Current
+    {
+        set => current = value;
+    }
+
+    public AvatarLogicEntity OutFacing { get; } = new();
+
+    public ArchetypeId ArchetypeId => ArchetypeIdConstants.AvatarLogic;
 
 
     public IAction[] Actions => actionsContainer.Actions.ToArray();
-    
+
     public ILogic Logic => current;
 
     public void Overwrite()
@@ -140,12 +142,12 @@ public class AvatarLogicEntityInternal : IGeneratedEntity
 
     public void FireCreated()
     {
-        outFacing.OnSpawned?.Invoke();
+        OutFacing.OnSpawned?.Invoke();
     }
 
     public void FireDestroyed()
     {
-        outFacing.OnDestroyed?.Invoke();
+        OutFacing.OnDestroyed?.Invoke();
     }
 
     public void DoAction(IAction action)
@@ -153,24 +155,25 @@ public class AvatarLogicEntityInternal : IGeneratedEntity
         switch (action)
         {
             case FireVolley thing:
-                outFacing.DoFireVolley?.Invoke(thing.direction);
-            break;
-
+                OutFacing.DoFireVolley?.Invoke(thing.direction);
+                break;
+        }
     }
-}
+
     public void UnDoAction(IAction action)
     {
         switch (action)
         {
             case FireVolley thing:
-                outFacing.UnDoFireVolley?.Invoke(thing.direction);
-            break;
-
+                OutFacing.UnDoFireVolley?.Invoke(thing.direction);
+                break;
+        }
     }
-}
+
     public void Serialize(ulong serializeFlags, IOctetWriter writer)
     {
-        if ((serializeFlags & FireButtonIsDownMask) != 0) writer.WriteUInt8(current.fireButtonIsDown ? (byte)1 : (byte)0);
+        if ((serializeFlags & FireButtonIsDownMask) != 0)
+            writer.WriteUInt8(current.fireButtonIsDown ? (byte)1 : (byte)0);
         if ((serializeFlags & AimingMask) != 0) AimingWriter.Write(current.aiming, writer);
         if ((serializeFlags & PositionMask) != 0) Position3Writer.Write(current.position, writer);
         if ((serializeFlags & AmmoCountMask) != 0) writer.WriteUInt16(current.ammoCount);
@@ -205,7 +208,6 @@ public class AvatarLogicEntityInternal : IGeneratedEntity
     }
 
 
-
     public void Tick()
     {
         var actions = new AvatarLogicActions(actionsContainer);
@@ -223,16 +225,15 @@ public class AvatarLogicEntityInternal : IGeneratedEntity
         if (current.fireCooldown != last.fireCooldown) mask |= FireCooldownMask;
 
         return mask;
-
     }
+
     public void FireChanges(ulong serializeFlags)
     {
-        if ((serializeFlags & FireButtonIsDownMask) != 0) outFacing.OnFireButtonIsDownChanged?.Invoke();
-        if ((serializeFlags & AimingMask) != 0) outFacing.OnAimingChanged?.Invoke();
-        if ((serializeFlags & PositionMask) != 0) outFacing.OnPositionChanged?.Invoke();
-        if ((serializeFlags & AmmoCountMask) != 0) outFacing.OnAmmoCountChanged?.Invoke();
-        if ((serializeFlags & FireCooldownMask) != 0) outFacing.OnFireCooldownChanged?.Invoke();
-
+        if ((serializeFlags & FireButtonIsDownMask) != 0) OutFacing.OnFireButtonIsDownChanged?.Invoke();
+        if ((serializeFlags & AimingMask) != 0) OutFacing.OnAimingChanged?.Invoke();
+        if ((serializeFlags & PositionMask) != 0) OutFacing.OnPositionChanged?.Invoke();
+        if ((serializeFlags & AmmoCountMask) != 0) OutFacing.OnAmmoCountChanged?.Invoke();
+        if ((serializeFlags & FireCooldownMask) != 0) OutFacing.OnFireCooldownChanged?.Invoke();
     }
 
     public TypeInformation TypeInformation
@@ -241,25 +242,43 @@ public class AvatarLogicEntityInternal : IGeneratedEntity
         {
             return new TypeInformation(new TypeInformationField[]
             {
-                new() { mask = FireButtonIsDownMask, name = new FieldName(nameof(current.fireButtonIsDown)), type = typeof(System.Boolean) },
-                new() { mask = AimingMask, name = new FieldName(nameof(current.aiming)), type = typeof(Piot.Surge.Types.Aiming) },
-                new() { mask = PositionMask, name = new FieldName(nameof(current.position)), type = typeof(Piot.Surge.Types.Position3) },
-                new() { mask = AmmoCountMask, name = new FieldName(nameof(current.ammoCount)), type = typeof(System.UInt16) },
-                new() { mask = FireCooldownMask, name = new FieldName(nameof(current.fireCooldown)), type = typeof(System.UInt16) },
-
-        });
+                new()
+                {
+                    mask = FireButtonIsDownMask, name = new TypeInformationFieldName(nameof(current.fireButtonIsDown)),
+                    type = typeof(bool)
+                },
+                new()
+                {
+                    mask = AimingMask, name = new TypeInformationFieldName(nameof(current.aiming)),
+                    type = typeof(Aiming)
+                },
+                new()
+                {
+                    mask = PositionMask, name = new TypeInformationFieldName(nameof(current.position)),
+                    type = typeof(Position3)
+                },
+                new()
+                {
+                    mask = AmmoCountMask, name = new TypeInformationFieldName(nameof(current.ammoCount)),
+                    type = typeof(ushort)
+                },
+                new()
+                {
+                    mask = FireCooldownMask, name = new TypeInformationFieldName(nameof(current.fireCooldown)),
+                    type = typeof(ushort)
+                }
+            });
+        }
     }
-
-}
 }
 
 // --------------- Internal Action Structs ---------------
 public struct Explode : IAction
 {
-
 }
+
 // --------------- Internal Action Implementation ---------------
-public class FireballLogicActions : Tests.ExampleGame.IFireballLogicActions
+public class FireballLogicActions : IFireballLogicActions
 {
     private readonly IActionsContainer actionsContainer;
 
@@ -267,51 +286,50 @@ public class FireballLogicActions : Tests.ExampleGame.IFireballLogicActions
     {
         this.actionsContainer = actionsContainer;
     }
+
     public void Explode()
     {
-        actionsContainer.Add(new Explode(){});
+        actionsContainer.Add(new Explode());
     }
 }
+
 public class FireballLogicEntity
 {
+    public delegate void ExplodeDelegate();
+
+    public ExplodeDelegate? DoExplode;
     public Action? OnDestroyed;
-    public Action? OnSpawned;
     public Action? OnPositionChanged;
+    public Action? OnSpawned;
 
     public Action? OnVelocityChanged;
-
-    public delegate void ExplodeDelegate();
-    public ExplodeDelegate? DoExplode;
     public ExplodeDelegate? UnDoExplode;
-
-
 }
-
 
 public class FireballLogicEntityInternal : IGeneratedEntity
 {
+    public const ulong PositionMask = 0x00000001;
+    public const ulong VelocityMask = 0x00000002;
     private readonly ActionsContainer actionsContainer = new();
 
 
-    Tests.ExampleGame.FireballLogic current;
-    Tests.ExampleGame.FireballLogic last;
+    private FireballLogic current;
+    private FireballLogic last;
 
-    public Tests.ExampleGame.FireballLogic Self => current;
+    public FireballLogic Self => current;
 
- internal Tests.ExampleGame.FireballLogic Current
-            {
-                set => current = value;
-            }
-     FireballLogicEntity outFacing = new();
-    public FireballLogicEntity OutFacing => outFacing;
+    internal FireballLogic Current
+    {
+        set => current = value;
+    }
+
+    public FireballLogicEntity OutFacing { get; } = new();
 
     public ArchetypeId ArchetypeId => ArchetypeIdConstants.FireballLogic;
-    public const ulong PositionMask = 0x00000001;
-    public const ulong VelocityMask = 0x00000002;
 
 
     public IAction[] Actions => actionsContainer.Actions.ToArray();
-    
+
     public ILogic Logic => current;
 
     public void Overwrite()
@@ -321,12 +339,12 @@ public class FireballLogicEntityInternal : IGeneratedEntity
 
     public void FireCreated()
     {
-        outFacing.OnSpawned?.Invoke();
+        OutFacing.OnSpawned?.Invoke();
     }
 
     public void FireDestroyed()
     {
-        outFacing.OnDestroyed?.Invoke();
+        OutFacing.OnDestroyed?.Invoke();
     }
 
     public void DoAction(IAction action)
@@ -334,21 +352,21 @@ public class FireballLogicEntityInternal : IGeneratedEntity
         switch (action)
         {
             case Explode:
-                outFacing.DoExplode?.Invoke();
-            break;
-
+                OutFacing.DoExplode?.Invoke();
+                break;
+        }
     }
-}
+
     public void UnDoAction(IAction action)
     {
         switch (action)
         {
             case Explode:
-                outFacing.UnDoExplode?.Invoke();
-            break;
-
+                OutFacing.UnDoExplode?.Invoke();
+                break;
+        }
     }
-}
+
     public void Serialize(ulong serializeFlags, IOctetWriter writer)
     {
         if ((serializeFlags & PositionMask) != 0) Position3Writer.Write(current.position, writer);
@@ -374,7 +392,6 @@ public class FireballLogicEntityInternal : IGeneratedEntity
     }
 
 
-
     public void Tick()
     {
         var actions = new FireballLogicActions(actionsContainer);
@@ -389,13 +406,12 @@ public class FireballLogicEntityInternal : IGeneratedEntity
         if (current.velocity != last.velocity) mask |= VelocityMask;
 
         return mask;
-
     }
+
     public void FireChanges(ulong serializeFlags)
     {
-        if ((serializeFlags & PositionMask) != 0) outFacing.OnPositionChanged?.Invoke();
-        if ((serializeFlags & VelocityMask) != 0) outFacing.OnVelocityChanged?.Invoke();
-
+        if ((serializeFlags & PositionMask) != 0) OutFacing.OnPositionChanged?.Invoke();
+        if ((serializeFlags & VelocityMask) != 0) OutFacing.OnVelocityChanged?.Invoke();
     }
 
     public TypeInformation TypeInformation
@@ -404,14 +420,20 @@ public class FireballLogicEntityInternal : IGeneratedEntity
         {
             return new TypeInformation(new TypeInformationField[]
             {
-                new() { mask = PositionMask, name = new FieldName(nameof(current.position)), type = typeof(Piot.Surge.Types.Position3) },
-                new() { mask = VelocityMask, name = new FieldName(nameof(current.velocity)), type = typeof(Piot.Surge.Types.Velocity3) },
-
-        });
+                new()
+                {
+                    mask = PositionMask, name = new TypeInformationFieldName(nameof(current.position)),
+                    type = typeof(Position3)
+                },
+                new()
+                {
+                    mask = VelocityMask, name = new TypeInformationFieldName(nameof(current.velocity)),
+                    type = typeof(Velocity3)
+                }
+            });
+        }
     }
-
-}
 }
 
 
-} // Namespace
+// Namespace
