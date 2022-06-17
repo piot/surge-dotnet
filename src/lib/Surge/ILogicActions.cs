@@ -7,5 +7,6 @@ namespace Piot.Surge
 {
     public interface ILogicActions
     {
+        // Intentionally left blank
     }
 }

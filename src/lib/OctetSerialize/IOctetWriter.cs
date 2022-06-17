@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using System;
+
 namespace Piot.Surge.OctetSerialize
 {
     public interface IOctetWriter
@@ -12,6 +14,6 @@ namespace Piot.Surge.OctetSerialize
         public void WriteInt16(short value);
         public void WriteUInt32(uint value);
         public void WriteUInt64(ulong value);
-        public void WriteOctets(byte[] value);
+        public void WriteOctets(Memory<byte> value);
     }
 }

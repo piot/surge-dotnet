@@ -4,6 +4,7 @@
         <TargetFramework>net5.0</TargetFramework>
         <ImplicitUsings>disable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <WarningsAsErrors>Nullable</WarningsAsErrors>
         <UseCommonOutputDirectory>true</UseCommonOutputDirectory>
         <IntermediateOutputPath>../../output</IntermediateOutputPath>
     </PropertyGroup>

@@ -9,6 +9,6 @@ namespace Piot.Surge
 {
     public class Surge
     {
-        public IInputPackFetch InputPackFetcher;
+        public IInputPackFetch? InputPackFetcher;
     }
 }

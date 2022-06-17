@@ -24,14 +24,14 @@ namespace Piot.Clog
             target.Log(LogLevel.Info, message, Array.Empty<object>());
         }
 
-        public void Info<T>(string message, T arg)
+        public void Info<T>(string message, T arg) where T : notnull
         {
             if (threshold > LogLevel.Info) return;
 
             target.Log(LogLevel.Info, message, new object[] { arg });
         }
 
-        public void Info<T0, T1>(string message, T0 arg0, T1 arg1)
+        public void Info<T0, T1>(string message, T0 arg0, T1 arg1) where T0 : notnull where T1 : notnull
         {
             if (threshold > LogLevel.Info) return;
 
@@ -39,6 +39,7 @@ namespace Piot.Clog
         }
 
         public void Info<T0, T1, T2>(string message, T0 arg0, T1 arg1, T2 arg2)
+            where T0 : notnull where T1 : notnull where T2 : notnull
         {
             if (threshold > LogLevel.Info) return;
 

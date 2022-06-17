@@ -39,7 +39,7 @@ namespace Piot.Surge.Generator
             public CommandParameter(ParameterInfo parameterInfo)
             {
                 this.parameterInfo = parameterInfo;
-                name = parameterInfo.Name;
+                name = parameterInfo.Name!;
                 type = parameterInfo.ParameterType;
             }
 

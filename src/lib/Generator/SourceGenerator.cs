@@ -21,7 +21,7 @@ namespace Piot.Surge.Generator
 
         public static string FullName(Type t)
         {
-            return t.FullName.Replace('+', '.');
+            return t.FullName!.Replace('+', '.');
         }
 
         public static string ActionsName(Type t)
@@ -31,7 +31,7 @@ namespace Piot.Surge.Generator
 
         public static string TitleCase(string input)
         {
-            return string.Concat(input[0].ToString().ToUpper(), input.AsSpan(1));
+            return string.Concat(input[0].ToString().ToUpper(), input.Substring(1, input.Length - 1));
         }
 
         public static string EntityExternal(LogicInfo info)

@@ -20,8 +20,8 @@ namespace Piot.Surge.SnapshotDeltaInternal
             foreach (var delta in deltas)
             foreach (var entityInfo in delta.entities)
             {
-                var hasEntityAlready = baseDelta.entities.TryGetValue(entityInfo.Key, out var foundInfo);
-                if (hasEntityAlready)
+                baseDelta.entities.TryGetValue(entityInfo.Key, out var foundInfo);
+                if (foundInfo is not null)
                     foundInfo.changeMask = FullChangeMask.MergeBits(foundInfo.changeMask, entityInfo.Value.changeMask);
                 else
                     baseDelta.entities[entityInfo.Key] =

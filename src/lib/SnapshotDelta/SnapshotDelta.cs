@@ -7,9 +7,9 @@ namespace Piot.Surge.SnapshotDelta
 {
     public class SnapshotDelta
     {
-        public EntityId[] createdIds;
-        public EntityId[] deletedIds;
-        public SnapshotDeltaChangedEntity[] updatedEntities;
+        public readonly EntityId[] createdIds;
+        public readonly EntityId[] deletedIds;
+        public readonly SnapshotDeltaChangedEntity[] updatedEntities;
 
         public SnapshotDelta(EntityId[] deletedIds, EntityId[] createdIds,
             SnapshotDeltaChangedEntity[] updatedEntities)

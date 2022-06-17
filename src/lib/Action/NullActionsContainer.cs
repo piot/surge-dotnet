@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using System;
+
 namespace Piot.Surge
 {
     public class NullActionsContainer : IActionsContainer
@@ -11,7 +13,7 @@ namespace Piot.Surge
         {
         }
 
-        public IAction[] Actions { get; }
+        public IAction[] Actions { get; } = Array.Empty<IAction>();
 
         public void Spawn(ILogic data)
         {

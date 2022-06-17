@@ -32,9 +32,7 @@ namespace Piot.Surge.SnapshotDeltaPack
 
         public bool IsValidPackToInsert(SnapshotIdRange range)
         {
-            if (packs.Count == 0) return true;
-
-            return range.IsImmediateFollowing(lastInsertedRange);
+            return packs.Count == 0 || range.IsImmediateFollowing(lastInsertedRange);
         }
 
         public SnapshotDeltaPack Peek()

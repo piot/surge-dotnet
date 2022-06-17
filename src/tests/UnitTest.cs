@@ -525,7 +525,7 @@ public class UnitTest1
             SnapshotDeltaReaderWithUndo.ReadWithUndo(payloadReader, clientWorld, undoWriter);
 
         var undoPack = new SnapshotDeltaPack(idRange, undoWriter.Octets);
-        var clientSpawnedEntity = clientWorld.FindEntity<AvatarLogicEntityInternal>(spawnedAvatar.Id);
+        var clientSpawnedEntity = clientWorld.FetchEntity<AvatarLogicEntityInternal>(spawnedAvatar.Id);
         var clientAvatar = clientWorld.FetchEntity(spawnedAvatar.Id);
 
         clientSpawnedEntity.OutFacing.OnAmmoCountChanged += () =>
@@ -583,7 +583,7 @@ public class UnitTest1
         var readBackAgain = new OctetReader(snapshotDeltaPack.payload);
         SnapshotDeltaReader.Read(readBackAgain, clientWorld);
 
-        var clientSpawnedEntityAgain = clientWorld.FindEntity<AvatarLogicEntityInternal>(spawnedAvatar.Id);
+        var clientSpawnedEntityAgain = clientWorld.FetchEntity<AvatarLogicEntityInternal>(spawnedAvatar.Id);
 
         Assert.Equal(3, clientSpawnedEntityAgain.Self.position.x);
         Assert.Equal(100, clientSpawnedEntityAgain.Self.ammoCount);

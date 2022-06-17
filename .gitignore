@@ -4,3 +4,4 @@ obj/
 .idea/
 output/
 *.meta
+testoutput/

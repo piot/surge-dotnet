@@ -30,9 +30,18 @@ namespace Piot.Surge
 
         IEntity[] IEntityContainer.AllEntities => Entities.Values.ToArray();
 
-        public T FindEntity<T>(EntityId entityId)
+        public T? FindEntity<T>(EntityId entityId)
         {
             Entities.TryGetValue(entityId.Value, out var entity);
+            if (entity == null) return default;
+
+            return (T)entity.GeneratedEntity;
+        }
+
+        public T FetchEntity<T>(EntityId entityId)
+        {
+            Entities.TryGetValue(entityId.Value, out var entity);
+            if (entity == null) throw new NullReferenceException($"could not find entity {entityId}");
 
             return (T)entity.GeneratedEntity;
         }
@@ -73,7 +82,7 @@ namespace Piot.Surge
             return newEntity;
         }
 
-        internal IEntity FindEntity(EntityId entityId)
+        internal IEntity? FindEntity(EntityId entityId)
         {
             Entities.TryGetValue(entityId.Value, out var entity);
             return entity;

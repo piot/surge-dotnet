@@ -19,6 +19,6 @@ namespace Piot.Surge
 
     public class InputSourceAttribute : Attribute
     {
-        public string BindName { get; set; }
+        public string BindName { get; set; } = string.Empty;
     }
 }

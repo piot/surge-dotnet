@@ -50,9 +50,9 @@ namespace Piot.Surge.OctetSerialize
             BinaryPrimitives.WriteUInt64BigEndian(array.Span.Slice(pos - 8, 8), value);
         }
 
-        public void WriteOctets(byte[] value)
+        public void WriteOctets(Memory<byte> value)
         {
-            value.CopyTo(array.Span.Slice(pos, value.Length));
+            value.Span.CopyTo(array.Span.Slice(pos, value.Length));
             pos += value.Length;
         }
     }
