@@ -124,17 +124,17 @@ public class UnitTest1
     [Fact]
     public void OrderedDatagrams()
     {
-        var sequence = new OrderedDatagramsIn();
+        OrderedDatagramsIn sequence = new();
         {
-            var writer = new OctetWriter(1);
+            OctetWriter writer = new (1);
             writer.WriteUInt8(128);
-            var reader = new OctetReader(writer.Octets);
+            OctetReader reader = new (writer.Octets);
             Assert.False(sequence.Read(reader));
         }
         {
-            var writer = new OctetWriter(1);
+            OctetWriter writer = new (1);
             writer.WriteUInt8(129);
-            var reader = new OctetReader(writer.Octets);
+            OctetReader reader = new (writer.Octets);
             Assert.False(sequence.Read(reader));
         }
     }
@@ -143,25 +143,25 @@ public class UnitTest1
     [Fact]
     public void OrderedDatagramsValid()
     {
-        var sequence = new OrderedDatagramsIn();
+        OrderedDatagramsIn sequence = new ();
         {
-            var writer = new OctetWriter(1);
+            OctetWriter writer = new (1);
             writer.WriteUInt8(126);
-            var reader = new OctetReader(writer.Octets);
+            OctetReader reader = new (writer.Octets);
             Assert.True(sequence.Read(reader));
         }
 
         {
-            var writer = new OctetWriter(1);
+            OctetWriter writer = new (1);
             writer.WriteUInt8(127);
-            var reader = new OctetReader(writer.Octets);
+            OctetReader reader = new (writer.Octets);
             Assert.True(sequence.Read(reader));
         }
 
         {
-            var writer = new OctetWriter(1);
+            OctetWriter writer = new (1);
             writer.WriteUInt8(127);
-            var reader = new OctetReader(writer.Octets);
+            OctetReader reader = new (writer.Octets);
             Assert.False(sequence.Read(reader));
         }
     }
@@ -169,19 +169,19 @@ public class UnitTest1
     [Fact]
     public void OrderedDatagramsWrite()
     {
-        var sequence = new OrderedDatagramsOut();
+        OrderedDatagramsOut sequence = new ();
         Assert.Equal(0, sequence.SequenceId);
 
         for (var i = 0; i < 256; ++i)
         {
-            var writer = new OctetWriter(1);
+            OctetWriter writer = new (1);
             sequence.Write(writer);
-            var reader = new OctetReader(writer.Octets);
+            OctetReader reader = new (writer.Octets);
             Assert.Equal(i, reader.ReadUInt8());
         }
 
         Assert.Equal(0, sequence.SequenceId);
-        var writer2 = new OctetWriter(1);
+        OctetWriter writer2 = new (1);
         sequence.Write(writer2);
         Assert.Equal(1, sequence.SequenceId);
     }

@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using Piot.Surge.OctetSerialize;
+using Piot.Flood;
 using Piot.Surge.Snapshot;
 
 namespace Piot.Surge.SnapshotSerialization

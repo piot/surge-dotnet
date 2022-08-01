@@ -80,10 +80,7 @@ namespace Piot.Surge.Tools
             var lineY = -100;
             foreach (var value in interpolationValues)
             {
-                if (value < 0)
-                    DrawLine(i, lineY, value, interpolationTexture);
-                else
-                    DrawLine(i, lineY, value, extrapolationTexture);
+                DrawLine(i, lineY, value, value < 0 ? interpolationTexture : extrapolationTexture);
 
                 ++i;
             }

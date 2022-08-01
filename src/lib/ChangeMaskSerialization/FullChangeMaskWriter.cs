@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using Piot.Surge.ChangeMask;
-using Piot.Surge.OctetSerialize;
+using Piot.Flood;
 
 namespace Piot.Surge.ChangeMaskSerialization
 {

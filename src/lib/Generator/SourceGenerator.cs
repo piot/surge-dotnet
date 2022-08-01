@@ -668,7 +668,7 @@ public class ").Append(EntityGeneratedInternal(logicInfo)).Append(" : IGenerated
 
             sb.Append(@"
 using Piot.Surge.FastTypeInformation;
-using Piot.Surge.OctetSerialize;
+using Piot.Flood;
 using Piot.Surge.TypeSerialization;
 
 namespace Piot.Surge.Internal.Generated

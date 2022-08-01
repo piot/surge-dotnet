@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using Piot.Surge.ChangeMaskSerialization;
-using Piot.Surge.OctetSerialize;
+using Piot.Flood;
 using Surge.SnapshotDeltaPack;
 
 namespace Piot.Surge.SnapshotDeltaPack.Serialization

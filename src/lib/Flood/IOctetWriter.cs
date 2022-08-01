@@ -5,7 +5,7 @@
 
 using System;
 
-namespace Piot.Surge.OctetSerialize
+namespace Piot.Flood
 {
     public interface IOctetWriter
     {

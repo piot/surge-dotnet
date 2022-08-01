@@ -9,11 +9,11 @@ namespace Piot.Surge
 {
     public class NullActionsContainer : IActionsContainer
     {
+
+        public IAction[] Actions { get; } = Array.Empty<IAction>();
         public void Add(IAction action)
         {
         }
-
-        public IAction[] Actions { get; } = Array.Empty<IAction>();
 
         public void Spawn(ILogic data)
         {

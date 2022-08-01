@@ -6,7 +6,7 @@
 using System;
 using System.Buffers.Binary;
 
-namespace Piot.Surge.OctetSerialize
+namespace Piot.Flood
 {
     public class OctetReader : IOctetReader
     {

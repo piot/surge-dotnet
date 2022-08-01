@@ -9,4 +9,8 @@
         <IntermediateOutputPath>../../output</IntermediateOutputPath>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="ClrHeapAllocationAnalyzer" Version="3.0.0" />
+    </ItemGroup>
+
 </Project>

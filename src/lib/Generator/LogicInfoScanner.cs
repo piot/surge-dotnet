@@ -80,10 +80,10 @@ namespace Piot.Surge.Generator
             var commandsInterface = parameters.Single().ParameterType;
             if (!commandsInterface.IsInterface)
                 throw new Exception("Tick() must take an interface as a single parameter");
-#if !UNITY_EDITOR
+/*
             if (!commandsInterface.IsAssignableTo(typeof(ILogicActions)))
                 throw new Exception($"Interface in Tick {type.Name} must inherit from {nameof(ILogicActions)}");
-#endif
+*/
             var methodsInInterface = commandsInterface.GetMethods();
             CommandInfos = methodsInInterface.Select(method => new CommandInfo(method)).ToList();
             CommandsInterface = commandsInterface;

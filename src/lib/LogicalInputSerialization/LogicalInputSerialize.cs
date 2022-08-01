@@ -5,7 +5,7 @@
 
 using System;
 using System.Linq;
-using Piot.Surge.OctetSerialize;
+using Piot.Flood;
 using Piot.Surge.SnapshotSerialization;
 
 namespace Piot.Surge.LogicalInputSerialization

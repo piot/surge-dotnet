@@ -5,7 +5,7 @@
 
 using System.Collections.Generic;
 using Piot.Surge.ChangeMaskSerialization;
-using Piot.Surge.OctetSerialize;
+using Piot.Flood;
 
 namespace Piot.Surge.SnapshotDeltaPack.Serialization
 {

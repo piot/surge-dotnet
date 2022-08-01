@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
-using Piot.Surge.OctetSerialize;
+using Piot.Flood;
 using Piot.Surge.OrderedDatagrams;
 using Piot.Surge.SnapshotSerialization;
 
