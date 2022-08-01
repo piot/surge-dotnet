@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Peter Bjorklund. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 using System;
 using System.Linq;
 using System.Text;
@@ -66,7 +71,7 @@ namespace Piot.Raff
     {
         public static void ReadHeader(IOctetReader reader)
         {
-            var readHeader = reader.ReadOctets(9);
+            var readHeader = reader.ReadOctets(Constants.fileHeader.Length);
             if (!readHeader.SequenceEqual(Constants.fileHeader))
             {
                 throw new Exception("illegal header");
