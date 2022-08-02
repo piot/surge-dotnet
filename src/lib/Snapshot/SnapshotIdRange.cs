@@ -17,6 +17,8 @@ namespace Piot.Surge.Snapshot
             this.snapshotId = snapshotId;
         }
 
+        public uint Length => snapshotId.frameId - containsFromSnapshotId.frameId + 1;
+
         public bool IsImmediateFollowing(SnapshotIdRange other)
         {
             return other.snapshotId.frameId + 1 == containsFromSnapshotId.frameId;
