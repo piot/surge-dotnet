@@ -19,7 +19,7 @@ public class TestOutputLogger : ILogTarget
     public void Log(LogLevel level, string message, object[] args)
     {
         var strings = args.Select(x => x.ToString());
-        var allStrings = level + ": " + message + " " + string.Join(",", strings);
-        output.WriteLine(allStrings);
+        var line = $"{level} : {message} {string.Join(",", strings)}";
+        output.WriteLine(line);
     }
 }

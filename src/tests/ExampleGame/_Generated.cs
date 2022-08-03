@@ -135,6 +135,7 @@ public class AvatarLogicEntityInternal : IGeneratedEntity
     public void Overwrite()
     {
         last = current;
+        actionsContainer.Clear();
     }
 
     public void FireCreated()
@@ -316,6 +317,7 @@ public class FireballLogicEntityInternal : IGeneratedEntity
     public void Overwrite()
     {
         last = current;
+        actionsContainer.Clear();
     }
 
     public void FireCreated()

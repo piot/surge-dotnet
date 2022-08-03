@@ -37,7 +37,13 @@ public struct AvatarLogic : ILogic
     {
         ammoCount--;
         fireCooldown = 30;
-        commands.FireVolley(aiming.ToDirection);
+        var fakeAiming = new Vector3
+        {
+            X = position.x,
+            Y = position.y,
+            Z = position.z,
+        };
+        commands.FireVolley(fakeAiming); // aiming.ToDirection
     }
 
     private bool CanFire => fireCooldown == 0 && ammoCount > 0;

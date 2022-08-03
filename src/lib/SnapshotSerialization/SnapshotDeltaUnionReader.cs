@@ -3,26 +3,35 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using System;
 using Piot.Flood;
 using Piot.Surge.Snapshot;
 
 namespace Piot.Surge.SnapshotSerialization
 {
+    
+    public static class Constants
+    {
+        public const byte UnionSync = 0xba;
+    }
+
     public static class SnapshotDeltaUnionReader
     {
         public static SerializedSnapshotDeltaPackUnion Read(IOctetReader reader)
         {
+#if DEBUG
+            if (reader.ReadUInt8() != Constants.UnionSync)
+            {
+                throw new Exception("out of sync");
+            }
+#endif
             var frameIdRange = SnapshotIdRangeReader.Read(reader);
-            var packs = new SerializedSnapshotDeltaPack[frameIdRange.Length];
+            var packs = new SnapshotDeltaPack.SnapshotDeltaPack[frameIdRange.Length];
             for (var i = 0; i < frameIdRange.Length; ++i)
             {
                 var payloadOctetCount = reader.ReadUInt16();
                 var payload = reader.ReadOctets(payloadOctetCount);
-                var snapshotDeltaPack = new SerializedSnapshotDeltaPack()
-                {
-                    snapshotId = new SnapshotId((uint)(frameIdRange.containsFromSnapshotId.frameId + i)),
-                    payload = payload
-                };
+                var snapshotDeltaPack = new SnapshotDeltaPack.SnapshotDeltaPack(new SnapshotId((uint)(frameIdRange.containsFromSnapshotId.frameId + i)), payload);
                 packs[i] = snapshotDeltaPack;
             }
 
@@ -34,10 +43,14 @@ namespace Piot.Surge.SnapshotSerialization
         }
     }
 
-    public static class SnapshotDeltaWriter
+
+    public static class SnapshotDeltaUnionWriter
     {
         public static void Write(IOctetWriter writer, SerializedSnapshotDeltaPackUnion serializedSnapshotDeltaPacks)
         {
+            #if DEBUG
+                writer.WriteUInt8(Constants.UnionSync);
+            #endif
             SnapshotIdRangeWriter.Write(writer, serializedSnapshotDeltaPacks.snapshotIdRange);
             foreach (var serializedSnapshotDeltaPack in serializedSnapshotDeltaPacks.packs)
             {
@@ -48,10 +61,33 @@ namespace Piot.Surge.SnapshotSerialization
     }
 
 
+    public static class SnapshotDeltaUnionPacker
+    {
+        public static SerializedSnapshotDeltaPackUnionFlattened Pack(SerializedSnapshotDeltaPackUnion serializedSnapshotDeltaPacks)
+        {
+            var unionStream = new OctetWriter(10 * 1200);
+            
+            SnapshotDeltaUnionWriter.Write(unionStream, serializedSnapshotDeltaPacks);
+            return new SerializedSnapshotDeltaPackUnionFlattened
+            {
+                snapshotIdRange = serializedSnapshotDeltaPacks.snapshotIdRange,
+                payload = unionStream.Octets
+            };
+        }
+
+    }
+
     public struct SerializedSnapshotDeltaPackUnion
     {
         public SnapshotIdRange snapshotIdRange;
-        public SerializedSnapshotDeltaPack[] packs;
+        public SnapshotDeltaPack.SnapshotDeltaPack[] packs;
+       
+    }
+    
+    public struct SerializedSnapshotDeltaPackUnionFlattened
+    {
+        public SnapshotIdRange snapshotIdRange;
+        public Memory<byte> payload;
     }
     
     public struct SerializedSnapshotDeltaPack

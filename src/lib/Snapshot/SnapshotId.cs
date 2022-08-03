@@ -18,6 +18,11 @@ namespace Piot.Surge.Snapshot
             this.frameId = frameId;
         }
 
+        public bool IsImmediateFollowing(SnapshotId other)
+        {
+            return other.frameId + 1 == frameId;
+        }
+        
         public override string ToString()
         {
             return $"{frameId}";

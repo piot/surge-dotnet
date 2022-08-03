@@ -7,6 +7,9 @@
         <WarningsAsErrors>Nullable</WarningsAsErrors>
         <UseCommonOutputDirectory>true</UseCommonOutputDirectory>
         <IntermediateOutputPath>../../output</IntermediateOutputPath>
+        <RootNamespace>Piot.Surge</RootNamespace>
+        <EnableNETAnalyzers>true</EnableNETAnalyzers>
+        <AnalysisLevel>latest</AnalysisLevel>
     </PropertyGroup>
 
     <ItemGroup>

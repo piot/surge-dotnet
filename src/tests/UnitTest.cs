@@ -15,6 +15,7 @@ using Piot.Surge.Snapshot;
 using Piot.Surge.SnapshotDeltaInternal;
 using Piot.Surge.SnapshotDeltaPack;
 using Piot.Surge.SnapshotDeltaPack.Serialization;
+using Piot.Surge.SnapshotSerialization;
 using Piot.Surge.SnnapshotDeltaPack.Serialization;
 using Piot.Surge.Types;
 using Piot.Surge.TypeSerialization;
@@ -208,7 +209,7 @@ public class UnitTest1
 
         var reader = new OctetReader(writer.Octets);
 
-        (readAvatar as IEntityDeserializer)?.DeserializeAll(reader);
+        (readAvatar as IEntityDeserializer).DeserializeAll(reader);
 
         Assert.Equal(someAvatar.Self.ammoCount, readAvatar.Self.ammoCount);
     }
@@ -339,10 +340,10 @@ public class UnitTest1
 
     private static void SaveDelta(ISnapshotDeltaPackQueue queue, IUpdatedEntity updatedEntity)
     {
-        var idRange = new SnapshotIdRange(new SnapshotId(10), new SnapshotId(10));
+        var snapshotId = new SnapshotId(10);
         var octets = SnapshotDeltaPacker.Pack(Array.Empty<EntityId>(), Array.Empty<IEntity>(),
             new[] { updatedEntity });
-        var pack = new SnapshotDeltaPack(idRange, octets);
+        var pack = new SnapshotDeltaPack(snapshotId, octets);
         queue.Enqueue(pack);
     }
 
@@ -403,14 +404,14 @@ public class UnitTest1
                 SnapshotDeltaPacker.Pack(snapshotDeltaAfter.deletedIds, createdForPacker, updateForPacker);
         }
 
+        var firstSnapshotId = new SnapshotId(8);
 
-        var idRange = new SnapshotIdRange(new SnapshotId(8), new SnapshotId(10));
-        var snapshotDeltaPack = new SnapshotDeltaPack(idRange, snapshotDeltaPackPayload);
+        var snapshotDeltaPack = new SnapshotDeltaPack(firstSnapshotId, snapshotDeltaPackPayload);
         packetQueue.Enqueue(snapshotDeltaPack);
 
         Assert.Equal(1, packetQueue.Count);
-        Assert.Equal(packetQueue.Peek().snapshotIdRange, new SnapshotIdRange(new SnapshotId(8), new SnapshotId(10)));
-        Assert.Equal(24, packetQueue.Peek().payload.Length);
+        Assert.Equal(packetQueue.Peek().snapshotId, firstSnapshotId);
+        Assert.Equal(25, packetQueue.Peek().payload.Length);
 
         Assert.Equal(6, ((AvatarLogic)spawnedAvatar.Logic).position.x);
         Assert.Equal(AvatarLogicEntityInternal.PositionMask,
@@ -424,7 +425,7 @@ public class UnitTest1
         Assert.Single(updatedEntities);
         Assert.Empty(deletedEntities);
         Assert.Empty(createdEntities);
-        Assert.Equal(spawnedAvatar.Id, updatedEntities[0].Id);
+        Assert.Equal(spawnedAvatar.Id, updatedEntities[0].entity.Id);
 
 
         (world as IEntityContainer).DeleteEntity(spawnedAvatar);
@@ -441,8 +442,7 @@ public class UnitTest1
         }
     }
 
-    [Fact]
-    public void BasicUndo()
+    private (SerializedSnapshotDeltaPackUnionFlattened, EntityId) PrepareThreeServerSnapshotDeltas()
     {
         var avatarInfo = new AvatarLogicEntityInternal
         {
@@ -455,27 +455,37 @@ public class UnitTest1
 
         var scanWorld = (IEntityContainerWithChanges)world;
 
+        /* FIRST Snapshot */
         var firstDelta = SnapshotDeltaCreator.Scan(scanWorld);
+        var firstDeltaConverted = FromSnapshotDeltaInternal.Convert(firstDelta);
+        var firstSnapshotId = new SnapshotId(10);
+        var firstDeltaPack = SnapshotDeltaPackCreator.Create(firstSnapshotId, world, firstDeltaConverted);
         world.ClearDelta();
         OverWriter.Overwrite(world);
 
-        var firstDeltaConverted = FromSnapshotDeltaInternal.Convert(firstDelta);
         var internalInfo = firstDelta.FetchEntity(spawnedAvatar.Id);
         Assert.Equal(FullChangeMask.AllFieldChangedMaskBits, internalInfo.changeMask);
 
         Assert.Single(firstDeltaConverted.createdIds);
         Assert.Empty(firstDeltaConverted.updatedEntities);
         Assert.Empty(firstDeltaConverted.deletedIds);
-
         Ticker.Tick(world);
+        
+        var serverSpawnedAvatarForAssert = world.FetchEntity<AvatarLogicEntityInternal>(spawnedAvatar.Id);
+        Assert.Equal(3, serverSpawnedAvatarForAssert.Self.position.x);
 
+
+        
+        /* SECOND Snapshot */
         var secondDelta = SnapshotDeltaCreator.Scan(scanWorld);
+        var secondDeltaConverted = FromSnapshotDeltaInternal.Convert(secondDelta);
         var secondInternalInfo = secondDelta.FetchEntity(spawnedAvatar.Id);
+        var secondSnapshotId = new SnapshotId(11);
+        var secondDeltaPack = SnapshotDeltaPackCreator.Create(secondSnapshotId, world, secondDeltaConverted);
         Assert.Equal(AvatarLogicEntityInternal.PositionMask, secondInternalInfo.changeMask);
         world.ClearDelta();
         OverWriter.Overwrite(world);
 
-        var secondDeltaConverted = FromSnapshotDeltaInternal.Convert(secondDelta);
         Assert.Empty(secondDeltaConverted.createdIds);
         Assert.Single(secondDeltaConverted.updatedEntities);
         Assert.Empty(secondDeltaConverted.deletedIds);
@@ -483,50 +493,88 @@ public class UnitTest1
         Assert.Equal(AvatarLogicEntityInternal.PositionMask, secondDeltaConverted.updatedEntities[0].changeMask.mask);
 
         var serverSpawnedAvatar = (AvatarLogicEntityInternal)spawnedAvatar.GeneratedEntity;
-
-        serverSpawnedAvatar.Current = serverSpawnedAvatar.Self with { fireButtonIsDown = true };
-
-        var mergedSnapshotDelta = SnapshotDeltaInternalMerger.Merge(new[] { firstDelta, secondDelta });
-
-        var idRange = new SnapshotIdRange(new SnapshotId(10), new SnapshotId(10));
-        var snapshotDeltaPack = SnapshotDeltaPackCreator.Create(idRange, world, mergedSnapshotDelta);
-
-
         Ticker.Tick(world);
 
-        Assert.IsType<FireVolley>((serverSpawnedAvatar as IEntityActions).Actions[0]);
-
+        
+        /* THIRD */
+        serverSpawnedAvatar.Current = serverSpawnedAvatar.Self with { fireButtonIsDown = true };
+        var serverSpawnedAvatarForAssertAtThree = world.FetchEntity<AvatarLogicEntityInternal>(spawnedAvatar.Id);
         var thirdDelta = SnapshotDeltaCreator.Scan(scanWorld);
+        var thirdDeltaConverted = FromSnapshotDeltaInternal.Convert(thirdDelta);
+        var thirdSnapshotId = new SnapshotId(12);
+        var thirdDeltaPack = SnapshotDeltaPackCreator.Create(thirdSnapshotId, world, thirdDeltaConverted);
+        
         var thirdInternalInfo = thirdDelta.FetchEntity(spawnedAvatar.Id);
-        Assert.Equal(
-            AvatarLogicEntityInternal.PositionMask | AvatarLogicEntityInternal.AmmoCountMask |
-            AvatarLogicEntityInternal.FireButtonIsDownMask | AvatarLogicEntityInternal.FireCooldownMask,
-            thirdInternalInfo.changeMask);
+
+        log.Info("Server fire happens at position", serverSpawnedAvatar.Self.position.x);
         world.ClearDelta();
         OverWriter.Overwrite(world);
+        Ticker.Tick(world);
+        
 
-        var thirdDeltaConverted = FromSnapshotDeltaInternal.Convert(thirdDelta);
+        Assert.Equal(9, serverSpawnedAvatarForAssertAtThree.Self.position.x);
+        Assert.IsType<FireVolley>((serverSpawnedAvatar as IEntityActions).Actions[0]);
 
+        Assert.Equal(
+            AvatarLogicEntityInternal.PositionMask |
+            AvatarLogicEntityInternal.FireButtonIsDownMask, 
+            thirdDeltaConverted.updatedEntities[0].changeMask.mask);
+
+        /* FOURTH */
+        var fourthDelta = SnapshotDeltaCreator.Scan(scanWorld);
+        var fourthDeltaConverted = FromSnapshotDeltaInternal.Convert(fourthDelta);
+        var fourthSnapshotId = new SnapshotId(13);
+        var fourthDeltaPack = SnapshotDeltaPackCreator.Create(fourthSnapshotId, world, fourthDeltaConverted);
+        var fourthInternalInfo = fourthDelta.FetchEntity(spawnedAvatar.Id);
+        Assert.Equal(
+            AvatarLogicEntityInternal.PositionMask | AvatarLogicEntityInternal.AmmoCountMask |
+            AvatarLogicEntityInternal.FireCooldownMask,
+            fourthInternalInfo.changeMask);
+        
+     
+        
         Assert.Empty(thirdDeltaConverted.createdIds);
         Assert.Single(thirdDeltaConverted.updatedEntities);
         Assert.Empty(thirdDeltaConverted.deletedIds);
-        Assert.Equal(
-            AvatarLogicEntityInternal.PositionMask | AvatarLogicEntityInternal.AmmoCountMask |
-            AvatarLogicEntityInternal.FireButtonIsDownMask | AvatarLogicEntityInternal.FireCooldownMask,
-            thirdDeltaConverted.updatedEntities[0].changeMask.mask);
+ 
+        var idRange = new SnapshotIdRange(firstSnapshotId, fourthSnapshotId);
+        var union = new SerializedSnapshotDeltaPackUnion
+        {
+            snapshotIdRange = idRange,
+            packs = new[]{ firstDeltaPack, secondDeltaPack, thirdDeltaPack, fourthDeltaPack }
+        };
 
 
+        return (SnapshotDeltaUnionPacker.Pack(union), spawnedAvatar.Id);
+    }
+    [Fact]
+    public void BasicUndo()
+    {
+        var (allSerializedSnapshots, spawnedAvatarId) = PrepareThreeServerSnapshotDeltas();
         var clientWorld = new World(new GeneratedEntityCreation()) as IEntityContainer;
 
         var undoWriter = new OctetWriter(1200);
-        var payloadReader = new OctetReader(snapshotDeltaPack.payload);
+        var unionReader = new OctetReader(allSerializedSnapshots.payload);
+        var deserializedUnion = SnapshotDeltaUnionReader.Read(unionReader);
 
-        var (deleted, created, clientUpdated) =
-            SnapshotDeltaReaderWithUndo.ReadWithUndo(payloadReader, clientWorld, undoWriter);
+        var firstSnapshotId = allSerializedSnapshots.snapshotIdRange.containsFromSnapshotId;
+        var lastSnapshotId = allSerializedSnapshots.snapshotIdRange.snapshotId;
+        
+        Assert.Equal(firstSnapshotId.frameId, deserializedUnion.snapshotIdRange.containsFromSnapshotId.frameId);
+        Assert.Equal(lastSnapshotId.frameId, deserializedUnion.snapshotIdRange.snapshotId.frameId);
 
-        var undoPack = new SnapshotDeltaPack(idRange, undoWriter.Octets);
-        var clientSpawnedEntity = clientWorld.FetchEntity<AvatarLogicEntityInternal>(spawnedAvatar.Id);
-        var clientAvatar = clientWorld.FetchEntity(spawnedAvatar.Id);
+        var firstPack = deserializedUnion.packs[0];
+        var firstSnapshotReader = new OctetReader(firstPack.payload);
+        var (_, _, updateEntitiesInFirst) = SnapshotDeltaReader.Read(firstSnapshotReader, clientWorld);
+        
+        var clientSpawnedEntity = clientWorld.FetchEntity<AvatarLogicEntityInternal>(spawnedAvatarId);
+        var clientAvatar = clientWorld.FetchEntity(spawnedAvatarId);
+        
+        Assert.Equal(0, clientSpawnedEntity.Self.fireCooldown);
+        Ticker.Tick(clientWorld);
+        Assert.Equal(0, clientSpawnedEntity.Self.fireCooldown);
+        Notifier.Notify(updateEntitiesInFirst);
+        
 
         clientSpawnedEntity.OutFacing.OnAmmoCountChanged += () =>
         {
@@ -535,31 +583,70 @@ public class UnitTest1
 
         clientSpawnedEntity.OutFacing.OnSpawned += () => { log.Info("SPAWNED {Avatar}", clientSpawnedEntity); };
 
-        clientSpawnedEntity.OutFacing.DoFireVolley += position => { log.Info("DO FIRE {Position}", position); };
-
-
-        Assert.Equal(14, undoWriter.Octets.Length);
-
-        foreach (var notifyEntity in clientUpdated)
+        clientSpawnedEntity.OutFacing.DoFireVolley += position =>
         {
-            notifyEntity.entity.FireChanges(notifyEntity.changeMask);
-            foreach (var action in notifyEntity.entity.Actions) notifyEntity.entity.DoAction(action);
-            notifyEntity.entity.Overwrite();
+            log.Info("CLIENT DO FIRE {Position}", position);
+        };
+        
+        var allButTheLastPacks = deserializedUnion.packs.Skip(1).Take(deserializedUnion.packs.Length - 3);
+        
+        foreach (var snapshotDelta in allButTheLastPacks)
+        {
+            var snapshotReader = new OctetReader(snapshotDelta.payload);
+            var (_, _, updateEntities) = SnapshotDeltaReader.Read(snapshotReader, clientWorld);
+            Ticker.Tick(clientWorld);
+            Notifier.Notify(updateEntities);
+            OverWriter.Overwrite(clientWorld);
+
         }
+        
+
+        Assert.Equal(0, clientSpawnedEntity.Self.fireCooldown);
+        Assert.False(clientSpawnedEntity.Self.fireButtonIsDown);
+        Assert.Equal(100, clientSpawnedEntity.Self.ammoCount);
+        Assert.Equal(6, clientSpawnedEntity.Self.position.x);
+
+        var secondToLastPack = deserializedUnion.packs[deserializedUnion.packs.Length - 2];
+        var secondToLastReader = new OctetReader(secondToLastPack.payload);
+        var (_, _, secondToLastUpdatedEntities) = SnapshotDeltaReader.Read(secondToLastReader, clientWorld);
+
+        
+        Assert.Equal(0, clientSpawnedEntity.Self.fireCooldown);
+        Assert.True(clientSpawnedEntity.Self.fireButtonIsDown);
+        Ticker.Tick(clientWorld);
+        Notifier.Notify(secondToLastUpdatedEntities);
+        OverWriter.Overwrite(clientWorld);
+
+        Assert.Equal(30, clientSpawnedEntity.Self.fireCooldown);
+        Assert.True(clientSpawnedEntity.Self.fireButtonIsDown);
+        
+        var lastPack = deserializedUnion.packs.Last();
+        var lastSnapshotReader = new OctetReader(lastPack.payload);
+        
+        var (deleted, created, clientUpdated) =
+            SnapshotDeltaReaderWithUndo.ReadWithUndo(lastSnapshotReader, clientWorld, undoWriter);
+        
+
+        Assert.Equal(30, clientSpawnedEntity.Self.fireCooldown);
+        Assert.Equal(99, clientSpawnedEntity.Self.ammoCount);
+        Assert.True(clientSpawnedEntity.Self.fireButtonIsDown);
+        
+        Ticker.Tick(clientWorld);
+        Notifier.Notify(clientUpdated);
+        OverWriter.Overwrite(clientWorld);
+
+        var undoPack = new SnapshotDeltaPack(firstSnapshotId, undoWriter.Octets);
+
+        Assert.Equal(29, undoWriter.Octets.Length);
 
         foreach (var clientCreatedEntity in created) clientCreatedEntity.FireCreated();
 
-        Assert.Equal(3, clientSpawnedEntity.Self.position.x);
-        Assert.Equal(100, clientSpawnedEntity.Self.ammoCount);
-        Assert.True(clientSpawnedEntity.Self.fireButtonIsDown);
-
-        Ticker.Tick(clientWorld);
-
-        Assert.Equal(6, clientSpawnedEntity.Self.position.x);
+        Assert.Equal(12, clientSpawnedEntity.Self.position.x);
         Assert.Equal(99, clientSpawnedEntity.Self.ammoCount);
-        Assert.Equal(spawnedAvatar.Id.Value, clientAvatar.Id.Value);
-        Assert.Equal(151u, clientAvatar.Id.Value);
         Assert.True(clientSpawnedEntity.Self.fireButtonIsDown);
+        Assert.Equal(spawnedAvatarId.Value, clientAvatar.Id.Value);
+        Assert.Equal(151u, clientAvatar.Id.Value);
+
 
         foreach (var notifyEntity in created)
         {
@@ -574,12 +661,12 @@ public class UnitTest1
         var (deletedUnpack, createdUnpack, updatedUnpack) = SnapshotDeltaUnPacker.UnPack(undoPack.payload, clientWorld);
 
         Assert.Empty(createdUnpack);
-        Assert.Empty(updatedUnpack);
-        Assert.Single(deletedUnpack);
-        Assert.False(clientAvatar.IsAlive);
-        Assert.Equal(6, clientSpawnedEntity.Self.position.x);
-        Assert.Equal(99, clientSpawnedEntity.Self.ammoCount);
+        Assert.Single(updatedUnpack);
+        Assert.Empty(deletedUnpack);
+        Assert.True(clientAvatar.IsAlive);
+        Assert.Equal(9, clientSpawnedEntity.Self.position.x);
 
+        /*
         var readBackAgain = new OctetReader(snapshotDeltaPack.payload);
         SnapshotDeltaReader.Read(readBackAgain, clientWorld);
 
@@ -587,5 +674,6 @@ public class UnitTest1
 
         Assert.Equal(3, clientSpawnedEntityAgain.Self.position.x);
         Assert.Equal(100, clientSpawnedEntityAgain.Self.ammoCount);
+        */
     }
 }

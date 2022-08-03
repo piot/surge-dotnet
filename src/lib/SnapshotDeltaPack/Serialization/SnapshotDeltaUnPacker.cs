@@ -5,13 +5,14 @@
 
 using System;
 using Piot.Flood;
+using Piot.Surge.SnnapshotDeltaPack.Serialization;
 
 namespace Piot.Surge.SnapshotDeltaPack.Serialization
 {
     public static class SnapshotDeltaUnPacker
     {
         public static (IEntity[] deletedEntities, IEntity[]createdEntities,
-            IEntity[] updatedEntities) UnPack(Memory<byte> pack, IEntityContainer creator)
+            SnapshotDeltaReaderInfoEntity[] updatedEntities) UnPack(Memory<byte> pack, IEntityContainer creator)
         {
             var reader = new OctetReader(pack);
             var (deletedEntities, createdEntities, updatedEntities) = SnapshotDeltaReader.Read(reader, creator);

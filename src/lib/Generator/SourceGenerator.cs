@@ -414,6 +414,7 @@ namespace Piot.Surge.Generator
     public void Overwrite()
     {
         last = current;
+        actionsContainer.Clear();
     }
 
     public void FireCreated()

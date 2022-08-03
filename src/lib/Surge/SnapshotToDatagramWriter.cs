@@ -12,7 +12,7 @@ namespace Piot.Surge
 {
     public class SnapshotPackToDatagramWriter
     {
-        public void Write(Action<Memory<byte>> send, SnapshotDeltaPack.SnapshotDeltaPack pack,
+        public void Write(Action<Memory<byte>> send, SerializedSnapshotDeltaPackUnionFlattened pack,
             OrderedDatagramsOut orderedDatagramsHeader)
         {
             var writer = new OctetWriter(1200);
