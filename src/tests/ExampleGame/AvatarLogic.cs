@@ -33,16 +33,39 @@ public struct AvatarLogic : ILogic
         public void FireVolley(Vector3 direction);
     }
 
+    private void Fire(IAvatarLogicActions commands)
+    {
+        ammoCount--;
+        fireCooldown = 30;
+        commands.FireVolley(aiming.ToDirection);
+    }
+
+    private bool CanFire => fireCooldown == 0 && ammoCount > 0;
+
+    private bool ShouldFire => fireButtonIsDown && CanFire;
+
+    private void AlwaysMoveRight()
+    {
+        position += new Position3(3, 0, 0);
+    }
+
+    private void TickDownCoolDowns()
+    {
+        if (fireCooldown > 0)
+        {
+            fireCooldown--;
+        }
+    }
+    
     public void Tick(IAvatarLogicActions commands)
     {
-        if (fireButtonIsDown && fireCooldown == 0)
-            if (ammoCount > 0)
-            {
-                ammoCount--;
-                fireCooldown = 30;
-                commands.FireVolley(aiming.ToDirection);
-            }
+        TickDownCoolDowns();
 
-        position += new Position3(3, 0, 0);
+        if (ShouldFire)
+        {
+            Fire(commands);
+        }
+
+        AlwaysMoveRight();
     }
 }
