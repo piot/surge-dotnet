@@ -7,6 +7,9 @@ using System;
 
 namespace Piot.Surge.Snapshot
 {
+    /**
+     * A range of consecutive snapshot IDs.
+     */
     public struct SnapshotIdRange
     {
         public SnapshotIdRange(SnapshotId containsFromSnapshotId, SnapshotId snapshotId)

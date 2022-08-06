@@ -661,6 +661,9 @@ public class ").Append(EntityGeneratedInternal(logicInfo)).Append(" : IGenerated
             AddArchetypeIdConstants(sb, infos);
         }
 
+        /**
+         * Generates C# source code that handle the serialization of the user specific (game specific) types.
+         */
         public static string Generate(IEnumerable<LogicInfo> infos)
         {
             var sb = new StringBuilder();

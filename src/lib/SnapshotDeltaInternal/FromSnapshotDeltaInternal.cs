@@ -9,6 +9,9 @@ using Piot.Surge.SnapshotDelta;
 
 namespace Piot.Surge.SnapshotDeltaInternal
 {
+    /**
+     * Helper class for putting together all the changes between two ticks/snapshots
+     */
     public static class FromSnapshotDeltaInternal
     {
         public static SnapshotDelta.SnapshotDelta Convert(SnapshotDeltaInternal internalDelta)
@@ -20,13 +23,13 @@ namespace Piot.Surge.SnapshotDeltaInternal
             foreach (var x in internalDelta.entities)
             {
                 var changeMask = x.Value.changeMask;
-                if (changeMask == FullChangeMask.AllFieldChangedMaskBits)
+                if (changeMask == ChangedFieldsMask.AllFieldChangedMaskBits)
                     createdIds.Add(new EntityId(x.Key));
-                else if ((changeMask & FullChangeMask.DeletedMaskBit) != 0)
+                else if ((changeMask & ChangedFieldsMask.DeletedMaskBit) != 0)
                     deletedIds.Add(new EntityId(x.Key));
                 else
                     updatedEntities.Add(new SnapshotDeltaChangedEntity(new EntityId(x.Key),
-                        new FullChangeMask(x.Value.changeMask)));
+                        new ChangedFieldsMask(x.Value.changeMask)));
             }
 
             return new SnapshotDelta.SnapshotDelta(deletedIds.ToArray(), createdIds.ToArray(),

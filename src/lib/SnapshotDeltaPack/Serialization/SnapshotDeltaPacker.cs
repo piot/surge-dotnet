@@ -5,12 +5,15 @@
 
 using System;
 using Piot.Flood;
-using Surge.SnapshotDeltaPack;
 
 namespace Piot.Surge.SnapshotDeltaPack.Serialization
 {
     public static class SnapshotDeltaPacker
     {
+        /**
+         * Creates a pack payload that is used as part of the datagram
+         * sent from host to clients.
+        */
         public static Memory<byte> Pack(EntityId[] deletedEntities, IEntity[] createdEntities,
             IUpdatedEntity[] updatedEntities)
         {

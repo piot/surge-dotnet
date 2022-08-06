@@ -29,6 +29,10 @@ namespace Piot.Surge.SnnapshotDeltaPack.Serialization
             writer.WriteUInt16((ushort)count);
         }
 
+        /**
+         * Similar to SnapshotDeltaReader.Read, but it also writes the current values of the fields that are overwritten.
+         * The undoWriter can be used to undo the overwritten entities.
+         */
         public static (IEntity[], IEntity[], SnapshotDeltaReaderInfoEntity[]) ReadWithUndo(IOctetReader reader,
             IEntityContainer creation,
             IOctetWriter undoWriter)
@@ -75,13 +79,13 @@ namespace Piot.Surge.SnnapshotDeltaPack.Serialization
             for (var i = 0; i < updatedEntityCount; ++i)
             {
                 var entityId = EntityIdReader.Read(reader);
-                var serializeMask = FullChangeMaskReader.ReadFullChangeMask(reader);
+                var serializeMask = ChangedFieldsMaskReader.ReadFullChangeMask(reader);
 
                 var entityToDeserialize = creation.FetchEntity(entityId);
 
 
                 EntityIdWriter.Write(undoWriter, entityId);
-                FullChangeMaskWriter.WriteFullChangeMask(undoWriter, serializeMask);
+                ChangedFieldsMaskWriter.WriteChangedFieldsMask(undoWriter, serializeMask);
                 entityToDeserialize.Serialize(serializeMask.mask, undoWriter);
 
 

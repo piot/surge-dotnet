@@ -7,6 +7,9 @@ using Piot.Surge.FastTypeInformation;
 
 namespace Piot.Surge
 {
+    /**
+     * Interfaces that a source code generated entity code is implementing.
+     */
     public interface IGeneratedEntity : IEntitySerializer, IEntityDeserializer, IEntityChanges, IEntityOverwrite,
         ISimpleLogic, IEntityFireChanges, IEntityActions, IEntityActionsDoUnDo
     {

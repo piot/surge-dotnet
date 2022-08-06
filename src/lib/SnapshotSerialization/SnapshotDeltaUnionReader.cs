@@ -17,6 +17,12 @@ namespace Piot.Surge.SnapshotSerialization
 
     public static class SnapshotDeltaUnionReader
     {
+        /**
+         * Read on the client coming from the host.
+         * In many cases the union only consists of a single delta compressed snapshot.
+         * But in the case of previously dropped snapshots, host resends snapshots in
+         * ascending, consecutive order.
+         */
         public static SerializedSnapshotDeltaPackUnion Read(IOctetReader reader)
         {
 #if DEBUG
@@ -46,6 +52,12 @@ namespace Piot.Surge.SnapshotSerialization
 
     public static class SnapshotDeltaUnionWriter
     {
+        /**
+         * Written on the host to be sent to a client.
+         * In many cases the union only consists of a single delta compressed snapshot.
+         * But in the case of previously dropped snapshots, host resends snapshots in
+         * ascending, consecutive order.
+         */
         public static void Write(IOctetWriter writer, SerializedSnapshotDeltaPackUnion serializedSnapshotDeltaPacks)
         {
             #if DEBUG

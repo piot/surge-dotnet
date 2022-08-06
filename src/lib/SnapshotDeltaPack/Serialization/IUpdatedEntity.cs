@@ -5,7 +5,6 @@
 
 using Piot.Surge.ChangeMask;
 using Piot.Flood;
-using Surge.SnapshotDeltaPack;
 
 namespace Piot.Surge.SnapshotDeltaPack.Serialization
 {
@@ -13,7 +12,7 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
     {
         private readonly IEntitySerializer serializer;
 
-        public UpdatedEntity(EntityId id, FullChangeMask changeMask, IEntitySerializer serializer)
+        public UpdatedEntity(EntityId id, ChangedFieldsMask changeMask, IEntitySerializer serializer)
         {
             Id = id;
             ChangeMask = changeMask;
@@ -22,11 +21,11 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
 
         public EntityId Id { get; }
 
-        public void Serialize(FullChangeMask serializeMask, IOctetWriter writer)
+        public void Serialize(ChangedFieldsMask serializeMask, IOctetWriter writer)
         {
             serializer.Serialize(serializeMask.mask, writer);
         }
 
-        public FullChangeMask ChangeMask { get; }
+        public ChangedFieldsMask ChangeMask { get; }
     }
 }

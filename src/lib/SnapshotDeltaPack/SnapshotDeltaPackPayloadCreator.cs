@@ -5,12 +5,15 @@
 
 using System;
 using System.Linq;
-using Surge.SnapshotDeltaPack;
+using Piot.Surge.SnapshotDeltaPack.Serialization;
 
-namespace Piot.Surge.SnapshotDeltaPack.Serialization
+namespace Piot.Surge.SnapshotDeltaPack
 {
     internal static class SnapshotDeltaPackPayloadCreator
     {
+        /**
+         * Creates a pack from a snapshot delta and then drops the changes from the entity container (world).
+         */
         internal static Memory<byte> CreatePack(IEntityContainer world, SnapshotDelta.SnapshotDelta snapshotDeltaAfter)
         {
             var createdEntities = snapshotDeltaAfter.createdIds.Select(world.FetchEntity).ToArray();

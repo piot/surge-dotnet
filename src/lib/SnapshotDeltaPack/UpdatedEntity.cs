@@ -7,22 +7,22 @@ using Piot.Surge;
 using Piot.Surge.ChangeMask;
 using Piot.Flood;
 
-namespace Surge.SnapshotDeltaPack
+namespace Piot.Surge.SnapshotDeltaPack
 {
     public class UpdateEntity : IUpdatedEntity
     {
         private readonly IEntity entity;
 
-        public UpdateEntity(FullChangeMask mask, IEntity entity)
+        public UpdateEntity(ChangedFieldsMask mask, IEntity entity)
         {
             ChangeMask = mask;
             this.entity = entity;
         }
 
         public EntityId Id => entity.Id;
-        public FullChangeMask ChangeMask { get; }
+        public ChangedFieldsMask ChangeMask { get; }
 
-        public void Serialize(FullChangeMask serializeMask, IOctetWriter writer)
+        public void Serialize(ChangedFieldsMask serializeMask, IOctetWriter writer)
         {
             entity.Serialize(serializeMask.mask, writer);
         }

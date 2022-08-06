@@ -5,7 +5,6 @@
 
 using Piot.Surge.ChangeMaskSerialization;
 using Piot.Flood;
-using Surge.SnapshotDeltaPack;
 
 namespace Piot.Surge.SnapshotDeltaPack.Serialization
 {
@@ -16,6 +15,9 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
             writer.WriteUInt16((ushort)entityCount);
         }
 
+        /**
+         * Serialized deleted, created and updated entities to the writer stream.
+         */
         internal static void Write(IOctetWriter writer, EntityId[] deletedEntities,
             IEntity[] createdEntities, IUpdatedEntity[] updatedEntities)
         {
@@ -31,11 +33,10 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
             }
 
             WriteEntityCount(writer, updatedEntities.Length);
-
             foreach (var entity in updatedEntities)
             {
                 EntityIdWriter.Write(writer, entity.Id);
-                FullChangeMaskWriter.WriteFullChangeMask(writer, entity.ChangeMask);
+                ChangedFieldsMaskWriter.WriteChangedFieldsMask(writer, entity.ChangeMask);
                 entity.Serialize(entity.ChangeMask, writer);
             }
         }

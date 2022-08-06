@@ -10,13 +10,16 @@ using Piot.Surge.SnnapshotDeltaPack.Serialization;
 
 namespace Piot.Surge.SnapshotDeltaPack.Serialization
 {
-    public class SnapshotDeltaReader
+    public static class SnapshotDeltaReader
     {
         public static uint ReadEntityCount(IOctetReader reader)
         {
             return reader.ReadUInt16();
         }
 
+        /**
+         * Reading a snapshot delta pack and returning the created, deleted and updated entities.
+         */
         public static (IEntity[], IEntity[], SnapshotDeltaReaderInfoEntity[]) Read(IOctetReader reader, IEntityContainer creation)
         {
             var deletedEntities = new List<IEntity>();
@@ -37,6 +40,7 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
                 var entityArchetype = new ArchetypeId(reader.ReadUInt16());
                 var entityToDeserialize = creation.CreateEntity(entityArchetype, entityId);
                 entityToDeserialize.DeserializeAll(reader);
+                createdEntities.Add(entityToDeserialize);
             }
 
             var updatedEntities = new List<SnapshotDeltaReaderInfoEntity>();
@@ -44,7 +48,7 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
             for (var i = 0; i < updatedEntityCount; ++i)
             {
                 var entityId = EntityIdReader.Read(reader);
-                var serializeMask = FullChangeMaskReader.ReadFullChangeMask(reader);
+                var serializeMask = ChangedFieldsMaskReader.ReadFullChangeMask(reader);
 
                 var entityToDeserialize = creation.FetchEntity(entityId);
                 entityToDeserialize.Deserialize(serializeMask.mask, reader);

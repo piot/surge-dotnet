@@ -26,7 +26,7 @@ namespace Piot.Surge.SnapshotDeltaInternal
             var updatedEntities = (from entity in world.AllEntities
                 where entity.Mode == EntityMode.Normal
                 let changes = entity.GeneratedEntity.Changes()
-                select new SnapshotDeltaChangedEntity(entity.Id, new FullChangeMask(changes))).ToArray();
+                select new SnapshotDeltaChangedEntity(entity.Id, new ChangedFieldsMask(changes))).ToArray();
 
             var snapshotDelta = new SnapshotDeltaInternal(deletedEntities, createdEntities, updatedEntities);
 

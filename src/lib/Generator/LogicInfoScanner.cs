@@ -122,6 +122,9 @@ namespace Piot.Surge.Generator
 
     public static class LogicInfoScanner
     {
+        /**
+         * Scans the specified @param types and checks if the type contains a method called Tick.
+         */
         public static IEnumerable<LogicInfo> Scan(IEnumerable<Type> types, ILog log)
         {
             var logicInfos = new List<LogicInfo>();

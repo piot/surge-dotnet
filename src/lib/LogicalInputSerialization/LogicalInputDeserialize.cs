@@ -11,6 +11,9 @@ namespace Piot.Surge.LogicalInputSerialization
 {
     public static class LogicalInputDeserialize
     {
+        /**
+         * Deserializes game specific input arriving on the host from the client.
+         */
         public static LogicalInput.LogicalInput[] Deserialize(IOctetReader reader)
         {
             var inputCount = reader.ReadUInt8();

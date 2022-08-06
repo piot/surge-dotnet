@@ -9,7 +9,14 @@ namespace Piot.Surge
 {
     public interface IEntitySerializer
     {
-        public void Serialize(ulong serializeFlags, IOctetWriter writer);
+        /**
+         * Serializes the fields in the @param changedFieldsMask.
+         */
+        public void Serialize(ulong changedFieldsMask, IOctetWriter writer);
+        /**
+         * Serializes all fields in the entity. Useful for handling late join / rejoin
+         * where no parts of the data is known beforehand.
+         */
         public void SerializeAll(IOctetWriter writer);
     }
 }

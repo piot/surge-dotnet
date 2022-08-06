@@ -19,7 +19,6 @@ using Piot.Surge.SnapshotSerialization;
 using Piot.Surge.SnnapshotDeltaPack.Serialization;
 using Piot.Surge.Types;
 using Piot.Surge.TypeSerialization;
-using Surge.SnapshotDeltaPack;
 using Tests.ExampleGame;
 using Xunit.Abstractions;
 
@@ -464,7 +463,7 @@ public class UnitTest1
         OverWriter.Overwrite(world);
 
         var internalInfo = firstDelta.FetchEntity(spawnedAvatar.Id);
-        Assert.Equal(FullChangeMask.AllFieldChangedMaskBits, internalInfo.changeMask);
+        Assert.Equal(ChangedFieldsMask.AllFieldChangedMaskBits, internalInfo.changeMask);
 
         Assert.Single(firstDeltaConverted.createdIds);
         Assert.Empty(firstDeltaConverted.updatedEntities);

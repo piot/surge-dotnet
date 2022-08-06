@@ -5,6 +5,10 @@
 
 namespace Piot.Surge.SnapshotDelta
 {
+    /**
+     * Holds information about what has changed between two snapshots
+     * Used as input for the serialization.
+     */
     public class SnapshotDelta
     {
         public readonly EntityId[] createdIds;

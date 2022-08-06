@@ -7,6 +7,9 @@ using System;
 
 namespace Piot.Surge.Snapshot
 {
+    /**
+     * A snapshot Id. Always increasing by one and consecutive. Usually the session is starting on zero.
+     */
     public struct SnapshotId
     {
         public uint frameId;

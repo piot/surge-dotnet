@@ -12,9 +12,9 @@ namespace Piot.Surge.ChangeMaskSerialization
     {
         public const byte FullChangeMaskSync = 0x91;
     }
-    public static class FullChangeMaskWriter
+    public static class ChangedFieldsMaskWriter
     {
-        public static void WriteFullChangeMask(IOctetWriter writer, FullChangeMask changeMask)
+        public static void WriteChangedFieldsMask(IOctetWriter writer, ChangedFieldsMask changeMask)
         {
             #if DEBUG
             writer.WriteUInt8(Constants.FullChangeMaskSync);

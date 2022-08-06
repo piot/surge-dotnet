@@ -12,6 +12,9 @@ namespace Piot.Surge.LogicalInputSerialization
 {
     public static class LogicalInputSerialize
     {
+        /**
+         * Serializing the game specific inputs to be sent from the client to the host/server.
+         */
         public static void Serialize(IOctetWriter writer, LogicalInput.LogicalInput[] inputs)
         {
             if (inputs.Length > 255) throw new Exception("too many inputs to serialize");

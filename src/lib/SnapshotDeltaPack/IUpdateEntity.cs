@@ -3,16 +3,15 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using Piot.Surge;
 using Piot.Surge.ChangeMask;
 using Piot.Flood;
 
-namespace Surge.SnapshotDeltaPack
+namespace Piot.Surge.SnapshotDeltaPack
 {
     public interface IUpdatedEntity : IEntityBase
     {
-        public FullChangeMask ChangeMask { get; }
+        public ChangedFieldsMask ChangeMask { get; }
 
-        public void Serialize(FullChangeMask serializeMask, IOctetWriter writer);
+        public void Serialize(ChangedFieldsMask serializeMask, IOctetWriter writer);
     }
 }

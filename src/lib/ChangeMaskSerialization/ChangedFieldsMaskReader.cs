@@ -9,9 +9,9 @@ using Piot.Flood;
 
 namespace Piot.Surge.ChangeMaskSerialization
 {
-    public static class FullChangeMaskReader
+    public static class ChangedFieldsMaskReader
     {
-        public static FullChangeMask ReadFullChangeMask(IOctetReader reader)
+        public static ChangedFieldsMask ReadFullChangeMask(IOctetReader reader)
         {
             #if DEBUG
             if (reader.ReadUInt8() != Constants.FullChangeMaskSync)
@@ -20,7 +20,7 @@ namespace Piot.Surge.ChangeMaskSerialization
             }
             #endif
             var v = reader.ReadUInt16();
-            if ((v & 0x8000) == 0) return new FullChangeMask { mask = v };
+            if ((v & 0x8000) == 0) return new ChangedFieldsMask { mask = v };
             ulong completeMask = (ushort) (v & 0x7fff);
             
 
@@ -28,7 +28,7 @@ namespace Piot.Surge.ChangeMaskSerialization
             completeMask <<= 16;
             completeMask |= next;
 
-            return new FullChangeMask { mask = completeMask };
+            return new ChangedFieldsMask { mask = completeMask };
         }
     }
 }

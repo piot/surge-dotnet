@@ -7,6 +7,9 @@ using System.Collections.Generic;
 
 namespace Piot.Surge
 {
+/***
+ * Holds a list of actions that is added by a Tick method in the Logic implementation.
+ */
     public class ActionsContainer : IActionsContainer
     {
         private readonly List<IAction> actions = new();

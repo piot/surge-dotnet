@@ -30,14 +30,14 @@ namespace Piot.Surge.SnapshotDeltaInternal
             {
                 if (entities.ContainsKey(deletedId.Value)) throw new Exception("EntityId can only be included once");
                 entities[deletedId.Value] =
-                    new SnapshotDeltaInternalInfoEntity(deletedId, FullChangeMask.DeletedMaskBit);
+                    new SnapshotDeltaInternalInfoEntity(deletedId, ChangedFieldsMask.DeletedMaskBit);
             }
 
             foreach (var createdId in createdIds)
             {
                 if (entities.ContainsKey(createdId.Value)) throw new Exception("EntityId can only be included once");
                 entities[createdId.Value] =
-                    new SnapshotDeltaInternalInfoEntity(createdId, FullChangeMask.AllFieldChangedMaskBits);
+                    new SnapshotDeltaInternalInfoEntity(createdId, ChangedFieldsMask.AllFieldChangedMaskBits);
             }
 
             foreach (var updatedEntity in updatedEntities)

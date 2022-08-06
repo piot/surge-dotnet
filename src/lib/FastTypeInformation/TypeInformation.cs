@@ -7,6 +7,9 @@ using System.Linq;
 
 namespace Piot.Surge.FastTypeInformation
 {
+   /**
+    * Only used for debug output
+    */
     public class TypeInformation
     {
         public TypeInformation(TypeInformationField[] fields)

@@ -7,14 +7,14 @@ using System;
 
 namespace Piot.Surge.ChangeMask
 {
-    public struct FullChangeMask
+    public struct ChangedFieldsMask
     {
         public ulong mask;
 
         public const ulong DeletedMaskBit = 0x8000000000000000;
         public const ulong AllFieldChangedMaskBits = 0x7fffffffffffffff;
 
-        public FullChangeMask(ulong mask)
+        public ChangedFieldsMask(ulong mask)
         {
             this.mask = mask;
         }

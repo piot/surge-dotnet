@@ -8,6 +8,9 @@ using Piot.Flood;
 
 namespace Piot.Surge.OrderedDatagrams
 {
+    /**
+     * Very simple protocol to detect out of order and dropped datagrams.
+     */
     public class OrderedDatagramsIn
     {
         private byte expectedSequenceId;
