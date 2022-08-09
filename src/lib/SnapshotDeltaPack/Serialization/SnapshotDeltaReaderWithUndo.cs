@@ -29,10 +29,14 @@ namespace Piot.Surge.SnnapshotDeltaPack.Serialization
             writer.WriteUInt16((ushort)count);
         }
 
-        /**
-         * Similar to SnapshotDeltaReader.Read, but it also writes the current values of the fields that are overwritten.
-         * The undoWriter can be used to undo the overwritten entities.
-         */
+        /// <summary>
+        /// Similar to SnapshotDeltaReader.Read, but it also writes the current values of the fields that are overwritten.
+        /// The undoWriter can be used to undo the overwritten entities.
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="creation"></param>
+        /// <param name="undoWriter"></param>
+        /// <returns></returns>
         public static (IEntity[], IEntity[], SnapshotDeltaReaderInfoEntity[]) ReadWithUndo(IOctetReader reader,
             IEntityContainer creation,
             IOctetWriter undoWriter)

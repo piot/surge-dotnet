@@ -10,9 +10,11 @@ namespace Piot.Surge.SnapshotSerialization
 {
     public static class SnapshotIdRangeWriter
     {
-        /**
-         * Writes a snapshot ID range to the stream.
-         */
+        /// <summary>
+        /// Writes a snapshot ID range to the stream.
+        /// </summary>
+        /// <param name="writer"></param>
+        /// <param name="snapshotIdRange"></param>
         public static void Write(IOctetWriter writer, SnapshotIdRange snapshotIdRange)
         {
             SnapshotIdWriter.Write(writer, snapshotIdRange.snapshotId);

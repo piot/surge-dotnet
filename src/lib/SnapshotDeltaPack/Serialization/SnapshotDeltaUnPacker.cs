@@ -11,9 +11,12 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
 {
     public static class SnapshotDeltaUnPacker
     {
-        /**
-         * Helper method for calling SnapshotDeltaReader.Read.
-         */
+        /// <summary>
+        /// Helper method for calling SnapshotDeltaReader.Read.
+        /// </summary>
+        /// <param name="pack"></param>
+        /// <param name="creator"></param>
+        /// <returns></returns>
         public static (IEntity[] deletedEntities, IEntity[]createdEntities,
             SnapshotDeltaReaderInfoEntity[] updatedEntities) UnPack(Memory<byte> pack, IEntityContainer creator)
         {

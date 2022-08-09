@@ -11,15 +11,24 @@ namespace Piot.Surge.LogicalInputSerialization
 {
     public static class LogicalInputDeserialize
     {
-        /**
-         * Deserializes game specific input arriving on the host from the client.
-         */
+        /// <summary>
+        /// Deserializes game specific input arriving on the host from the client.
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
         public static LogicalInput.LogicalInput[] Deserialize(IOctetReader reader)
         {
             var inputCount = reader.ReadUInt8();
             if (inputCount == 0)
             {
                 return Array.Empty<LogicalInput.LogicalInput>();
+            }
+
+            var inputStreamCount = reader.ReadUInt8();
+            if (inputStreamCount != 1)
+            {
+                throw new NotImplementedException("only support for a single input stream for now");
             }
 
             var array = new LogicalInput.LogicalInput[inputCount];

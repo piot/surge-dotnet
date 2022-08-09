@@ -23,9 +23,11 @@ namespace Piot.Surge.Generator
             return t.IsValueType && !t.IsEnum;
         }
 
-        /**
-         * Scans .NET type information to find types that have the LogicAttribute attached.
-         */
+        /// <summary>
+        /// Scans .NET type information to find types that have the LogicAttribute attached.
+        /// </summary>
+        /// <param name="output"></param>
+        /// <returns></returns>
         public static IEnumerable<Type> ScanForLogics(ILog output)
         {
             var assemblies2 = AppDomain.CurrentDomain.GetAssemblies();

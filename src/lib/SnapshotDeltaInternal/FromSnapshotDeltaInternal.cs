@@ -9,9 +9,9 @@ using Piot.Surge.SnapshotDelta;
 
 namespace Piot.Surge.SnapshotDeltaInternal
 {
-    /**
-     * Helper class for putting together all the changes between two ticks/snapshots
-     */
+    /// <summary>
+    /// Helper class for putting together all the changes between two ticks/snapshots
+    /// </summary>
     public static class FromSnapshotDeltaInternal
     {
         public static SnapshotDelta.SnapshotDelta Convert(SnapshotDeltaInternal internalDelta)

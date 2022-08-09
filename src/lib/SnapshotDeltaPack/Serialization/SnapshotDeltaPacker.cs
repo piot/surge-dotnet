@@ -10,10 +10,14 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
 {
     public static class SnapshotDeltaPacker
     {
-        /**
-         * Creates a pack payload that is used as part of the datagram
-         * sent from host to clients.
-        */
+        /// <summary>
+        /// Creates a pack payload that is used as part of the datagram
+        /// sent from host to clients.
+        /// </summary>
+        /// <param name="deletedEntities"></param>
+        /// <param name="createdEntities"></param>
+        /// <param name="updatedEntities"></param>
+        /// <returns></returns>
         public static Memory<byte> Pack(EntityId[] deletedEntities, IEntity[] createdEntities,
             IUpdatedEntity[] updatedEntities)
         {

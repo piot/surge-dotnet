@@ -15,9 +15,13 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
             writer.WriteUInt16((ushort)entityCount);
         }
 
-        /**
-         * Serialized deleted, created and updated entities to the writer stream.
-         */
+        /// <summary>
+        /// Serialized deleted, created and updated entities to the writer stream.
+        /// </summary>
+        /// <param name="writer"></param>
+        /// <param name="deletedEntities"></param>
+        /// <param name="createdEntities"></param>
+        /// <param name="updatedEntities"></param>
         internal static void Write(IOctetWriter writer, EntityId[] deletedEntities,
             IEntity[] createdEntities, IUpdatedEntity[] updatedEntities)
         {

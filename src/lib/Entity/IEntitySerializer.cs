@@ -9,14 +9,18 @@ namespace Piot.Surge
 {
     public interface IEntitySerializer
     {
-        /**
-         * Serializes the fields in the @param changedFieldsMask.
-         */
+        /// <summary>
+        /// Serializes the fields that have a bit set in <paramref name="changedFieldsMask"/>.
+        /// </summary>
+        /// <param name="changedFieldsMask"></param>
+        /// <param name="writer"></param>
         public void Serialize(ulong changedFieldsMask, IOctetWriter writer);
-        /**
-         * Serializes all fields in the entity. Useful for handling late join / rejoin
-         * where no parts of the data is known beforehand.
-         */
+
+        /// <summary>
+        /// Serializes all fields in the entity. Useful for handling late join / rejoin
+        /// where no parts of the data is known beforehand.
+        /// </summary>
+        /// <param name="writer"></param>
         public void SerializeAll(IOctetWriter writer);
     }
 }

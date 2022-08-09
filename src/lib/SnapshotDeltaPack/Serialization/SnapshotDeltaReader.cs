@@ -17,9 +17,12 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
             return reader.ReadUInt16();
         }
 
-        /**
-         * Reading a snapshot delta pack and returning the created, deleted and updated entities.
-         */
+        /// <summary>
+        /// Reading a snapshot delta pack and returning the created, deleted and updated entities.
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="creation"></param>
+        /// <returns></returns>
         public static (IEntity[], IEntity[], SnapshotDeltaReaderInfoEntity[]) Read(IOctetReader reader, IEntityContainer creation)
         {
             var deletedEntities = new List<IEntity>();

@@ -11,7 +11,7 @@ using Piot.Surge.SnapshotSerialization;
 
 namespace Piot.Surge
 {
-    public class Constants
+    public static class Constants
     {
         public const uint MaxDatagramOctetSize = 1200;
     }
@@ -20,7 +20,7 @@ namespace Piot.Surge
     {
         public const uint PayloadOctetCountPerDatagram = 1100;
         public void Write(Action<Memory<byte>> send, SerializedSnapshotDeltaPackUnionFlattened pack,
-            OrderedDatagramsOut orderedDatagramsHeader)
+            OrderedDatagramsOutIncrease orderedDatagramsIncrease)
         {
             var datagramCount = pack.payload.Length / PayloadOctetCountPerDatagram + 1;
 
@@ -30,7 +30,7 @@ namespace Piot.Surge
             {
                 var writer = new OctetWriter(Constants.MaxDatagramOctetSize);
 
-                orderedDatagramsHeader.Write(writer);
+                OrderedDatagramsOutWriter.Write(writer, orderedDatagramsIncrease.Value);
                 DatagramTypeWriter.Write(writer, DatagramType.DatagramType.DeltaSnapshots);
                 
                 var lastOne = datagramIndex + 1 == datagramCount;
@@ -44,6 +44,7 @@ namespace Piot.Surge
                 writer.WriteOctets(payloadSlice);
 
                 send(writer.Octets);
+                orderedDatagramsIncrease.Increase();
             }
         }
     }

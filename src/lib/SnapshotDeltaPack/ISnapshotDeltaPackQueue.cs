@@ -5,9 +5,9 @@
 
 namespace Piot.Surge.SnapshotDeltaPack
 {
-    /**
-     * Holds the incoming delta snapshot received from the host to the client.
-     */
+    /// <summary>
+    /// Holds the incoming delta snapshot received from the host to the client.
+    /// </summary>
     public interface ISnapshotDeltaPackQueue
     {
         public int Count { get; }

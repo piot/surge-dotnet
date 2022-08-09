@@ -7,9 +7,9 @@ using System;
 
 namespace Piot.Surge
 {
-    /***
-     * Discards actions added to it. Useful for testing purposes.
-     */
+    /// <summary>
+    /// Discards actions added to it. Useful for testing purposes.
+    /// </summary>
     public class NullActionsContainer : IActionsContainer
     {
 

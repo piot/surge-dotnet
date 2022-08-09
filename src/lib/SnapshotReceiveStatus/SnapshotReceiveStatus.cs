@@ -11,10 +11,13 @@ namespace Piot.Surge
 {
     public static class SnapshotReceiveStatusWriter
     {
-        /**
-         * Sent from client to host. Client describes the last delta compressed snapshot ID it has received
-         * and how many snapshots it has detected as dropped after that.
-         */
+        /// <summary>
+        /// Sent from client to host. Client describes the last delta compressed snapshot ID it has received
+        /// and how many snapshots it has detected as dropped after that.
+        /// </summary>
+        /// <param name="writer"></param>
+        /// <param name="lastReceivedSnapshotId"></param>
+        /// <param name="droppedFramesAfterThat"></param>
         public static void Write(IOctetWriter writer, SnapshotId lastReceivedSnapshotId, byte droppedFramesAfterThat)
         {
             SnapshotIdWriter.Write(writer, lastReceivedSnapshotId);
@@ -24,10 +27,13 @@ namespace Piot.Surge
 
     public static class SnapshotReceiveStatusReader
     {
-        /**
-         * Read on host coming from client.
-         * Client describes the last delta compressed snapshot ID it has received and how many snapshots it has detected as dropped after that.
-         */
+        /// <summary>
+        /// Read on host coming from client.
+        /// Client describes the last delta compressed snapshot ID it has received and how many snapshots it has detected as dropped after that.
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="lastReceivedSnapshotId"></param>
+        /// <param name="droppedFramesAfterThat"></param>
         public static void Read(IOctetReader reader, out SnapshotId lastReceivedSnapshotId,
             out byte droppedFramesAfterThat)
         {

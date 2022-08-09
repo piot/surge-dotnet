@@ -7,13 +7,17 @@ using Piot.Flood;
 
 namespace Piot.Surge.OrderedDatagrams
 {
-    public class OrderedDatagramsOut
+    public struct OrderedDatagramsOut
     {
-        public byte SequenceId { get; private set; }
-
-        public void Write(IOctetWriter writer)
+        public OrderedDatagramsOut(byte initialValue)
         {
-            writer.WriteUInt8(SequenceId++);
+            Value = initialValue;
         }
+
+        public OrderedDatagramsOut Next()
+        {
+            return new OrderedDatagramsOut((byte)(Value + 1));
+        }
+        public byte Value { get; }
     }
 }

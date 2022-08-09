@@ -8,24 +8,31 @@ using Piot.Flood;
 
 namespace Piot.Surge.OrderedDatagrams
 {
-    /**
-     * Very simple protocol to detect out of order and dropped datagrams.
-     */
-    public class OrderedDatagramsIn
+    /// <summary>
+    /// Very simple protocol to detect out of order and dropped datagrams.
+    /// </summary>
+    public struct OrderedDatagramsIn
     {
-        private byte expectedSequenceId;
+       
+        public OrderedDatagramsIn(byte sequenceId)
+        {
+            Value = sequenceId;
+        }
 
-        private bool IsValidSuccessor(byte id)
+        public byte Value { get; }
+
+        public bool IsValidSuccessor(OrderedDatagramsIn value)
         {
             int diff;
 
-            if (id < expectedSequenceId)
+            var id = value.Value;
+            if (Value < id)
             {
-                diff = id + 256 - expectedSequenceId;
+                diff = Value + 256 - id;
             }
             else
             {
-                diff = id - expectedSequenceId;
+                diff = Value - id;
             }
 
             if (diff < 0)
@@ -33,19 +40,7 @@ namespace Piot.Surge.OrderedDatagrams
                 throw new Exception("delta is negative");
             }
 
-            return diff <= 127;
-        }
-
-        public bool Read(IOctetReader reader)
-        {
-            var encounteredId = reader.ReadUInt8();
-            var wasValid = IsValidSuccessor(encounteredId);
-            if (wasValid)
-            {
-                expectedSequenceId = (byte)(encounteredId + 1);
-            }
-
-            return wasValid;
+            return diff > 0 && diff <= 127;
         }
     }
 }

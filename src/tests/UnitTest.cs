@@ -7,6 +7,7 @@ using Piot.Clog;
 using Piot.Flood;
 using Piot.Surge;
 using Piot.Surge.ChangeMask;
+using Piot.Surge.DatagramType;
 using Piot.Surge.Internal.Generated;
 using Piot.Surge.LogicalInput;
 using Piot.Surge.LogicalInputSerialization;
@@ -110,6 +111,28 @@ public class UnitTest1
 
         Assert.Equal(logicalInputQueue.Collection, encounteredLogicalPositions, new CompareLogicalInputCollections());
     }
+    
+    [Fact]
+    public void SerializeLogicalInputDatagramPack()
+    {
+        var logicalInputQueue = new LogicalInputQueue();
+        logicalInputQueue.AddLogicalInput(new LogicalInput
+            { appliedAtSnapshotId = new SnapshotId { frameId = 20 }, payload = new byte[] { 0x0a, 0x0b } });
+
+        var datagramsOut = new OrderedDatagramsOut();
+        var outDatagram = LogicInputDatagramPackOut.CreateInputDatagram(datagramsOut, logicalInputQueue.Collection);
+
+        var reader = new OctetReader(outDatagram.ToArray());
+        var datagramsSequenceIn = OrderedDatagramsInReader.Read(reader);
+        Assert.Equal(datagramsOut.Value, datagramsSequenceIn.Value);
+        var typeOfDatagram = DatagramTypeReader.Read(reader);
+        Assert.Equal(DatagramType.PredictedInputs, typeOfDatagram);
+
+        var encounteredLogicalPositions = LogicalInputDeserialize.Deserialize(reader);
+
+        Assert.Equal(logicalInputQueue.Collection, encounteredLogicalPositions, new CompareLogicalInputCollections());
+    }
+
 
     [Fact]
     public void SerializeEmptyLogicalInput()
@@ -133,18 +156,18 @@ public class UnitTest1
     [Fact]
     public void OrderedDatagrams()
     {
-        OrderedDatagramsIn sequence = new();
+        OrderedDatagramsInChecker sequence = new(new OrderedDatagramsIn(0));
         {
             OctetWriter writer = new (1);
             writer.WriteUInt8(128);
             OctetReader reader = new (writer.Octets);
-            Assert.False(sequence.Read(reader));
+            Assert.False(sequence.ReadAndCheck(reader));
         }
         {
             OctetWriter writer = new (1);
             writer.WriteUInt8(129);
             OctetReader reader = new (writer.Octets);
-            Assert.False(sequence.Read(reader));
+            Assert.False(sequence.ReadAndCheck(reader));
         }
     }
 
@@ -152,47 +175,49 @@ public class UnitTest1
     [Fact]
     public void OrderedDatagramsValid()
     {
-        OrderedDatagramsIn sequence = new ();
+        OrderedDatagramsInChecker sequence = new ();
         {
             OctetWriter writer = new (1);
             writer.WriteUInt8(126);
             OctetReader reader = new (writer.Octets);
-            Assert.True(sequence.Read(reader));
+            Assert.True(sequence.ReadAndCheck(reader));
         }
 
         {
             OctetWriter writer = new (1);
             writer.WriteUInt8(127);
             OctetReader reader = new (writer.Octets);
-            Assert.True(sequence.Read(reader));
+            Assert.True(sequence.ReadAndCheck(reader));
         }
 
         {
             OctetWriter writer = new (1);
             writer.WriteUInt8(127);
             OctetReader reader = new (writer.Octets);
-            Assert.False(sequence.Read(reader));
+            Assert.False(sequence.ReadAndCheck(reader));
         }
     }
 
     [Fact]
     public void OrderedDatagramsWrite()
     {
-        OrderedDatagramsOut sequence = new ();
-        Assert.Equal(0, sequence.SequenceId);
+        OrderedDatagramsOutIncrease sequence = new ();
+        Assert.Equal(0, sequence.Value.Value);
 
         for (var i = 0; i < 256; ++i)
         {
             OctetWriter writer = new (1);
-            sequence.Write(writer);
+            OrderedDatagramsOutWriter.Write(writer, sequence.Value);
             OctetReader reader = new (writer.Octets);
             Assert.Equal(i, reader.ReadUInt8());
+            sequence.Increase();
         }
 
-        Assert.Equal(0, sequence.SequenceId);
+        Assert.Equal(0, sequence.Value.Value);
         OctetWriter writer2 = new (1);
-        sequence.Write(writer2);
-        Assert.Equal(1, sequence.SequenceId);
+        OrderedDatagramsOutWriter.Write(writer2, sequence.Value);
+        sequence.Increase();
+        Assert.Equal(1, sequence.Value.Value);
     }
 
     [Fact]

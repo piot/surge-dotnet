@@ -16,9 +16,10 @@ namespace Piot.Surge.LogicalInput
         }
     }
 
-    /**
-     * Game specific input that is serialized to the @payload.
-     */
+
+    /// <summary>
+    /// Serialized Game specific input stored in the <c>LogicalInput.payload</c>.
+    /// </summary>
     public struct LogicalInput
     {
         public SnapshotId appliedAtSnapshotId;
