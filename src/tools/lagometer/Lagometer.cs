@@ -48,15 +48,27 @@ namespace Piot.Surge.Tools
             }
 
             interpolationValues.Enqueue(debugLastInterpolationValue);
-            if (interpolationValues.Count > 200) interpolationValues.Dequeue();
+            if (interpolationValues.Count > 200)
+            {
+                interpolationValues.Dequeue();
+            }
 
-            if (Random.Range(0, 100) < 14) return;
+            if (Random.Range(0, 100) < 14)
+            {
+                return;
+            }
 
             var value = 16 + Random.Range(0, 50);
-            if (Random.Range(0, 100) < 8) value = -value;
+            if (Random.Range(0, 100) < 8)
+            {
+                value = -value;
+            }
 
             values.Enqueue(value);
-            if (values.Count > 200) values.Dequeue();
+            if (values.Count > 200)
+            {
+                values.Dequeue();
+            }
         }
 
         private void OnGUI()
@@ -69,9 +81,13 @@ namespace Piot.Surge.Tools
             foreach (var value in values)
             {
                 if (value < 0)
+                {
                     DrawBar(i, 80, dropTexture);
+                }
                 else
+                {
                     DrawBar(i, value, receivedTexture);
+                }
 
                 ++i;
             }

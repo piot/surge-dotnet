@@ -20,7 +20,11 @@ namespace Piot.Surge.ChangeMaskSerialization
             }
             #endif
             var v = reader.ReadUInt16();
-            if ((v & 0x8000) == 0) return new ChangedFieldsMask { mask = v };
+            if ((v & 0x8000) == 0)
+            {
+                return new ChangedFieldsMask { mask = v };
+            }
+
             ulong completeMask = (ushort) (v & 0x7fff);
             
 

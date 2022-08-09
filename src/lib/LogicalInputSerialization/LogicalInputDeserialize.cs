@@ -17,7 +17,10 @@ namespace Piot.Surge.LogicalInputSerialization
         public static LogicalInput.LogicalInput[] Deserialize(IOctetReader reader)
         {
             var inputCount = reader.ReadUInt8();
-            if (inputCount == 0) return Array.Empty<LogicalInput.LogicalInput>();
+            if (inputCount == 0)
+            {
+                return Array.Empty<LogicalInput.LogicalInput>();
+            }
 
             var array = new LogicalInput.LogicalInput[inputCount];
 

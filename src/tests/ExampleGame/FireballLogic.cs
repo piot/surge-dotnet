@@ -22,6 +22,9 @@ public struct FireballLogic : ILogic
     public void Tick(IFireballLogicActions commands)
     {
         position += velocity;
-        if (Math.Abs(position.x) > 2000) commands.Explode();
+        if (Math.Abs(position.x) > 2000)
+        {
+            commands.Explode();
+        }
     }
 }

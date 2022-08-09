@@ -15,7 +15,10 @@ namespace Piot.Surge.Snapshot
         public SnapshotIdRange(SnapshotId containsFromSnapshotId, SnapshotId snapshotId)
         {
             if (containsFromSnapshotId.frameId > snapshotId.frameId)
+            {
                 throw new ArgumentOutOfRangeException($"snapshotId {containsFromSnapshotId} {snapshotId}");
+            }
+
             this.containsFromSnapshotId = containsFromSnapshotId;
             this.snapshotId = snapshotId;
         }

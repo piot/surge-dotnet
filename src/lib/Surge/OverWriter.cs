@@ -9,7 +9,10 @@ namespace Piot.Surge
     {
         private static void Overwrite(IEntity[] entities)
         {
-            foreach (var entity in entities) entity.Overwrite();
+            foreach (var entity in entities)
+            {
+                entity.Overwrite();
+            }
         }
 
         // ReSharper disable once ParameterTypeCanBeEnumerable.Global

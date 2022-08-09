@@ -39,9 +39,9 @@ namespace Piot.Surge
                 var sliceStart = (int)(datagramIndex * PayloadOctetCountPerDatagram);
                 var sliceLength = lastOne ? payloadSpan.Length % (int)PayloadOctetCountPerDatagram : (int) PayloadOctetCountPerDatagram;
 
-                payloadSpan.Slice(sliceStart, sliceLength);
+                var payloadSlice = payloadSpan.Slice(sliceStart, sliceLength).ToArray();
                 
-                writer.WriteOctets(pack.payload);
+                writer.WriteOctets(payloadSlice);
 
                 send(writer.Octets);
             }

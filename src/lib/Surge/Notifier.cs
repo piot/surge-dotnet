@@ -9,7 +9,11 @@ namespace Piot.Surge
             foreach (var notifyEntity in entities)
             {
                 notifyEntity.entity.FireChanges(notifyEntity.changeMask);
-                foreach (var action in notifyEntity.entity.Actions) notifyEntity.entity.DoAction(action);
+                foreach (var action in notifyEntity.entity.Actions)
+                {
+                    notifyEntity.entity.DoAction(action);
+                }
+
                 notifyEntity.entity.Overwrite();
                 
             }

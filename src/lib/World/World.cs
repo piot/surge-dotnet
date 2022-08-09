@@ -33,7 +33,10 @@ namespace Piot.Surge
         public T? FindEntity<T>(EntityId entityId)
         {
             Entities.TryGetValue(entityId.Value, out var entity);
-            if (entity == null) return default;
+            if (entity == null)
+            {
+                return default;
+            }
 
             return (T)entity.GeneratedEntity;
         }
@@ -41,7 +44,10 @@ namespace Piot.Surge
         public T FetchEntity<T>(EntityId entityId)
         {
             Entities.TryGetValue(entityId.Value, out var entity);
-            if (entity == null) throw new NullReferenceException($"could not find entity {entityId}");
+            if (entity == null)
+            {
+                throw new NullReferenceException($"could not find entity {entityId}");
+            }
 
             return (T)entity.GeneratedEntity;
         }
@@ -50,7 +56,11 @@ namespace Piot.Surge
         IEntity IEntityContainer.FetchEntity(EntityId entityId)
         {
             Entities.TryGetValue(entityId.Value, out var completeNetworkEntity);
-            if (completeNetworkEntity == null) throw new Exception($"could not find entity {entityId}");
+            if (completeNetworkEntity == null)
+            {
+                throw new Exception($"could not find entity {entityId}");
+            }
+
             return completeNetworkEntity;
         }
 
@@ -58,7 +68,10 @@ namespace Piot.Surge
         void IEntityContainer.DeleteEntity(EntityId entityId)
         {
             var existingEntity = Entities[entityId.Value];
-            if (existingEntity == null) throw new Exception($"unknown entity id {entityId}");
+            if (existingEntity == null)
+            {
+                throw new Exception($"unknown entity id {entityId}");
+            }
 
             DeleteEntity(existingEntity);
         }
@@ -90,7 +103,11 @@ namespace Piot.Surge
 
         public void ClearDelta()
         {
-            foreach (var entity in created) entity.Mode = EntityMode.Normal;
+            foreach (var entity in created)
+            {
+                entity.Mode = EntityMode.Normal;
+            }
+
             created.Clear();
             deleted.Clear();
         }
@@ -110,9 +127,15 @@ namespace Piot.Surge
             for (var i = 0; i < 200; ++i)
             {
                 lastEntityId += 151;
-                if (lastEntityId == 0) continue;
+                if (lastEntityId == 0)
+                {
+                    continue;
+                }
 
-                if (!Entities.ContainsKey(lastEntityId)) return lastEntityId;
+                if (!Entities.ContainsKey(lastEntityId))
+                {
+                    return lastEntityId;
+                }
             }
 
             throw new Exception("Could not find free entity id");

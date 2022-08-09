@@ -24,12 +24,18 @@ namespace Piot.Surge.SnapshotDeltaInternal
             {
                 var changeMask = x.Value.changeMask;
                 if (changeMask == ChangedFieldsMask.AllFieldChangedMaskBits)
+                {
                     createdIds.Add(new EntityId(x.Key));
+                }
                 else if ((changeMask & ChangedFieldsMask.DeletedMaskBit) != 0)
+                {
                     deletedIds.Add(new EntityId(x.Key));
+                }
                 else
+                {
                     updatedEntities.Add(new SnapshotDeltaChangedEntity(new EntityId(x.Key),
                         new ChangedFieldsMask(x.Value.changeMask)));
+                }
             }
 
             return new SnapshotDelta.SnapshotDelta(deletedIds.ToArray(), createdIds.ToArray(),

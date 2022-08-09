@@ -7,6 +7,9 @@ using Piot.Flood;
 
 namespace Piot.Surge
 {
+    /// <summary>
+    /// R
+    /// </summary>
     public class Entity : IEntity
     {
         private readonly IGeneratedEntity generatedEntity;

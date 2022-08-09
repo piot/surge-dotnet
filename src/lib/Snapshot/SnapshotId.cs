@@ -17,7 +17,10 @@ namespace Piot.Surge.Snapshot
         public SnapshotId(uint frameId)
         {
             if (frameId == uint.MaxValue)
+            {
                 throw new ArgumentOutOfRangeException(nameof(frameId), "max value frame id reserved");
+            }
+
             this.frameId = frameId;
         }
 

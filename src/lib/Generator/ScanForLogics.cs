@@ -31,7 +31,10 @@ namespace Piot.Surge.Generator
             var assemblies2 = AppDomain.CurrentDomain.GetAssemblies();
 
             List<Type> allTypes = new();
-            foreach (var assembly in assemblies2) allTypes.AddRange(assembly.GetTypes());
+            foreach (var assembly in assemblies2)
+            {
+                allTypes.AddRange(assembly.GetTypes());
+            }
 
             var logicClasses = allTypes
                 .Where(type => IsStruct(type) && HasAttribute<LogicAttribute>(type)).ToArray();

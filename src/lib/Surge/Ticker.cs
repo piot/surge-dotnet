@@ -9,7 +9,10 @@ namespace Piot.Surge
     {
         public static void Tick(IEntity[] entities)
         {
-            foreach (var entity in entities) entity.Tick();
+            foreach (var entity in entities)
+            {
+                entity.Tick();
+            }
         }
 
         public static void Tick(IEntityContainer world)

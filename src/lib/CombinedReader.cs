@@ -10,7 +10,6 @@ namespace Piot.Surge
 {
     public struct CombinedPacket
     {
-        public DatagramReceiveStatus DatagramReceiveStatus;
         public SerializedSnapshotDeltaPackUnion serializedSnapshots;
     }
 
@@ -20,7 +19,6 @@ namespace Piot.Surge
         {
             return new()
             {
-                DatagramReceiveStatus = DatagramReceiveStatusReader.Read(reader),
                 serializedSnapshots = SnapshotDeltaUnionReader.Read(reader)
             };
         }

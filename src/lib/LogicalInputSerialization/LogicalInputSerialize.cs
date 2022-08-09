@@ -17,10 +17,16 @@ namespace Piot.Surge.LogicalInputSerialization
          */
         public static void Serialize(IOctetWriter writer, LogicalInput.LogicalInput[] inputs)
         {
-            if (inputs.Length > 255) throw new Exception("too many inputs to serialize");
+            if (inputs.Length > 255)
+            {
+                throw new Exception("too many inputs to serialize");
+            }
 
             writer.WriteUInt8((byte)inputs.Length);
-            if (inputs.Length == 0) return;
+            if (inputs.Length == 0)
+            {
+                return;
+            }
 
             var first = inputs.First();
 
@@ -31,14 +37,16 @@ namespace Piot.Surge.LogicalInputSerialization
             foreach (var input in inputs)
             {
                 if (input.appliedAtSnapshotId.frameId < lastFrameId.frameId)
+                {
                     throw new Exception("logical input in wrong order in collection");
+                }
 
-                var deltaFrameId = input.appliedAtSnapshotId.frameId - lastFrameId.frameId;
                 if (index != 0)
                 {
-                    if (deltaFrameId <= 0) throw new Exception("logical input wrong delta");
-
-                    writer.WriteUInt8((byte)deltaFrameId);
+                    if (!input.appliedAtSnapshotId.IsImmediateFollowing(lastFrameId))
+                    {
+                        throw new Exception("logical input wrong delta ");
+                    }
                 }
 
                 writer.WriteUInt8((byte)input.payload.Length);

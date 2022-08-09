@@ -26,7 +26,10 @@ namespace Piot.Surge.LogicalInput
 
         public override bool Equals(object? obj)
         {
-            if (obj is null) return false;
+            if (obj is null)
+            {
+                return false;
+            }
 
             var other = (LogicalInput)obj;
 

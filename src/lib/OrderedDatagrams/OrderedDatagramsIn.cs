@@ -20,11 +20,18 @@ namespace Piot.Surge.OrderedDatagrams
             int diff;
 
             if (id < expectedSequenceId)
+            {
                 diff = id + 256 - expectedSequenceId;
+            }
             else
+            {
                 diff = id - expectedSequenceId;
+            }
 
-            if (diff < 0) throw new Exception("delta is negative");
+            if (diff < 0)
+            {
+                throw new Exception("delta is negative");
+            }
 
             return diff <= 127;
         }
@@ -33,7 +40,10 @@ namespace Piot.Surge.OrderedDatagrams
         {
             var encounteredId = reader.ReadUInt8();
             var wasValid = IsValidSuccessor(encounteredId);
-            if (wasValid) expectedSequenceId = (byte)(encounteredId + 1);
+            if (wasValid)
+            {
+                expectedSequenceId = (byte)(encounteredId + 1);
+            }
 
             return wasValid;
         }

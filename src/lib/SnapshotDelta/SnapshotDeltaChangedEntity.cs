@@ -7,10 +7,11 @@ using Piot.Surge.ChangeMask;
 
 namespace Piot.Surge.SnapshotDelta
 {
-    /**
-     * Information about an entity that changed any of its field between two snapshots.
-     * Does only contain the changeMask, but should probably be refactored to hold the serialized data as well.
-     */
+    
+    /// <summary>
+    /// Information about an entity that changed any of its field between two snapshots.
+    /// Does only contain the <c>changeMask</c>, but should probably be refactored to hold the serialized data as well.
+    /// </summary> 
     public struct SnapshotDeltaChangedEntity
     {
         public ChangedFieldsMask changeMask;

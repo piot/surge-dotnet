@@ -22,7 +22,10 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
             IEntity[] createdEntities, IUpdatedEntity[] updatedEntities)
         {
             WriteEntityCount(writer, deletedEntities.Length);
-            foreach (var entityId in deletedEntities) EntityIdWriter.Write(writer, entityId);
+            foreach (var entityId in deletedEntities)
+            {
+                EntityIdWriter.Write(writer, entityId);
+            }
 
             WriteEntityCount(writer, createdEntities.Length);
             foreach (var entity in createdEntities)

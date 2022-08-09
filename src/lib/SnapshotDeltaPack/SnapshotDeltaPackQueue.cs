@@ -17,7 +17,9 @@ namespace Piot.Surge.SnapshotDeltaPack
         public void Enqueue(SnapshotDeltaPack pack)
         {
             if (!IsValidPackToInsert(pack.snapshotId))
+            {
                 throw new Exception($"pack can not inserted {pack} {lastInsertedSnapshotId}");
+            }
 
             packs.Enqueue(pack);
             lastInsertedSnapshotId = pack.snapshotId;

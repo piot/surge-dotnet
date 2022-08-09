@@ -73,10 +73,12 @@ namespace Piot.Surge.Generator
                 {
 ");
             foreach (var logicInfo in logicInfos)
+            {
                 sb.Append(
                         $"        ArchetypeConstants.{logicInfo.Type.Name} => new {EntityGeneratedInternal(logicInfo)}(),")
                     .Append(@"
 ");
+            }
 
             sb.Append(@"            _ => throw new Exception($""unknown entity to create {archetypeId}""),
 
@@ -94,8 +96,10 @@ namespace Piot.Surge.Generator
             AddClassDeclaration(sb, "EngineWorld");
 
             foreach (var info in infos)
+            {
                 sb.Append($"public Action<{EntityExternal(info)}>? OnSpawn{info.Type.Name};").Append(@"
 ");
+            }
 
             AddEndDeclaration(sb);
         }
@@ -111,10 +115,12 @@ namespace Piot.Surge.Generator
 ");
 
             foreach (var info in infos)
+            {
                 sb.Append($"case {EntityGeneratedInternal(info)} internalEntity:").Append(@"
 ").Append($"engineWorld.OnSpawn{info.Type.Name}?.Invoke(internalEntity.OutFacing);").Append(@"
     break;
 ");
+            }
 
             sb.Append(@"
                 default:
@@ -167,8 +173,10 @@ namespace Piot.Surge.Generator
 {
 ");
                 foreach (var parameter in commandInfo.CommandParameters)
+                {
                     sb.Append($"    public {parameter.type} {parameter.name}").Append(@";
 ");
+                }
             }
 
             sb.Append(@"
@@ -231,7 +239,10 @@ namespace Piot.Surge.Generator
 
         public static void AddActionDelegates(StringBuilder sb, IEnumerable<CommandInfo> commandInfos)
         {
-            foreach (var commandInfo in commandInfos) AddActionDelegate(sb, commandInfo);
+            foreach (var commandInfo in commandInfos)
+            {
+                AddActionDelegate(sb, commandInfo);
+            }
         }
 
         public static string MaskName(LogicFieldInfo fieldInfo)
@@ -248,7 +259,10 @@ namespace Piot.Surge.Generator
 
         public static void AddChangeMaskConstants(StringBuilder sb, IEnumerable<LogicFieldInfo> fieldInfos)
         {
-            foreach (var fieldInfo in fieldInfos) AddChangeMaskConstant(sb, fieldInfo);
+            foreach (var fieldInfo in fieldInfos)
+            {
+                AddChangeMaskConstant(sb, fieldInfo);
+            }
 
             sb.Append(@"
 ");
@@ -278,22 +292,50 @@ namespace Piot.Surge.Generator
 
         public static string DeSerializeMethod(Type type)
         {
-            if (type == typeof(bool)) return "reader.ReadUInt8() != 0";
-            if (type == typeof(ushort)) return PrimitiveDeSerializer("UInt16");
-            if (type == typeof(uint)) return PrimitiveDeSerializer("UInt32");
+            if (type == typeof(bool))
+            {
+                return "reader.ReadUInt8() != 0";
+            }
 
-            if (type == typeof(ulong)) return PrimitiveDeSerializer("UInt64");
+            if (type == typeof(ushort))
+            {
+                return PrimitiveDeSerializer("UInt16");
+            }
+
+            if (type == typeof(uint))
+            {
+                return PrimitiveDeSerializer("UInt32");
+            }
+
+            if (type == typeof(ulong))
+            {
+                return PrimitiveDeSerializer("UInt64");
+            }
 
             return DeSerializeMethodForValueTypes(type);
         }
 
         public static string SerializeMethod(Type type, string variableName)
         {
-            if (type == typeof(bool)) return $"writer.WriteUInt8({variableName} ? (byte)1 : (byte)0)";
-            if (type == typeof(ushort)) return PrimitiveSerializer("UInt16", variableName);
-            if (type == typeof(uint)) return PrimitiveSerializer("UInt32", variableName);
+            if (type == typeof(bool))
+            {
+                return $"writer.WriteUInt8({variableName} ? (byte)1 : (byte)0)";
+            }
 
-            if (type == typeof(ulong)) return PrimitiveSerializer("UInt64", variableName);
+            if (type == typeof(ushort))
+            {
+                return PrimitiveSerializer("UInt16", variableName);
+            }
+
+            if (type == typeof(uint))
+            {
+                return PrimitiveSerializer("UInt32", variableName);
+            }
+
+            if (type == typeof(ulong))
+            {
+                return PrimitiveSerializer("UInt64", variableName);
+            }
 
             return SerializeMethodForValueTypes(type, variableName);
         }
@@ -301,7 +343,10 @@ namespace Piot.Surge.Generator
         public static void AddChangeDelegates(StringBuilder sb, LogicInfo logicInfo,
             IEnumerable<LogicFieldInfo> fieldInfos)
         {
-            foreach (var fieldInfo in fieldInfos) AddChangeDelegate(sb, logicInfo, fieldInfo);
+            foreach (var fieldInfo in fieldInfos)
+            {
+                AddChangeDelegate(sb, logicInfo, fieldInfo);
+            }
         }
 
         public static void AddDeserialize(StringBuilder sb, IEnumerable<LogicFieldInfo> fieldInfos)
@@ -464,10 +509,12 @@ namespace Piot.Surge.Generator
 ");
 
             foreach (var logicInfo in logics)
+            {
                 sb.Append(
                         $"    public static readonly ArchetypeId {logicInfo.Type.Name} = new(ArchetypeConstants.{logicInfo.Type.Name});")
                     .Append(@"
 ");
+            }
 
             sb.Append(@"
 }
@@ -486,11 +533,13 @@ namespace Piot.Surge.Generator
 ");
 
             foreach (var fieldInfo in fieldInfos)
+            {
                 sb.Append(@"                new() { ")
                     .Append(
                         $"mask = {MaskName(fieldInfo)}, name = new TypeInformationFieldName(nameof(current.{fieldInfo.FieldInfo.Name})), type = typeof({fieldInfo.FieldInfo.FieldType})")
                     .Append(@" },
 ");
+            }
 
             sb.Append(@"
         });
@@ -509,10 +558,12 @@ namespace Piot.Surge.Generator
 ");
 
             foreach (var fieldInfo in fieldInfos)
+            {
                 sb.Append(
                         $"        if (current.{fieldInfo.FieldInfo.Name} != last.{fieldInfo.FieldInfo.Name}) mask |= {MaskName(fieldInfo)};")
                     .Append(@"
 ");
+            }
 
             sb.Append(@"
         return mask;
@@ -527,9 +578,11 @@ namespace Piot.Surge.Generator
     {
 ");
             foreach (var fieldInfo in fieldInfos)
+            {
                 sb.Append(
                         $"        if ((serializeFlags & {MaskName(fieldInfo)}) != 0) outFacing.On{TitleCase(fieldInfo.FieldInfo.Name)}Changed?.Invoke();")
                     .Append('\n');
+            }
 
             sb.Append(@"
     }
@@ -551,7 +604,10 @@ namespace Piot.Surge.Generator
                 var parameters = string.Join(", ", parameterFromFieldParts);
 
                 var caseSuffix = "";
-                if (parameters.Length > 0) caseSuffix = " thing";
+                if (parameters.Length > 0)
+                {
+                    caseSuffix = " thing";
+                }
 
                 sb.Append($"            case {action.MethodInfo.Name}{caseSuffix}:").Append(@"
                 ").Append($"outFacing.{prefix}{action.MethodInfo.Name}?.Invoke({parameters});").Append(@"

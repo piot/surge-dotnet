@@ -28,15 +28,24 @@ public class CompareLogicalInputCollections : IEqualityComparer<ICollection<Logi
 {
     public bool Equals(ICollection<LogicalInput>? x, ICollection<LogicalInput>? y)
     {
-        if (x is null || y is null) return false;
+        if (x is null || y is null)
+        {
+            return false;
+        }
 
-        if (x.Count != y.Count) return false;
+        if (x.Count != y.Count)
+        {
+            return false;
+        }
 
         for (var i = 0; i < x.Count; ++i)
         {
             var a = x.ToArray()[i];
             var b = y.ToArray()[i];
-            if (!a.Equals(b)) return false;
+            if (!a.Equals(b))
+            {
+                return false;
+            }
         }
 
         return true;
@@ -638,7 +647,10 @@ public class UnitTest1
 
         Assert.Equal(29, undoWriter.Octets.Length);
 
-        foreach (var clientCreatedEntity in created) clientCreatedEntity.FireCreated();
+        foreach (var clientCreatedEntity in created)
+        {
+            clientCreatedEntity.FireCreated();
+        }
 
         Assert.Equal(12, clientSpawnedEntity.Self.position.x);
         Assert.Equal(99, clientSpawnedEntity.Self.ammoCount);
@@ -649,7 +661,11 @@ public class UnitTest1
 
         foreach (var notifyEntity in created)
         {
-            foreach (var action in notifyEntity.Actions) notifyEntity.DoAction(action);
+            foreach (var action in notifyEntity.Actions)
+            {
+                notifyEntity.DoAction(action);
+            }
+
             notifyEntity.Overwrite();
         }
 

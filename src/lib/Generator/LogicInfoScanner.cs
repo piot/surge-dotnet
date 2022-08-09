@@ -75,12 +75,18 @@ namespace Piot.Surge.Generator
             Type = type;
             TickMethod = tickMethod;
             var parameters = tickMethod.GetParameters();
-            if (parameters.Length != 1) throw new Exception("we can only allow one parameter to Tick()");
+            if (parameters.Length != 1)
+            {
+                throw new Exception("we can only allow one parameter to Tick()");
+            }
 
             var commandsInterface = parameters.Single().ParameterType;
             if (!commandsInterface.IsInterface)
+            {
                 throw new Exception("Tick() must take an interface as a single parameter");
-/*
+            }
+
+            /*
             if (!commandsInterface.IsAssignableTo(typeof(ILogicActions)))
                 throw new Exception($"Interface in Tick {type.Name} must inherit from {nameof(ILogicActions)}");
 */
@@ -131,9 +137,15 @@ namespace Piot.Surge.Generator
             foreach (var type in types)
             {
                 var methodInfo = type.GetMethod("Tick");
-                if (methodInfo == null) throw new Exception("Each logic must have a tick method");
+                if (methodInfo == null)
+                {
+                    throw new Exception("Each logic must have a tick method");
+                }
 
-                if (methodInfo.IsAbstract) throw new Exception("Each logic tick can not be abstract");
+                if (methodInfo.IsAbstract)
+                {
+                    throw new Exception("Each logic tick can not be abstract");
+                }
 
                 var logicInfo = new LogicInfo(type, methodInfo, log);
                 logicInfos.Add(logicInfo);
