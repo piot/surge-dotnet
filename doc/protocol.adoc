@@ -1,0 +1,116 @@
+= Surge Protocol
+
+The Surge protocol is based on datagrams, e.g. UDP. It does not handle connections nor sessions, since they differ widly on different services and transports.
+
+== Ordered Datagrams
+Makes sure that the datagrams are received in order and that duplicates and reordered datagrams are discarded.
+Normally this is handled by the transport layer used, but needed when using unsecure UDP and in all cases as an extra sanity check.
+Receiver should discard any datagram that is not considered a successor to the previously received datagram.
+If no datagram has been received, just accept the first one.
+
+|===
+|Type|Name|Description
+
+|`U8`
+|Sequence ID
+|Increasing every datagram sent. Wraps around to zero after 0xff (255), Starts with zero.
+|===
+
+== Snapshot Datagrams
+
+Sent from authoritative host to the client. When connection quality is good, only one snapshot is sent. If snapshots are dropped
+or network quality is likely to be bad, a few extra delta snapshots are sent (redundancy).
+
+Contains all fields that changed for all  ghosts that changed during each of the snapshots.
+Also contains fully non compressed correction state for the predicting avatars on the client
+ (usually one, unless multiple local players). The ghosts and the predicting avatars should be deterministic in isolation.
+
+|===
+|Type|Name|Description
+
+|`Ordered Datagrams`
+|OrderedDatagrams
+|See <<Ordered Datagrams>>
+
+|`U8`
+|DatagramType
+|0x01 = DeltaSnapshots
+
+|`U32`
+|LastSnapshotId
+|Last snapshotID in the range
+
+|`U8`
+|SnapshotCount
+|How many snapshots are contained going back. Must be at least one.
+
+`FirstSnapshotID = LastSnapshotId - (SnapshotCount - 1)`.
+
+|`U8`
+|PayloadPartIndex
+|The (0x7F) part of the octet indicates which index of the payload that should be reassembled. +
+If the highest bit is set (0x80), then this is the last packet and the payload can be reassembled and put in a queue.
+
+|`U8[]`
+|PayloadSlice
+|Slice of the complete payload. Between 1 and 1100 octets.
+
+|===
+
+
+== Predicted Logical Input Datagrams
+Sent by client to authoritative host for the locally predicted avatars on the client (usually just one).
+
+The protocol has, by design, no way of splitting in multiple datagrams.
+
+If we have around 300 ms as a maximum latency from a QoS perspective and assume a 16ms simulation tick, that comes down to around 10 locally predicted inputs.
+
+With a redundancy about 10, that must fit in a single datagram, results in a max size of each logical input to 120 octets.
+
+|===
+|Type|Name|Description
+
+|`OrderedDatagrams`
+|OrderedDatagrams
+|See <<Ordered Datagrams>>
+
+|`U8`
+|DatagramType
+|0x02 = Predicted Inputs
+
+|`U8`
+|InputCount
+|The number of inputs that follows, in the range of 1 to 10.
+
+|`U8`
+|InputStreamCount
+|The number of input streams. One for each local player. Usually one.
+
+|`U8[InputStreamCount]`
+|LocalPlayerIndicies
+|The local player indicies. Every <<Logical Input Chunk>> is considered to have the data serialized for each player in this order.
+
+|`U32`
+|FirstSnapshotId
+|Input was predicted and applied when state was at this `FirstSnapshotId`. Receiver should assume that it increased by one
+after each `InputStreamCount` LogicalInputChunks.
+
+|`LogicalInputChunk[InputCount{nbsp}*{nbsp}InputStreamCount]`
+|InputChunks
+|Input chunks repeated `InputCount{nbsp}*{nbsp}InputStreamCount` times.
+
+|===
+
+=== Logical Input Chunk
+
+|===
+|Type|Name|Description
+|`U8`
+|PayloadLength
+|The number of following octets. 1-120 octets if one stream, 1-60 for two streams. 0 is allowed if no data available yet, like a recently joined player.
+
+|`U8[PayloadLength]`
+|Payload
+|Game specific serialized logical input. The logical input can be delta compressed, but only with reference to inputs that are serialized within this datagram.
+
+|===
