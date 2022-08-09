@@ -11,7 +11,7 @@ namespace Piot.Surge.SnapshotSerialization
     public static class SnapshotIdReader
     {
         /// <summary>
-        /// Reads a snapshot ID from the stream reader.
+        ///     Reads a snapshot ID from the stream reader.
         /// </summary>
         /// <param name="reader"></param>
         /// <returns></returns>

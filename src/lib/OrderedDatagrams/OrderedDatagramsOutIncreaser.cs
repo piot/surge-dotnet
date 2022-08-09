@@ -6,8 +6,8 @@ namespace Piot.Surge.OrderedDatagrams
 
         public OrderedDatagramsOutIncrease()
         {
-            
         }
+
         public OrderedDatagramsOutIncrease(OrderedDatagramsOut startValue)
         {
             value = startValue;

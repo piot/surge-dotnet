@@ -6,7 +6,7 @@ namespace Piot.Surge.DatagramType
     {
         public static DatagramType Read(IOctetReader reader)
         {
-            return (DatagramType) reader.ReadUInt8();
+            return (DatagramType)reader.ReadUInt8();
         }
     }
 }

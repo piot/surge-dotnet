@@ -129,7 +129,7 @@ namespace Piot.Surge.Generator
     public static class LogicInfoScanner
     {
         /// <summary>
-        /// Scans the specified <paramref name="types"/> and checks if the type contains a method called Tick.
+        ///     Scans the specified <paramref name="types" /> and checks if the type contains a method called Tick.
         /// </summary>
         /// <param name="types"></param>
         /// <param name="log"></param>

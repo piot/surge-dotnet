@@ -13,7 +13,7 @@ namespace Piot.Surge.LogicalInputSerialization
     public static class LogicalInputSerialize
     {
         /// <summary>
-        /// Serializing the game specific inputs to be sent from the client to the authoritative host.
+        ///     Serializing the game specific inputs to be sent from the client to the authoritative host.
         /// </summary>
         public static void Serialize(IOctetWriter writer, LogicalInput.LogicalInput[] inputs)
         {
@@ -27,7 +27,7 @@ namespace Piot.Surge.LogicalInputSerialization
             {
                 return;
             }
-            
+
             const byte InputStreamCount = 1;
             // TODO: Support more streams
             writer.WriteUInt8(InputStreamCount);

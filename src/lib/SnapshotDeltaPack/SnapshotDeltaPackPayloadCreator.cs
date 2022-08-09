@@ -12,7 +12,7 @@ namespace Piot.Surge.SnapshotDeltaPack
     internal static class SnapshotDeltaPackPayloadCreator
     {
         /// <summary>
-        /// Creates a pack from a snapshot delta and then drops the changes from the entity container (world).
+        ///     Creates a pack from a snapshot delta and then drops the changes from the entity container (world).
         /// </summary>
         /// <param name="world"></param>
         /// <param name="snapshotDeltaAfter"></param>

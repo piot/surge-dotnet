@@ -24,7 +24,7 @@ namespace Piot.Surge.Generator
         }
 
         /// <summary>
-        /// Scans .NET type information to find types that have the LogicAttribute attached.
+        ///     Scans .NET type information to find types that have the LogicAttribute attached.
         /// </summary>
         /// <param name="output"></param>
         /// <returns></returns>

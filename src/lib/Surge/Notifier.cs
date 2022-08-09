@@ -15,7 +15,6 @@ namespace Piot.Surge
                 }
 
                 notifyEntity.entity.Overwrite();
-                
             }
         }
     }

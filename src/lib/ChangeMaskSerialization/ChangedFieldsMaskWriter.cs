@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using Piot.Surge.ChangeMask;
 using Piot.Flood;
+using Piot.Surge.ChangeMask;
 
 namespace Piot.Surge.ChangeMaskSerialization
 {
@@ -12,14 +12,15 @@ namespace Piot.Surge.ChangeMaskSerialization
     {
         public const byte FullChangeMaskSync = 0x91;
     }
+
     public static class ChangedFieldsMaskWriter
     {
         public static void WriteChangedFieldsMask(IOctetWriter writer, ChangedFieldsMask changeMask)
         {
-            #if DEBUG
+#if DEBUG
             writer.WriteUInt8(Constants.FullChangeMaskSync);
-            #endif
-            writer.WriteUInt16((ushort)((changeMask.mask >> 16) & 0xffff | 0x8000));
+#endif
+            writer.WriteUInt16((ushort)(((changeMask.mask >> 16) & 0xffff) | 0x8000));
             writer.WriteUInt16((ushort)(changeMask.mask & 0x7fff));
         }
     }

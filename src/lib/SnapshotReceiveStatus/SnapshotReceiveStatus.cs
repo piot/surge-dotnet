@@ -12,8 +12,8 @@ namespace Piot.Surge
     public static class SnapshotReceiveStatusWriter
     {
         /// <summary>
-        /// Sent from client to host. Client describes the last delta compressed snapshot ID it has received
-        /// and how many snapshots it has detected as dropped after that.
+        ///     Sent from client to host. Client describes the last delta compressed snapshot ID it has received
+        ///     and how many snapshots it has detected as dropped after that.
         /// </summary>
         /// <param name="writer"></param>
         /// <param name="lastReceivedSnapshotId"></param>
@@ -28,8 +28,9 @@ namespace Piot.Surge
     public static class SnapshotReceiveStatusReader
     {
         /// <summary>
-        /// Read on host coming from client.
-        /// Client describes the last delta compressed snapshot ID it has received and how many snapshots it has detected as dropped after that.
+        ///     Read on host coming from client.
+        ///     Client describes the last delta compressed snapshot ID it has received and how many snapshots it has detected as
+        ///     dropped after that.
         /// </summary>
         /// <param name="reader"></param>
         /// <param name="lastReceivedSnapshotId"></param>

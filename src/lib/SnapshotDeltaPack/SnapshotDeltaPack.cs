@@ -9,7 +9,7 @@ using Piot.Surge.Snapshot;
 namespace Piot.Surge.SnapshotDeltaPack
 {
     /// <summary>
-    /// Holds a complete delta snapshot serialized pack payload.
+    ///     Holds a complete delta snapshot serialized pack payload.
     /// </summary>
     public class SnapshotDeltaPack
     {

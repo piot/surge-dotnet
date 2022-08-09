@@ -19,6 +19,7 @@ namespace Piot.Surge
     public class SnapshotDeltaPackUnionToDatagramsWriter
     {
         public const uint PayloadOctetCountPerDatagram = 1100;
+
         public void Write(Action<Memory<byte>> send, SerializedSnapshotDeltaPackUnionFlattened pack,
             OrderedDatagramsOutIncrease orderedDatagramsIncrease)
         {
@@ -32,15 +33,17 @@ namespace Piot.Surge
 
                 OrderedDatagramsOutWriter.Write(writer, orderedDatagramsIncrease.Value);
                 DatagramTypeWriter.Write(writer, DatagramType.DatagramType.DeltaSnapshots);
-                
+
                 var lastOne = datagramIndex + 1 == datagramCount;
                 SnapshotPackDatagramHeaderWriter.Write(writer, pack.snapshotIdRange, datagramIndex, lastOne);
 
                 var sliceStart = (int)(datagramIndex * PayloadOctetCountPerDatagram);
-                var sliceLength = lastOne ? payloadSpan.Length % (int)PayloadOctetCountPerDatagram : (int) PayloadOctetCountPerDatagram;
+                var sliceLength = lastOne
+                    ? payloadSpan.Length % (int)PayloadOctetCountPerDatagram
+                    : (int)PayloadOctetCountPerDatagram;
 
                 var payloadSlice = payloadSpan.Slice(sliceStart, sliceLength).ToArray();
-                
+
                 writer.WriteOctets(payloadSlice);
 
                 send(writer.Octets);

@@ -8,7 +8,7 @@ using System;
 namespace Piot.Surge.Snapshot
 {
     /// <summary>
-    /// A snapshot Id. Always increasing by one and consecutive. Usually the session is starting at zero.
+    ///     A snapshot Id. Always increasing by one and consecutive. Usually the session is starting at zero.
     /// </summary>
     public struct SnapshotId
     {
@@ -28,7 +28,7 @@ namespace Piot.Surge.Snapshot
         {
             return other.frameId + 1 == frameId;
         }
-        
+
         public override string ToString()
         {
             return $"{frameId}";

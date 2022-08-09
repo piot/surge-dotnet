@@ -8,12 +8,12 @@ using System;
 namespace Piot.Surge
 {
     /// <summary>
-    /// Discards actions added to it. Useful for testing purposes.
+    ///     Discards actions added to it. Useful for testing purposes.
     /// </summary>
     public class NullActionsContainer : IActionsContainer
     {
-
         public IAction[] Actions { get; } = Array.Empty<IAction>();
+
         public void Add(IAction action)
         {
         }

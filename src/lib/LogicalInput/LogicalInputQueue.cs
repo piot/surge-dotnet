@@ -10,9 +10,9 @@ using Piot.Surge.Snapshot;
 namespace Piot.Surge.LogicalInput
 {
     /// <summary>
-    /// Queue of serialized game specific inputs.
-    /// Used by the predicting client to keep track of inputs that needs to be
-    /// re-simulated when a correction state is received.
+    ///     Queue of serialized game specific inputs.
+    ///     Used by the predicting client to keep track of inputs that needs to be
+    ///     re-simulated when a correction state is received.
     /// </summary>
     public class LogicalInputQueue
     {

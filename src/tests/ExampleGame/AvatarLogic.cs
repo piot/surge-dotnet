@@ -41,7 +41,7 @@ public struct AvatarLogic : ILogic
         {
             X = position.x,
             Y = position.y,
-            Z = position.z,
+            Z = position.z
         };
         commands.FireVolley(fakeAiming); // aiming.ToDirection
     }
@@ -62,7 +62,7 @@ public struct AvatarLogic : ILogic
             fireCooldown--;
         }
     }
-    
+
     public void Tick(IAvatarLogicActions commands)
     {
         TickDownCoolDowns();

@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System.Collections.Generic;
-using Piot.Surge.ChangeMaskSerialization;
 using Piot.Flood;
+using Piot.Surge.ChangeMaskSerialization;
 using Piot.Surge.SnapshotDeltaPack.Serialization;
 
 namespace Piot.Surge.SnnapshotDeltaPack.Serialization
@@ -30,8 +30,8 @@ namespace Piot.Surge.SnnapshotDeltaPack.Serialization
         }
 
         /// <summary>
-        /// Similar to SnapshotDeltaReader.Read, but it also writes the current values of the fields that are overwritten.
-        /// The undoWriter can be used to undo the overwritten entities.
+        ///     Similar to SnapshotDeltaReader.Read, but it also writes the current values of the fields that are overwritten.
+        ///     The undoWriter can be used to undo the overwritten entities.
         /// </summary>
         /// <param name="reader"></param>
         /// <param name="creation"></param>

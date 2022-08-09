@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
+
 // ReSharper disable CheckNamespace
 
 namespace Piot.Clog
@@ -56,7 +57,7 @@ namespace Piot.Clog
                 return;
             }
 
-            target.Log(LogLevel.Info, message, new object[]{ arg0, arg1, arg2 });
+            target.Log(LogLevel.Info, message, new object[] { arg0, arg1, arg2 });
         }
 
         public void Info(string message, object[] args)
@@ -99,14 +100,15 @@ namespace Piot.Clog
             target.Log(LogLevel.Warning, message, new object[] { arg0, arg1 });
         }
 
-        public void Warn<T0, T1, T2>(string message, T0 arg0, T1 arg1, T2 arg2) where T0 : notnull where T1 : notnull where T2 : notnull
+        public void Warn<T0, T1, T2>(string message, T0 arg0, T1 arg1, T2 arg2)
+            where T0 : notnull where T1 : notnull where T2 : notnull
         {
             if (threshold > LogLevel.Warning)
             {
                 return;
             }
 
-            target.Log(LogLevel.Warning, message, new object[]{ arg0, arg1, arg2 });
+            target.Log(LogLevel.Warning, message, new object[] { arg0, arg1, arg2 });
         }
 
         public void Warn(string message, object[] args)
@@ -149,14 +151,15 @@ namespace Piot.Clog
             target.Log(LogLevel.Debug, message, new object[] { arg0, arg1 });
         }
 
-        public void Debug<T0, T1, T2>(string message, T0 arg0, T1 arg1, T2 arg2) where T0 : notnull where T1 : notnull where T2 : notnull
+        public void Debug<T0, T1, T2>(string message, T0 arg0, T1 arg1, T2 arg2)
+            where T0 : notnull where T1 : notnull where T2 : notnull
         {
             if (threshold > LogLevel.Debug)
             {
                 return;
             }
 
-            target.Log(LogLevel.Debug, message, new object[]{ arg0, arg1, arg2 });
+            target.Log(LogLevel.Debug, message, new object[] { arg0, arg1, arg2 });
         }
 
         public void Debug(string message, object[] args)
@@ -199,14 +202,15 @@ namespace Piot.Clog
             target.Log(LogLevel.Error, message, new object[] { arg0, arg1 });
         }
 
-        public void Error<T0, T1, T2>(string message, T0 arg0, T1 arg1, T2 arg2) where T0 : notnull where T1 : notnull where T2 : notnull
+        public void Error<T0, T1, T2>(string message, T0 arg0, T1 arg1, T2 arg2)
+            where T0 : notnull where T1 : notnull where T2 : notnull
         {
             if (threshold > LogLevel.Error)
             {
                 return;
             }
 
-            target.Log(LogLevel.Error, message, new object[]{ arg0, arg1, arg2 });
+            target.Log(LogLevel.Error, message, new object[] { arg0, arg1, arg2 });
         }
 
         public void Error(string message, object[] args)

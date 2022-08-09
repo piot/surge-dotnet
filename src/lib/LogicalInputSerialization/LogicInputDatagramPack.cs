@@ -6,7 +6,8 @@ namespace Piot.Surge.LogicalInputSerialization
 {
     public static class LogicInputDatagramPackOut
     {
-        public static Memory<byte> CreateInputDatagram(OrderedDatagramsOut sequenceOut, LogicalInput.LogicalInput[] inputs)
+        public static Memory<byte> CreateInputDatagram(OrderedDatagramsOut sequenceOut,
+            LogicalInput.LogicalInput[] inputs)
         {
             var datagramWriter = new OctetWriter(Constants.MaxDatagramOctetSize);
             LogicInputDatagramSerialize.Serialize(datagramWriter, sequenceOut, inputs);

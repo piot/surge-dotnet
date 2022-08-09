@@ -4,6 +4,6 @@ namespace Piot.Surge.DatagramType
     {
         Reserved,
         DeltaSnapshots, // Sent from simulating, arbitrating host to client
-        PredictedInputs, // Sent from client to host
+        PredictedInputs // Sent from client to host
     }
 }

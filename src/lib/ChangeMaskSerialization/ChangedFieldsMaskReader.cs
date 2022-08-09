@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
-using Piot.Surge.ChangeMask;
 using Piot.Flood;
+using Piot.Surge.ChangeMask;
 
 namespace Piot.Surge.ChangeMaskSerialization
 {
@@ -13,20 +13,20 @@ namespace Piot.Surge.ChangeMaskSerialization
     {
         public static ChangedFieldsMask ReadFullChangeMask(IOctetReader reader)
         {
-            #if DEBUG
+#if DEBUG
             if (reader.ReadUInt8() != Constants.FullChangeMaskSync)
             {
                 throw new Exception("out of sync");
             }
-            #endif
+#endif
             var v = reader.ReadUInt16();
             if ((v & 0x8000) == 0)
             {
                 return new ChangedFieldsMask { mask = v };
             }
 
-            ulong completeMask = (ushort) (v & 0x7fff);
-            
+            ulong completeMask = (ushort)(v & 0x7fff);
+
 
             var next = reader.ReadUInt16();
             completeMask <<= 16;

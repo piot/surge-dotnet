@@ -18,6 +18,7 @@ namespace Piot.Raff
             {
                 throw new Exception("FourCC must have exactly four octets");
             }
+
             Value = x;
         }
 
@@ -44,7 +45,7 @@ namespace Piot.Raff
     {
         public static readonly byte[] fileHeader = { 0xF0, 0x9F, 0xA6, 0x8A, 0x52, 0x41, 0x46, 0x46, 0x0a };
     }
-    
+
     public static class Serialize
     {
         public static void WriteHeader(IOctetWriter writer)
@@ -59,7 +60,7 @@ namespace Piot.Raff
             writer.WriteUInt32((uint)octets.Length);
             writer.WriteOctets(octets);
         }
-        
+
         // WriteInternalChunkMarker writes a octet slice to file with an extended header.
         public static void WriteInternalChunkMarker(IOctetWriter writer, FourCC icon)
         {
@@ -99,6 +100,7 @@ namespace Piot.Raff
             {
                 throw new Exception("not equal");
             }
+
             if (!name.Value.Equals(expectedName.Value))
             {
                 throw new Exception("not equal");
@@ -112,5 +114,4 @@ namespace Piot.Raff
             return ReadFourCC(reader);
         }
     }
-
-} 
+}

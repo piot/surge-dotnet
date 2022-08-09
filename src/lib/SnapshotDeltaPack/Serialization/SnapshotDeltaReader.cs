@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System.Collections.Generic;
-using Piot.Surge.ChangeMaskSerialization;
 using Piot.Flood;
+using Piot.Surge.ChangeMaskSerialization;
 using Piot.Surge.SnnapshotDeltaPack.Serialization;
 
 namespace Piot.Surge.SnapshotDeltaPack.Serialization
@@ -18,12 +18,13 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
         }
 
         /// <summary>
-        /// Reading a snapshot delta pack and returning the created, deleted and updated entities.
+        ///     Reading a snapshot delta pack and returning the created, deleted and updated entities.
         /// </summary>
         /// <param name="reader"></param>
         /// <param name="creation"></param>
         /// <returns></returns>
-        public static (IEntity[], IEntity[], SnapshotDeltaReaderInfoEntity[]) Read(IOctetReader reader, IEntityContainer creation)
+        public static (IEntity[], IEntity[], SnapshotDeltaReaderInfoEntity[]) Read(IOctetReader reader,
+            IEntityContainer creation)
         {
             var deletedEntities = new List<IEntity>();
             var deletedEntityCount = ReadEntityCount(reader);

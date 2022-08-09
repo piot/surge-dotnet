@@ -111,7 +111,7 @@ public class UnitTest1
 
         Assert.Equal(logicalInputQueue.Collection, encounteredLogicalPositions, new CompareLogicalInputCollections());
     }
-    
+
     [Fact]
     public void SerializeLogicalInputDatagramPack()
     {
@@ -158,15 +158,15 @@ public class UnitTest1
     {
         OrderedDatagramsInChecker sequence = new(new OrderedDatagramsIn(0));
         {
-            OctetWriter writer = new (1);
+            OctetWriter writer = new(1);
             writer.WriteUInt8(128);
-            OctetReader reader = new (writer.Octets);
+            OctetReader reader = new(writer.Octets);
             Assert.False(sequence.ReadAndCheck(reader));
         }
         {
-            OctetWriter writer = new (1);
+            OctetWriter writer = new(1);
             writer.WriteUInt8(129);
-            OctetReader reader = new (writer.Octets);
+            OctetReader reader = new(writer.Octets);
             Assert.False(sequence.ReadAndCheck(reader));
         }
     }
@@ -175,25 +175,25 @@ public class UnitTest1
     [Fact]
     public void OrderedDatagramsValid()
     {
-        OrderedDatagramsInChecker sequence = new ();
+        OrderedDatagramsInChecker sequence = new();
         {
-            OctetWriter writer = new (1);
+            OctetWriter writer = new(1);
             writer.WriteUInt8(126);
-            OctetReader reader = new (writer.Octets);
+            OctetReader reader = new(writer.Octets);
             Assert.True(sequence.ReadAndCheck(reader));
         }
 
         {
-            OctetWriter writer = new (1);
+            OctetWriter writer = new(1);
             writer.WriteUInt8(127);
-            OctetReader reader = new (writer.Octets);
+            OctetReader reader = new(writer.Octets);
             Assert.True(sequence.ReadAndCheck(reader));
         }
 
         {
-            OctetWriter writer = new (1);
+            OctetWriter writer = new(1);
             writer.WriteUInt8(127);
-            OctetReader reader = new (writer.Octets);
+            OctetReader reader = new(writer.Octets);
             Assert.False(sequence.ReadAndCheck(reader));
         }
     }
@@ -201,20 +201,20 @@ public class UnitTest1
     [Fact]
     public void OrderedDatagramsWrite()
     {
-        OrderedDatagramsOutIncrease sequence = new ();
+        OrderedDatagramsOutIncrease sequence = new();
         Assert.Equal(0, sequence.Value.Value);
 
         for (var i = 0; i < 256; ++i)
         {
-            OctetWriter writer = new (1);
+            OctetWriter writer = new(1);
             OrderedDatagramsOutWriter.Write(writer, sequence.Value);
-            OctetReader reader = new (writer.Octets);
+            OctetReader reader = new(writer.Octets);
             Assert.Equal(i, reader.ReadUInt8());
             sequence.Increase();
         }
 
         Assert.Equal(0, sequence.Value.Value);
-        OctetWriter writer2 = new (1);
+        OctetWriter writer2 = new(1);
         OrderedDatagramsOutWriter.Write(writer2, sequence.Value);
         sequence.Increase();
         Assert.Equal(1, sequence.Value.Value);
@@ -503,12 +503,11 @@ public class UnitTest1
         Assert.Empty(firstDeltaConverted.updatedEntities);
         Assert.Empty(firstDeltaConverted.deletedIds);
         Ticker.Tick(world);
-        
+
         var serverSpawnedAvatarForAssert = world.FetchEntity<AvatarLogicEntityInternal>(spawnedAvatar.Id);
         Assert.Equal(3, serverSpawnedAvatarForAssert.Self.position.x);
 
 
-        
         /* SECOND Snapshot */
         var secondDelta = SnapshotDeltaCreator.Scan(scanWorld);
         var secondDeltaConverted = FromSnapshotDeltaInternal.Convert(secondDelta);
@@ -528,7 +527,7 @@ public class UnitTest1
         var serverSpawnedAvatar = (AvatarLogicEntityInternal)spawnedAvatar.GeneratedEntity;
         Ticker.Tick(world);
 
-        
+
         /* THIRD */
         serverSpawnedAvatar.Current = serverSpawnedAvatar.Self with { fireButtonIsDown = true };
         var serverSpawnedAvatarForAssertAtThree = world.FetchEntity<AvatarLogicEntityInternal>(spawnedAvatar.Id);
@@ -536,21 +535,21 @@ public class UnitTest1
         var thirdDeltaConverted = FromSnapshotDeltaInternal.Convert(thirdDelta);
         var thirdSnapshotId = new SnapshotId(12);
         var thirdDeltaPack = SnapshotDeltaPackCreator.Create(thirdSnapshotId, world, thirdDeltaConverted);
-        
+
         var thirdInternalInfo = thirdDelta.FetchEntity(spawnedAvatar.Id);
 
         log.Info("Server fire happens at position", serverSpawnedAvatar.Self.position.x);
         world.ClearDelta();
         OverWriter.Overwrite(world);
         Ticker.Tick(world);
-        
+
 
         Assert.Equal(9, serverSpawnedAvatarForAssertAtThree.Self.position.x);
         Assert.IsType<FireVolley>((serverSpawnedAvatar as IEntityActions).Actions[0]);
 
         Assert.Equal(
             AvatarLogicEntityInternal.PositionMask |
-            AvatarLogicEntityInternal.FireButtonIsDownMask, 
+            AvatarLogicEntityInternal.FireButtonIsDownMask,
             thirdDeltaConverted.updatedEntities[0].changeMask.mask);
 
         /* FOURTH */
@@ -563,23 +562,23 @@ public class UnitTest1
             AvatarLogicEntityInternal.PositionMask | AvatarLogicEntityInternal.AmmoCountMask |
             AvatarLogicEntityInternal.FireCooldownMask,
             fourthInternalInfo.changeMask);
-        
-     
-        
+
+
         Assert.Empty(thirdDeltaConverted.createdIds);
         Assert.Single(thirdDeltaConverted.updatedEntities);
         Assert.Empty(thirdDeltaConverted.deletedIds);
- 
+
         var idRange = new SnapshotIdRange(firstSnapshotId, fourthSnapshotId);
         var union = new SerializedSnapshotDeltaPackUnion
         {
             snapshotIdRange = idRange,
-            packs = new[]{ firstDeltaPack, secondDeltaPack, thirdDeltaPack, fourthDeltaPack }
+            packs = new[] { firstDeltaPack, secondDeltaPack, thirdDeltaPack, fourthDeltaPack }
         };
 
 
         return (SnapshotDeltaUnionPacker.Pack(union), spawnedAvatar.Id);
     }
+
     [Fact]
     public void BasicUndo()
     {
@@ -592,22 +591,22 @@ public class UnitTest1
 
         var firstSnapshotId = allSerializedSnapshots.snapshotIdRange.containsFromSnapshotId;
         var lastSnapshotId = allSerializedSnapshots.snapshotIdRange.snapshotId;
-        
+
         Assert.Equal(firstSnapshotId.frameId, deserializedUnion.snapshotIdRange.containsFromSnapshotId.frameId);
         Assert.Equal(lastSnapshotId.frameId, deserializedUnion.snapshotIdRange.snapshotId.frameId);
 
         var firstPack = deserializedUnion.packs[0];
         var firstSnapshotReader = new OctetReader(firstPack.payload);
         var (_, _, updateEntitiesInFirst) = SnapshotDeltaReader.Read(firstSnapshotReader, clientWorld);
-        
+
         var clientSpawnedEntity = clientWorld.FetchEntity<AvatarLogicEntityInternal>(spawnedAvatarId);
         var clientAvatar = clientWorld.FetchEntity(spawnedAvatarId);
-        
+
         Assert.Equal(0, clientSpawnedEntity.Self.fireCooldown);
         Ticker.Tick(clientWorld);
         Assert.Equal(0, clientSpawnedEntity.Self.fireCooldown);
         Notifier.Notify(updateEntitiesInFirst);
-        
+
 
         clientSpawnedEntity.OutFacing.OnAmmoCountChanged += () =>
         {
@@ -616,13 +615,10 @@ public class UnitTest1
 
         clientSpawnedEntity.OutFacing.OnSpawned += () => { log.Info("SPAWNED {Avatar}", clientSpawnedEntity); };
 
-        clientSpawnedEntity.OutFacing.DoFireVolley += position =>
-        {
-            log.Info("CLIENT DO FIRE {Position}", position);
-        };
-        
+        clientSpawnedEntity.OutFacing.DoFireVolley += position => { log.Info("CLIENT DO FIRE {Position}", position); };
+
         var allButTheLastPacks = deserializedUnion.packs.Skip(1).Take(deserializedUnion.packs.Length - 3);
-        
+
         foreach (var snapshotDelta in allButTheLastPacks)
         {
             var snapshotReader = new OctetReader(snapshotDelta.payload);
@@ -630,9 +626,8 @@ public class UnitTest1
             Ticker.Tick(clientWorld);
             Notifier.Notify(updateEntities);
             OverWriter.Overwrite(clientWorld);
-
         }
-        
+
 
         Assert.Equal(0, clientSpawnedEntity.Self.fireCooldown);
         Assert.False(clientSpawnedEntity.Self.fireButtonIsDown);
@@ -643,7 +638,7 @@ public class UnitTest1
         var secondToLastReader = new OctetReader(secondToLastPack.payload);
         var (_, _, secondToLastUpdatedEntities) = SnapshotDeltaReader.Read(secondToLastReader, clientWorld);
 
-        
+
         Assert.Equal(0, clientSpawnedEntity.Self.fireCooldown);
         Assert.True(clientSpawnedEntity.Self.fireButtonIsDown);
         Ticker.Tick(clientWorld);
@@ -652,18 +647,18 @@ public class UnitTest1
 
         Assert.Equal(30, clientSpawnedEntity.Self.fireCooldown);
         Assert.True(clientSpawnedEntity.Self.fireButtonIsDown);
-        
+
         var lastPack = deserializedUnion.packs.Last();
         var lastSnapshotReader = new OctetReader(lastPack.payload);
-        
+
         var (deleted, created, clientUpdated) =
             SnapshotDeltaReaderWithUndo.ReadWithUndo(lastSnapshotReader, clientWorld, undoWriter);
-        
+
 
         Assert.Equal(30, clientSpawnedEntity.Self.fireCooldown);
         Assert.Equal(99, clientSpawnedEntity.Self.ammoCount);
         Assert.True(clientSpawnedEntity.Self.fireButtonIsDown);
-        
+
         Ticker.Tick(clientWorld);
         Notifier.Notify(clientUpdated);
         OverWriter.Overwrite(clientWorld);

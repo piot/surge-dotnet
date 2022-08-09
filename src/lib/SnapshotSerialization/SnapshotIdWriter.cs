@@ -11,7 +11,7 @@ namespace Piot.Surge.SnapshotSerialization
     public static class SnapshotIdWriter
     {
         /// <summary>
-        /// Writes a snapshot ID to the stream writer.
+        ///     Writes a snapshot ID to the stream writer.
         /// </summary>
         /// <param name="writer"></param>
         /// <param name="snapshotId"></param>

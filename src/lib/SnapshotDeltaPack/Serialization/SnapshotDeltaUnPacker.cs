@@ -12,7 +12,7 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
     public static class SnapshotDeltaUnPacker
     {
         /// <summary>
-        /// Helper method for calling SnapshotDeltaReader.Read.
+        ///     Helper method for calling SnapshotDeltaReader.Read.
         /// </summary>
         /// <param name="pack"></param>
         /// <param name="creator"></param>

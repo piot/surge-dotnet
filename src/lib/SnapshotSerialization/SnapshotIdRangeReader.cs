@@ -11,7 +11,7 @@ namespace Piot.Surge.SnapshotSerialization
     public static class SnapshotIdRangeReader
     {
         /// <summary>
-        /// Reads a snapshot ID range. The range is always with ascending, consecutive IDs.
+        ///     Reads a snapshot ID range. The range is always with ascending, consecutive IDs.
         /// </summary>
         /// <param name="reader"></param>
         /// <returns></returns>

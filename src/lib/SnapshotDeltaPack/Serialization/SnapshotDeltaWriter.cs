@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using Piot.Surge.ChangeMaskSerialization;
 using Piot.Flood;
+using Piot.Surge.ChangeMaskSerialization;
 
 namespace Piot.Surge.SnapshotDeltaPack.Serialization
 {
@@ -16,7 +16,7 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
         }
 
         /// <summary>
-        /// Serialized deleted, created and updated entities to the writer stream.
+        ///     Serialized deleted, created and updated entities to the writer stream.
         /// </summary>
         /// <param name="writer"></param>
         /// <param name="deletedEntities"></param>

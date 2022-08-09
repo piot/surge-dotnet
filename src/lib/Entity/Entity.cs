@@ -8,7 +8,7 @@ using Piot.Flood;
 namespace Piot.Surge
 {
     /// <summary>
-    /// R
+    ///     Representation of a network entity
     /// </summary>
     public class Entity : IEntity
     {

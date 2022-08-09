@@ -12,7 +12,7 @@ namespace Piot.Surge.LogicalInputSerialization
     public static class LogicalInputDeserialize
     {
         /// <summary>
-        /// Deserializes game specific input arriving on the host from the client.
+        ///     Deserializes game specific input arriving on the host from the client.
         /// </summary>
         /// <param name="reader"></param>
         /// <returns></returns>
