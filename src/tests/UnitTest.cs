@@ -23,7 +23,7 @@ using Piot.Surge.TypeSerialization;
 using Tests.ExampleGame;
 using Xunit.Abstractions;
 
-namespace Tests;
+namespace GeneralTests;
 
 public class CompareLogicalInputCollections : IEqualityComparer<ICollection<LogicalInput>>
 {
@@ -70,12 +70,13 @@ public class UnitTest1
     }
 
     [Fact]
-    public void Test1()
+    public void OctetWriterFirstOctet()
     {
         var writer = new OctetWriter(23);
         writer.WriteUInt8(42);
 
         Assert.Equal(42, writer.Octets.Span[0]);
+        Assert.Equal(1, writer.Octets.Length);
     }
 
 
@@ -99,7 +100,7 @@ public class UnitTest1
     {
         var logicalInputQueue = new LogicalInputQueue();
         logicalInputQueue.AddLogicalInput(new LogicalInput
-            { appliedAtSnapshotId = new SnapshotId { frameId = 20 }, payload = new byte[] { 0x0a, 0x0b } });
+            { appliedAtTickId = new TickId { tickId = 20 }, payload = new byte[] { 0x0a, 0x0b } });
 
         var writer = new OctetWriter(23);
 
@@ -117,7 +118,7 @@ public class UnitTest1
     {
         var logicalInputQueue = new LogicalInputQueue();
         logicalInputQueue.AddLogicalInput(new LogicalInput
-            { appliedAtSnapshotId = new SnapshotId { frameId = 20 }, payload = new byte[] { 0x0a, 0x0b } });
+            { appliedAtTickId = new TickId { tickId = 20 }, payload = new byte[] { 0x0a, 0x0b } });
 
         var datagramsOut = new OrderedDatagramsOut();
         var outDatagram = LogicInputDatagramPackOut.CreateInputDatagram(datagramsOut, logicalInputQueue.Collection);
@@ -153,72 +154,6 @@ public class UnitTest1
         Assert.Throws<IndexOutOfRangeException>(() => reader.ReadUInt8());
     }
 
-    [Fact]
-    public void OrderedDatagrams()
-    {
-        OrderedDatagramsInChecker sequence = new(new OrderedDatagramsIn(0));
-        {
-            OctetWriter writer = new(1);
-            writer.WriteUInt8(128);
-            OctetReader reader = new(writer.Octets);
-            Assert.False(sequence.ReadAndCheck(reader));
-        }
-        {
-            OctetWriter writer = new(1);
-            writer.WriteUInt8(129);
-            OctetReader reader = new(writer.Octets);
-            Assert.False(sequence.ReadAndCheck(reader));
-        }
-    }
-
-
-    [Fact]
-    public void OrderedDatagramsValid()
-    {
-        OrderedDatagramsInChecker sequence = new();
-        {
-            OctetWriter writer = new(1);
-            writer.WriteUInt8(126);
-            OctetReader reader = new(writer.Octets);
-            Assert.True(sequence.ReadAndCheck(reader));
-        }
-
-        {
-            OctetWriter writer = new(1);
-            writer.WriteUInt8(127);
-            OctetReader reader = new(writer.Octets);
-            Assert.True(sequence.ReadAndCheck(reader));
-        }
-
-        {
-            OctetWriter writer = new(1);
-            writer.WriteUInt8(127);
-            OctetReader reader = new(writer.Octets);
-            Assert.False(sequence.ReadAndCheck(reader));
-        }
-    }
-
-    [Fact]
-    public void OrderedDatagramsWrite()
-    {
-        OrderedDatagramsOutIncrease sequence = new();
-        Assert.Equal(0, sequence.Value.Value);
-
-        for (var i = 0; i < 256; ++i)
-        {
-            OctetWriter writer = new(1);
-            OrderedDatagramsOutWriter.Write(writer, sequence.Value);
-            OctetReader reader = new(writer.Octets);
-            Assert.Equal(i, reader.ReadUInt8());
-            sequence.Increase();
-        }
-
-        Assert.Equal(0, sequence.Value.Value);
-        OctetWriter writer2 = new(1);
-        OrderedDatagramsOutWriter.Write(writer2, sequence.Value);
-        sequence.Increase();
-        Assert.Equal(1, sequence.Value.Value);
-    }
 
     [Fact]
     public void Position()
@@ -354,26 +289,26 @@ public class UnitTest1
     }
 
     [Fact]
-    public void TestSnapshotIdRanges()
+    public void SnapshotIdRanges()
     {
-        var first = new SnapshotIdRange(new SnapshotId(23), new SnapshotId(24));
-        var illegalAfter = new SnapshotIdRange(new SnapshotId(26), new SnapshotId(28));
+        var first = new TickIdRange(new TickId(23), new TickId(24));
+        var illegalAfter = new TickIdRange(new TickId(26), new TickId(28));
         Assert.False(illegalAfter.IsImmediateFollowing(first));
-        var legalAfter = new SnapshotIdRange(new SnapshotId(25), new SnapshotId(31));
+        var legalAfter = new TickIdRange(new TickId(25), new TickId(31));
         Assert.True(legalAfter.IsImmediateFollowing(first));
     }
 
     [Fact]
     public void IllegalRange()
     {
-        Assert.Throws<ArgumentOutOfRangeException>(() => new SnapshotIdRange(new SnapshotId(24), new SnapshotId(23)));
+        Assert.Throws<ArgumentOutOfRangeException>(() => new TickIdRange(new TickId(24), new TickId(23)));
         Assert.Throws<ArgumentOutOfRangeException>(() =>
-            new SnapshotIdRange(new SnapshotId(uint.MaxValue), new SnapshotId(uint.MaxValue)));
+            new TickIdRange(new TickId(uint.MaxValue), new TickId(uint.MaxValue)));
     }
 
     private static void SaveDelta(ISnapshotDeltaPackQueue queue, IUpdatedEntity updatedEntity)
     {
-        var snapshotId = new SnapshotId(10);
+        var snapshotId = new TickId(10);
         var octets = SnapshotDeltaPacker.Pack(Array.Empty<EntityId>(), Array.Empty<IEntity>(),
             new[] { updatedEntity });
         var pack = new SnapshotDeltaPack(snapshotId, octets);
@@ -437,13 +372,13 @@ public class UnitTest1
                 SnapshotDeltaPacker.Pack(snapshotDeltaAfter.deletedIds, createdForPacker, updateForPacker);
         }
 
-        var firstSnapshotId = new SnapshotId(8);
+        var firstSnapshotId = new TickId(8);
 
         var snapshotDeltaPack = new SnapshotDeltaPack(firstSnapshotId, snapshotDeltaPackPayload);
         packetQueue.Enqueue(snapshotDeltaPack);
 
         Assert.Equal(1, packetQueue.Count);
-        Assert.Equal(packetQueue.Peek().snapshotId, firstSnapshotId);
+        Assert.Equal(packetQueue.Peek().tickId, firstSnapshotId);
         Assert.Equal(25, packetQueue.Peek().payload.Length);
 
         Assert.Equal(6, ((AvatarLogic)spawnedAvatar.Logic).position.x);
@@ -491,7 +426,7 @@ public class UnitTest1
         /* FIRST Snapshot */
         var firstDelta = SnapshotDeltaCreator.Scan(scanWorld);
         var firstDeltaConverted = FromSnapshotDeltaInternal.Convert(firstDelta);
-        var firstSnapshotId = new SnapshotId(10);
+        var firstSnapshotId = new TickId(10);
         var firstDeltaPack = SnapshotDeltaPackCreator.Create(firstSnapshotId, world, firstDeltaConverted);
         world.ClearDelta();
         OverWriter.Overwrite(world);
@@ -512,7 +447,7 @@ public class UnitTest1
         var secondDelta = SnapshotDeltaCreator.Scan(scanWorld);
         var secondDeltaConverted = FromSnapshotDeltaInternal.Convert(secondDelta);
         var secondInternalInfo = secondDelta.FetchEntity(spawnedAvatar.Id);
-        var secondSnapshotId = new SnapshotId(11);
+        var secondSnapshotId = new TickId(11);
         var secondDeltaPack = SnapshotDeltaPackCreator.Create(secondSnapshotId, world, secondDeltaConverted);
         Assert.Equal(AvatarLogicEntityInternal.PositionMask, secondInternalInfo.changeMask);
         world.ClearDelta();
@@ -533,7 +468,7 @@ public class UnitTest1
         var serverSpawnedAvatarForAssertAtThree = world.FetchEntity<AvatarLogicEntityInternal>(spawnedAvatar.Id);
         var thirdDelta = SnapshotDeltaCreator.Scan(scanWorld);
         var thirdDeltaConverted = FromSnapshotDeltaInternal.Convert(thirdDelta);
-        var thirdSnapshotId = new SnapshotId(12);
+        var thirdSnapshotId = new TickId(12);
         var thirdDeltaPack = SnapshotDeltaPackCreator.Create(thirdSnapshotId, world, thirdDeltaConverted);
 
         var thirdInternalInfo = thirdDelta.FetchEntity(spawnedAvatar.Id);
@@ -555,7 +490,7 @@ public class UnitTest1
         /* FOURTH */
         var fourthDelta = SnapshotDeltaCreator.Scan(scanWorld);
         var fourthDeltaConverted = FromSnapshotDeltaInternal.Convert(fourthDelta);
-        var fourthSnapshotId = new SnapshotId(13);
+        var fourthSnapshotId = new TickId(13);
         var fourthDeltaPack = SnapshotDeltaPackCreator.Create(fourthSnapshotId, world, fourthDeltaConverted);
         var fourthInternalInfo = fourthDelta.FetchEntity(spawnedAvatar.Id);
         Assert.Equal(
@@ -568,10 +503,10 @@ public class UnitTest1
         Assert.Single(thirdDeltaConverted.updatedEntities);
         Assert.Empty(thirdDeltaConverted.deletedIds);
 
-        var idRange = new SnapshotIdRange(firstSnapshotId, fourthSnapshotId);
+        var idRange = new TickIdRange(firstSnapshotId, fourthSnapshotId);
         var union = new SerializedSnapshotDeltaPackUnion
         {
-            snapshotIdRange = idRange,
+            tickIdRange = idRange,
             packs = new[] { firstDeltaPack, secondDeltaPack, thirdDeltaPack, fourthDeltaPack }
         };
 
@@ -589,11 +524,11 @@ public class UnitTest1
         var unionReader = new OctetReader(allSerializedSnapshots.payload);
         var deserializedUnion = SnapshotDeltaUnionReader.Read(unionReader);
 
-        var firstSnapshotId = allSerializedSnapshots.snapshotIdRange.containsFromSnapshotId;
-        var lastSnapshotId = allSerializedSnapshots.snapshotIdRange.snapshotId;
+        var firstSnapshotId = allSerializedSnapshots.tickIdRange.containsFromTickId;
+        var lastSnapshotId = allSerializedSnapshots.tickIdRange.tickId;
 
-        Assert.Equal(firstSnapshotId.frameId, deserializedUnion.snapshotIdRange.containsFromSnapshotId.frameId);
-        Assert.Equal(lastSnapshotId.frameId, deserializedUnion.snapshotIdRange.snapshotId.frameId);
+        Assert.Equal(firstSnapshotId.tickId, deserializedUnion.tickIdRange.containsFromTickId.tickId);
+        Assert.Equal(lastSnapshotId.tickId, deserializedUnion.tickIdRange.tickId.tickId);
 
         var firstPack = deserializedUnion.packs[0];
         var firstSnapshotReader = new OctetReader(firstPack.payload);

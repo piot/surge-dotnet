@@ -8,18 +8,16 @@ using Piot.Surge.Snapshot;
 
 namespace Piot.Surge.SnapshotSerialization
 {
-    public static class SnapshotIdRangeWriter
+    public static class TickIdReader
     {
         /// <summary>
-        ///     Writes a snapshot ID range to the stream.
+        ///     Reads a tick ID from the stream reader.
         /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="snapshotIdRange"></param>
-        public static void Write(IOctetWriter writer, SnapshotIdRange snapshotIdRange)
+        /// <param name="reader"></param>
+        /// <returns></returns>
+        public static TickId Read(IOctetReader reader)
         {
-            SnapshotIdWriter.Write(writer, snapshotIdRange.snapshotId);
-            writer.WriteUInt8(
-                (byte)(snapshotIdRange.snapshotId.frameId - snapshotIdRange.containsFromSnapshotId.frameId));
+            return new TickId(reader.ReadUInt32());
         }
     }
 }

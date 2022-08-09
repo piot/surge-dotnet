@@ -8,30 +8,31 @@ using System;
 namespace Piot.Surge.Snapshot
 {
     /// <summary>
-    ///     A snapshot Id. Always increasing by one and consecutive. Usually the session is starting at zero.
+    ///     A tick Id. Always increasing by one and consecutive for each simulation tick.
+    ///     Usually the session is starting at tickId zero.
     /// </summary>
-    public struct SnapshotId
+    public struct TickId
     {
-        public uint frameId;
+        public uint tickId;
 
-        public SnapshotId(uint frameId)
+        public TickId(uint tickId)
         {
-            if (frameId == uint.MaxValue)
+            if (tickId == uint.MaxValue)
             {
-                throw new ArgumentOutOfRangeException(nameof(frameId), "max value frame id reserved");
+                throw new ArgumentOutOfRangeException(nameof(tickId), "max value tick id reserved");
             }
 
-            this.frameId = frameId;
+            this.tickId = tickId;
         }
 
-        public bool IsImmediateFollowing(SnapshotId other)
+        public bool IsImmediateFollowing(TickId other)
         {
-            return other.frameId + 1 == frameId;
+            return other.tickId + 1 == tickId;
         }
 
         public override string ToString()
         {
-            return $"{frameId}";
+            return $"{tickId}";
         }
     }
 }

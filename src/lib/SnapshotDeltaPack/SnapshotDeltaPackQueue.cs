@@ -12,17 +12,17 @@ namespace Piot.Surge.SnapshotDeltaPack
     public class SnapshotDeltaPackQueue : ISnapshotDeltaPackQueue
     {
         private readonly Queue<SnapshotDeltaPack> packs = new();
-        private SnapshotId lastInsertedSnapshotId;
+        private TickId lastInsertedTickId;
 
         public void Enqueue(SnapshotDeltaPack pack)
         {
-            if (!IsValidPackToInsert(pack.snapshotId))
+            if (!IsValidPackToInsert(pack.tickId))
             {
-                throw new Exception($"pack can not inserted {pack} {lastInsertedSnapshotId}");
+                throw new Exception($"pack can not inserted {pack} {lastInsertedTickId}");
             }
 
             packs.Enqueue(pack);
-            lastInsertedSnapshotId = pack.snapshotId;
+            lastInsertedTickId = pack.tickId;
         }
 
         public SnapshotDeltaPack Dequeue()
@@ -32,9 +32,9 @@ namespace Piot.Surge.SnapshotDeltaPack
 
         public int Count => packs.Count;
 
-        public bool IsValidPackToInsert(SnapshotId range)
+        public bool IsValidPackToInsert(TickId range)
         {
-            return packs.Count == 0 || range.IsImmediateFollowing(lastInsertedSnapshotId);
+            return packs.Count == 0 || range.IsImmediateFollowing(lastInsertedTickId);
         }
 
         public SnapshotDeltaPack Peek()

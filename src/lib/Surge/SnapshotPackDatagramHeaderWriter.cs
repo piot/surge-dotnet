@@ -6,7 +6,7 @@ namespace Piot.Surge
 {
     public static class SnapshotPackDatagramHeaderWriter
     {
-        public static void Write(IOctetWriter writer, SnapshotIdRange snapshotIdRange, int datagramIndex,
+        public static void Write(IOctetWriter writer, TickIdRange tickIdRange, int datagramIndex,
             bool isLastOne)
         {
             var indexMask = (byte)datagramIndex;
@@ -15,7 +15,7 @@ namespace Piot.Surge
                 indexMask |= 0x80;
             }
 
-            SnapshotIdRangeWriter.Write(writer, snapshotIdRange);
+            TickIdRangeWriter.Write(writer, tickIdRange);
             writer.WriteUInt8(indexMask);
         }
     }

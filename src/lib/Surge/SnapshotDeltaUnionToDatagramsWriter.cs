@@ -35,7 +35,7 @@ namespace Piot.Surge
                 DatagramTypeWriter.Write(writer, DatagramType.DatagramType.DeltaSnapshots);
 
                 var lastOne = datagramIndex + 1 == datagramCount;
-                SnapshotPackDatagramHeaderWriter.Write(writer, pack.snapshotIdRange, datagramIndex, lastOne);
+                SnapshotPackDatagramHeaderWriter.Write(writer, pack.tickIdRange, datagramIndex, lastOne);
 
                 var sliceStart = (int)(datagramIndex * PayloadOctetCountPerDatagram);
                 var sliceLength = lastOne

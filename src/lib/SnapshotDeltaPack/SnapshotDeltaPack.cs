@@ -14,17 +14,17 @@ namespace Piot.Surge.SnapshotDeltaPack
     public class SnapshotDeltaPack
     {
         public Memory<byte> payload;
-        public SnapshotId snapshotId;
+        public TickId tickId;
 
-        public SnapshotDeltaPack(SnapshotId snapshotId, Memory<byte> payload)
+        public SnapshotDeltaPack(TickId tickId, Memory<byte> payload)
         {
-            this.snapshotId = snapshotId;
+            this.tickId = tickId;
             this.payload = payload;
         }
 
         public override string ToString()
         {
-            return $"[snapshotDeltaPack {snapshotId} {payload}]";
+            return $"[snapshotDeltaPack {tickId} {payload}]";
         }
     }
 }

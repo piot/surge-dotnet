@@ -22,7 +22,7 @@ namespace Piot.Surge.LogicalInput
     /// </summary>
     public struct LogicalInput
     {
-        public SnapshotId appliedAtSnapshotId;
+        public TickId appliedAtTickId;
         public byte[] payload;
 
         public override bool Equals(object? obj)
@@ -34,7 +34,7 @@ namespace Piot.Surge.LogicalInput
 
             var other = (LogicalInput)obj;
 
-            return other.appliedAtSnapshotId.frameId == appliedAtSnapshotId.frameId &&
+            return other.appliedAtTickId.tickId == appliedAtTickId.tickId &&
                    CompareOctets.Compare(other.payload, payload);
         }
     }

@@ -34,20 +34,20 @@ namespace Piot.Surge.LogicalInputSerialization
 
             var first = inputs.First();
 
-            SnapshotIdWriter.Write(writer, first.appliedAtSnapshotId);
-            var lastFrameId = first.appliedAtSnapshotId;
+            TickIdWriter.Write(writer, first.appliedAtTickId);
+            var lastFrameId = first.appliedAtTickId;
 
             var index = 0;
             foreach (var input in inputs)
             {
-                if (input.appliedAtSnapshotId.frameId < lastFrameId.frameId)
+                if (input.appliedAtTickId.tickId < lastFrameId.tickId)
                 {
                     throw new Exception("logical input in wrong order in collection");
                 }
 
                 if (index != 0)
                 {
-                    if (!input.appliedAtSnapshotId.IsImmediateFollowing(lastFrameId))
+                    if (!input.appliedAtTickId.IsImmediateFollowing(lastFrameId))
                     {
                         throw new Exception("logical input wrong delta ");
                     }
@@ -56,7 +56,7 @@ namespace Piot.Surge.LogicalInputSerialization
                 writer.WriteUInt8((byte)input.payload.Length);
                 writer.WriteOctets(input.payload);
 
-                lastFrameId = input.appliedAtSnapshotId;
+                lastFrameId = input.appliedAtTickId;
                 index++;
             }
         }

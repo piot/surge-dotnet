@@ -33,7 +33,7 @@ namespace Piot.Surge.SnapshotSerialization
                 throw new Exception("out of sync");
             }
 #endif
-            var frameIdRange = SnapshotIdRangeReader.Read(reader);
+            var frameIdRange = TickIdRangeReader.Read(reader);
             var packs = new SnapshotDeltaPack.SnapshotDeltaPack[frameIdRange.Length];
             for (var i = 0; i < frameIdRange.Length; ++i)
             {
@@ -41,13 +41,13 @@ namespace Piot.Surge.SnapshotSerialization
                 var payload = reader.ReadOctets(payloadOctetCount);
                 var snapshotDeltaPack =
                     new SnapshotDeltaPack.SnapshotDeltaPack(
-                        new SnapshotId((uint)(frameIdRange.containsFromSnapshotId.frameId + i)), payload);
+                        new TickId((uint)(frameIdRange.containsFromTickId.tickId + i)), payload);
                 packs[i] = snapshotDeltaPack;
             }
 
             return new SerializedSnapshotDeltaPackUnion
             {
-                snapshotIdRange = frameIdRange,
+                tickIdRange = frameIdRange,
                 packs = packs
             };
         }
@@ -69,7 +69,7 @@ namespace Piot.Surge.SnapshotSerialization
 #if DEBUG
             writer.WriteUInt8(Constants.UnionSync);
 #endif
-            SnapshotIdRangeWriter.Write(writer, serializedSnapshotDeltaPacks.snapshotIdRange);
+            TickIdRangeWriter.Write(writer, serializedSnapshotDeltaPacks.tickIdRange);
             foreach (var serializedSnapshotDeltaPack in serializedSnapshotDeltaPacks.packs)
             {
                 writer.WriteUInt16((ushort)serializedSnapshotDeltaPack.payload.Length);
@@ -89,7 +89,7 @@ namespace Piot.Surge.SnapshotSerialization
             SnapshotDeltaUnionWriter.Write(unionStream, serializedSnapshotDeltaPacks);
             return new SerializedSnapshotDeltaPackUnionFlattened
             {
-                snapshotIdRange = serializedSnapshotDeltaPacks.snapshotIdRange,
+                tickIdRange = serializedSnapshotDeltaPacks.tickIdRange,
                 payload = unionStream.Octets
             };
         }
@@ -97,25 +97,25 @@ namespace Piot.Surge.SnapshotSerialization
 
     public struct SerializedSnapshotDeltaPackUnion
     {
-        public SnapshotIdRange snapshotIdRange;
+        public TickIdRange tickIdRange;
         public SnapshotDeltaPack.SnapshotDeltaPack[] packs;
     }
 
     public struct SerializedSnapshotDeltaPackUnionFlattened
     {
-        public SnapshotIdRange snapshotIdRange;
+        public TickIdRange tickIdRange;
         public Memory<byte> payload;
     }
 
     public struct SerializedSnapshotDeltaPack
     {
-        public SnapshotId snapshotId;
+        public TickId tickId;
         public byte[] payload;
     }
 
     public struct SerializedSnapshotDeltaPackForEntity
     {
-        public SnapshotId snapshotId;
+        public TickId tickId;
         public EntityId entityId;
         public byte[] payload;
     }

@@ -12,15 +12,15 @@ namespace Piot.Surge
     public static class SnapshotReceiveStatusWriter
     {
         /// <summary>
-        ///     Sent from client to host. Client describes the last delta compressed snapshot ID it has received
+        ///     Sent from client to host. Client describes the last delta compressed snapshot for TickId it has received
         ///     and how many snapshots it has detected as dropped after that.
         /// </summary>
         /// <param name="writer"></param>
-        /// <param name="lastReceivedSnapshotId"></param>
+        /// <param name="lastReceivedTickId"></param>
         /// <param name="droppedFramesAfterThat"></param>
-        public static void Write(IOctetWriter writer, SnapshotId lastReceivedSnapshotId, byte droppedFramesAfterThat)
+        public static void Write(IOctetWriter writer, TickId lastReceivedTickId, byte droppedFramesAfterThat)
         {
-            SnapshotIdWriter.Write(writer, lastReceivedSnapshotId);
+            TickIdWriter.Write(writer, lastReceivedTickId);
             writer.WriteUInt8(droppedFramesAfterThat);
         }
     }
@@ -29,16 +29,16 @@ namespace Piot.Surge
     {
         /// <summary>
         ///     Read on host coming from client.
-        ///     Client describes the last delta compressed snapshot ID it has received and how many snapshots it has detected as
+        ///     Client describes the last delta compressed snapshot TickId it has received and how many snapshots it has detected as
         ///     dropped after that.
         /// </summary>
         /// <param name="reader"></param>
-        /// <param name="lastReceivedSnapshotId"></param>
+        /// <param name="lastReceivedTickId"></param>
         /// <param name="droppedFramesAfterThat"></param>
-        public static void Read(IOctetReader reader, out SnapshotId lastReceivedSnapshotId,
+        public static void Read(IOctetReader reader, out TickId lastReceivedTickId,
             out byte droppedFramesAfterThat)
         {
-            lastReceivedSnapshotId = SnapshotIdReader.Read(reader);
+            lastReceivedTickId = TickIdReader.Read(reader);
             droppedFramesAfterThat = reader.ReadUInt8();
         }
     }

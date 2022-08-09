@@ -15,11 +15,11 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
         /// <param name="idRange"></param>
         /// <param name="world"></param>
         /// <returns></returns>
-        public static SnapshotDeltaPack Create(SnapshotId snapshotId, World world, SnapshotDelta.SnapshotDelta delta)
+        public static SnapshotDeltaPack Create(TickId tickId, World world, SnapshotDelta.SnapshotDelta delta)
         {
             var payload = SnapshotDeltaPackPayloadCreator.CreatePack(world, delta);
 
-            return new SnapshotDeltaPack(snapshotId, payload);
+            return new SnapshotDeltaPack(tickId, payload);
         }
     }
 }
