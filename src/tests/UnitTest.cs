@@ -121,14 +121,16 @@ public class UnitTest1
             { appliedAtTickId = new TickId { tickId = 20 }, payload = new byte[] { 0x0a, 0x0b } });
 
         var datagramsOut = new OrderedDatagramsOut();
-        var outDatagram = LogicInputDatagramPackOut.CreateInputDatagram(datagramsOut, logicalInputQueue.Collection);
+        var outDatagram = LogicInputDatagramPackOut.CreateInputDatagram(datagramsOut, new TickId(42), 0, logicalInputQueue.Collection);
 
         var reader = new OctetReader(outDatagram.ToArray());
         var datagramsSequenceIn = OrderedDatagramsInReader.Read(reader);
         Assert.Equal(datagramsOut.Value, datagramsSequenceIn.Value);
         var typeOfDatagram = DatagramTypeReader.Read(reader);
         Assert.Equal(DatagramType.PredictedInputs, typeOfDatagram);
-
+        SnapshotReceiveStatusReader.Read(reader, out var tickId, out var droppedFrames);
+        Assert.Equal(42u, tickId.tickId);
+        Assert.Equal(0, droppedFrames);
         var encounteredLogicalPositions = LogicalInputDeserialize.Deserialize(reader);
 
         Assert.Equal(logicalInputQueue.Collection, encounteredLogicalPositions, new CompareLogicalInputCollections());
