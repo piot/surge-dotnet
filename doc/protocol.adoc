@@ -2,21 +2,10 @@
 
 The Surge protocol is based on datagrams, e.g. UDP. It does not handle connections nor sessions, since they differ widly on different services and transports.
 
-== Ordered Datagrams
-Makes sure that the datagrams are received in order and that duplicates and reordered datagrams are discarded.
-Normally this is handled by the transport layer used, but needed when using unsecure UDP and in all cases as an extra sanity check.
-Receiver should discard any datagram that is not considered a successor to the previously received datagram.
-If no datagram has been received, just accept the first one.
 
-|===
-|Type|Name|Description
+== Datagram
 
-|`U8`
-|Sequence ID
-|Increasing every datagram sent. Wraps around to zero after 0xff (255), Starts with zero.
-|===
-
-== Snapshot Datagrams
+=== Snapshot Datagrams
 
 Sent from authoritative host to the client. When connection quality is good, only one snapshot is sent. If snapshots are dropped
 or network quality is likely to be bad, a few extra delta snapshots are sent (redundancy).
@@ -28,11 +17,11 @@ Also contains fully non compressed correction state for the predicting avatars o
 |===
 |Type|Name|Description
 
-|`Ordered Datagrams`
+| +Ordered Datagrams+
 |OrderedDatagrams
 |See <<Ordered Datagrams>>
 
-|`U8`
+|`+U8+`
 |DatagramType
 |0x01 = DeltaSnapshots
 
@@ -58,7 +47,7 @@ If the highest bit is set (0x80), then this is the last packet and the payload c
 |===
 
 
-== Predicted Logical Input Datagrams
+=== Predicted Logical Input Datagrams
 Sent by client to authoritative host for the locally predicted avatars on the client (usually just one).
 
 The protocol has, by design, no way of splitting in multiple datagrams.
@@ -77,6 +66,10 @@ With a redundancy about 10, that must fit in a single datagram, results in a max
 |`U8`
 |DatagramType
 |0x02 = Predicted Inputs
+
+|`<<Snapshot Receive Status>>`
+|Snapshot Receive Status
+|See <<Snapshot Receive Status>>
 
 |`U8`
 |InputCount
@@ -97,14 +90,15 @@ after each `InputStreamCount` LogicalInputChunks.
 
 |`LogicalInputChunk[InputCount{nbsp}*{nbsp}InputStreamCount]`
 |InputChunks
-|Input chunks repeated `InputCount{nbsp}*{nbsp}InputStreamCount` times.
+|Input chunks repeated `InputCount{nbsp}*{nbsp}InputStreamCount` times. See <<Logical Input Chunk>>.
 
 |===
 
-=== Logical Input Chunk
+==== Logical Input Chunk
 
 |===
 |Type|Name|Description
+
 |`U8`
 |PayloadLength
 |The number of following octets. 1-120 octets if one stream, 1-60 for two streams. 0 is allowed if no data available yet, like a recently joined player.
@@ -112,5 +106,41 @@ after each `InputStreamCount` LogicalInputChunks.
 |`U8[PayloadLength]`
 |Payload
 |Game specific serialized logical input. The logical input can be delta compressed, but only with reference to inputs that are serialized within this datagram.
+
+|===
+
+
+== Sections
+
+=== Ordered Datagrams
+
+Makes sure that the datagrams are received in order and that duplicates and reordered datagrams are discarded.
+Normally this is handled by the transport layer used, but needed when using unsecure UDP and in all cases as an extra sanity check.
+Receiver should discard any datagram that is not considered a successor to the previously received datagram.
+If no datagram has been received, just accept the first one.
+
+|===
+|Type|Name|Description
+
+|`U8`
+|Sequence ID
+|Increasing every datagram sent. Wraps around to zero after 0xff (255), Starts with zero.
+|===
+
+
+=== Snapshot Receive Status
+
+Sent from Client to Host, to signal the latest useful snapshot that was received and put in a queue. As well as how many that was dropped after that (to the Clients' knowledge). The host will resend any dropped snapshots.
+
+|===
+|Type|Name|Description
+
+|`U32`
+|TickIdForLastSnapshot
+|The TickId for the last Snapshot that the client received in a consecutive unbroken sequence.
+
+|`U8`
+|DroppedSnapshotCount
+|The number of dropped snapshots after `TickIdForLastSnapshot`. 0 - 30.
 
 |===
