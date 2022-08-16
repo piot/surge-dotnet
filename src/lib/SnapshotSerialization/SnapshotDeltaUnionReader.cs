@@ -6,12 +6,16 @@
 using System;
 using Piot.Flood;
 using Piot.Surge.Snapshot;
+using Piot.Surge.SnapshotDeltaPack.Serialization;
 
 namespace Piot.Surge.SnapshotSerialization
 {
     public static class Constants
     {
         public const byte UnionSync = 0xba;
+        public const byte SnapshotDeltaSync = 0xbb;
+        public const byte SnapshotDeltaCreatedSync = 0xbc;
+        public const byte SnapshotDeltaUpdatedSync = 0x13;
     }
 
     public static class SnapshotDeltaUnionReader
@@ -39,9 +43,13 @@ namespace Piot.Surge.SnapshotSerialization
             {
                 var payloadOctetCount = reader.ReadUInt16();
                 var payload = reader.ReadOctets(payloadOctetCount);
+                var includedCorrection = new SnapshotDeltaIncludedCorrectionPackMemory
+                {
+                    memory = payload
+                };
                 var snapshotDeltaPack =
                     new SnapshotDeltaPack.SnapshotDeltaPack(
-                        new TickId((uint)(frameIdRange.containsFromTickId.tickId + i)), payload);
+                        new TickId((uint)(frameIdRange.containsFromTickId.tickId + i)), includedCorrection);
                 packs[i] = snapshotDeltaPack;
             }
 

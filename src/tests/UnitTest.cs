@@ -13,6 +13,7 @@ using Piot.Surge.LogicalInput;
 using Piot.Surge.LogicalInputSerialization;
 using Piot.Surge.OrderedDatagrams;
 using Piot.Surge.Snapshot;
+using Piot.Surge.SnapshotDelta;
 using Piot.Surge.SnapshotDeltaInternal;
 using Piot.Surge.SnapshotDeltaPack;
 using Piot.Surge.SnapshotDeltaPack.Serialization;
@@ -308,14 +309,6 @@ public class UnitTest1
             new TickIdRange(new TickId(uint.MaxValue), new TickId(uint.MaxValue)));
     }
 
-    private static void SaveDelta(ISnapshotDeltaPackQueue queue, IUpdatedEntity updatedEntity)
-    {
-        var snapshotId = new TickId(10);
-        var octets = SnapshotDeltaPacker.Pack(Array.Empty<EntityId>(), Array.Empty<IEntity>(),
-            new[] { updatedEntity });
-        var pack = new SnapshotDeltaPack(snapshotId, octets);
-        queue.Enqueue(pack);
-    }
 
     [Fact]
     public void FullRollback()
@@ -345,7 +338,8 @@ public class UnitTest1
         Ticker.Tick(allEntities);
         Assert.Equal(3, ((AvatarLogic)spawnedAvatar.Logic).position.x);
 
-        var snapshotDelta = FromSnapshotDeltaInternal.Convert(SnapshotDeltaCreator.Scan(scanWorld));
+        var firstTick = new TickId(0);
+        var snapshotDelta = FromSnapshotDeltaInternal.Convert(SnapshotDeltaCreator.Scan(scanWorld, firstTick));
         world.ClearDelta();
         Assert.Empty(snapshotDelta.deletedIds);
         Assert.Empty(snapshotDelta.updatedEntities);
@@ -353,8 +347,8 @@ public class UnitTest1
 
 
         Ticker.Tick(allEntities);
-
-        var snapshotDeltaAfter = FromSnapshotDeltaInternal.Convert(SnapshotDeltaCreator.Scan(scanWorld));
+        var secondTick = new TickId(1);
+        var snapshotDeltaAfter = FromSnapshotDeltaInternal.Convert(SnapshotDeltaCreator.Scan(scanWorld, secondTick));
         world.ClearDelta();
         Assert.Empty(snapshotDeltaAfter.deletedIds);
         Assert.Empty(snapshotDeltaAfter.createdIds);
@@ -362,26 +356,35 @@ public class UnitTest1
 
         Assert.Equal(AvatarLogicEntityInternal.PositionMask, snapshotDeltaAfter.updatedEntities[0].changeMask.mask);
 
-        Memory<byte> snapshotDeltaPackPayload;
+        SnapshotDeltaIncludedCorrectionPackMemory snapshotDeltaPackPayload;
         {
+            /*
             var (createdForPacker, updateForPacker) = SnapshotDeltaPackPrepare.Prepare(
                 snapshotDeltaAfter.createdIds,
                 snapshotDeltaAfter.updatedEntities, world);
             Assert.Empty(createdForPacker);
             Assert.Single(updateForPacker);
+*/
+            var snapshotPackContainer = SnapshotDeltaPackCreator.Create(world, snapshotDeltaAfter);
 
-            snapshotDeltaPackPayload =
-                SnapshotDeltaPacker.Pack(snapshotDeltaAfter.deletedIds, createdForPacker, updateForPacker);
+            var snapshotDeltaMemory = SnapshotPackContainerToMemory.PackWithFilter(snapshotPackContainer, Array.Empty<EntityId>());
+
+            var snapshotDeltaPackPayloadWithout =
+                SnapshotDeltaPacker.Pack(snapshotDeltaMemory);
+
+            snapshotDeltaPackPayload = new SnapshotDeltaIncludedCorrectionPackMemory
+                { memory = snapshotDeltaPackPayloadWithout.memory };
         }
 
-        var firstSnapshotId = new TickId(8);
+        var firstTickId = new TickId(8);
 
-        var snapshotDeltaPack = new SnapshotDeltaPack(firstSnapshotId, snapshotDeltaPackPayload);
+        var snapshotDeltaPack = new SnapshotDeltaPack(firstTickId, snapshotDeltaPackPayload);
+        
         packetQueue.Enqueue(snapshotDeltaPack);
 
         Assert.Equal(1, packetQueue.Count);
-        Assert.Equal(packetQueue.Peek().tickId, firstSnapshotId);
-        Assert.Equal(25, packetQueue.Peek().payload.Length);
+        Assert.Equal(packetQueue.Peek().tickId, firstTickId);
+        Assert.Equal(28, packetQueue.Peek().payload.Length);
 
         Assert.Equal(6, ((AvatarLogic)spawnedAvatar.Logic).position.x);
         Assert.Equal(AvatarLogicEntityInternal.PositionMask,
@@ -401,7 +404,7 @@ public class UnitTest1
         (world as IEntityContainer).DeleteEntity(spawnedAvatar);
 
         {
-            var snapshotDeltaAfterDelete = FromSnapshotDeltaInternal.Convert(SnapshotDeltaCreator.Scan(scanWorld));
+            var snapshotDeltaAfterDelete = FromSnapshotDeltaInternal.Convert(SnapshotDeltaCreator.Scan(scanWorld, firstTickId));
             var (createdForPacker, updateForPacker) = SnapshotDeltaPackPrepare.Prepare(
                 snapshotDeltaAfterDelete.createdIds,
                 snapshotDeltaAfterDelete.updatedEntities, world);
@@ -412,6 +415,29 @@ public class UnitTest1
         }
     }
 
+
+    private static (SnapshotDeltaInternal, SnapshotDelta, SnapshotDeltaPack) ScanConvertAndCreate(World worldToScan, TickId tickId)
+    {
+        var deltaSnapshotInternal = SnapshotDeltaCreator.Scan(worldToScan, tickId);
+        var convertedDeltaSnapshot = FromSnapshotDeltaInternal.Convert(deltaSnapshotInternal);
+        var deltaPackContainer = SnapshotDeltaPackCreator.Create(worldToScan, convertedDeltaSnapshot);
+        
+        worldToScan.ClearDelta();
+        OverWriter.Overwrite(worldToScan);
+        
+        var snapshotDeltaMemory = SnapshotPackContainerToMemory.PackWithFilter(deltaPackContainer, Array.Empty<EntityId>());
+
+        var withoutCorrectionPackMemory = SnapshotDeltaPacker.Pack(snapshotDeltaMemory);
+        var complete = new SnapshotDeltaIncludedCorrectionPackMemory
+        {
+            memory = withoutCorrectionPackMemory.memory
+        };
+
+        var deltaPack = new SnapshotDeltaPack(tickId, complete);
+        
+        return (deltaSnapshotInternal, convertedDeltaSnapshot, deltaPack);
+    }
+    
     private (SerializedSnapshotDeltaPackUnionFlattened, EntityId) PrepareThreeServerSnapshotDeltas()
     {
         var avatarInfo = new AvatarLogicEntityInternal
@@ -426,12 +452,8 @@ public class UnitTest1
         var scanWorld = (IEntityContainerWithChanges)world;
 
         /* FIRST Snapshot */
-        var firstDelta = SnapshotDeltaCreator.Scan(scanWorld);
-        var firstDeltaConverted = FromSnapshotDeltaInternal.Convert(firstDelta);
-        var firstSnapshotId = new TickId(10);
-        var firstDeltaPack = SnapshotDeltaPackCreator.Create(firstSnapshotId, world, firstDeltaConverted);
-        world.ClearDelta();
-        OverWriter.Overwrite(world);
+        var firstTickId = new TickId(10);
+        var (firstDelta, firstDeltaConverted, firstDeltaPack) = ScanConvertAndCreate(world, firstTickId);
 
         var internalInfo = firstDelta.FetchEntity(spawnedAvatar.Id);
         Assert.Equal(ChangedFieldsMask.AllFieldChangedMaskBits, internalInfo.changeMask);
@@ -439,6 +461,8 @@ public class UnitTest1
         Assert.Single(firstDeltaConverted.createdIds);
         Assert.Empty(firstDeltaConverted.updatedEntities);
         Assert.Empty(firstDeltaConverted.deletedIds);
+        
+        
         Ticker.Tick(world);
 
         var serverSpawnedAvatarForAssert = world.FetchEntity<AvatarLogicEntityInternal>(spawnedAvatar.Id);
@@ -446,14 +470,13 @@ public class UnitTest1
 
 
         /* SECOND Snapshot */
-        var secondDelta = SnapshotDeltaCreator.Scan(scanWorld);
-        var secondDeltaConverted = FromSnapshotDeltaInternal.Convert(secondDelta);
+        var secondTickId = new TickId(11);
+        
+        var (secondDelta, secondDeltaConverted, secondDeltaPack) = ScanConvertAndCreate(world, secondTickId);
+        
         var secondInternalInfo = secondDelta.FetchEntity(spawnedAvatar.Id);
-        var secondSnapshotId = new TickId(11);
-        var secondDeltaPack = SnapshotDeltaPackCreator.Create(secondSnapshotId, world, secondDeltaConverted);
+
         Assert.Equal(AvatarLogicEntityInternal.PositionMask, secondInternalInfo.changeMask);
-        world.ClearDelta();
-        OverWriter.Overwrite(world);
 
         Assert.Empty(secondDeltaConverted.createdIds);
         Assert.Single(secondDeltaConverted.updatedEntities);
@@ -468,16 +491,14 @@ public class UnitTest1
         /* THIRD */
         serverSpawnedAvatar.Current = serverSpawnedAvatar.Self with { fireButtonIsDown = true };
         var serverSpawnedAvatarForAssertAtThree = world.FetchEntity<AvatarLogicEntityInternal>(spawnedAvatar.Id);
-        var thirdDelta = SnapshotDeltaCreator.Scan(scanWorld);
-        var thirdDeltaConverted = FromSnapshotDeltaInternal.Convert(thirdDelta);
-        var thirdSnapshotId = new TickId(12);
-        var thirdDeltaPack = SnapshotDeltaPackCreator.Create(thirdSnapshotId, world, thirdDeltaConverted);
+        var thirdTickId = new TickId(12);
 
+        var (thirdDelta, thirdDeltaConverted, thirdDeltaPack) = ScanConvertAndCreate(world, thirdTickId);
+        
         var thirdInternalInfo = thirdDelta.FetchEntity(spawnedAvatar.Id);
 
         log.Info("Server fire happens at position", serverSpawnedAvatar.Self.position.x);
-        world.ClearDelta();
-        OverWriter.Overwrite(world);
+
         Ticker.Tick(world);
 
 
@@ -490,10 +511,10 @@ public class UnitTest1
             thirdDeltaConverted.updatedEntities[0].changeMask.mask);
 
         /* FOURTH */
-        var fourthDelta = SnapshotDeltaCreator.Scan(scanWorld);
-        var fourthDeltaConverted = FromSnapshotDeltaInternal.Convert(fourthDelta);
-        var fourthSnapshotId = new TickId(13);
-        var fourthDeltaPack = SnapshotDeltaPackCreator.Create(fourthSnapshotId, world, fourthDeltaConverted);
+        var fourthTickId = new TickId(13);
+
+        var (fourthDelta, fourthDeltaConverted, fourthDeltaPack) = ScanConvertAndCreate(world, fourthTickId);
+        
         var fourthInternalInfo = fourthDelta.FetchEntity(spawnedAvatar.Id);
         Assert.Equal(
             AvatarLogicEntityInternal.PositionMask | AvatarLogicEntityInternal.AmmoCountMask |
@@ -501,11 +522,11 @@ public class UnitTest1
             fourthInternalInfo.changeMask);
 
 
-        Assert.Empty(thirdDeltaConverted.createdIds);
-        Assert.Single(thirdDeltaConverted.updatedEntities);
-        Assert.Empty(thirdDeltaConverted.deletedIds);
+        Assert.Empty(fourthDeltaConverted.createdIds);
+        Assert.Single(fourthDeltaConverted.updatedEntities);
+        Assert.Empty(fourthDeltaConverted.deletedIds);
 
-        var idRange = new TickIdRange(firstSnapshotId, fourthSnapshotId);
+        var idRange = new TickIdRange(firstTickId, fourthTickId);
         var union = new SerializedSnapshotDeltaPackUnion
         {
             tickIdRange = idRange,
@@ -526,11 +547,11 @@ public class UnitTest1
         var unionReader = new OctetReader(allSerializedSnapshots.payload);
         var deserializedUnion = SnapshotDeltaUnionReader.Read(unionReader);
 
-        var firstSnapshotId = allSerializedSnapshots.tickIdRange.containsFromTickId;
-        var lastSnapshotId = allSerializedSnapshots.tickIdRange.tickId;
+        var firstTickId = allSerializedSnapshots.tickIdRange.containsFromTickId;
+        var lastTickId = allSerializedSnapshots.tickIdRange.tickId;
 
-        Assert.Equal(firstSnapshotId.tickId, deserializedUnion.tickIdRange.containsFromTickId.tickId);
-        Assert.Equal(lastSnapshotId.tickId, deserializedUnion.tickIdRange.tickId.tickId);
+        Assert.Equal(firstTickId.tickId, deserializedUnion.tickIdRange.containsFromTickId.tickId);
+        Assert.Equal(lastTickId.tickId, deserializedUnion.tickIdRange.tickId.tickId);
 
         var firstPack = deserializedUnion.packs[0];
         var firstSnapshotReader = new OctetReader(firstPack.payload);
@@ -600,9 +621,9 @@ public class UnitTest1
         Notifier.Notify(clientUpdated);
         OverWriter.Overwrite(clientWorld);
 
-        var undoPack = new SnapshotDeltaPack(firstSnapshotId, undoWriter.Octets);
+        var undoPack = new SnapshotDeltaPack(firstTickId, new SnapshotDeltaIncludedCorrectionPackMemory{ memory = undoWriter.Octets });
 
-        Assert.Equal(29, undoWriter.Octets.Length);
+        Assert.Equal(32, undoWriter.Octets.Length);
 
         foreach (var clientCreatedEntity in created)
         {

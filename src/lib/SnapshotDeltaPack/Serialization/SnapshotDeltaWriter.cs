@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using System;
 using Piot.Flood;
-using Piot.Surge.ChangeMaskSerialization;
 
 namespace Piot.Surge.SnapshotDeltaPack.Serialization
 {
@@ -19,33 +19,30 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
         ///     Serialized deleted, created and updated entities to the writer stream.
         /// </summary>
         /// <param name="writer"></param>
-        /// <param name="deletedEntities"></param>
-        /// <param name="createdEntities"></param>
-        /// <param name="updatedEntities"></param>
-        internal static void Write(IOctetWriter writer, EntityId[] deletedEntities,
-            IEntity[] createdEntities, IUpdatedEntity[] updatedEntities)
+        /// <param name="deltaMemory"></param>
+        internal static void Write(SnapshotDeltaMemory deltaMemory, IOctetWriter writer)
         {
-            WriteEntityCount(writer, deletedEntities.Length);
-            foreach (var entityId in deletedEntities)
+            #if DEBUG
+            writer.WriteUInt8(SnapshotSerialization.Constants.SnapshotDeltaSync);
+            #endif
+            if (deltaMemory.deletedCount == 0 && deltaMemory.createdCount == 0 && deltaMemory.updatedCount == 0)
             {
-                EntityIdWriter.Write(writer, entityId);
+                throw new Exception("suspicious, nothing has changed in this delta");
             }
+            WriteEntityCount(writer, (int)deltaMemory.deletedCount);
+            writer.WriteOctets(deltaMemory.deletedMemory);
 
-            WriteEntityCount(writer, createdEntities.Length);
-            foreach (var entity in createdEntities)
-            {
-                EntityIdWriter.Write(writer, entity.Id);
-                writer.WriteUInt16(entity.ArchetypeId.id);
-                entity.SerializeAll(writer);
-            }
+#if DEBUG
+            writer.WriteUInt8(SnapshotSerialization.Constants.SnapshotDeltaCreatedSync);
+#endif
+            WriteEntityCount(writer, (int)deltaMemory.createdCount);
+            writer.WriteOctets(deltaMemory.createdMemory);
 
-            WriteEntityCount(writer, updatedEntities.Length);
-            foreach (var entity in updatedEntities)
-            {
-                EntityIdWriter.Write(writer, entity.Id);
-                ChangedFieldsMaskWriter.WriteChangedFieldsMask(writer, entity.ChangeMask);
-                entity.Serialize(entity.ChangeMask, writer);
-            }
+#if DEBUG
+            writer.WriteUInt8(SnapshotSerialization.Constants.SnapshotDeltaUpdatedSync);
+#endif
+            WriteEntityCount(writer, (int)deltaMemory.updatedCount);
+            writer.WriteOctets(deltaMemory.updatedMemory);
         }
     }
 }

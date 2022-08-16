@@ -8,6 +8,15 @@ using Piot.Flood;
 
 namespace Piot.Surge.SnapshotDeltaPack.Serialization
 {
+    public class SnapshotDeltaIncludedCorrectionPackMemory
+    {
+        public Memory<byte> memory;
+    }
+    
+    public class SnapshotDeltaWithoutCorrectionPackMemory
+    {
+        public Memory<byte> memory;
+    }
     public static class SnapshotDeltaPacker
     {
         /// <summary>
@@ -18,13 +27,11 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
         /// <param name="createdEntities"></param>
         /// <param name="updatedEntities"></param>
         /// <returns></returns>
-        public static Memory<byte> Pack(EntityId[] deletedEntities, IEntity[] createdEntities,
-            IUpdatedEntity[] updatedEntities)
+        public static SnapshotDeltaWithoutCorrectionPackMemory Pack(SnapshotDeltaMemory deltaMemory)
         {
-            var writer = new OctetWriter(32 * 1024);
-            SnapshotDeltaWriter.Write(writer, deletedEntities, createdEntities, updatedEntities);
-
-            return writer.Octets;
+            var writer = new OctetWriter(Constants.MaxSnapshotOctetSize);
+            SnapshotDeltaWriter.Write(deltaMemory, writer);
+            return new SnapshotDeltaWithoutCorrectionPackMemory { memory = writer.Octets };
         }
     }
 }

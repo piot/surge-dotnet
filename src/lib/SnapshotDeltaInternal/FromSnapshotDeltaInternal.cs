@@ -38,7 +38,7 @@ namespace Piot.Surge.SnapshotDeltaInternal
                 }
             }
 
-            return new SnapshotDelta.SnapshotDelta(deletedIds.ToArray(), createdIds.ToArray(),
+            return new SnapshotDelta.SnapshotDelta(internalDelta.TickId, deletedIds.ToArray(), createdIds.ToArray(),
                 updatedEntities.ToArray());
         }
     }

@@ -11,7 +11,9 @@ namespace Piot.Surge.SnapshotDeltaPack
     public interface IUpdatedEntity : IEntityBase
     {
         public ChangedFieldsMask ChangeMask { get; }
+        
+        public IEntitySerializer Serializer { get; }
 
-        public void Serialize(ChangedFieldsMask serializeMask, IOctetWriter writer);
+       // public void Serialize(ChangedFieldsMask serializeMask, IOctetWriter writer);
     }
 }

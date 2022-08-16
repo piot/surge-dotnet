@@ -5,6 +5,7 @@
 
 using System;
 using Piot.Surge.Snapshot;
+using Piot.Surge.SnapshotDeltaPack.Serialization;
 
 namespace Piot.Surge.SnapshotDeltaPack
 {
@@ -16,10 +17,10 @@ namespace Piot.Surge.SnapshotDeltaPack
         public Memory<byte> payload;
         public TickId tickId;
 
-        public SnapshotDeltaPack(TickId tickId, Memory<byte> payload)
+        public SnapshotDeltaPack(TickId tickId, SnapshotDeltaIncludedCorrectionPackMemory payload)
         {
             this.tickId = tickId;
-            this.payload = payload;
+            this.payload = payload.memory;
         }
 
         public override string ToString()

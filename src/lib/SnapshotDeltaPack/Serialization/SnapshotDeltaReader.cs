@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using System;
 using System.Collections.Generic;
 using Piot.Flood;
 using Piot.Surge.ChangeMaskSerialization;
@@ -14,7 +15,13 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
     {
         public static uint ReadEntityCount(IOctetReader reader)
         {
-            return reader.ReadUInt16();
+            var count = reader.ReadUInt16();
+            if (count > 128)
+            {
+                throw new Exception($"suspicious count {count}");
+            }
+
+            return count;
         }
 
         /// <summary>
@@ -26,6 +33,12 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
         public static (IEntity[], IEntity[], SnapshotDeltaReaderInfoEntity[]) Read(IOctetReader reader,
             IEntityContainer creation)
         {
+#if DEBUG
+            if (reader.ReadUInt8() != SnapshotSerialization.Constants.SnapshotDeltaSync)
+            {
+                throw new Exception("out of sync");
+            }
+#endif
             var deletedEntities = new List<IEntity>();
             var deletedEntityCount = ReadEntityCount(reader);
             for (var i = 0; i < deletedEntityCount; ++i)
@@ -36,6 +49,13 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
                 creation.DeleteEntity(entityId);
             }
 
+            
+#if DEBUG
+            if (reader.ReadUInt8() != SnapshotSerialization.Constants.SnapshotDeltaCreatedSync)
+            {
+                throw new Exception("out of sync");
+            }
+#endif            
             var createdEntities = new List<IEntity>();
             var createdEntityCount = ReadEntityCount(reader);
             for (var i = 0; i < createdEntityCount; ++i)
@@ -46,6 +66,14 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
                 entityToDeserialize.DeserializeAll(reader);
                 createdEntities.Add(entityToDeserialize);
             }
+
+            
+#if DEBUG
+            if (reader.ReadUInt8() != SnapshotSerialization.Constants.SnapshotDeltaUpdatedSync)
+            {
+                throw new Exception("out of sync");
+            }
+#endif            
 
             var updatedEntities = new List<SnapshotDeltaReaderInfoEntity>();
             var updatedEntityCount = ReadEntityCount(reader);

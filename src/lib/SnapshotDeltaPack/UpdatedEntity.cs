@@ -21,9 +21,6 @@ namespace Piot.Surge.SnapshotDeltaPack
         public EntityId Id => entity.Id;
         public ChangedFieldsMask ChangeMask { get; }
 
-        public void Serialize(ChangedFieldsMask serializeMask, IOctetWriter writer)
-        {
-            entity.Serialize(serializeMask.mask, writer);
-        }
+        public IEntitySerializer Serializer => entity;
     }
 }

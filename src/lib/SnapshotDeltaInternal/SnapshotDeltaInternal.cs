@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using Piot.Surge.ChangeMask;
+using Piot.Surge.Snapshot;
 using Piot.Surge.SnapshotDelta;
 
 namespace Piot.Surge.SnapshotDeltaInternal
@@ -19,13 +20,16 @@ namespace Piot.Surge.SnapshotDeltaInternal
     {
         public readonly Dictionary<ulong, SnapshotDeltaInternalInfoEntity> entities = new();
 
+        public TickId TickId { get; }
+
         public SnapshotDeltaInternal()
         {
         }
 
-        public SnapshotDeltaInternal(EntityId[] deletedIds, EntityId[] createdIds,
+        public SnapshotDeltaInternal(TickId tickId, EntityId[] deletedIds, EntityId[] createdIds,
             SnapshotDeltaChangedEntity[] updatedEntities)
         {
+            TickId = tickId;
             foreach (var deletedId in deletedIds)
             {
                 if (entities.ContainsKey(deletedId.Value))

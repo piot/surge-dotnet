@@ -10,21 +10,17 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
 {
     public readonly struct UpdatedEntity : IUpdatedEntity
     {
-        private readonly IEntitySerializer serializer;
-
         public UpdatedEntity(EntityId id, ChangedFieldsMask changeMask, IEntitySerializer serializer)
         {
             Id = id;
             ChangeMask = changeMask;
-            this.serializer = serializer;
+            Serializer = serializer;
         }
 
         public EntityId Id { get; }
 
-        public void Serialize(ChangedFieldsMask serializeMask, IOctetWriter writer)
-        {
-            serializer.Serialize(serializeMask.mask, writer);
-        }
+        public IEntitySerializer Serializer { get; }
+
 
         public ChangedFieldsMask ChangeMask { get; }
     }

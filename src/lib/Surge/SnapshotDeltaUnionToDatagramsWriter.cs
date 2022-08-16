@@ -14,6 +14,7 @@ namespace Piot.Surge
     public static class Constants
     {
         public const uint MaxDatagramOctetSize = 1200;
+        public const uint MaxSnapshotOctetSize = 64 * MaxDatagramOctetSize;
     }
 
     public class SnapshotDeltaPackUnionToDatagramsWriter
