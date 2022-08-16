@@ -17,8 +17,6 @@ namespace Piot.Surge.SnapshotDelta
         public readonly EntityId[] deletedIds;
         public readonly SnapshotDeltaChangedEntity[] updatedEntities;
 
-        public TickId TickId { get; }
-
         public SnapshotDelta(TickId tickId, EntityId[] deletedIds, EntityId[] createdIds,
             SnapshotDeltaChangedEntity[] updatedEntities)
         {
@@ -27,5 +25,7 @@ namespace Piot.Surge.SnapshotDelta
             this.createdIds = createdIds;
             this.updatedEntities = updatedEntities;
         }
+
+        public TickId TickId { get; }
     }
 }

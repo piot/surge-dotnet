@@ -22,13 +22,14 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
         /// <param name="deltaMemory"></param>
         internal static void Write(SnapshotDeltaMemory deltaMemory, IOctetWriter writer)
         {
-            #if DEBUG
+#if DEBUG
             writer.WriteUInt8(SnapshotSerialization.Constants.SnapshotDeltaSync);
-            #endif
+#endif
             if (deltaMemory.deletedCount == 0 && deltaMemory.createdCount == 0 && deltaMemory.updatedCount == 0)
             {
                 throw new Exception("suspicious, nothing has changed in this delta");
             }
+
             WriteEntityCount(writer, (int)deltaMemory.deletedCount);
             writer.WriteOctets(deltaMemory.deletedMemory);
 

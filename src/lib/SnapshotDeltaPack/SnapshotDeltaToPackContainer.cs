@@ -3,10 +3,8 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System;
 using System.Linq;
 using Piot.Flood;
-using Piot.Surge.ChangeMaskSerialization;
 using Piot.Surge.SnapshotDeltaPack.Serialization;
 
 namespace Piot.Surge.SnapshotDeltaPack
@@ -19,10 +17,11 @@ namespace Piot.Surge.SnapshotDeltaPack
         /// <param name="world"></param>
         /// <param name="snapshotDeltaAfter"></param>
         /// <returns></returns>
-        internal static DeltaSnapshotPackContainer SnapshotDeltaToContainer(IEntityContainer world, SnapshotDelta.SnapshotDelta snapshotDeltaAfter)
+        internal static DeltaSnapshotPackContainer SnapshotDeltaToContainer(IEntityContainer world,
+            SnapshotDelta.SnapshotDelta snapshotDeltaAfter)
         {
             var targetPackContainer = new DeltaSnapshotPackContainer();
-            
+
             var createdEntities = snapshotDeltaAfter.createdIds.Select(world.FetchEntity).ToArray();
             foreach (var createdEntity in createdEntities)
             {
@@ -46,7 +45,7 @@ namespace Piot.Surge.SnapshotDeltaPack
                 EntityIdWriter.Write(writer, deletedEntityId);
                 targetPackContainer.DeletedEntityContainer.Add(deletedEntityId, writer.Octets);
             }
-            
+
             targetPackContainer.TickId = snapshotDeltaAfter.TickId;
 
             return targetPackContainer;

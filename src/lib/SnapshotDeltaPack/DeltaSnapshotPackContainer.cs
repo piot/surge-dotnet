@@ -1,16 +1,22 @@
-using System;
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Peter Bjorklund. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 using Piot.Surge.Snapshot;
 
 namespace Piot.Surge.SnapshotDeltaPack
 {
     /// <summary>
-    /// Holds reusable packs for all the entities that has changed from one tick to the next.
+    ///     Holds reusable packs for all the entities that has changed from one tick to the next.
     /// </summary>
     public class DeltaSnapshotPackContainer
     {
-        readonly SnapshotEntityPackContainer entityUpdateContainer = new();
-        readonly SnapshotEntityPackContainer entityCreatedContainer = new();
-        readonly SnapshotEntityPackContainer entityDeletedContainer = new();
+        private readonly SnapshotEntityPackContainer entityCreatedContainer = new();
+        private readonly SnapshotEntityPackContainer entityDeletedContainer = new();
+        private readonly SnapshotEntityPackContainer entityUpdateContainer = new();
+
+        public TickId TickId = new();
 
         public IFeedEntityPackToContainer EntityUpdateContainer => entityUpdateContainer;
         public IReadPackContainer EntityUpdateContainerRead => entityUpdateContainer;
@@ -18,7 +24,5 @@ namespace Piot.Surge.SnapshotDeltaPack
         public IReadPackContainer CreatedEntityContainerRead => entityCreatedContainer;
         public IFeedEntityPackToContainer DeletedEntityContainer => entityDeletedContainer;
         public IReadPackContainer DeletedEntityContainerRead => entityDeletedContainer;
-
-        public TickId TickId = new ();
     }
 }

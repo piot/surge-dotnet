@@ -3,8 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using Piot.Surge.Snapshot;
-
 namespace Piot.Surge.SnapshotDeltaPack.Serialization
 {
     public static class SnapshotDeltaPackCreator

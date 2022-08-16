@@ -29,8 +29,8 @@ namespace Piot.Surge
     {
         /// <summary>
         ///     Read on host coming from client.
-        ///     Client describes the last delta compressed snapshot TickId it has received and how many snapshots it has detected as
-        ///     dropped after that.
+        ///     Client describes the last delta compressed snapshot TickId it has received and how many snapshots it has
+        ///     detected as dropped after that.
         /// </summary>
         /// <param name="reader"></param>
         /// <param name="lastReceivedTickId"></param>

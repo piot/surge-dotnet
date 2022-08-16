@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Peter Bjorklund. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 using System;
 using System.Linq;
 using Piot.Flood;
@@ -17,14 +22,14 @@ namespace Piot.Surge.SnapshotDeltaPack
         public uint updatedCount;
         public Memory<byte> updatedMemory;
     }
-    
+
     public static class SnapshotPackContainerToMemory
     {
         private static (uint, Memory<byte>) Pack(IReadPackContainer containerToRead, ulong[] excludeEntityIds)
         {
             uint count = 0;
             var target = new OctetWriter(Constants.MaxDatagramOctetSize);
-            
+
             foreach (var pair in containerToRead.Entries.Where(pair => !excludeEntityIds.Contains(pair.Key)))
             {
                 count++;
@@ -33,11 +38,12 @@ namespace Piot.Surge.SnapshotDeltaPack
 
             return (count, target.Octets);
         }
-        
-        public static SnapshotDeltaMemory PackWithFilter(DeltaSnapshotPackContainer container, EntityId[] excludeEntityIds)
+
+        public static SnapshotDeltaMemory PackWithFilter(DeltaSnapshotPackContainer container,
+            EntityId[] excludeEntityIds)
         {
             var flattenedUInts = excludeEntityIds.Select(entityId => entityId.Value).ToArray();
-         
+
             var (createdMemoryCount, createMemory) = Pack(container.CreatedEntityContainerRead, flattenedUInts);
             var (updatedMemoryCount, updatedMemory) = Pack(container.EntityUpdateContainerRead, flattenedUInts);
             var (deletedMemoryCount, deletedMemory) = Pack(container.DeletedEntityContainerRead, flattenedUInts);
@@ -50,7 +56,7 @@ namespace Piot.Surge.SnapshotDeltaPack
                 updatedCount = updatedMemoryCount,
                 updatedMemory = updatedMemory,
                 deletedCount = deletedMemoryCount,
-                deletedMemory = deletedMemory,
+                deletedMemory = deletedMemory
             };
         }
     }

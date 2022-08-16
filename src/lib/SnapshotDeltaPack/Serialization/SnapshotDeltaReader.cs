@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using Piot.Flood;
 using Piot.Surge.ChangeMaskSerialization;
-using Piot.Surge.SnnapshotDeltaPack.Serialization;
 
 namespace Piot.Surge.SnapshotDeltaPack.Serialization
 {
@@ -49,13 +48,13 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
                 creation.DeleteEntity(entityId);
             }
 
-            
+
 #if DEBUG
             if (reader.ReadUInt8() != SnapshotSerialization.Constants.SnapshotDeltaCreatedSync)
             {
                 throw new Exception("out of sync");
             }
-#endif            
+#endif
             var createdEntities = new List<IEntity>();
             var createdEntityCount = ReadEntityCount(reader);
             for (var i = 0; i < createdEntityCount; ++i)
@@ -67,13 +66,13 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
                 createdEntities.Add(entityToDeserialize);
             }
 
-            
+
 #if DEBUG
             if (reader.ReadUInt8() != SnapshotSerialization.Constants.SnapshotDeltaUpdatedSync)
             {
                 throw new Exception("out of sync");
             }
-#endif            
+#endif
 
             var updatedEntities = new List<SnapshotDeltaReaderInfoEntity>();
             var updatedEntityCount = ReadEntityCount(reader);

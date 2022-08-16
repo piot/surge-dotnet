@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Peter Bjorklund. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 using Piot.Flood;
 using Piot.Surge.OrderedDatagrams;
 
@@ -71,5 +76,4 @@ public class OrderedDatagramsTests
         sequence.Increase();
         Assert.Equal(1, sequence.Value.Value);
     }
-
 }

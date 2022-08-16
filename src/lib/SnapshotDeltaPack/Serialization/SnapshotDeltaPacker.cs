@@ -12,11 +12,12 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
     {
         public Memory<byte> memory;
     }
-    
+
     public class SnapshotDeltaWithoutCorrectionPackMemory
     {
         public Memory<byte> memory;
     }
+
     public static class SnapshotDeltaPacker
     {
         /// <summary>

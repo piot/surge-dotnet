@@ -20,8 +20,6 @@ namespace Piot.Surge.SnapshotDeltaInternal
     {
         public readonly Dictionary<ulong, SnapshotDeltaInternalInfoEntity> entities = new();
 
-        public TickId TickId { get; }
-
         public SnapshotDeltaInternal()
         {
         }
@@ -63,6 +61,8 @@ namespace Piot.Surge.SnapshotDeltaInternal
                     new SnapshotDeltaInternalInfoEntity(updatedEntity.entityId, updatedEntity.changeMask.mask);
             }
         }
+
+        public TickId TickId { get; }
 
         public SnapshotDeltaInternalInfoEntity FetchEntity(EntityId entityId)
         {

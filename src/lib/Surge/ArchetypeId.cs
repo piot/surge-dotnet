@@ -17,6 +17,7 @@ namespace Piot.Surge
             {
                 throw new Exception("Illegal ID");
             }
+
             this.id = id;
         }
 

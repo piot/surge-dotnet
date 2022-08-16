@@ -1,4 +1,9 @@
-using Piot.Surge.SnnapshotDeltaPack.Serialization;
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Peter Bjorklund. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+using Piot.Surge.SnapshotDeltaPack.Serialization;
 
 namespace Piot.Surge
 {

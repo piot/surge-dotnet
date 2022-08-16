@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Peter Bjorklund. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 using System;
 using System.Collections.Generic;
 
@@ -12,24 +17,24 @@ namespace Piot.Surge.SnapshotDeltaPack
     {
         public Dictionary<ulong, Memory<byte>> Entries { get; }
     }
+
     public class SnapshotEntityPackContainer : IFeedEntityPackToContainer, IReadPackContainer
     {
-        readonly Dictionary<ulong, Memory<byte>> entityPacks = new ();
-        
-        public Dictionary<ulong, Memory<byte>> Entries => entityPacks;
-        
         public void Add(EntityId entityId, Memory<byte> payload)
         {
-            if (entityPacks.ContainsKey(entityId.Value))
+            if (Entries.ContainsKey(entityId.Value))
             {
                 throw new Exception($"pack for {entityId} already inserted");
             }
-            entityPacks.Add(entityId.Value, payload);
+
+            Entries.Add(entityId.Value, payload);
         }
-        
+
+        public Dictionary<ulong, Memory<byte>> Entries { get; } = new();
+
         public Memory<byte> PackForEntity(EntityId entityId)
         {
-            var wasFound = entityPacks.TryGetValue(entityId.Value, out var foundPack);
+            var wasFound = Entries.TryGetValue(entityId.Value, out var foundPack);
             if (!wasFound)
             {
                 throw new Exception($"no pack for entity {entityId}");
