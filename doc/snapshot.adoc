@@ -56,7 +56,8 @@ A more detailed look at the contents of an individual Snapshot Message.
 
 ==== Updated Entity Info
 
-[cols="a,a,a"]
+[cols="a,a,2a"]
+[width=95%]
 |===
 |Type|Name|Description
 
