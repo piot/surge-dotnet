@@ -52,9 +52,9 @@ Sent by client to authoritative host for the locally predicted avatars on the cl
 
 The protocol has, by design, no way of splitting in multiple datagrams.
 
-If we have around 300 ms as a maximum latency from a QoS perspective and assume a 16ms simulation tick, that comes down to around 10 locally predicted inputs.
+If we have around 300 ms as a maximum latency from a QoS perspective and assume a 16ms simulation tick, that comes down to around 16 locally predicted inputs.
 
-With a redundancy about 10, that must fit in a single datagram, results in a max size of each logical input to 120 octets.
+With a redundancy about 16, that must fit in a single datagram, results in a max size of each logical input to 70 octets.
 
 |===
 |Type|Name|Description
@@ -73,11 +73,11 @@ With a redundancy about 10, that must fit in a single datagram, results in a max
 
 |`U8`
 |InputCount
-|The number of inputs that follows, in the range of 1 to 10.
+|The number of inputs that follows, in the range of 0 to 16.
 
 |`U8`
 |InputStreamCount
-|The number of input streams. One for each local player. Usually one.
+|The number of input streams. One stream for each local player. Usually one.
 
 |`U8[InputStreamCount]`
 |LocalPlayerIndicies
@@ -101,7 +101,7 @@ after each `InputStreamCount` LogicalInputChunks.
 
 |`U8`
 |PayloadLength
-|The number of following octets. 1-120 octets if one stream, 1-60 for two streams. 0 is allowed if no data available yet, like a recently joined player.
+|The number of following octets. 1-70 octets if one stream (with full 16 redundancy), 1-35 for two streams. 0 is allowed if no data available yet, like a recently joined player.
 
 |`U8[PayloadLength]`
 |Payload
