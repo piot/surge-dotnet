@@ -8,7 +8,7 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
     public static class SnapshotDeltaPackCreator
     {
         /// <summary>
-        ///     Creates a snapshot delta from the current state of the World. Almost always being produced on the simulator
+        ///     Creates a snapshot delta from the current state of the World. Almost always being produced on the host (simulator)
         /// </summary>
         /// <param name="idRange"></param>
         /// <param name="world"></param>

@@ -7,6 +7,9 @@ using Piot.Surge.ChangeMask;
 
 namespace Piot.Surge.SnapshotDeltaPack
 {
+    /// <summary>
+    ///     The minimal information needed for a updated entity to be serialized into a pack.
+    /// </summary>
     public interface IUpdatedEntity : IEntityBase
     {
         public ChangedFieldsMask ChangeMask { get; }

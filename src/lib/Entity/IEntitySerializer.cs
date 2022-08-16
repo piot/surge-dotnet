@@ -18,7 +18,8 @@ namespace Piot.Surge
 
         /// <summary>
         ///     Serializes all fields in the entity. Useful for handling late join / rejoin
-        ///     where no parts of the data is known beforehand.
+        ///     where no parts of the data is known beforehand. Also used for correction states,
+        ///     where whole state is needed.
         /// </summary>
         /// <param name="writer"></param>
         public void SerializeAll(IOctetWriter writer);

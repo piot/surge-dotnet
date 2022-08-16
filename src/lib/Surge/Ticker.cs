@@ -15,6 +15,10 @@ namespace Piot.Surge
             }
         }
 
+        /// <summary>
+        ///     Calls Tick() on all entities in the <paramref name="world" />.
+        /// </summary>
+        /// <param name="world"></param>
         public static void Tick(IEntityContainer world)
         {
             Tick(world.AllEntities);

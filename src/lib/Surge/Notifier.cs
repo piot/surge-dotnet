@@ -9,6 +9,13 @@ namespace Piot.Surge
 {
     public static class Notifier
     {
+        /// <summary>
+        ///     Fire changes for the fields set in the <see cref="SnapshotDeltaReaderInfoEntity.changeMask" />.
+        ///     Also invokes the <see cref="IEntityActionsDoUnDo.DoAction" /> for Actions that have been created
+        ///     from the ILogic implementation.
+        /// </summary>
+        /// <seealso cref="ISimpleLogic.Tick" />
+        /// <param name="entities"></param>
         public static void Notify(SnapshotDeltaReaderInfoEntity[] entities)
         {
             foreach (var notifyEntity in entities)

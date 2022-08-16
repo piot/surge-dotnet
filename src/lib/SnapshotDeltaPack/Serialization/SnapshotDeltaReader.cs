@@ -79,7 +79,7 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
             for (var i = 0; i < updatedEntityCount; ++i)
             {
                 var entityId = EntityIdReader.Read(reader);
-                var serializeMask = ChangedFieldsMaskReader.ReadFullChangeMask(reader);
+                var serializeMask = ChangedFieldsMaskReader.ReadChangedFieldMask(reader);
 
                 var entityToDeserialize = creation.FetchEntity(entityId);
                 entityToDeserialize.Deserialize(serializeMask.mask, reader);

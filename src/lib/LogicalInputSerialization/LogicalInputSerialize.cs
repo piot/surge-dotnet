@@ -14,6 +14,8 @@ namespace Piot.Surge.LogicalInputSerialization
     {
         /// <summary>
         ///     Serializing the game specific inputs to be sent from the client to the authoritative host.
+        ///     The inputs should be fed to this method with redundancy. All outstanding inputs should be
+        ///     sent each network tick in order to handle packet drops.
         /// </summary>
         public static void Serialize(IOctetWriter writer, LogicalInput.LogicalInput[] inputs)
         {

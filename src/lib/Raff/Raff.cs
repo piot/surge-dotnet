@@ -48,6 +48,10 @@ namespace Piot.Raff
 
     public static class Serialize
     {
+        /// <summary>
+        ///     Write a header according to the <a href="https://github.com/piot/raff-c#readme">RAFF</a> standard.
+        /// </summary>
+        /// <param name="writer"></param>
         public static void WriteHeader(IOctetWriter writer)
         {
             writer.WriteOctets(Constants.fileHeader);

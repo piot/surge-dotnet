@@ -7,6 +7,9 @@ using System;
 
 namespace Piot.Surge.ChangeMask
 {
+    /// <summary>
+    ///     Holds a bit mask with a bit for each field in an Entity.
+    /// </summary>
     public struct ChangedFieldsMask
     {
         public ulong mask;

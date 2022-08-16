@@ -13,6 +13,7 @@ namespace Piot.Surge.LogicalInputSerialization
     {
         /// <summary>
         ///     Deserializes game specific input arriving on the host from the client.
+        ///     Currently only one (1) input stream is supported (one local player on each client).
         /// </summary>
         /// <param name="reader"></param>
         /// <returns></returns>

@@ -10,6 +10,14 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
 {
     public static class PackCreatedEntity
     {
+        /// <summary>
+        ///     Writes the EntityID, ArchetypeID and all the fields in the Entity.
+        /// </summary>
+        /// <param name="writer"></param>
+        /// <param name="entityId"></param>
+        /// <param name="archetypeId"></param>
+        /// <param name="entitySerializer"></param>
+        /// <exception cref="Exception"></exception>
         public static void Write(IOctetWriter writer, EntityId entityId, ArchetypeId archetypeId,
             IEntitySerializer entitySerializer)
         {

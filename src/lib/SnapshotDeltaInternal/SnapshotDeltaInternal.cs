@@ -12,8 +12,8 @@ using Piot.Surge.SnapshotDelta;
 namespace Piot.Surge.SnapshotDeltaInternal
 {
     /// <summary>
-    ///     Keeps track of all the changes that has happened to the World. It only stores the Entity Ids
-    ///     and FullChangeMasks for updated entities,
+    ///     Keeps track of all the changes that has happened to the World. It only stores the <see cref="EntityId" />s
+    ///     and <see cref="ChangedFieldsMask" /> for updated entities,
     ///     not the actual field values, archetypeIds, etc.
     /// </summary>
     public class SnapshotDeltaInternal

@@ -10,6 +10,9 @@ using Piot.Surge.Snapshot;
 
 namespace Piot.Surge.SnapshotDeltaPack
 {
+    /// <summary>
+    ///     Holds the deleted, created and updated memory packs.
+    /// </summary>
     public struct SnapshotDeltaMemory
     {
         public TickId tickId;
@@ -39,6 +42,16 @@ namespace Piot.Surge.SnapshotDeltaPack
             return (count, target.Octets);
         }
 
+        /// <summary>
+        ///     Packs together from a container (that has reusable entity packs), the deleted, updated and created entities.
+        ///     It also filters out the entities specified in <paramref name="excludeEntityIds" />.
+        /// </summary>
+        /// <param name="container"></param>
+        /// <param name="excludeEntityIds">
+        ///     The entities that should not be included in the pack. Usually because
+        ///     the correction entity states will be appended later.
+        /// </param>
+        /// <returns></returns>
         public static SnapshotDeltaMemory PackWithFilter(DeltaSnapshotPackContainer container,
             EntityId[] excludeEntityIds)
         {

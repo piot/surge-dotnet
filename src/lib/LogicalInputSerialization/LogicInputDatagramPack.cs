@@ -12,6 +12,15 @@ namespace Piot.Surge.LogicalInputSerialization
 {
     public static class LogicInputDatagramPackOut
     {
+        /// <summary>
+        ///     Creates an Input Datagram that is ready to send over the transport.
+        ///     Calls <see cref="LogicInputDatagramSerialize.Serialize" />.
+        /// </summary>
+        /// <param name="sequenceOut"></param>
+        /// <param name="lastReceivedSnapshot"></param>
+        /// <param name="droppedSnapshotCount"></param>
+        /// <param name="inputs"></param>
+        /// <returns></returns>
         public static Memory<byte> CreateInputDatagram(OrderedDatagramsOut sequenceOut,
             TickId lastReceivedSnapshot, byte droppedSnapshotCount, LogicalInput.LogicalInput[] inputs)
         {

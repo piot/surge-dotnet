@@ -24,10 +24,8 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
         ///     Creates a pack payload that is used as part of the datagram
         ///     sent from host to clients.
         /// </summary>
-        /// <param name="deletedEntities"></param>
-        /// <param name="createdEntities"></param>
-        /// <param name="updatedEntities"></param>
-        /// <returns></returns>
+        /// <param name="deltaMemory"></param>
+        /// <returns>The deleted, created and updated memory packs</returns>
         public static SnapshotDeltaWithoutCorrectionPackMemory Pack(SnapshotDeltaMemory deltaMemory)
         {
             var writer = new OctetWriter(Constants.MaxSnapshotOctetSize);

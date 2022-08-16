@@ -11,6 +11,13 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
 {
     public static class PackUpdatedEntity
     {
+        /// <summary>
+        ///     Write an updated Entity. EntityId, FieldsMask, and the changed fields for the Entity.
+        /// </summary>
+        /// <param name="writer"></param>
+        /// <param name="entityId"></param>
+        /// <param name="changeMask"></param>
+        /// <param name="entitySerializer"></param>
         public static void Write(IOctetWriter writer, EntityId entityId, ChangedFieldsMask changeMask,
             IEntitySerializer entitySerializer)
         {

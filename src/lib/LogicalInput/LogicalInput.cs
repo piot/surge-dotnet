@@ -18,7 +18,7 @@ namespace Piot.Surge.LogicalInput
 
 
     /// <summary>
-    ///     Serialized Game specific input stored in the <c>LogicalInput.payload</c>.
+    ///     Serialized Game specific input stored in the <see cref="LogicalInput.payload" />.
     /// </summary>
     public struct LogicalInput
     {

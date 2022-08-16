@@ -18,6 +18,9 @@ namespace Piot.Surge.SnapshotDeltaPack
         public Dictionary<ulong, Memory<byte>> Entries { get; }
     }
 
+    /// <summary>
+    ///     Holds reusable packs of either updated, deleted or created serialized entities.
+    /// </summary>
     public class SnapshotEntityPackContainer : IFeedEntityPackToContainer, IReadPackContainer
     {
         public void Add(EntityId entityId, Memory<byte> payload)

@@ -25,6 +25,10 @@ namespace Piot.Surge
             }
         }
 
+        /// <summary>
+        ///     Overwrites all detected field changes in the <paramref name="world" />.
+        /// </summary>
+        /// <param name="world"></param>
         public static void Overwrite(IEntityContainer world)
         {
             Overwrite(world.AllEntities);

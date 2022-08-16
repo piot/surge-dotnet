@@ -7,6 +7,9 @@ using Piot.Surge.ChangeMask;
 
 namespace Piot.Surge.SnapshotDeltaPack
 {
+    /// <summary>
+    ///     Implements the minimum <see cref="IUpdatedEntity" /> interface.
+    /// </summary>
     public class UpdateEntity : IUpdatedEntity
     {
         private readonly IEntity entity;

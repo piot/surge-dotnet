@@ -11,7 +11,13 @@ namespace Piot.Surge.ChangeMaskSerialization
 {
     public static class ChangedFieldsMaskReader
     {
-        public static ChangedFieldsMask ReadFullChangeMask(IOctetReader reader)
+        /// <summary>
+        ///     Reads a <see cref="ChangedFieldsMask" /> from an octet stream.
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public static ChangedFieldsMask ReadChangedFieldMask(IOctetReader reader)
         {
 #if DEBUG
             if (reader.ReadUInt8() != Constants.FullChangeMaskSync)
@@ -29,7 +35,7 @@ namespace Piot.Surge.ChangeMaskSerialization
 
 
             var next = reader.ReadUInt16();
-            completeMask <<= 16;
+            completeMask <<= 15;
             completeMask |= next;
 
             return new ChangedFieldsMask { mask = completeMask };

@@ -16,7 +16,7 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
         }
 
         /// <summary>
-        ///     Serialized deleted, created and updated entities to the writer stream.
+        ///     Serialize deleted, created and updated entities to the writer stream.
         /// </summary>
         /// <param name="writer"></param>
         /// <param name="deltaMemory"></param>
