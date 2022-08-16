@@ -46,8 +46,9 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
             {
                 throw new Exception("out of sync");
             }
-#endif
+
             undoWriter.WriteUInt8(SnapshotSerialization.Constants.SnapshotDeltaSync);
+#endif
             var deletedEntities = new List<IEntity>();
             var deletedEntityCount = SnapshotDeltaReader.ReadEntityCount(reader);
 
@@ -82,9 +83,9 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
                 createdEntities.Add(entityToDeserialize);
                 entityToDeserialize.DeserializeAll(reader);
             }
-
+#if DEBUG
             undoWriter.WriteUInt8(SnapshotSerialization.Constants.SnapshotDeltaCreatedSync);
-
+#endif
             WriteEntityCount(deletedEntityCount, undoWriter);
             foreach (var deletedEntity in deletedEntities)
             {
@@ -104,7 +105,9 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
 
             var updatedEntities = new List<SnapshotDeltaReaderInfoEntity>();
             var updatedEntityCount = SnapshotDeltaReader.ReadEntityCount(reader);
+#if DEBUG
             undoWriter.WriteUInt8(SnapshotSerialization.Constants.SnapshotDeltaUpdatedSync);
+#endif
             WriteEntityCount(updatedEntityCount, undoWriter);
             for (var i = 0; i < updatedEntityCount; ++i)
             {
