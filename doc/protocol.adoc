@@ -47,6 +47,8 @@ If the highest bit is set (0x80), then this is the last packet and the payload c
 |===
 
 
+For more info about the `PayloadSlice`, check out xref:snapshot.adoc#SnapshotMessage[Snapshot Message]
+
 === Predicted Logical Input Datagrams
 Sent by client to authoritative host for the locally predicted avatars on the client (usually just one).
 

@@ -1,0 +1,84 @@
+= Snapshot Message
+
+A more detailed look at the contents of an individual Snapshot Message.
+
+== Snapshot Message
+
+|===
+|Type|Name|Description
+
+|`U16`
+|DeletedCount
+|Number of following EntityIds
+
+|`U64[DeletedCount]`
+|DeletedEntityIds
+|EntityIds that was deleted
+
+|`U16`
+|CreatedCount
+|Number of following created entities
+
+|`<<Created Entity Info>>[CreatedCount]`
+|CreatedEntityInfos
+|<<Created Entity Info>>
+
+|`U16`
+|UpdatedCount
+|Number of following updated entities
+
+|`<<Updated Entity Info>>[UpdatedCount]`
+|UpdatedEntityInfos
+|<<Updated Entity Info>>
+
+|===
+
+=== Entity Info
+
+==== Created Entity Info
+
+|===
+|Type|Name|Description
+
+|`U64`
+|EntityId
+|ID of the created entity
+
+|`U16`
+|ArchetypeID
+|The archetype / "TypeID" of the entity to create
+
+|`U8[?]`
+|EntityFields
+|Payload with all the field values in the Entity serialized in order.
+
+|===
+
+==== Updated Entity Info
+
+[cols="a,a,a"]
+|===
+|Type|Name|Description
+
+|`U64`
+|EntityId
+|ID of the updated entity
+
+|`U16`
+|`ChangedFieldsMaskLow`
+|If the highest bit is set, the `ChangedFieldsMaskHigh` is following. `0x7fff` is used as the bits.
+
+|`U16` (if high bit set in `ChangedFieldsMaskLow`)
+|`ChangedFieldsMaskHi`
+|If the highest bit is set in `ChangedFieldsMaskLow`, then the 16 bits are shifted 15 bits to the left. The combined value is called `ChangedFieldsMask`.
+
+[source,csharp]
+----
+ChangedFieldsMask = (ChangedFieldsMaskHi << 15) \| ChangedFieldsMaskLow & 0x7fff)
+----
+
+|`U8[?]`
+|EntityFields
+|Payload with the field values that have a bit set in `ChangedFieldsMask` in order.
+
+|===
