@@ -42,5 +42,7 @@ namespace Piot.Clog
             where T0 : notnull where T1 : notnull where T2 : notnull;
 
         public void Error(string s, object[] args);
+
+        public ILog SubLog(string debugPrefix);
     }
 }

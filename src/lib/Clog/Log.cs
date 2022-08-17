@@ -13,10 +13,12 @@ namespace Piot.Clog
     {
         private readonly ILogTarget target;
         private readonly LogLevel threshold = LogLevel.Debug;
+        private string prefix;
 
-        public Log(ILogTarget target)
+        public Log(ILogTarget target, string prefix="")
         {
             this.target = target;
+            this.prefix = prefix;
         }
 
         public void Info(string message)
@@ -26,7 +28,7 @@ namespace Piot.Clog
                 return;
             }
 
-            target.Log(LogLevel.Info, message, Array.Empty<object>());
+            target.Log(LogLevel.Info, prefix, message, Array.Empty<object>());
         }
 
         public void Info<T>(string message, T arg) where T : notnull
@@ -36,7 +38,7 @@ namespace Piot.Clog
                 return;
             }
 
-            target.Log(LogLevel.Info, message, new object[] { arg });
+            target.Log(LogLevel.Info, prefix, message, new object[] { arg });
         }
 
         public void Info<T0, T1>(string message, T0 arg0, T1 arg1) where T0 : notnull where T1 : notnull
@@ -46,7 +48,7 @@ namespace Piot.Clog
                 return;
             }
 
-            target.Log(LogLevel.Info, message, new object[] { arg0, arg1 });
+            target.Log(LogLevel.Info, prefix, message, new object[] { arg0, arg1 });
         }
 
         public void Info<T0, T1, T2>(string message, T0 arg0, T1 arg1, T2 arg2)
@@ -57,7 +59,7 @@ namespace Piot.Clog
                 return;
             }
 
-            target.Log(LogLevel.Info, message, new object[] { arg0, arg1, arg2 });
+            target.Log(LogLevel.Info, prefix, message, new object[] { arg0, arg1, arg2 });
         }
 
         public void Info(string message, object[] args)
@@ -67,7 +69,7 @@ namespace Piot.Clog
                 return;
             }
 
-            target.Log(LogLevel.Info, message, args);
+            target.Log(LogLevel.Info, prefix, message, args);
         }
 
         public void Warn(string message)
@@ -77,7 +79,7 @@ namespace Piot.Clog
                 return;
             }
 
-            target.Log(LogLevel.Warning, message, Array.Empty<object>());
+            target.Log(LogLevel.Warning, prefix, message, Array.Empty<object>());
         }
 
         public void Warn<T>(string message, T arg) where T : notnull
@@ -87,7 +89,7 @@ namespace Piot.Clog
                 return;
             }
 
-            target.Log(LogLevel.Warning, message, new object[] { arg });
+            target.Log(LogLevel.Warning, prefix, message, new object[] { arg });
         }
 
         public void Warn<T0, T1>(string message, T0 arg0, T1 arg1) where T0 : notnull where T1 : notnull
@@ -97,7 +99,7 @@ namespace Piot.Clog
                 return;
             }
 
-            target.Log(LogLevel.Warning, message, new object[] { arg0, arg1 });
+            target.Log(LogLevel.Warning, prefix, message, new object[] { arg0, arg1 });
         }
 
         public void Warn<T0, T1, T2>(string message, T0 arg0, T1 arg1, T2 arg2)
@@ -108,7 +110,7 @@ namespace Piot.Clog
                 return;
             }
 
-            target.Log(LogLevel.Warning, message, new object[] { arg0, arg1, arg2 });
+            target.Log(LogLevel.Warning, prefix, message, new object[] { arg0, arg1, arg2 });
         }
 
         public void Warn(string message, object[] args)
@@ -118,7 +120,7 @@ namespace Piot.Clog
                 return;
             }
 
-            target.Log(LogLevel.Warning, message, args);
+            target.Log(LogLevel.Warning, prefix, message, args);
         }
 
         public void Debug(string message)
@@ -128,7 +130,7 @@ namespace Piot.Clog
                 return;
             }
 
-            target.Log(LogLevel.Debug, message, Array.Empty<object>());
+            target.Log(LogLevel.Debug, prefix, message, Array.Empty<object>());
         }
 
         public void Debug<T>(string message, T arg) where T : notnull
@@ -138,7 +140,7 @@ namespace Piot.Clog
                 return;
             }
 
-            target.Log(LogLevel.Warning, message, new object[] { arg });
+            target.Log(LogLevel.Warning, prefix, message, new object[] { arg });
         }
 
         public void Debug<T0, T1>(string message, T0 arg0, T1 arg1) where T0 : notnull where T1 : notnull
@@ -148,7 +150,7 @@ namespace Piot.Clog
                 return;
             }
 
-            target.Log(LogLevel.Debug, message, new object[] { arg0, arg1 });
+            target.Log(LogLevel.Debug, prefix, message, new object[] { arg0, arg1 });
         }
 
         public void Debug<T0, T1, T2>(string message, T0 arg0, T1 arg1, T2 arg2)
@@ -159,7 +161,7 @@ namespace Piot.Clog
                 return;
             }
 
-            target.Log(LogLevel.Debug, message, new object[] { arg0, arg1, arg2 });
+            target.Log(LogLevel.Debug, prefix, message, new object[] { arg0, arg1, arg2 });
         }
 
         public void Debug(string message, object[] args)
@@ -169,7 +171,7 @@ namespace Piot.Clog
                 return;
             }
 
-            target.Log(LogLevel.Debug, message, args);
+            target.Log(LogLevel.Debug, prefix, message, args);
         }
 
         public void Error(string message)
@@ -179,7 +181,7 @@ namespace Piot.Clog
                 return;
             }
 
-            target.Log(LogLevel.Debug, message, Array.Empty<object>());
+            target.Log(LogLevel.Debug, prefix, message, Array.Empty<object>());
         }
 
         public void Error<T>(string message, T arg) where T : notnull
@@ -189,7 +191,7 @@ namespace Piot.Clog
                 return;
             }
 
-            target.Log(LogLevel.Error, message, new object[] { arg });
+            target.Log(LogLevel.Error, prefix, message, new object[] { arg });
         }
 
         public void Error<T0, T1>(string message, T0 arg0, T1 arg1) where T0 : notnull where T1 : notnull
@@ -199,7 +201,7 @@ namespace Piot.Clog
                 return;
             }
 
-            target.Log(LogLevel.Error, message, new object[] { arg0, arg1 });
+            target.Log(LogLevel.Error, prefix, message, new object[] { arg0, arg1 });
         }
 
         public void Error<T0, T1, T2>(string message, T0 arg0, T1 arg1, T2 arg2)
@@ -210,7 +212,7 @@ namespace Piot.Clog
                 return;
             }
 
-            target.Log(LogLevel.Error, message, new object[] { arg0, arg1, arg2 });
+            target.Log(LogLevel.Error, prefix, message, new object[] { arg0, arg1, arg2 });
         }
 
         public void Error(string message, object[] args)
@@ -220,7 +222,12 @@ namespace Piot.Clog
                 return;
             }
 
-            target.Log(LogLevel.Error, message, args);
+            target.Log(LogLevel.Error, prefix, message, args);
+        }
+
+        public ILog SubLog(string debugPrefix)
+        {
+            return new Log(target, prefix != "" ?  "/" + debugPrefix : debugPrefix);
         }
     }
 }

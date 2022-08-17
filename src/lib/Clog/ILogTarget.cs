@@ -7,6 +7,6 @@ namespace Piot.Clog
 {
     public interface ILogTarget
     {
-        public void Log(LogLevel level, string message, object[] args);
+        public void Log(LogLevel level, string prefix, string message, object[] args);
     }
 }
