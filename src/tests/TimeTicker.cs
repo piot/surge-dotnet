@@ -21,7 +21,6 @@ public class TimeTickerTests
         log = new Log(logTarget);
     }
 
-
     [Fact]
     public void TickZeroTimes()
     {
@@ -33,7 +32,6 @@ public class TimeTickerTests
 
         Assert.Equal(0, tickCount);
     }
-
 
     [Fact]
     public void TickOneTime()
@@ -70,12 +68,41 @@ public class TimeTickerTests
         var deltaTimeMs = new Milliseconds(0);
         var now = new Milliseconds(42);
 
-        Assert.Throws<ArgumentException>(() =>
+        var exception = Assert.Throws<ArgumentOutOfRangeException>(() =>
         {
             new TimeTicker(now, () => { tickCount++; }, deltaTimeMs, log.SubLog("IllegalDeltaTime"));
         });
+
+        log.Debug("exception {Exception}", exception);
+
+        Assert.Equal("deltaTimeMs", exception.ParamName);
         Assert.Equal(0, tickCount);
     }
+
+
+#if DEBUG
+    [Fact]
+#endif
+    public void IllegalUpdateTime()
+    {
+        var tickCount = 0;
+        var deltaTimeMs = new Milliseconds(32);
+        var now = new Milliseconds(10);
+
+        var ticker = new TimeTicker(now, () => { tickCount++; }, deltaTimeMs, log.SubLog("CheckThatRestIsUsed"));
+
+        ticker.Update(new Milliseconds(10 + 32 + 31));
+        Assert.Equal(1, tickCount);
+
+        var exception = Assert.Throws<ArgumentOutOfRangeException>(() =>
+        {
+            ticker.Update(new Milliseconds(10 + 32 + 30));
+        });
+
+        Assert.Equal("now", exception.ParamName);
+        Assert.Equal(1, tickCount);
+    }
+
 
     [Fact]
     public void CheckThatRestIsUsed()
@@ -84,10 +111,9 @@ public class TimeTickerTests
         var deltaTimeMs = new Milliseconds(32);
         var now = new Milliseconds(10);
 
-        var ticker = new TimeTicker(now, () => { tickCount++; }, deltaTimeMs, log.SubLog("TwoTimes"));
+        var ticker = new TimeTicker(now, () => { tickCount++; }, deltaTimeMs, log.SubLog("CheckThatRestIsUsed"));
 
         ticker.Update(new Milliseconds(10 + 32 + 31));
-
         Assert.Equal(1, tickCount);
 
         ticker.Update(new Milliseconds(10 + 32 + 33));

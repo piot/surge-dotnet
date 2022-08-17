@@ -13,24 +13,41 @@ namespace Piot.Surge.TimeTicker
     {
         private readonly long deltaTimeMs;
         private readonly ILog log;
-        private Milliseconds lastTick;
         private readonly Action Tick;
+        private Milliseconds lastTick;
+#if DEBUG
+        private Milliseconds lastUpdateTime;
+#endif
 
         public TimeTicker(Milliseconds now, Action action, Milliseconds deltaTimeMs, ILog log)
         {
             if (deltaTimeMs.ms <= 0)
             {
-                throw new ArgumentException($"illegal monotonic time <= 0 {deltaTimeMs}", nameof(deltaTimeMs));
+                throw new ArgumentOutOfRangeException(nameof(deltaTimeMs), deltaTimeMs.ms,
+                    $"illegal monotonic time <= 0 {deltaTimeMs}");
             }
 
             Tick = action;
             lastTick.ms = now.ms;
             this.deltaTimeMs = deltaTimeMs.ms;
             this.log = log;
+#if DEBUG
+            lastUpdateTime = now;
+#endif
         }
 
         public void Update(Milliseconds now)
         {
+#if DEBUG
+            if (now.ms < lastUpdateTime.ms)
+            {
+                throw new ArgumentOutOfRangeException(nameof(now), now.ms,
+                    $"monotonic time can only stand still or move forward ${now} ${lastTick}");
+            }
+
+            lastUpdateTime.ms = now.ms;
+
+#endif
             var iterationCount = (now.ms - lastTick.ms) / deltaTimeMs;
             if (iterationCount <= 0)
             {
