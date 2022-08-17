@@ -13,9 +13,9 @@ namespace Piot.Clog
     {
         private readonly ILogTarget target;
         private readonly LogLevel threshold = LogLevel.Debug;
-        private string prefix;
+        private readonly string prefix;
 
-        public Log(ILogTarget target, string prefix="")
+        public Log(ILogTarget target, string prefix = "")
         {
             this.target = target;
             this.prefix = prefix;
@@ -227,7 +227,7 @@ namespace Piot.Clog
 
         public ILog SubLog(string debugPrefix)
         {
-            return new Log(target, prefix != "" ?  "/" + debugPrefix : debugPrefix);
+            return new Log(target, prefix != "" ? "/" + debugPrefix : debugPrefix);
         }
     }
 }
