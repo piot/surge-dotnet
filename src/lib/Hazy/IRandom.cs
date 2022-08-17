@@ -3,12 +3,10 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using Piot.Flood;
-
-namespace Piot.Surge.Pulse.Client
+namespace Piot.Hazy
 {
-    public interface IClientPredictorCorrections
+    public interface IRandom
     {
-        public void ReadCorrections(IOctetReader snapshotReader);
+        int Random(int max);
     }
 }

@@ -3,12 +3,16 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using Piot.Flood;
+using System;
+using Piot.MonotonicTime;
+using Piot.Transport;
 
-namespace Piot.Surge.Pulse.Client
+namespace Piot.Hazy
 {
-    public interface IClientPredictorCorrections
+    public class Packet
     {
-        public void ReadCorrections(IOctetReader snapshotReader);
+        public Milliseconds monotonicTimeMs;
+        public byte[] payload = Array.Empty<byte>();
+        public RemoteEndpointId endPoint;
     }
 }

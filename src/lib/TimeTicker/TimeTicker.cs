@@ -42,7 +42,7 @@ namespace Piot.Surge.TimeTicker
             {
                 if (value.ms <= 0)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(deltaTimeMs), deltaTimeMs.ms,
+                    throw new ArgumentOutOfRangeException(nameof(deltaTimeMs), deltaTimeMs,
                         $"illegal monotonic time <= 0 {deltaTimeMs}");
                 }
 

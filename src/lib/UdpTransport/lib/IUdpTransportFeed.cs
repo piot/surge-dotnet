@@ -3,12 +3,12 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using Piot.Flood;
+using System;
 
-namespace Piot.Surge.Pulse.Client
+namespace Piot.UdpTransport
 {
-    public interface IClientPredictorCorrections
+    public interface IUdpTransportFeed
     {
-        public void ReadCorrections(IOctetReader snapshotReader);
+        void Feed(ReadOnlySpan<byte> octets);
     }
 }

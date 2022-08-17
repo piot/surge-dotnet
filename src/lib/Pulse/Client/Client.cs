@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Peter Bjorklund. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 using System;
 using Piot.Clog;
 using Piot.Flood;
@@ -6,7 +11,7 @@ using Piot.Surge.DatagramType;
 using Piot.Surge.LogicalInput;
 using Piot.Surge.OrderedDatagrams;
 using Piot.Surge.SnapshotSerialization;
-using Piot.Surge.Transport;
+using Piot.Transport;
 
 namespace Piot.Surge.Pulse.Client
 {
@@ -31,7 +36,7 @@ namespace Piot.Surge.Pulse.Client
         private void ReceiveSnapshot(IOctetReader reader)
         {
             var unionOfSnapshots = SnapshotDeltaUnionReader.Read(reader);
-            ghostPlayback.FeedSnapshot(unionOfSnapshots);
+            ghostPlayback.FeedSnapshotsUnion(unionOfSnapshots);
         }
         
         private void ReceiveDatagramFromHost(IOctetReader reader)
@@ -46,7 +51,7 @@ namespace Piot.Surge.Pulse.Client
             switch (datagramType)
             {
                 case DatagramType.DatagramType.DeltaSnapshots:
-                    ReceiveSnapshot();
+                    ReceiveSnapshot(reader);
                     break;
                 default:
                     throw new Exception($"illegal datagram type {datagramType} from client ${id}");
@@ -63,7 +68,7 @@ namespace Piot.Surge.Pulse.Client
                     return;
                 }
 
-                var datagramReader = new OctetReader(datagram);
+                var datagramReader = new OctetReader(datagram.ToArray());
                 ReceiveDatagramFromHost(datagramReader);
             }
         }

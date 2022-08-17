@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Peter Bjorklund. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 using System;
 using System.Collections.Generic;
 using Piot.Clog;
@@ -7,13 +12,13 @@ using Piot.Surge.Snapshot;
 using Piot.Surge.SnapshotDeltaInternal;
 using Piot.Surge.SnapshotDeltaPack;
 using Piot.Surge.SnapshotDeltaPack.Serialization;
-using Piot.Surge.Transport;
+using Piot.Transport;
 
 namespace Piot.Surge.Pulse.Host
 {
     public class Host
     {
-        private readonly ITransportHost transport;
+        private readonly ITransport transport;
         private readonly Dictionary<uint, ConnectionToClient> connections = new();
         private readonly List<ConnectionToClient> orderedConnections = new();
         private TickId serverTickId;
@@ -22,7 +27,7 @@ namespace Piot.Surge.Pulse.Host
         private readonly IEntityContainerWithChanges authoritativeWorld;
         private readonly DeltaSnapshotPackContainerHistory snapshotHistory = new();
         
-        public Host(ITransportHost transport, ILog log)
+        public Host(ITransport transport, ILog log)
         {
             authoritativeWorld = new AuthoritativeWorld();
             this.transport = transport;
@@ -100,7 +105,7 @@ namespace Piot.Surge.Pulse.Host
                     connections.Add(clientId.Value, connectionToClient);
                 }
 
-                var datagramReader = new OctetReader(datagram);
+                var datagramReader = new OctetReader(datagram.ToArray());
                 connectionToClient.Receive(datagramReader, serverTickId);
             }
         }

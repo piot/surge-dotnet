@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Peter Bjorklund. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 using System;
 using Piot.Flood;
 using Piot.Surge.DatagramType;
@@ -5,16 +10,16 @@ using Piot.Surge.LogicalInput;
 using Piot.Surge.LogicalInputSerialization;
 using Piot.Surge.OrderedDatagrams;
 using Piot.Surge.Snapshot;
-using Piot.Surge.Transport;
+using Piot.Transport;
 
 namespace Piot.Surge.Pulse.Host
 {
     public class ConnectionToClient
     {
         private OrderedDatagramsIn orderedDatagramsIn = new (0);
-        private ClientId id;
+        private RemoteEndpointId id;
         private LogicalInputQueue inputQueue = new();
-        public ConnectionToClient(ClientId id)
+        public ConnectionToClient(RemoteEndpointId id)
         {
             this.id = id;
         }
@@ -29,12 +34,12 @@ namespace Piot.Surge.Pulse.Host
 
             var first = logicalInputs[0];
 
-            if (first.appliedAtTickId > inputQueue.WaitingForTickId)
+            if (first.appliedAtTickId.tickId > inputQueue.WaitingForTickId.tickId)
             {
                 
             }
 
-            if (first.appliedAtTickId < serverIsAtTickId)
+            if (first.appliedAtTickId.tickId < serverIsAtTickId.tickId)
             {
                 
             }
