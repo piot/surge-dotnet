@@ -56,7 +56,6 @@ A more detailed look at the contents of an individual Snapshot Message.
 
 ==== Updated Entity Info
 
-[cols="a,a,2a"]
 [width=95%]
 |===
 |Type|Name|Description
@@ -71,7 +70,7 @@ A more detailed look at the contents of an individual Snapshot Message.
 
 |`U16` (if high bit set in `ChangedFieldsMaskLow`)
 |`ChangedFieldsMaskHi`
-|If the highest bit is set in `ChangedFieldsMaskLow`, then the 16 bits are shifted 15 bits to the left. The combined value is called `ChangedFieldsMask`.
+a|If the highest bit is set in `ChangedFieldsMaskLow`, then the 16 bits are shifted 15 bits to the left. The combined value is called `ChangedFieldsMask`.
 
 [source,csharp]
 ----
