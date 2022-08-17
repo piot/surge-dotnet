@@ -16,10 +16,10 @@ public class TestOutputLogger : ILogTarget
         this.output = output;
     }
 
-    public void Log(LogLevel level, string message, object[] args)
+    public void Log(LogLevel level, string prefix, string message, object[] args)
     {
         var strings = args.Select(x => x.ToString());
-        var line = $"{level} : {message} {string.Join(",", strings)}";
+        var line = $"{level} : [{prefix}] {message} {string.Join(",", strings)}";
         output.WriteLine(line);
     }
 }
