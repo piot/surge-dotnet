@@ -557,11 +557,11 @@ public class UnitTest1
         var unionReader = new OctetReader(allSerializedSnapshots.payload);
         var deserializedUnion = SnapshotDeltaUnionReader.Read(unionReader);
 
-        var firstTickId = allSerializedSnapshots.tickIdRange.containsFromTickId;
-        var lastTickId = allSerializedSnapshots.tickIdRange.tickId;
+        var firstTickId = allSerializedSnapshots.tickIdRange.startTickId;
+        var lastTickId = allSerializedSnapshots.tickIdRange.lastTickId;
 
-        Assert.Equal(firstTickId.tickId, deserializedUnion.tickIdRange.containsFromTickId.tickId);
-        Assert.Equal(lastTickId.tickId, deserializedUnion.tickIdRange.tickId.tickId);
+        Assert.Equal(firstTickId.tickId, deserializedUnion.tickIdRange.startTickId.tickId);
+        Assert.Equal(lastTickId.tickId, deserializedUnion.tickIdRange.lastTickId.tickId);
 
         var firstPack = deserializedUnion.packs[0];
         var firstSnapshotReader = new OctetReader(firstPack.payload);

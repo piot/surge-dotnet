@@ -17,11 +17,11 @@ namespace Piot.Surge
         public const uint MaxSnapshotOctetSize = 64 * MaxDatagramOctetSize;
     }
 
-    public class SnapshotDeltaPackUnionToDatagramsWriter
+    public static class SnapshotDeltaPackUnionToDatagramsWriter
     {
         public const uint PayloadOctetCountPerDatagram = 1100;
 
-        public void Write(Action<Memory<byte>> send, SerializedSnapshotDeltaPackUnionFlattened pack,
+        public static void Write(Action<Memory<byte>> send, SerializedSnapshotDeltaPackUnionFlattened pack,
             OrderedDatagramsOutIncrease orderedDatagramsIncrease)
         {
             var datagramCount = pack.payload.Length / PayloadOctetCountPerDatagram + 1;

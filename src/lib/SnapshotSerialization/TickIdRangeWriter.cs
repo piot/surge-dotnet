@@ -17,9 +17,9 @@ namespace Piot.Surge.SnapshotSerialization
         /// <param name="tickIdRange"></param>
         public static void Write(IOctetWriter writer, TickIdRange tickIdRange)
         {
-            TickIdWriter.Write(writer, tickIdRange.tickId);
+            TickIdWriter.Write(writer, tickIdRange.lastTickId);
             writer.WriteUInt8(
-                (byte)(tickIdRange.tickId.tickId - tickIdRange.containsFromTickId.tickId));
+                (byte)(tickIdRange.lastTickId.tickId - tickIdRange.startTickId.tickId));
         }
     }
 }

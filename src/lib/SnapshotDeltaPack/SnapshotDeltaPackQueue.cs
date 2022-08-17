@@ -25,6 +25,8 @@ namespace Piot.Surge.SnapshotDeltaPack
             lastInsertedTickId = pack.tickId;
         }
 
+        public TickId WantsTickId => new (lastInsertedTickId.tickId + 1);
+
         public SnapshotDeltaPack Dequeue()
         {
             return packs.Dequeue();

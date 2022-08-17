@@ -5,7 +5,7 @@
 
 namespace Piot.Surge
 {
-    public interface IEntityContainer : IEntityCreation
+    public interface IEntityContainer
     {
         IEntity[] AllEntities { get; }
         public IEntity FetchEntity(EntityId entityId);
