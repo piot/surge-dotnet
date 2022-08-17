@@ -3,12 +3,15 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using Piot.MonotonicTime;
+using System;
 
-namespace Piot.Surge.TimeTicker
+namespace Piot.MonotonicTime
 {
-    public interface ITimeTicker
+    public class MonotonicTimeEnvironmentMs : IMonotonicTimeMs
     {
-        public void Update(Milliseconds now);
+        /// <summary>
+        ///     Returns the monotonic time in milliseconds. Implementation is using the Environment tick count
+        /// </summary>
+        public Milliseconds TimeInMs => new() { ms = Environment.TickCount64 };
     }
 }

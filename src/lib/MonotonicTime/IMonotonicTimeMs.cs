@@ -3,12 +3,10 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using Piot.MonotonicTime;
-
-namespace Piot.Surge.TimeTicker
+namespace Piot.MonotonicTime
 {
-    public interface ITimeTicker
+    public interface IMonotonicTimeMs
     {
-        public void Update(Milliseconds now);
+        Milliseconds TimeInMs { get; }
     }
 }
