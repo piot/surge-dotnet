@@ -54,6 +54,7 @@ namespace Piot.Hazy
             dropPercentage = drop;
             tamperPercentage = tamper;
             duplicatePercentage = duplicate;
+            
             var sum = drop + tamper + duplicate;
             if (sum > 100)
             {
@@ -70,7 +71,6 @@ namespace Piot.Hazy
                 thresholds.Add(new() { packetAction = PacketAction.Tamper, threshold = drop + tamper });
             }
 
-            
             if (duplicate > 0)
             {
                 thresholds.Add(new() { packetAction = PacketAction.Duplicate, threshold = drop + tamper + duplicate });

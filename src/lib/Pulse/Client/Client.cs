@@ -20,7 +20,7 @@ namespace Piot.Surge.Pulse.Client
         private readonly ILog log;
         private readonly ITransportClient transport;
         private readonly ClientPredictor predictor;
-        private ClientGhostPlayback ghostPlayback;
+        private readonly ClientGhostPlayback ghostPlayback;
         private ClientWorld world;
         private OrderedDatagramsIn orderedDatagramsIn = new (0);
         
@@ -46,6 +46,10 @@ namespace Piot.Surge.Pulse.Client
             {
                 orderedDatagramsIn = new OrderedDatagramsIn(sequenceIn.Value);
             }
+            else
+            {
+                return;
+            }
 
             var datagramType = DatagramTypeReader.Read(reader);
             switch (datagramType)
@@ -54,7 +58,7 @@ namespace Piot.Surge.Pulse.Client
                     ReceiveSnapshot(reader);
                     break;
                 default:
-                    throw new Exception($"illegal datagram type {datagramType} from client ${id}");
+                    throw new Exception($"illegal datagram type {datagramType} from host");
             }
         }
         

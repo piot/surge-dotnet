@@ -38,14 +38,16 @@ namespace Piot.Hazy
         {
             foreach (var queuedPacket in queue)
             {
-                if (queuedPacket.monotonicTimeMs.IsBeforeOrAt(atOrBeforeMs))
+                if (!queuedPacket.monotonicTimeMs.IsBeforeOrAt(atOrBeforeMs))
                 {
-                    packet = queuedPacket;
-
-                    queue.Remove(queuedPacket);
-
-                    return true;
+                    continue;
                 }
+
+                packet = queuedPacket;
+
+                queue.Remove(queuedPacket);
+
+                return true;
             }
 
             packet = new();

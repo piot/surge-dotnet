@@ -58,7 +58,7 @@ namespace Piot.Hazy
             var packetAction = decider.Decide(new Percentage(chance));
 
             var now = timeProvider.TimeInMs;
-            var withLatency = new Milliseconds(now.ms + latencySimulator.LatencyInMs);
+            var withLatency = new Milliseconds(now.ms + latencySimulator.LatencyInMs.ms);
 
             switch (packetAction)
             {
@@ -66,7 +66,7 @@ namespace Piot.Hazy
                     break;
                 case PacketAction.Duplicate:
                     outQueue.AddPacket(new Packet {monotonicTimeMs = withLatency, payload = octets.ToArray()});
-                    var nextLatency = new Milliseconds(now.ms + latencySimulator.LatencyInMs+1);
+                    var nextLatency = new Milliseconds(now.ms + latencySimulator.LatencyInMs.ms+1);
                     outQueue.AddPacket(new Packet {monotonicTimeMs = nextLatency, payload = octets.ToArray()});
                     break;
                 case PacketAction.Normal:

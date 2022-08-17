@@ -330,7 +330,7 @@ public class UnitTest1
 
         var packetQueue = new SnapshotDeltaPackQueue();
 
-        var world = new World(new GeneratedEntityCreation());
+        var world = new ClientWorld(new GeneratedEntityCreation());
 
         var spawnedAvatar = world.SpawnEntity(avatarInfo);
 
@@ -424,7 +424,7 @@ public class UnitTest1
     }
 
 
-    private static (SnapshotDeltaInternal, SnapshotDelta, SnapshotDeltaPack) ScanConvertAndCreate(World worldToScan,
+    private static (SnapshotDeltaInternal, SnapshotDelta, SnapshotDeltaPack) ScanConvertAndCreate(AuthoritativeWorld worldToScan,
         TickId tickId)
     {
         var deltaSnapshotInternal = SnapshotDeltaCreator.Scan(worldToScan, tickId);
@@ -455,7 +455,7 @@ public class UnitTest1
             Current = new AvatarLogic { ammoCount = 100, fireButtonIsDown = false }
         };
 
-        var world = new World(new GeneratedEntityCreation());
+        var world = new AuthoritativeWorld();
 
         var spawnedAvatar = world.SpawnEntity(avatarInfo);
 
@@ -551,7 +551,7 @@ public class UnitTest1
     public void BasicUndo()
     {
         var (allSerializedSnapshots, spawnedAvatarId) = PrepareThreeServerSnapshotDeltas();
-        var clientWorld = new World(new GeneratedEntityCreation()) as IEntityContainer;
+        var clientWorld = new ClientWorld(new GeneratedEntityCreation()) as IEntityContainer;
 
         var undoWriter = new OctetWriter(1200);
         var unionReader = new OctetReader(allSerializedSnapshots.payload);
