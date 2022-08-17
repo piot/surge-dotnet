@@ -11,10 +11,10 @@ namespace Piot.Surge.TimeTicker
 {
     public class TimeTicker : ITimeTicker
     {
-        private Action Tick;
-        private Milliseconds lastTick;
         private readonly long deltaTimeMs;
         private readonly ILog log;
+        private Milliseconds lastTick;
+        private readonly Action Tick;
 
         public TimeTicker(Milliseconds now, Action action, Milliseconds deltaTimeMs, ILog log)
         {
@@ -22,12 +22,13 @@ namespace Piot.Surge.TimeTicker
             {
                 throw new ArgumentException($"illegal monotonic time <= 0 {deltaTimeMs}", nameof(deltaTimeMs));
             }
+
             Tick = action;
             lastTick.ms = now.ms;
             this.deltaTimeMs = deltaTimeMs.ms;
             this.log = log;
         }
-        
+
         public void Update(Milliseconds now)
         {
             var iterationCount = (now.ms - lastTick.ms) / deltaTimeMs;
