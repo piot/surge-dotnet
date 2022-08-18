@@ -11,9 +11,9 @@ namespace Piot.Surge.TimeTicker
 {
     public class TimeTicker : ITimeTicker
     {
-        private readonly long deltaTimeMs;
         private readonly ILog log;
         private readonly Action Tick;
+        private long deltaTimeMs;
         private Milliseconds lastTick;
 #if DEBUG
         private Milliseconds lastUpdateTime;
@@ -35,6 +35,21 @@ namespace Piot.Surge.TimeTicker
             lastUpdateTime = now;
 #endif
         }
+
+        public Milliseconds DeltaTime
+        {
+            set
+            {
+                if (value.ms <= 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(deltaTimeMs), deltaTimeMs,
+                        $"illegal monotonic time <= 0 {deltaTimeMs}");
+                }
+
+                deltaTimeMs = value.ms;
+            }
+        }
+
 
         public void Update(Milliseconds now)
         {

@@ -21,6 +21,8 @@ namespace Piot.Surge.LogicalInput
 
         public LogicalInput[] Collection => queue.ToArray();
 
+        public TickId WaitingForTickId => new(lastFrameId.tickId + 1);
+
         public void AddLogicalInput(LogicalInput logicalInput)
         {
             if (lastFrameId.tickId >= logicalInput.appliedAtTickId.tickId)

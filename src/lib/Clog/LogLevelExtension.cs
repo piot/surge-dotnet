@@ -16,9 +16,9 @@ namespace Piot.Clog
                 LogLevel.LowLevel => "LowLevel",
                 LogLevel.Debug => "Debug",
                 LogLevel.Info => "Info",
+                LogLevel.Notice => "Notice",
                 LogLevel.Warning => "Warning",
                 LogLevel.Error => "Error",
-                LogLevel.Critical => "Critical",
                 _ => throw new ArgumentOutOfRangeException(nameof(level), level, null)
             };
         }

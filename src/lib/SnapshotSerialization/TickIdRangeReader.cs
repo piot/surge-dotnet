@@ -20,8 +20,8 @@ namespace Piot.Surge.SnapshotSerialization
             var currentId = TickIdReader.Read(reader);
             return new TickIdRange
             {
-                tickId = currentId,
-                containsFromTickId = new TickId { tickId = currentId.tickId - reader.ReadUInt8() }
+                lastTickId = currentId,
+                startTickId = new TickId { tickId = currentId.tickId - reader.ReadUInt8() }
             };
         }
     }

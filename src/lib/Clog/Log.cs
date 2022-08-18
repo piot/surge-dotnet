@@ -135,12 +135,12 @@ namespace Piot.Clog
 
         public void Debug<T>(string message, T arg) where T : notnull
         {
-            if (threshold > LogLevel.Warning)
+            if (threshold > LogLevel.Debug)
             {
                 return;
             }
 
-            target.Log(LogLevel.Warning, prefix, message, new object[] { arg });
+            target.Log(LogLevel.Debug, prefix, message, new object[] { arg });
         }
 
         public void Debug<T0, T1>(string message, T0 arg0, T1 arg1) where T0 : notnull where T1 : notnull
@@ -174,14 +174,118 @@ namespace Piot.Clog
             target.Log(LogLevel.Debug, prefix, message, args);
         }
 
-        public void Error(string message)
+        public void DebugLowLevel(string message)
         {
-            if (threshold > LogLevel.Debug)
+            if (threshold > LogLevel.LowLevel)
             {
                 return;
             }
 
-            target.Log(LogLevel.Debug, prefix, message, Array.Empty<object>());
+            target.Log(LogLevel.LowLevel, prefix, message, Array.Empty<object>());
+        }
+
+        public void DebugLowLevel<T>(string message, T arg) where T : notnull
+        {
+            if (threshold > LogLevel.LowLevel)
+            {
+                return;
+            }
+
+            target.Log(LogLevel.LowLevel, prefix, message, new object[] { arg });
+        }
+
+        public void DebugLowLevel<T0, T1>(string message, T0 arg0, T1 arg1) where T0 : notnull where T1 : notnull
+        {
+            if (threshold > LogLevel.LowLevel)
+            {
+                return;
+            }
+
+            target.Log(LogLevel.LowLevel, prefix, message, new object[] { arg0, arg1 });
+        }
+
+        public void DebugLowLevel<T0, T1, T2>(string message, T0 arg0, T1 arg1, T2 arg2)
+            where T0 : notnull where T1 : notnull where T2 : notnull
+        {
+            if (threshold > LogLevel.LowLevel)
+            {
+                return;
+            }
+
+            target.Log(LogLevel.LowLevel, prefix, message, new object[] { arg0, arg1, arg2 });
+        }
+
+        public void DebugLowLevel(string message, object[] args)
+        {
+            if (threshold > LogLevel.LowLevel)
+            {
+                return;
+            }
+
+            target.Log(LogLevel.LowLevel, prefix, message, args);
+        }
+
+
+        public void Notice(string message)
+        {
+            if (threshold > LogLevel.Notice)
+            {
+                return;
+            }
+
+            target.Log(LogLevel.Notice, prefix, message, Array.Empty<object>());
+        }
+
+        public void Notice<T>(string message, T arg) where T : notnull
+        {
+            if (threshold > LogLevel.Notice)
+            {
+                return;
+            }
+
+            target.Log(LogLevel.Notice, prefix, message, new object[] { arg });
+        }
+
+        public void Notice<T0, T1>(string message, T0 arg0, T1 arg1) where T0 : notnull where T1 : notnull
+        {
+            if (threshold > LogLevel.Notice)
+            {
+                return;
+            }
+
+            target.Log(LogLevel.Notice, prefix, message, new object[] { arg0, arg1 });
+        }
+
+        public void Notice<T0, T1, T2>(string message, T0 arg0, T1 arg1, T2 arg2)
+            where T0 : notnull where T1 : notnull where T2 : notnull
+        {
+            if (threshold > LogLevel.Notice)
+            {
+                return;
+            }
+
+            target.Log(LogLevel.Notice, prefix, message, new object[] { arg0, arg1, arg2 });
+        }
+
+        public void Notice(string message, object[] args)
+        {
+            if (threshold > LogLevel.Notice)
+            {
+                return;
+            }
+
+            target.Log(LogLevel.Notice, prefix, message, args);
+        }
+
+
+        public void Error(string message)
+        {
+            if (threshold > LogLevel.Error)
+            {
+                return;
+            }
+
+            target.Log(LogLevel.Error, prefix, message, Array.Empty<object>());
         }
 
         public void Error<T>(string message, T arg) where T : notnull

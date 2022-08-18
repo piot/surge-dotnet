@@ -9,5 +9,7 @@ namespace Piot.Surge
     {
         public IEntity[] Created { get; }
         public IEntity[] Deleted { get; }
+
+        void ClearDelta();
     }
 }

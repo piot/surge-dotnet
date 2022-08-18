@@ -10,18 +10,12 @@ using System.Runtime.CompilerServices;
 
 namespace Piot.Surge
 {
-    public class World : IEntityContainerWithChanges
+    public class AuthoritativeWorld : IEntityContainerWithChanges
     {
-        private readonly List<IEntity> created = new();
-        private readonly IEntityCreation creator;
+        protected readonly List<IEntity> created = new();
         private readonly List<IEntity> deleted = new();
 
         private ulong lastEntityId;
-
-        public World(IEntityCreation creator)
-        {
-            this.creator = creator;
-        }
 
         public Dictionary<ulong, IEntity> Entities { get; } = new();
 
@@ -84,23 +78,6 @@ namespace Piot.Surge
             Entities.Remove(existingEntity.Id.Value);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        IEntity IEntityCreation.CreateEntity(ArchetypeId archetypeId, EntityId entityId)
-        {
-            var newEntity = creator.CreateEntity(archetypeId, entityId);
-
-            created.Add(newEntity);
-            Entities.Add(entityId.Value, newEntity);
-
-            return newEntity;
-        }
-
-        internal IEntity? FindEntity(EntityId entityId)
-        {
-            Entities.TryGetValue(entityId.Value, out var entity);
-            return entity;
-        }
-
         public void ClearDelta()
         {
             foreach (var entity in created)
@@ -110,6 +87,12 @@ namespace Piot.Surge
 
             created.Clear();
             deleted.Clear();
+        }
+
+        internal IEntity? FindEntity(EntityId entityId)
+        {
+            Entities.TryGetValue(entityId.Value, out var entity);
+            return entity;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -3,15 +3,13 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-namespace Piot.Surge
+using System;
+
+namespace Piot.Transport
 {
-    public interface IEntityContainer
+    public interface ITransportClient
     {
-        IEntity[] AllEntities { get; }
-        public IEntity FetchEntity(EntityId entityId);
-        public T? FindEntity<T>(EntityId entityId);
-        public T FetchEntity<T>(EntityId entityId);
-        void DeleteEntity(EntityId entityId);
-        void DeleteEntity(IEntity entity);
+        public void SendToHost(ReadOnlySpan<byte> payload);
+        public ReadOnlySpan<byte> ReceiveFromHost();
     }
 }

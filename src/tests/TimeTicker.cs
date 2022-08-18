@@ -89,7 +89,7 @@ public class TimeTickerTests
         var deltaTimeMs = new Milliseconds(32);
         var now = new Milliseconds(10);
 
-        var ticker = new TimeTicker(now, () => { tickCount++; }, deltaTimeMs, log.SubLog("CheckThatRestIsUsed"));
+        var ticker = new TimeTicker(now, () => { tickCount++; }, deltaTimeMs, log.SubLog("IllegalUpdateTime"));
 
         ticker.Update(new Milliseconds(10 + 32 + 31));
         Assert.Equal(1, tickCount);

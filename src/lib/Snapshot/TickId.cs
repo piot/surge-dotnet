@@ -9,7 +9,7 @@ namespace Piot.Surge.Snapshot
 {
     /// <summary>
     ///     A tick Id. Always increasing by one and consecutive for each simulation tick.
-    ///     Usually the session is starting at tickId zero.
+    ///     Usually the session is starting at lastTickId zero.
     /// </summary>
     public struct TickId
     {

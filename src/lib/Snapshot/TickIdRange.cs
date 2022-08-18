@@ -12,30 +12,52 @@ namespace Piot.Surge.Snapshot
     /// </summary>
     public struct TickIdRange
     {
-        public TickIdRange(TickId containsFromTickId, TickId tickId)
+        public TickIdRange(TickId startTickId, TickId lastTickId)
         {
-            if (containsFromTickId.tickId > tickId.tickId)
+            if (startTickId.tickId > lastTickId.tickId)
             {
-                throw new ArgumentOutOfRangeException($"snapshotId {containsFromTickId} {tickId}");
+                throw new ArgumentOutOfRangeException(nameof(startTickId), $"TickIdRange {startTickId} {lastTickId}");
             }
 
-            this.containsFromTickId = containsFromTickId;
-            this.tickId = tickId;
+            this.startTickId = startTickId;
+            this.lastTickId = lastTickId;
         }
 
-        public uint Length => tickId.tickId - containsFromTickId.tickId + 1;
+        public bool Contains(TickIdRange other)
+        {
+            return other.startTickId.tickId >= startTickId.tickId && other.lastTickId.tickId <= lastTickId.tickId;
+        }
+
+        public bool Contains(TickId other)
+        {
+            return other.tickId >= startTickId.tickId && other.tickId <= lastTickId.tickId;
+        }
+
+        public (uint, uint) Offsets(TickIdRange other)
+        {
+            if (!Contains(other))
+            {
+                throw new ArgumentOutOfRangeException(nameof(other));
+            }
+
+            return (other.startTickId.tickId - startTickId.tickId, other.lastTickId.tickId - lastTickId.tickId);
+        }
+
+        public uint Length => lastTickId.tickId - startTickId.tickId + 1;
+
+        public TickId Last => lastTickId;
 
         public bool IsImmediateFollowing(TickIdRange other)
         {
-            return other.tickId.tickId + 1 == containsFromTickId.tickId;
+            return other.lastTickId.tickId + 1 == startTickId.tickId;
         }
 
         public override string ToString()
         {
-            return $"[tickIdRange {containsFromTickId} {tickId}]";
+            return $"[tickIdRange {startTickId} {lastTickId}]";
         }
 
-        public TickId tickId;
-        public TickId containsFromTickId;
+        public TickId lastTickId;
+        public TickId startTickId;
     }
 }

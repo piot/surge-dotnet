@@ -3,15 +3,16 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-namespace Piot.Surge
+using System;
+using Piot.MonotonicTime;
+using Piot.Transport;
+
+namespace Piot.Hazy
 {
-    public interface IEntityContainer
+    public class Packet
     {
-        IEntity[] AllEntities { get; }
-        public IEntity FetchEntity(EntityId entityId);
-        public T? FindEntity<T>(EntityId entityId);
-        public T FetchEntity<T>(EntityId entityId);
-        void DeleteEntity(EntityId entityId);
-        void DeleteEntity(IEntity entity);
+        public RemoteEndpointId endPoint;
+        public Milliseconds monotonicTimeMs;
+        public byte[] payload = Array.Empty<byte>();
     }
 }

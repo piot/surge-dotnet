@@ -49,7 +49,7 @@ namespace Piot.Surge.SnapshotSerialization
                 };
                 var snapshotDeltaPack =
                     new SnapshotDeltaPack.SnapshotDeltaPack(
-                        new TickId((uint)(frameIdRange.containsFromTickId.tickId + i)), includedCorrection);
+                        new TickId((uint)(frameIdRange.startTickId.tickId + i)), includedCorrection);
                 packs[i] = snapshotDeltaPack;
             }
 
