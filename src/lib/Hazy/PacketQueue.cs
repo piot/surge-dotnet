@@ -4,7 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System.Collections.Generic;
+using System.Linq;
 using Piot.MonotonicTime;
+using Piot.Transport;
 
 namespace Piot.Hazy
 {
@@ -34,6 +36,12 @@ namespace Piot.Hazy
             queue.AddFirst(packet);
         }
 
+        /// <summary>
+        /// Dequeues the first packet that are <paramref name="atOrBeforeMs"/> the time.
+        /// </summary>
+        /// <param name="atOrBeforeMs"></param>
+        /// <param name="packet"></param>
+        /// <returns>true if a packet exists that have a timestamp equal or less than <paramref name="atOrBeforeMs"/></returns>
         public bool Dequeue(Milliseconds atOrBeforeMs, out Packet packet)
         {
             foreach (var queuedPacket in queue)
@@ -51,6 +59,28 @@ namespace Piot.Hazy
             }
 
             packet = new();
+            return false;
+        }
+
+        /// <summary>
+        /// Finds a the packet with the lowest timestamp that is scheduled to be sent to the <paramref name="endpointId"/>.
+        /// Mostly used for reordering logic in Internet Simulation.
+        /// </summary>
+        /// <param name="endpointId"></param>
+        /// <param name="foundPacket"></param>
+        /// <returns></returns>
+        public bool FindFirstPacketForEndpoint(RemoteEndpointId endpointId, out Packet foundPacket)
+        {
+            foreach (var queuedPacket in queue)
+            {
+                if (queuedPacket.endPoint.Value == endpointId.Value)
+                {
+                    foundPacket = queuedPacket;
+                    return true;
+                }
+            }
+
+            foundPacket = new Packet();
             return false;
         }
 

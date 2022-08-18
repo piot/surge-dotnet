@@ -12,27 +12,31 @@ using Piot.Surge.SnapshotSerialization;
 
 namespace Piot.Surge.Pulse.Client
 {
-    public class ClientGhostPlayback
+    /// <summary>
+    /// Enqueues delta snapshots and plays them back at varying delta time depending on number of delta snapshots in queue.
+    /// </summary>
+    public class ClientDeltaSnapshotPlayback
     {
-        private readonly TimeTicker.TimeTicker ghostTicker;
+        private readonly TimeTicker.TimeTicker snapshotPlaybackTicker;
         private readonly ILog log;
         private readonly SnapshotDeltaPackQueue queue = new();
-        private readonly IEntityContainer entityWorld;
+        private readonly IEntityContainerWithCreation clientWorld;
         private readonly IClientPredictorCorrections predictor;
+        private readonly Milliseconds targetDeltaTimeMs;
 
-        public ClientGhostPlayback(Milliseconds now, IEntityContainer entityWorld, IClientPredictorCorrections predictor, ILog log)
+        public ClientDeltaSnapshotPlayback(Milliseconds now, IEntityContainerWithCreation clientWorld, IClientPredictorCorrections predictor, Milliseconds targetDeltaTimeMs, ILog log)
         {
             this.log = log;
             this.predictor = predictor;
-            this.entityWorld = entityWorld;
-            ghostTicker = new(now, GhostTick, new Milliseconds(16),
-                log.SubLog("GhostPlaybackTick"));
+            this.clientWorld = clientWorld;
+            this.targetDeltaTimeMs = targetDeltaTimeMs;
+            snapshotPlaybackTicker = new(now, NextSnapshotTick, targetDeltaTimeMs,
+                log.SubLog("NextSnapshotTick"));
         }
 
         public void Update(Milliseconds now)
         {
-            ghostTicker.Update(now);
-
+            snapshotPlaybackTicker.Update(now);
         }
 
         public void FeedSnapshotsUnion(SerializedSnapshotDeltaPackUnion snapshots)
@@ -58,29 +62,34 @@ namespace Piot.Surge.Pulse.Client
             }
         }
         
-        private void GhostTick()
+        private void NextSnapshotTick()
         {
-            log.Debug("Ghost Tick!");
+            log.DebugLowLevel("NextSnapshotTick!");
             if (queue.Count == 0)
             {
-                log.Warn("Snapshot playback has stalled because queue is empty");
+                log.Debug("Snapshot playback has stalled because incoming snapshot queue is empty");
+            }
+            else
+            {
+                var deltaSnapshot = queue.Dequeue();
+                var snapshotReader = new OctetReader(deltaSnapshot.payload);
+                SnapshotDeltaReader.Read(snapshotReader, clientWorld);
+                predictor.ReadCorrections(snapshotReader);
             }
 
-            var deltaSnapshot = queue.Dequeue();
-            var snapshotReader = new OctetReader(deltaSnapshot.payload);
-            SnapshotDeltaReader.Read(snapshotReader, entityWorld);
-            predictor.ReadCorrections(snapshotReader);
-
+            var targetDeltaTimeMsValue = targetDeltaTimeMs.ms;
             // Our goal is to have just two snapshots in the queue.
             // So adjust the playback speed using the playback delta time.
             var deltaTimeMs = queue.Count switch
             {
-                < 2 => 18,
-                > 4 => 12,
-                _ => 16
+                < 2 => targetDeltaTimeMsValue * 10 / 8,
+                > 4 => targetDeltaTimeMsValue * 10 / 15,
+                _ => targetDeltaTimeMsValue
             };
 
-            ghostTicker.DeltaTime = new Milliseconds(deltaTimeMs);
+            log.DebugLowLevel("new delta time for snapshot playback: {DeltaTimeMs}", deltaTimeMs);
+
+            snapshotPlaybackTicker.DeltaTime = new Milliseconds(deltaTimeMs);
         }
     }
 }

@@ -19,11 +19,11 @@ namespace Piot.Surge.Pulse.Client
         private readonly ILog log;
         private TickId predictTickId;
 
-        public ClientPredictor(IInputPackFetch inputPackFetch, Milliseconds now, ILog log)
+        public ClientPredictor(IInputPackFetch inputPackFetch, Milliseconds now, Milliseconds targetDeltaTimeMs, ILog log)
         {
             this.log = log;
             this.inputPackFetch = inputPackFetch;
-            predictionTicker = new(now, PredictionTick, new Milliseconds(16),
+            predictionTicker = new(now, PredictionTick, targetDeltaTimeMs,
                 log.SubLog("PredictionTick"));
         }
 
@@ -34,7 +34,9 @@ namespace Piot.Surge.Pulse.Client
 
         void IClientPredictorCorrections.ReadCorrections(IOctetReader snapshotReader)
         {
-            var correctionStates = SnapshotCorrectionsReader.Read(snapshotReader, predictedEntities);
+            /*
+              var correctionStates = SnapshotCorrectionsReader.Read(snapshotReader, predictedEntities);
+             
             foreach (var correctionState in correctionStates)
             {
                 if (correctionState.Checksum == previousCorrectionState.Checksum)
@@ -55,6 +57,7 @@ namespace Piot.Surge.Pulse.Client
                     predictedStates.StorePredictionState(predictedInput.appliedAtTickId, captureWriter.Octets);
                 }
             }
+            */
         }
         
         private void PredictionTick()

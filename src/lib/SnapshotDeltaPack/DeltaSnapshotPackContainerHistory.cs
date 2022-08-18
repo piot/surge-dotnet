@@ -14,8 +14,9 @@ namespace Piot.Surge.SnapshotDeltaPack
         private readonly Queue<DeltaSnapshotPackContainer> queue = new();
         private TickIdRange tickIdRange;
         
-        public void Add(DeltaSnapshotPackContainer container, TickId tickId)
+        public void Add(DeltaSnapshotPackContainer container)
         {
+            var tickId = container.TickId;
             if (queue.Count > 0 && !tickId.IsImmediateFollowing(tickIdRange.Last))
             {
                 throw new ArgumentOutOfRangeException(nameof(tickId));

@@ -25,10 +25,11 @@ namespace Piot.Surge.Pulse.Host
         private readonly TimeTicker.TimeTicker simulationTicker;
         private readonly ILog log;
         private readonly IEntityContainerWithChanges authoritativeWorld;
-        private readonly DeltaSnapshotPackContainerHistory snapshotHistory = new();
+        private readonly SnapshotSyncer snapshotSyncer;
         
         public Host(ITransport transport, ILog log)
         {
+            snapshotSyncer = new SnapshotSyncer(transport);
             authoritativeWorld = new AuthoritativeWorld();
             this.transport = transport;
             this.log = log;
@@ -36,44 +37,12 @@ namespace Piot.Surge.Pulse.Host
                 log.SubLog("SimulationTick"));
         }
 
-        private void SendDeltaSnapshotToAllClients(DeltaSnapshotPackContainer container)
-        {
-            foreach (var connection in orderedConnections)
-            {
-                DeltaSnapshotPackContainer[] fetchedContainers;
-                if (connection.WantsSnapshotFromTickId == 0)
-                {
-                    //serializeEverything
-                }
-                else if (connection.WantsResend)
-                {
-                    var tickIdRange = new TickIdRange(connection.ReSendFromTickId, serverTickId);
-                    snapshotHistory.FetchContainers(tickIdRange);
-                }
-                else
-                {
-                    var onlyThisTick = new TickIdRange(serverTickId, serverTickId);
-                    var containerForThisTick = snapshotHistory.FetchContainers(onlyThisTick);
-                    
-                }
-
-                foreach (var fetchedContainer in fetchedContainers)
-                {
-                    var snapshotDeltaMemory = SnapshotPackContainerToMemory.PackWithFilter(fetchedContainer, Array.Empty<EntityId>());
-                    var pack = SnapshotDeltaPacker.Pack(snapshotDeltaMemory);
-                }
-
-                SnapshotDeltaPackUnionToDatagramsWriter.Write(clientSender, unionFlattened,
-                    connection.OrderedDatagrams);
-            }
-        }
-
         private void SimulationTick()
         {
             log.Debug("Simulation Tick!");
             serverTickId = new TickId(serverTickId.tickId + 1);
             var packContainer = StoreWorldChangesToPackContainer();
-            SendDeltaSnapshotToAllClients(packContainer);
+            snapshotSyncer.SendSnapshot(packContainer);
         }
 
         private DeltaSnapshotPackContainer StoreWorldChangesToPackContainer()

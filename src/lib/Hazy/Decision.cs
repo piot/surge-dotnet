@@ -28,6 +28,7 @@ namespace Piot.Hazy
         Drop,
         Tamper,
         Duplicate,
+        Reorder,
         Normal
     }
 
@@ -43,19 +44,21 @@ namespace Piot.Hazy
         int dropPercentage;
         int tamperPercentage;
         int duplicatePercentage;
+        int reorderPercentage;
 
-        public Decision(int drop, int tamper, int duplicate)
+        public Decision(int drop, int tamper, int duplicate, int reorder)
         {
-            SetPercentages(drop, tamper, duplicate);
+            SetPercentages(drop, tamper, duplicate, reorder);
         }
 
-        public void SetPercentages(int drop, int tamper, int duplicate)
+        public void SetPercentages(int drop, int tamper, int duplicate, int reorder)
         {
             dropPercentage = drop;
             tamperPercentage = tamper;
             duplicatePercentage = duplicate;
+            reorderPercentage = reorder;
             
-            var sum = drop + tamper + duplicate;
+            var sum = drop + tamper + duplicate + reorder;
             if (sum > 100)
             {
                 throw new Exception("illegal values");
@@ -76,6 +79,11 @@ namespace Piot.Hazy
                 thresholds.Add(new() { packetAction = PacketAction.Duplicate, threshold = drop + tamper + duplicate });
             }
 
+            if (reorder > 0)
+            {
+                thresholds.Add(new() { packetAction = PacketAction.Reorder, threshold = drop + tamper + duplicate + reorder });
+            }
+            
             thresholds.Add(new() { packetAction = PacketAction.Normal, threshold = 100 });
         }
 

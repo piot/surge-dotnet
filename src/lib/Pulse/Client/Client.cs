@@ -20,23 +20,23 @@ namespace Piot.Surge.Pulse.Client
         private readonly ILog log;
         private readonly ITransportClient transport;
         private readonly ClientPredictor predictor;
-        private readonly ClientGhostPlayback ghostPlayback;
+        private readonly ClientDeltaSnapshotPlayback deltaSnapshotPlayback;
         private ClientWorld world;
         private OrderedDatagramsIn orderedDatagramsIn = new (0);
         
-        public Client(ILog log, Milliseconds now, IEntityCreation entityCreation, ITransportClient transport, IInputPackFetch fetch)
+        public Client(ILog log, Milliseconds now, Milliseconds targetDeltaTimeMs, IEntityCreation entityCreation, ITransportClient transport, IInputPackFetch fetch)
         {
             this.log = log;
             world = new ClientWorld(entityCreation);
             this.transport = transport;
-            predictor = new ClientPredictor(fetch, now, log.SubLog("Predictor"));
-            ghostPlayback = new ClientGhostPlayback(now, world, predictor, log.SubLog("GhostPlayback"));
+            predictor = new ClientPredictor(fetch, now, targetDeltaTimeMs, log.SubLog("Predictor"));
+            deltaSnapshotPlayback = new ClientDeltaSnapshotPlayback(now, (world as IEntityContainerWithCreation), predictor, targetDeltaTimeMs, log.SubLog("GhostPlayback"));
         }
 
         private void ReceiveSnapshot(IOctetReader reader)
         {
             var unionOfSnapshots = SnapshotDeltaUnionReader.Read(reader);
-            ghostPlayback.FeedSnapshotsUnion(unionOfSnapshots);
+            deltaSnapshotPlayback.FeedSnapshotsUnion(unionOfSnapshots);
         }
         
         private void ReceiveDatagramFromHost(IOctetReader reader)
@@ -48,6 +48,7 @@ namespace Piot.Surge.Pulse.Client
             }
             else
             {
+                log.DebugLowLevel("ordered datagram in wrong order, discarding datagram");
                 return;
             }
 
@@ -81,7 +82,7 @@ namespace Piot.Surge.Pulse.Client
         {
             ReceiveDatagramsFromHost();
             predictor.Update(now);
-            ghostPlayback.Update(now);
+            deltaSnapshotPlayback.Update(now);
         }
     }
 }

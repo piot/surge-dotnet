@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
-using System.Net;
 using Piot.MonotonicTime;
 using Piot.Transport;
 
@@ -15,14 +14,11 @@ namespace Piot.Hazy
         private readonly ITransportReceive baseTransport;
         readonly PacketQueue inQueue = new();
         private readonly IMonotonicTimeMs timeProvider;
-        private readonly IPEndPoint remoteEndpoint;
 
-        public InternetSimulatorIn(ITransportReceive baseTransport, IMonotonicTimeMs timeProvider,
-            IPEndPoint remoteEndpoint)
+        public InternetSimulatorIn(ITransportReceive baseTransport, IMonotonicTimeMs timeProvider)
         {
             this.baseTransport = baseTransport;
             this.timeProvider = timeProvider;
-            this.remoteEndpoint = remoteEndpoint;
         }
 
         public void Update(Milliseconds now)

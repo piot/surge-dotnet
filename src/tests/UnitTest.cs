@@ -551,7 +551,7 @@ public class UnitTest1
     public void BasicUndo()
     {
         var (allSerializedSnapshots, spawnedAvatarId) = PrepareThreeServerSnapshotDeltas();
-        var clientWorld = new ClientWorld(new GeneratedEntityCreation()) as IEntityContainer;
+        var clientWorld = new ClientWorld(new GeneratedEntityCreation()) as IEntityContainerWithCreation;
 
         var undoWriter = new OctetWriter(1200);
         var unionReader = new OctetReader(allSerializedSnapshots.payload);

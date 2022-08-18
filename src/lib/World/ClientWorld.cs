@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 
 namespace Piot.Surge
 {
-    public class ClientWorld : AuthoritativeWorld, IEntityCreation
+    public class ClientWorld : AuthoritativeWorld, IEntityContainerWithCreation
     {
         private readonly IEntityCreation creator;
 
