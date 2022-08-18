@@ -66,18 +66,6 @@ namespace Piot.Surge.Pulse.Client
         private void NextSnapshotTick()
         {
             log.DebugLowLevel("NextSnapshotTick!");
-            if (queue.Count == 0)
-            {
-                log.Debug("Snapshot playback has stalled because incoming snapshot queue is empty");
-            }
-            else
-            {
-                var deltaSnapshot = queue.Dequeue();
-                var snapshotReader = new OctetReader(deltaSnapshot.payload);
-                SnapshotDeltaReader.Read(snapshotReader, clientWorld);
-                predictor.ReadCorrections(snapshotReader);
-            }
-
             var targetDeltaTimeMsValue = targetDeltaTimeMs.ms;
             // Our goal is to have just two snapshots in the queue.
             // So adjust the playback speed using the playback delta time.
@@ -88,9 +76,26 @@ namespace Piot.Surge.Pulse.Client
                 _ => targetDeltaTimeMsValue
             };
 
-            log.DebugLowLevel("new delta time for snapshot playback: {DeltaTimeMs}", deltaTimeMs);
+            log.DebugLowLevel("setup delta time until next playback tick: {DeltaTimeMs}", deltaTimeMs);
 
             snapshotPlaybackTicker.DeltaTime = new Milliseconds(deltaTimeMs);
+
+            if (queue.Count == 0)
+            {
+                log.Debug("Snapshot playback has stalled because incoming snapshot queue is empty");
+                return;
+            }
+
+            var deltaSnapshot = queue.Dequeue();
+            var snapshotReader = new OctetReader(deltaSnapshot.payload);
+            SnapshotDeltaReader.Read(snapshotReader, clientWorld);
+
+            // Ghosts are never predicted, corrected, nor rolled back
+            // All the changed fields are set to the new values and Tick() is called to trigger the resulting effects of
+            // the logic running for one tick.
+            Ticker.Tick(clientWorld);
+
+            predictor.ReadCorrections(snapshotReader);
         }
     }
 }

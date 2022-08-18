@@ -5,6 +5,9 @@
 
 namespace Piot.Surge
 {
+    /// <summary>
+    ///     Inherit in your custom game logic struct
+    /// </summary>
     public interface ILogic
     {
         // Intentionally left blank

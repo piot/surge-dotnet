@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
+using Piot.Clog;
 using Piot.MonotonicTime;
 using Piot.Transport;
 
@@ -19,12 +20,13 @@ namespace Piot.Hazy
         private readonly ITransportSend wrappedTransport;
 
         public InternetSimulatorOut(ITransportSend wrappedTransport, IMonotonicTimeMs timeProvider,
-            IRandom random)
+            IRandom random, ILog log)
         {
             this.random = random;
             this.wrappedTransport = wrappedTransport;
             this.timeProvider = timeProvider;
-            latencySimulator = new LatencySimulator(30, 220, timeProvider.TimeInMs, random);
+            latencySimulator =
+                new LatencySimulator(30, 220, timeProvider.TimeInMs, random, log.SubLog("InternetSimLatency"));
         }
 
         public Milliseconds LatencyInMs => latencySimulator.LatencyInMs;

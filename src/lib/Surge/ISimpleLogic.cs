@@ -7,6 +7,10 @@ namespace Piot.Surge
 {
     public interface ISimpleLogic
     {
+        /// <summary>
+        ///     Called to tick the logic for an entity
+        ///     The Tick is not allowed to be passed any inputs, but must act from the fields stored in the implementing struct.
+        /// </summary>
         public void Tick();
     }
 }
