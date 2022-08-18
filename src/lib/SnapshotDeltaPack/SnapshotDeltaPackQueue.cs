@@ -14,6 +14,8 @@ namespace Piot.Surge.SnapshotDeltaPack
         private readonly Queue<SnapshotDeltaPack> packs = new();
         private TickId lastInsertedTickId;
 
+        public TickId WantsTickId => new(lastInsertedTickId.tickId + 1);
+
         public void Enqueue(SnapshotDeltaPack pack)
         {
             if (!IsValidPackToInsert(pack.tickId))
@@ -24,8 +26,6 @@ namespace Piot.Surge.SnapshotDeltaPack
             packs.Enqueue(pack);
             lastInsertedTickId = pack.tickId;
         }
-
-        public TickId WantsTickId => new (lastInsertedTickId.tickId + 1);
 
         public SnapshotDeltaPack Dequeue()
         {

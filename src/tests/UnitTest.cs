@@ -424,7 +424,8 @@ public class UnitTest1
     }
 
 
-    private static (SnapshotDeltaInternal, SnapshotDelta, SnapshotDeltaPack) ScanConvertAndCreate(AuthoritativeWorld worldToScan,
+    private static (SnapshotDeltaInternal, SnapshotDelta, SnapshotDeltaPack) ScanConvertAndCreate(
+        AuthoritativeWorld worldToScan,
         TickId tickId)
     {
         var deltaSnapshotInternal = SnapshotDeltaCreator.Scan(worldToScan, tickId);

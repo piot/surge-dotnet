@@ -11,25 +11,25 @@ using Piot.Surge.Snapshot;
 
 namespace Piot.Surge.Pulse.Client
 {
+    /// <summary>
+    ///     Predicts the future of an avatar. If misprediction occurs, it will roll back,
+    ///     apply the correction, and fast forward (Roll forth).
+    /// </summary>
     public class ClientPredictor : IClientPredictorCorrections
     {
         private readonly IInputPackFetch inputPackFetch;
+        private readonly ILog log;
         private readonly LogicalInputQueue predictedInputs = new();
         private readonly TimeTicker.TimeTicker predictionTicker;
-        private readonly ILog log;
         private TickId predictTickId;
 
-        public ClientPredictor(IInputPackFetch inputPackFetch, Milliseconds now, Milliseconds targetDeltaTimeMs, ILog log)
+        public ClientPredictor(IInputPackFetch inputPackFetch, Milliseconds now, Milliseconds targetDeltaTimeMs,
+            ILog log)
         {
             this.log = log;
             this.inputPackFetch = inputPackFetch;
             predictionTicker = new(now, PredictionTick, targetDeltaTimeMs,
                 log.SubLog("PredictionTick"));
-        }
-
-        public void Update(Milliseconds now)
-        {
-            predictionTicker.Update(now);
         }
 
         void IClientPredictorCorrections.ReadCorrections(IOctetReader snapshotReader)
@@ -59,7 +59,12 @@ namespace Piot.Surge.Pulse.Client
             }
             */
         }
-        
+
+        public void Update(Milliseconds now)
+        {
+            predictionTicker.Update(now);
+        }
+
         private void PredictionTick()
         {
             log.Debug("Prediction Tick!");
@@ -67,7 +72,7 @@ namespace Piot.Surge.Pulse.Client
             var logicalInput = new LogicalInput.LogicalInput
             {
                 appliedAtTickId = predictTickId,
-                payload = inputOctets.ToArray(),
+                payload = inputOctets.ToArray()
             };
             predictedInputs.AddLogicalInput(logicalInput);
             predictTickId = new TickId(predictTickId.tickId + 1);

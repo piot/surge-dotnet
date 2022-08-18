@@ -11,7 +11,7 @@ namespace Piot.Transport
     {
         public ReadOnlySpan<byte> Receive(out RemoteEndpointId remoteEndpointId);
     }
-    
+
     public interface ITransportSend
     {
         public void SendToEndpoint(RemoteEndpointId remoteEndpointId, ReadOnlySpan<byte> payload);

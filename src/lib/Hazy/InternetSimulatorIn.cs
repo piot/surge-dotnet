@@ -12,23 +12,13 @@ namespace Piot.Hazy
     public class InternetSimulatorIn : ITransportReceive
     {
         private readonly ITransportReceive baseTransport;
-        readonly PacketQueue inQueue = new();
+        private readonly PacketQueue inQueue = new();
         private readonly IMonotonicTimeMs timeProvider;
 
         public InternetSimulatorIn(ITransportReceive baseTransport, IMonotonicTimeMs timeProvider)
         {
             this.baseTransport = baseTransport;
             this.timeProvider = timeProvider;
-        }
-
-        public void Update(Milliseconds now)
-        {
-            for (var i = 0; i < 30; ++i)
-            {
-                var octets = baseTransport.Receive(out var endpoint);
-                inQueue.AddPacket(new Packet
-                    { payload = octets.ToArray(), endPoint = endpoint, monotonicTimeMs = now });
-            }
         }
 
         public int LatencyInMs { get; set; }
@@ -42,16 +32,26 @@ namespace Piot.Hazy
             }
 
             var now = timeProvider.TimeInMs;
-            
+
             var wasFound = inQueue.Dequeue(now, out var packet);
             if (wasFound)
             {
                 remoteEndpoint = packet.endPoint;
                 return packet.payload;
             }
-            
-            remoteEndpoint = new RemoteEndpointId( 0);
+
+            remoteEndpoint = new RemoteEndpointId(0);
             return new ReadOnlySpan<byte>();
+        }
+
+        public void Update(Milliseconds now)
+        {
+            for (var i = 0; i < 30; ++i)
+            {
+                var octets = baseTransport.Receive(out var endpoint);
+                inQueue.AddPacket(new Packet
+                    { payload = octets.ToArray(), endPoint = endpoint, monotonicTimeMs = now });
+            }
         }
     }
 }

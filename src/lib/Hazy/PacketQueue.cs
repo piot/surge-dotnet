@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System.Collections.Generic;
-using System.Linq;
 using Piot.MonotonicTime;
 using Piot.Transport;
 
@@ -14,8 +13,10 @@ namespace Piot.Hazy
     {
         private readonly LinkedList<Packet> queue = new();
 
+        public int Count => queue.Count;
+
         /// <summary>
-        /// Add packet to packet queue
+        ///     Add packet to packet queue
         /// </summary>
         /// <param name="insertAtMs"></param>
         /// <param name="packet"></param>
@@ -37,11 +38,11 @@ namespace Piot.Hazy
         }
 
         /// <summary>
-        /// Dequeues the first packet that are <paramref name="atOrBeforeMs"/> the time.
+        ///     Dequeues the first packet that are <paramref name="atOrBeforeMs" /> the time.
         /// </summary>
         /// <param name="atOrBeforeMs"></param>
         /// <param name="packet"></param>
-        /// <returns>true if a packet exists that have a timestamp equal or less than <paramref name="atOrBeforeMs"/></returns>
+        /// <returns>true if a packet exists that have a timestamp equal or less than <paramref name="atOrBeforeMs" /></returns>
         public bool Dequeue(Milliseconds atOrBeforeMs, out Packet packet)
         {
             foreach (var queuedPacket in queue)
@@ -63,8 +64,8 @@ namespace Piot.Hazy
         }
 
         /// <summary>
-        /// Finds a the packet with the lowest timestamp that is scheduled to be sent to the <paramref name="endpointId"/>.
-        /// Mostly used for reordering logic in Internet Simulation.
+        ///     Finds a the packet with the lowest timestamp that is scheduled to be sent to the <paramref name="endpointId" />.
+        ///     Mostly used for reordering logic in Internet Simulation.
         /// </summary>
         /// <param name="endpointId"></param>
         /// <param name="foundPacket"></param>
@@ -83,7 +84,5 @@ namespace Piot.Hazy
             foundPacket = new Packet();
             return false;
         }
-
-        public int Count => queue.Count;
     }
 }

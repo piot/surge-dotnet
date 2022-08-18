@@ -13,7 +13,7 @@ namespace Piot.Surge.SnapshotDeltaPack
     {
         private readonly Queue<DeltaSnapshotPackContainer> queue = new();
         private TickIdRange tickIdRange;
-        
+
         public void Add(DeltaSnapshotPackContainer container)
         {
             var tickId = container.TickId;
@@ -21,7 +21,7 @@ namespace Piot.Surge.SnapshotDeltaPack
             {
                 throw new ArgumentOutOfRangeException(nameof(tickId));
             }
-            
+
             queue.Enqueue(container);
             tickIdRange = new TickIdRange(tickIdRange.startTickId, tickIdRange.Last);
         }

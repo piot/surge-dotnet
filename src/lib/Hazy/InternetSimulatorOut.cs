@@ -11,15 +11,15 @@ namespace Piot.Hazy
 {
     public class InternetSimulatorOut : ITransportSend
     {
-        private readonly ITransportSend wrappedTransport;
         private readonly Decision decider = new(3, 1, 5, 1);
         private readonly LatencySimulator latencySimulator;
         private readonly PacketQueue outQueue = new();
         private readonly IRandom random;
         private readonly IMonotonicTimeMs timeProvider;
+        private readonly ITransportSend wrappedTransport;
 
         public InternetSimulatorOut(ITransportSend wrappedTransport, IMonotonicTimeMs timeProvider,
-          IRandom random)
+            IRandom random)
         {
             this.random = random;
             this.wrappedTransport = wrappedTransport;

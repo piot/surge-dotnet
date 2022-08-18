@@ -204,7 +204,8 @@ namespace Piot.Clog
             target.Log(LogLevel.LowLevel, prefix, message, new object[] { arg0, arg1 });
         }
 
-        public void DebugLowLevel<T0, T1, T2>(string message, T0 arg0, T1 arg1, T2 arg2) where T0 : notnull where T1 : notnull where T2 : notnull
+        public void DebugLowLevel<T0, T1, T2>(string message, T0 arg0, T1 arg1, T2 arg2)
+            where T0 : notnull where T1 : notnull where T2 : notnull
         {
             if (threshold > LogLevel.LowLevel)
             {
@@ -223,9 +224,8 @@ namespace Piot.Clog
 
             target.Log(LogLevel.LowLevel, prefix, message, args);
         }
-        
-        
-        
+
+
         public void Notice(string message)
         {
             if (threshold > LogLevel.Notice)
@@ -256,7 +256,8 @@ namespace Piot.Clog
             target.Log(LogLevel.Notice, prefix, message, new object[] { arg0, arg1 });
         }
 
-        public void Notice<T0, T1, T2>(string message, T0 arg0, T1 arg1, T2 arg2) where T0 : notnull where T1 : notnull where T2 : notnull
+        public void Notice<T0, T1, T2>(string message, T0 arg0, T1 arg1, T2 arg2)
+            where T0 : notnull where T1 : notnull where T2 : notnull
         {
             if (threshold > LogLevel.Notice)
             {
@@ -275,8 +276,7 @@ namespace Piot.Clog
 
             target.Log(LogLevel.Notice, prefix, message, args);
         }
-        
-        
+
 
         public void Error(string message)
         {

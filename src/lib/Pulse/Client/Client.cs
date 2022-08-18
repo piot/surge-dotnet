@@ -17,20 +17,22 @@ namespace Piot.Surge.Pulse.Client
 {
     public class Client
     {
-        private readonly ILog log;
-        private readonly ITransportClient transport;
-        private readonly ClientPredictor predictor;
         private readonly ClientDeltaSnapshotPlayback deltaSnapshotPlayback;
-        private ClientWorld world;
-        private OrderedDatagramsIn orderedDatagramsIn = new (0);
-        
-        public Client(ILog log, Milliseconds now, Milliseconds targetDeltaTimeMs, IEntityCreation entityCreation, ITransportClient transport, IInputPackFetch fetch)
+        private readonly ILog log;
+        private readonly ClientPredictor predictor;
+        private readonly ITransportClient transport;
+        private readonly ClientWorld world;
+        private OrderedDatagramsIn orderedDatagramsIn = new(0);
+
+        public Client(ILog log, Milliseconds now, Milliseconds targetDeltaTimeMs, IEntityCreation entityCreation,
+            ITransportClient transport, IInputPackFetch fetch)
         {
             this.log = log;
             world = new ClientWorld(entityCreation);
             this.transport = transport;
             predictor = new ClientPredictor(fetch, now, targetDeltaTimeMs, log.SubLog("Predictor"));
-            deltaSnapshotPlayback = new ClientDeltaSnapshotPlayback(now, (world as IEntityContainerWithCreation), predictor, targetDeltaTimeMs, log.SubLog("GhostPlayback"));
+            deltaSnapshotPlayback =
+                new ClientDeltaSnapshotPlayback(now, world, predictor, targetDeltaTimeMs, log.SubLog("GhostPlayback"));
         }
 
         private void ReceiveSnapshot(IOctetReader reader)
@@ -38,7 +40,7 @@ namespace Piot.Surge.Pulse.Client
             var unionOfSnapshots = SnapshotDeltaUnionReader.Read(reader);
             deltaSnapshotPlayback.FeedSnapshotsUnion(unionOfSnapshots);
         }
-        
+
         private void ReceiveDatagramFromHost(IOctetReader reader)
         {
             var sequenceIn = OrderedDatagramsInReader.Read(reader);
@@ -62,7 +64,7 @@ namespace Piot.Surge.Pulse.Client
                     throw new Exception($"illegal datagram type {datagramType} from host");
             }
         }
-        
+
         private void ReceiveDatagramsFromHost()
         {
             for (var i = 0; i < 30; i++)
@@ -77,7 +79,7 @@ namespace Piot.Surge.Pulse.Client
                 ReceiveDatagramFromHost(datagramReader);
             }
         }
-        
+
         public void Update(Milliseconds now)
         {
             ReceiveDatagramsFromHost();

@@ -19,6 +19,7 @@ namespace Piot.Hazy
             {
                 throw new Exception($"Illegal percentage {percentage}");
             }
+
             this.percentage = percentage;
         }
     }
@@ -41,10 +42,10 @@ namespace Piot.Hazy
     public class Decision
     {
         private readonly List<Threshold> thresholds = new();
-        int dropPercentage;
-        int tamperPercentage;
-        int duplicatePercentage;
-        int reorderPercentage;
+        private int dropPercentage;
+        private int duplicatePercentage;
+        private int reorderPercentage;
+        private int tamperPercentage;
 
         public Decision(int drop, int tamper, int duplicate, int reorder)
         {
@@ -57,7 +58,7 @@ namespace Piot.Hazy
             tamperPercentage = tamper;
             duplicatePercentage = duplicate;
             reorderPercentage = reorder;
-            
+
             var sum = drop + tamper + duplicate + reorder;
             if (sum > 100)
             {
@@ -68,7 +69,7 @@ namespace Piot.Hazy
             {
                 thresholds.Add(new() { packetAction = PacketAction.Drop, threshold = drop });
             }
-            
+
             if (tamper > 0)
             {
                 thresholds.Add(new() { packetAction = PacketAction.Tamper, threshold = drop + tamper });
@@ -81,9 +82,10 @@ namespace Piot.Hazy
 
             if (reorder > 0)
             {
-                thresholds.Add(new() { packetAction = PacketAction.Reorder, threshold = drop + tamper + duplicate + reorder });
+                thresholds.Add(new()
+                    { packetAction = PacketAction.Reorder, threshold = drop + tamper + duplicate + reorder });
             }
-            
+
             thresholds.Add(new() { packetAction = PacketAction.Normal, threshold = 100 });
         }
 

@@ -8,21 +8,21 @@ using Piot.MonotonicTime;
 namespace Piot.Hazy
 {
     /// <summary>
-    /// Simulates the latency that can be encountered on the Internet.
-    /// Currently provides simplistic latency "jitter" (inter-packet delay variance)
-    /// and short latency bursts.
+    ///     Simulates the latency that can be encountered on the Internet.
+    ///     Currently provides simplistic latency "jitter" (inter-packet delay variance)
+    ///     and short latency bursts.
     /// </summary>
     public class LatencySimulator
     {
-        private long latencyInMs;
-        private long targetLatencyInMs;
-        private long lastUpdate;
-        private long nextSpikeTime;
-        private int nextSpikeDuration;
-        private readonly IRandom random;
-        private readonly int minLatency;
         private readonly int maxLatency;
-        
+        private readonly int minLatency;
+        private readonly IRandom random;
+        private long lastUpdate;
+        private long latencyInMs;
+        private int nextSpikeDuration;
+        private long nextSpikeTime;
+        private long targetLatencyInMs;
+
         public LatencySimulator(int minimumLatency, int maximumLatency, Milliseconds now, IRandom random)
         {
             this.random = random;
@@ -35,9 +35,11 @@ namespace Piot.Hazy
             latencyInMs = targetLatencyInMs;
         }
 
+        public Milliseconds LatencyInMs => new(latencyInMs);
+
         /// <summary>
-        /// Update latency given the monotonic time <paramref name="now"/>.
-        /// TODO: Needs a more sophisticated solution
+        ///     Update latency given the monotonic time <paramref name="now" />.
+        ///     TODO: Needs a more sophisticated solution
         /// </summary>
         /// <param name="now"></param>
         public void Update(Milliseconds now)
@@ -58,10 +60,10 @@ namespace Piot.Hazy
             {
                 targetLatencyInMs -= diffInTarget;
             }
-            
+
             var jitter = 5 - random.Random(10);
             var latencyTargetThisUpdate = targetLatencyInMs + jitter;
-            
+
             if (now.ms >= nextSpikeTime)
             {
                 var timeInSpike = now.ms - nextSpikeTime;
@@ -78,9 +80,7 @@ namespace Piot.Hazy
 
             var diff = latencyTargetThisUpdate - latencyInMs;
             var adjustment = diff * (timePassed / 1000.0f);
-            latencyInMs += (long) adjustment;
+            latencyInMs += (long)adjustment;
         }
-
-        public Milliseconds LatencyInMs => new (latencyInMs);
     }
 }

@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Peter Bjorklund. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 using System;
 using System.Collections.Generic;
 using Piot.Surge.OrderedDatagrams;
@@ -12,10 +17,15 @@ namespace Piot.Surge.Pulse.Host
     public enum SnapshotSyncerClientState
     {
         Normal,
-        Resend,
+        Resend
     }
+
     public class SnapshotSyncerClient
     {
+        private SnapshotSyncerClientState state = SnapshotSyncerClientState.Normal;
+
+        public TickIdRange WaitingForTickIds;
+
         public SnapshotSyncerClient(RemoteEndpointId id)
         {
             Endpoint = id;
@@ -23,9 +33,6 @@ namespace Piot.Surge.Pulse.Host
 
         public RemoteEndpointId Endpoint { get; }
         public OrderedDatagramsOutIncrease DatagramsOutIncrease { get; } = new();
-
-        public TickIdRange WaitingForTickIds;
-        private SnapshotSyncerClientState state = SnapshotSyncerClientState.Normal;
         public bool WantsResend => false;
     }
 
@@ -33,7 +40,7 @@ namespace Piot.Surge.Pulse.Host
     {
         private readonly RemoteEndpointId id;
         private readonly ITransportSend sender;
-        
+
         public WrappedSender(ITransportSend sender, RemoteEndpointId id)
         {
             this.sender = sender;
@@ -51,31 +58,34 @@ namespace Piot.Surge.Pulse.Host
         private readonly DeltaSnapshotPackContainerHistory snapshotHistory = new();
         private readonly List<SnapshotSyncerClient> syncClients = new();
         private readonly ITransportSend transportSend;
-        
+
         public SnapshotSyncer(ITransportSend transportSend)
         {
             this.transportSend = transportSend;
         }
 
-        SnapshotSyncerClient Create(RemoteEndpointId id)
+        private SnapshotSyncerClient Create(RemoteEndpointId id)
         {
             var client = new SnapshotSyncerClient(id);
-            
+
             syncClients.Add(client);
 
             return client;
         }
-        
+
         private void SendUsingContainers(SnapshotSyncerClient connection, TickId serverTickId)
         {
-            var rangeToSend = connection.WantsResend ? connection.WaitingForTickIds : new TickIdRange(serverTickId, serverTickId);
+            var rangeToSend = connection.WantsResend
+                ? connection.WaitingForTickIds
+                : new TickIdRange(serverTickId, serverTickId);
 
             var fetchedContainers = snapshotHistory.FetchContainers(rangeToSend);
 
-            List<SnapshotDeltaPack.SnapshotDeltaPack> deltaPacks = new(); 
+            List<SnapshotDeltaPack.SnapshotDeltaPack> deltaPacks = new();
             foreach (var fetchedContainer in fetchedContainers)
             {
-                var snapshotDeltaMemory = SnapshotPackContainerToMemory.PackWithFilter(fetchedContainer, Array.Empty<EntityId>());
+                var snapshotDeltaMemory =
+                    SnapshotPackContainerToMemory.PackWithFilter(fetchedContainer, Array.Empty<EntityId>());
                 var pack = SnapshotDeltaPacker.Pack(snapshotDeltaMemory);
                 var packWithCorrections = new SnapshotDeltaIncludedCorrectionPackMemory
                 {

@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System;
 using System.Collections.Generic;
 using Piot.Clog;
 using Piot.Flood;
@@ -18,15 +17,15 @@ namespace Piot.Surge.Pulse.Host
 {
     public class Host
     {
-        private readonly ITransport transport;
-        private readonly Dictionary<uint, ConnectionToClient> connections = new();
-        private readonly List<ConnectionToClient> orderedConnections = new();
-        private TickId serverTickId;
-        private readonly TimeTicker.TimeTicker simulationTicker;
-        private readonly ILog log;
         private readonly IEntityContainerWithChanges authoritativeWorld;
+        private readonly Dictionary<uint, ConnectionToClient> connections = new();
+        private readonly ILog log;
+        private readonly List<ConnectionToClient> orderedConnections = new();
+        private readonly TimeTicker.TimeTicker simulationTicker;
         private readonly SnapshotSyncer snapshotSyncer;
-        
+        private readonly ITransport transport;
+        private TickId serverTickId;
+
         public Host(ITransport transport, ILog log)
         {
             snapshotSyncer = new SnapshotSyncer(transport);
@@ -78,7 +77,7 @@ namespace Piot.Surge.Pulse.Host
                 connectionToClient.Receive(datagramReader, serverTickId);
             }
         }
-        
+
         public void Update(Milliseconds now)
         {
             ReceiveFromClients();

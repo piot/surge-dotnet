@@ -16,9 +16,10 @@ namespace Piot.Surge.Pulse.Host
 {
     public class ConnectionToClient
     {
-        private OrderedDatagramsIn orderedDatagramsIn = new (0);
-        private RemoteEndpointId id;
-        private LogicalInputQueue inputQueue = new();
+        private readonly RemoteEndpointId id;
+        private readonly LogicalInputQueue inputQueue = new();
+        private OrderedDatagramsIn orderedDatagramsIn = new(0);
+
         public ConnectionToClient(RemoteEndpointId id)
         {
             this.id = id;
@@ -36,19 +37,18 @@ namespace Piot.Surge.Pulse.Host
 
             if (first.appliedAtTickId.tickId > inputQueue.WaitingForTickId.tickId)
             {
-                
             }
 
             if (first.appliedAtTickId.tickId < serverIsAtTickId.tickId)
             {
-                
             }
+
             foreach (var logicalInput in logicalInputs)
             {
                 inputQueue.AddLogicalInput(logicalInput);
             }
-            
         }
+
         public void Receive(IOctetReader reader, TickId serverIsAtTickId)
         {
             var sequenceIn = OrderedDatagramsInReader.Read(reader);

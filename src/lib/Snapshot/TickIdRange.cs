@@ -27,7 +27,7 @@ namespace Piot.Surge.Snapshot
         {
             return other.startTickId.tickId >= startTickId.tickId && other.lastTickId.tickId <= lastTickId.tickId;
         }
-        
+
         public bool Contains(TickId other)
         {
             return other.tickId >= startTickId.tickId && other.tickId <= lastTickId.tickId;
@@ -42,11 +42,11 @@ namespace Piot.Surge.Snapshot
 
             return (other.startTickId.tickId - startTickId.tickId, other.lastTickId.tickId - lastTickId.tickId);
         }
-        
+
         public uint Length => lastTickId.tickId - startTickId.tickId + 1;
 
         public TickId Last => lastTickId;
-        
+
         public bool IsImmediateFollowing(TickIdRange other)
         {
             return other.lastTickId.tickId + 1 == startTickId.tickId;

@@ -11,8 +11,8 @@ namespace Piot.Hazy
 {
     public class Packet
     {
+        public RemoteEndpointId endPoint;
         public Milliseconds monotonicTimeMs;
         public byte[] payload = Array.Empty<byte>();
-        public RemoteEndpointId endPoint;
     }
 }

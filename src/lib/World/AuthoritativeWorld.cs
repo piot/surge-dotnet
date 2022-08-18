@@ -78,12 +78,6 @@ namespace Piot.Surge
             Entities.Remove(existingEntity.Id.Value);
         }
 
-        internal IEntity? FindEntity(EntityId entityId)
-        {
-            Entities.TryGetValue(entityId.Value, out var entity);
-            return entity;
-        }
-
         public void ClearDelta()
         {
             foreach (var entity in created)
@@ -93,6 +87,12 @@ namespace Piot.Surge
 
             created.Clear();
             deleted.Clear();
+        }
+
+        internal IEntity? FindEntity(EntityId entityId)
+        {
+            Entities.TryGetValue(entityId.Value, out var entity);
+            return entity;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

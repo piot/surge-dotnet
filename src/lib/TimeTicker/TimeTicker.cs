@@ -11,9 +11,9 @@ namespace Piot.Surge.TimeTicker
 {
     public class TimeTicker : ITimeTicker
     {
-        private long deltaTimeMs;
         private readonly ILog log;
         private readonly Action Tick;
+        private long deltaTimeMs;
         private Milliseconds lastTick;
 #if DEBUG
         private Milliseconds lastUpdateTime;

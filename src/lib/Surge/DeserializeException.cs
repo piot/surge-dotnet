@@ -11,7 +11,6 @@ namespace Piot.Surge
     {
         public DeserializeException(string something) : base(something)
         {
-            
         }
     }
 }
