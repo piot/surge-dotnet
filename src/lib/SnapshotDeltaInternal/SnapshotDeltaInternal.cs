@@ -18,7 +18,7 @@ namespace Piot.Surge.SnapshotDeltaInternal
     /// </summary>
     public class SnapshotDeltaInternal
     {
-        public readonly Dictionary<ulong, SnapshotDeltaInternalInfoEntity> entities = new();
+        public readonly Dictionary<uint, SnapshotDeltaInternalInfoEntity> entities = new();
 
         public SnapshotDeltaInternal()
         {

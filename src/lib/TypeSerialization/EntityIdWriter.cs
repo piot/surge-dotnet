@@ -11,7 +11,7 @@ namespace Piot.Surge
     {
         public static void Write(IOctetWriter writer, EntityId id)
         {
-            writer.WriteUInt64(id.Value);
+            writer.WriteUInt32(id.Value);
         }
     }
 }

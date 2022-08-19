@@ -12,9 +12,9 @@ namespace Piot.Hazy
 {
     public class InternetSimulatorIn : ITransportReceive
     {
-        private readonly ITransportReceive wrappedTransport;
         private readonly InternetSimulator internetSimulator;
         private readonly IMonotonicTimeMs timeProvider;
+        private readonly ITransportReceive wrappedTransport;
 
         public InternetSimulatorIn(ITransportReceive wrappedTransport, IMonotonicTimeMs timeProvider, IRandom random,
             ILog log)

@@ -7,9 +7,9 @@ namespace Piot.Surge
 {
     public struct EntityId
     {
-        public ulong Value;
+        public uint Value;
 
-        public EntityId(ulong value)
+        public EntityId(uint value)
         {
             Value = value;
         }

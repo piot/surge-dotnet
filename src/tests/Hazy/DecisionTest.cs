@@ -31,7 +31,7 @@ public class DecisionTests
         {
             var part = new PartsPerTenThousand((uint)random.Random((int)PartsPerTenThousand.Divisor));
             var action = decision.Decide(part);
-            //log.DebugLowLevel("Action {Action}", action);
+            log.DebugLowLevel("Action {Action}", action);
             if (action == PacketAction.Normal)
             {
                 normalActionCount++;

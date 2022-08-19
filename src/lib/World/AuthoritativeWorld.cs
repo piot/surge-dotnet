@@ -15,7 +15,7 @@ namespace Piot.Surge
         protected readonly List<IEntity> created = new();
         private readonly List<IEntity> deleted = new();
 
-        private ulong lastEntityId;
+        private uint lastEntityId;
 
         public Dictionary<ulong, IEntity> Entities { get; } = new();
 
@@ -105,7 +105,7 @@ namespace Piot.Surge
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private ulong FindFreeEntityId()
+        private uint FindFreeEntityId()
         {
             for (var i = 0; i < 200; ++i)
             {

@@ -11,7 +11,7 @@ A more detailed look at the contents of an individual Snapshot Message.
 |DeletedCount
 |Number of following EntityIds
 
-|`U64[DeletedCount]`
+|`U32[DeletedCount]`
 |DeletedEntityIds
 |EntityIds that was deleted
 
@@ -40,7 +40,7 @@ A more detailed look at the contents of an individual Snapshot Message.
 |===
 |Type|Name|Description
 
-|`U64`
+|`U32`
 |EntityId
 |ID of the created entity
 
@@ -60,7 +60,7 @@ A more detailed look at the contents of an individual Snapshot Message.
 |===
 |Type|Name|Description
 
-|`U64`
+|`U32`
 |EntityId
 |ID of the updated entity
 

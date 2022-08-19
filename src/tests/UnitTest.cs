@@ -388,9 +388,9 @@ public class UnitTest1
         Assert.Equal(packetQueue.Peek().tickId, firstTickId);
 
 #if DEBUG
-        Assert.Equal(28, packetQueue.Peek().payload.Length);
-#else
         Assert.Equal(24, packetQueue.Peek().payload.Length);
+#else
+        Assert.Equal(20, packetQueue.Peek().payload.Length);
 #endif
 
         Assert.Equal(6, ((AvatarLogic)spawnedAvatar.Logic).position.x);
@@ -636,9 +636,9 @@ public class UnitTest1
             new SnapshotDeltaIncludedCorrectionPackMemory { memory = undoWriter.Octets });
 
 #if DEBUG
-        Assert.Equal(32, undoWriter.Octets.Length);
-#else
         Assert.Equal(28, undoWriter.Octets.Length);
+#else
+        Assert.Equal(24, undoWriter.Octets.Length);
 #endif
         foreach (var clientCreatedEntity in created)
         {

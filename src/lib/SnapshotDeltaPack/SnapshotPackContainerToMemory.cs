@@ -28,7 +28,7 @@ namespace Piot.Surge.SnapshotDeltaPack
 
     public static class SnapshotPackContainerToMemory
     {
-        private static (uint, Memory<byte>) Pack(IReadPackContainer containerToRead, ulong[] excludeEntityIds)
+        private static (uint, Memory<byte>) Pack(IReadPackContainer containerToRead, uint[] excludeEntityIds)
         {
             uint count = 0;
             var target = new OctetWriter(Constants.MaxDatagramOctetSize);

@@ -116,7 +116,7 @@ namespace Piot.Hazy
             }
 
             var diff = longTermTargetInMs - latencyInMs;
-            var adjustment = diff * (timePassed / 300.0f);
+            var adjustment = diff * (timePassed / 100.0f);
             latencyInMs += (long)adjustment;
             latencyInMs = Math.Clamp(latencyInMs, minLatency, maxLatency);
         }

@@ -76,7 +76,7 @@ namespace Piot.Hazy
             var octets = new byte[octetSize];
             for (var i = 0; i < octetSize; ++i)
             {
-                octets[i] = (byte)random.Random(255);
+                octets[i] = (byte)random.Random(256);
             }
 
             return octets;

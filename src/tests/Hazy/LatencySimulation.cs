@@ -28,7 +28,7 @@ public class LatencySimulationTests
     public LatencySimulationTests(ITestOutputHelper output)
     {
         logTarget = new TestOutputLogger(output);
-        log = new Log(logTarget);
+        log = new Log(logTarget, LogLevel.LowLevel);
     }
 
     [Fact]
@@ -42,6 +42,7 @@ public class LatencySimulationTests
         {
             var now = new Milliseconds(i);
             latencySimulation.Update(now);
+            log.DebugLowLevel("Latency {Latency}", latencySimulation.LatencyInMs);
             Assert.InRange(latencySimulation.LatencyInMs.ms, 20, 95);
         }
     }
