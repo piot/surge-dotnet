@@ -23,7 +23,7 @@ public class DecisionTests
     [Fact]
     public void TestDecision()
     {
-        var decision = new Decision(0.00001d, 0.002d, 0.01d, 0.001d);
+        var decision = new Decision(0.00002d, 0.002d, 0.01d, 0.001d);
         var random = new SystemRandom();
         var normalActionCount = 0;
 
@@ -31,6 +31,7 @@ public class DecisionTests
         {
             var part = new PartsPerTenThousand((uint)random.Random((int)PartsPerTenThousand.Divisor));
             var action = decision.Decide(part);
+            //log.DebugLowLevel("Action {Action}", action);
             if (action == PacketAction.Normal)
             {
                 normalActionCount++;
