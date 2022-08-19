@@ -9,33 +9,16 @@ using Piot.Transport;
 
 namespace Piot.Hazy
 {
-    public class PacketQueue
+    public interface IPacketQueuePop
+    {
+        bool Dequeue(Milliseconds atOrBeforeMs, out Packet packet);
+    }
+
+    public class PacketQueue : IPacketQueuePop
     {
         private readonly LinkedList<Packet> queue = new();
 
         public int Count => queue.Count;
-
-        /// <summary>
-        ///     Add packet to packet queue
-        /// </summary>
-        /// <param name="insertAtMs"></param>
-        /// <param name="packet"></param>
-        public void AddPacket(Packet packet)
-        {
-            var element = queue.Last;
-            while (element != null)
-            {
-                if (element.Value.monotonicTimeMs.ms < packet.monotonicTimeMs.ms)
-                {
-                    queue.AddAfter(element, packet);
-                    return;
-                }
-
-                element = element.Previous;
-            }
-
-            queue.AddFirst(packet);
-        }
 
         /// <summary>
         ///     Dequeues the first packet that are <paramref name="atOrBeforeMs" /> the time.
@@ -61,6 +44,28 @@ namespace Piot.Hazy
 
             packet = new();
             return false;
+        }
+
+        /// <summary>
+        ///     Add packet to packet queue
+        /// </summary>
+        /// <param name="insertAtMs"></param>
+        /// <param name="packet"></param>
+        public void AddPacket(Packet packet)
+        {
+            var element = queue.Last;
+            while (element != null)
+            {
+                if (element.Value.monotonicTimeMs.ms < packet.monotonicTimeMs.ms)
+                {
+                    queue.AddAfter(element, packet);
+                    return;
+                }
+
+                element = element.Previous;
+            }
+
+            queue.AddFirst(packet);
         }
 
         /// <summary>

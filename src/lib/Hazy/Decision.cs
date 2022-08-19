@@ -91,6 +91,13 @@ namespace Piot.Hazy
             thresholds.Add(new() { packetAction = PacketAction.Normal, threshold = PartsPerTenThousand.Divisor });
         }
 
+        /// <summary>
+        ///     Given the value passed in <paramref name="partsPerTenThousand" />, it will return the corresponding
+        ///     <see cref="PacketAction" />.
+        ///     The value passed to <paramref name="partsPerTenThousand" /> should be random or pseudo-random.
+        /// </summary>
+        /// <param name="partsPerTenThousand"></param>
+        /// <returns></returns>
         public PacketAction Decide(PartsPerTenThousand partsPerTenThousand)
         {
             foreach (var threshold in thresholds)

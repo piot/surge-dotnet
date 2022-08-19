@@ -17,18 +17,19 @@ namespace Piot.Hazy
     public class LatencySimulator
     {
         private readonly ILog log;
-        private readonly long maxLatency;
-        private readonly long minLatency;
         private readonly IRandom random;
-        private readonly long targetLatencyInMs;
         private bool isSpiking;
         private long lastUpdate;
         private long latencyInMs;
         private long longTermTargetInMs;
+
+        private long maxLatency;
+        private long minLatency;
         private long nextLongTermTargetTime;
         private int nextSpikeDuration;
         private long nextSpikeTime;
         private long savedLatencyBeforeSpike;
+        private long targetLatencyInMs;
 
         public LatencySimulator(int minimumLatency, int maximumLatency, Milliseconds now, IRandom random, ILog log)
         {
@@ -37,15 +38,25 @@ namespace Piot.Hazy
             lastUpdate = now.ms;
             nextSpikeTime = now.ms + 200 + random.Random(4000);
             nextSpikeDuration = 100;
-            minLatency = minimumLatency;
-            maxLatency = maximumLatency;
-            targetLatencyInMs = minimumLatency + (maximumLatency - minimumLatency) / 2;
             longTermTargetInMs = targetLatencyInMs;
-            nextLongTermTargetTime = now.ms + 1;
+            nextLongTermTargetTime = now.ms;
+            SetLatencyRange(minimumLatency, maximumLatency);
             latencyInMs = targetLatencyInMs;
         }
 
         public Milliseconds LatencyInMs => new(latencyInMs);
+
+        public void SetLatencyRange(int minimumLatency, int maximumLatency)
+        {
+            if (minLatency > maxLatency)
+            {
+                throw new Exception("illegal min or max latency");
+            }
+
+            minLatency = minimumLatency;
+            maxLatency = maximumLatency;
+            targetLatencyInMs = minimumLatency + (maximumLatency - minimumLatency) / 2;
+        }
 
         /// <summary>
         ///     Update latency given the monotonic time <paramref name="now" />.
