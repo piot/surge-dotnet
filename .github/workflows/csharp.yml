@@ -1,0 +1,20 @@
+name: CSharp
+on: [push]
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Build dotnet
+        run: dotnet build src/lib
+
+      - name: Test dotnet
+        run: dotnet test src/tests
