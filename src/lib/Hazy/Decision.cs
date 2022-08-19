@@ -5,23 +5,29 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Piot.Hazy
 {
-    public struct Percentage
+    public readonly struct PartsPerTenThousand
     {
-        public readonly int percentage;
+        public readonly uint parts;
+        public const uint Divisor = 10000;
 
-        public Percentage(int percentage)
+        public PartsPerTenThousand(uint parts)
         {
-            if (percentage < 0 || percentage > 100)
+            if (parts > Divisor)
             {
-                throw new Exception($"Illegal percentage {percentage}");
+                throw new ArgumentOutOfRangeException(nameof(parts), $"Illegal partsPerTenThousand {parts}");
             }
 
-            this.percentage = percentage;
+            this.parts = parts;
         }
+
+        public PartsPerTenThousand(double chance) : this((uint)(chance * Divisor))
+        {
+        }
+
+        public uint Value => parts;
     }
 
     public enum PacketAction
@@ -36,33 +42,29 @@ namespace Piot.Hazy
     public struct Threshold
     {
         public PacketAction packetAction;
-        public int threshold;
+        public uint threshold;
     }
 
     public class Decision
     {
         private readonly List<Threshold> thresholds = new();
-        private int dropPercentage;
-        private int duplicatePercentage;
-        private int reorderPercentage;
-        private int tamperPercentage;
 
-        public Decision(int drop, int tamper, int duplicate, int reorder)
+        public Decision(double drop, double tamper, double duplicate, double reorder)
         {
-            SetPercentages(drop, tamper, duplicate, reorder);
+            SetChances(drop, tamper, duplicate, reorder);
         }
 
-        public void SetPercentages(int drop, int tamper, int duplicate, int reorder)
+        public void SetChances(double dropChance, double tamperChance, double duplicateChance, double reorderChance)
         {
-            dropPercentage = drop;
-            tamperPercentage = tamper;
-            duplicatePercentage = duplicate;
-            reorderPercentage = reorder;
+            var drop = new PartsPerTenThousand(dropChance).Value;
+            var tamper = new PartsPerTenThousand(tamperChance).Value;
+            var duplicate = new PartsPerTenThousand(duplicateChance).Value;
+            var reorder = new PartsPerTenThousand(reorderChance).Value;
 
             var sum = drop + tamper + duplicate + reorder;
-            if (sum > 100)
+            if (sum > PartsPerTenThousand.Divisor)
             {
-                throw new Exception("illegal values");
+                throw new Exception("illegal sum");
             }
 
             if (drop > 0)
@@ -86,14 +88,17 @@ namespace Piot.Hazy
                     { packetAction = PacketAction.Reorder, threshold = drop + tamper + duplicate + reorder });
             }
 
-            thresholds.Add(new() { packetAction = PacketAction.Normal, threshold = 100 });
+            thresholds.Add(new() { packetAction = PacketAction.Normal, threshold = PartsPerTenThousand.Divisor });
         }
 
-        public PacketAction Decide(Percentage percentage)
+        public PacketAction Decide(PartsPerTenThousand partsPerTenThousand)
         {
-            foreach (var threshold in thresholds.Where(threshold => percentage.percentage < threshold.threshold))
+            foreach (var threshold in thresholds)
             {
-                return threshold.packetAction;
+                if (partsPerTenThousand.parts < threshold.threshold)
+                {
+                    return threshold.packetAction;
+                }
             }
 
             return PacketAction.Normal;

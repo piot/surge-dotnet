@@ -33,8 +33,8 @@ namespace Piot.Hazy
 
         public void SendToEndpoint(RemoteEndpointId endpointId, ReadOnlySpan<byte> octets)
         {
-            var chance = random.Random(100);
-            var packetAction = decider.Decide(new Percentage(chance));
+            var chance = (uint)random.Random((int)PartsPerTenThousand.Divisor);
+            var packetAction = decider.Decide(new PartsPerTenThousand(chance));
 
             var now = timeProvider.TimeInMs;
             var withLatency = new Milliseconds(now.ms + latencySimulator.LatencyInMs.ms);

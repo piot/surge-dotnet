@@ -16,19 +16,19 @@ namespace Piot.Hazy
     /// </summary>
     public class LatencySimulator
     {
+        private readonly ILog log;
         private readonly long maxLatency;
         private readonly long minLatency;
         private readonly IRandom random;
+        private readonly long targetLatencyInMs;
         private bool isSpiking;
         private long lastUpdate;
         private long latencyInMs;
-        private readonly ILog log;
         private long longTermTargetInMs;
         private long nextLongTermTargetTime;
         private int nextSpikeDuration;
         private long nextSpikeTime;
         private long savedLatencyBeforeSpike;
-        private readonly long targetLatencyInMs;
 
         public LatencySimulator(int minimumLatency, int maximumLatency, Milliseconds now, IRandom random, ILog log)
         {
