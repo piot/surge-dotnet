@@ -15,7 +15,7 @@ namespace Piot.Surge.MonotonicTimeLowerBits
             var nowBits = (ulong)(now.ms & 0xffff);
             var receivedLowerBits = (ulong)lowerBits.lowerBits;
             var top = (ulong)now.ms & 0xffffffffffff0000;
-            
+
             var receivedMonotonic = top | receivedLowerBits;
             if (receivedLowerBits > nowBits)
             {

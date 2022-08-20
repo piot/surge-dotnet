@@ -34,25 +34,25 @@ public class MonotonicTimeLowerBitsTests
     {
         TestLowerBits(0xfffe, 0x35ffff, 0x35fffe);
     }
-    
+
     [Fact]
     public void TestCalculator2()
     {
         TestLowerBits(0xfffe, 0x360010, 0x35fffe);
     }
-    
+
     [Fact]
     public void TestCalculator3()
     {
         TestLowerBits(0x0030, 0x360050, 0x360030);
     }
-    
+
     [Fact]
     public void TestCalculator4()
     {
         TestLowerBits(0xff30, 0x360150, 0x35ff30);
     }
-    
+
     [Fact]
     public void TestCalculatorException()
     {
@@ -60,5 +60,4 @@ public class MonotonicTimeLowerBitsTests
         var now = new Milliseconds(0x36ff20);
         Assert.Throws<Exception>(() => LowerBitsToMonotonic.LowerBitsToMonotonicMs(now, lowerBits));
     }
-    
 }
