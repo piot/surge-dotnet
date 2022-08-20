@@ -25,6 +25,14 @@ Also contains fully non compressed correction state for the predicting avatars o
 |DatagramType
 |0x01 = DeltaSnapshots
 
+|`U16`
+|PongTimeMsClientLowerBits
+|The lower bits of monotonic time last received from the client. Used to calculate Round Trip Time.
+
+|`S8`
+|Input Step Id diff
+|The input TickId diff. Optimal values are around +1 to +3.
+
 |`U32`
 |LastSnapshotId
 |Last snapshotID in the range
@@ -72,6 +80,10 @@ With a redundancy about 16, that must fit in a single datagram, results in a max
 |`<<Snapshot Receive Status>>`
 |Snapshot Receive Status
 |See <<Snapshot Receive Status>>
+
+|`U16`
+|Client Monotonic Ping Time lower bits
+|The lower bits of the monotonic time.
 
 |`U8`
 |InputCount
