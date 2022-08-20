@@ -5,12 +5,14 @@
 
 using Piot.Clog;
 using Piot.Flood;
+using Piot.MonotonicTime;
 using Piot.Surge;
 using Piot.Surge.ChangeMask;
 using Piot.Surge.DatagramType;
 using Piot.Surge.Internal.Generated;
 using Piot.Surge.LogicalInput;
 using Piot.Surge.LogicalInputSerialization;
+using Piot.Surge.MonotonicTimeLowerBits;
 using Piot.Surge.OrderedDatagrams;
 using Piot.Surge.Snapshot;
 using Piot.Surge.SnapshotDelta;
@@ -120,16 +122,20 @@ public class UnitTest1
         logicalInputQueue.AddLogicalInput(new LogicalInput
             { appliedAtTickId = new TickId { tickId = 20 }, payload = new byte[] { 0x0a, 0x0b } });
 
+        var now = new Milliseconds(0x954299);
+
         var datagramsOut = new OrderedDatagramsOut();
         var outDatagram =
             LogicInputDatagramPackOut.CreateInputDatagram(datagramsOut, new TickId(42), 0,
-                logicalInputQueue.Collection);
+                now, logicalInputQueue.Collection);
 
         var reader = new OctetReader(outDatagram.ToArray());
         var datagramsSequenceIn = OrderedDatagramsInReader.Read(reader);
         Assert.Equal(datagramsOut.Value, datagramsSequenceIn.Value);
         var typeOfDatagram = DatagramTypeReader.Read(reader);
         Assert.Equal(DatagramType.PredictedInputs, typeOfDatagram);
+        var monotonicTimeLowerBits = MonotonicTimeLowerBitsReader.Read(reader);
+        Assert.Equal(0x4299, monotonicTimeLowerBits.lowerBits);
         SnapshotReceiveStatusReader.Read(reader, out var tickId, out var droppedFrames);
         Assert.Equal(42u, tickId.tickId);
         Assert.Equal(0, droppedFrames);

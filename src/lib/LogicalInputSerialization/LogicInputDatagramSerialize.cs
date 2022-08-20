@@ -4,7 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 using Piot.Flood;
+using Piot.MonotonicTime;
 using Piot.Surge.DatagramType;
+using Piot.Surge.MonotonicTimeLowerBits;
 using Piot.Surge.OrderedDatagrams;
 using Piot.Surge.Snapshot;
 
@@ -19,10 +21,13 @@ namespace Piot.Surge.LogicalInputSerialization
         /// <param name="writer"></param>
         /// <param name="inputs"></param>
         public static void Serialize(IOctetWriter writer, OrderedDatagramsOut sequenceOut,
-            TickId lastReceivedSnapshot, byte droppedSnapshotCount, LogicalInput.LogicalInput[] inputs)
+            TickId lastReceivedSnapshot, byte droppedSnapshotCount, Milliseconds now,
+            LogicalInput.LogicalInput[] inputs)
         {
             OrderedDatagramsOutWriter.Write(writer, sequenceOut);
             DatagramTypeWriter.Write(writer, DatagramType.DatagramType.PredictedInputs);
+            MonotonicTimeLowerBitsWriter.Write(
+                new MonotonicTimeLowerBits.MonotonicTimeLowerBits((ushort)(now.ms & 0xffff)), writer);
             SnapshotReceiveStatusWriter.Write(writer, lastReceivedSnapshot, droppedSnapshotCount);
             LogicalInputSerialize.Serialize(writer, inputs);
         }

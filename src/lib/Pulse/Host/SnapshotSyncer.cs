@@ -22,6 +22,8 @@ namespace Piot.Surge.Pulse.Host
 
     public class SnapshotSyncerClient
     {
+        public sbyte clientInputTickCountAheadOfServer;
+        public MonotonicTimeLowerBits.MonotonicTimeLowerBits lastReceivedMonotonicTimeLowerBits;
         private SnapshotSyncerClientState state = SnapshotSyncerClientState.Normal;
 
         public TickIdRange WaitingForTickIds;
@@ -64,7 +66,7 @@ namespace Piot.Surge.Pulse.Host
             this.transportSend = transportSend;
         }
 
-        private SnapshotSyncerClient Create(RemoteEndpointId id)
+        public SnapshotSyncerClient Create(RemoteEndpointId id)
         {
             var client = new SnapshotSyncerClient(id);
 
@@ -106,6 +108,7 @@ namespace Piot.Surge.Pulse.Host
             var unionFlattened = SnapshotDeltaUnionPacker.Pack(serializedUnion);
 
             SnapshotDeltaPackUnionToDatagramsWriter.Write(sender.Send, unionFlattened,
+                connection.lastReceivedMonotonicTimeLowerBits, connection.clientInputTickCountAheadOfServer,
                 connection.DatagramsOutIncrease);
         }
 

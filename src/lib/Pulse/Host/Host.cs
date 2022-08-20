@@ -68,7 +68,8 @@ namespace Piot.Surge.Pulse.Host
 
                 if (!connections.TryGetValue(clientId.Value, out var connectionToClient))
                 {
-                    connectionToClient = new ConnectionToClient(clientId);
+                    var syncer = snapshotSyncer.Create(clientId);
+                    connectionToClient = new ConnectionToClient(clientId, syncer);
                     orderedConnections.Add(connectionToClient);
                     connections.Add(clientId.Value, connectionToClient);
                 }

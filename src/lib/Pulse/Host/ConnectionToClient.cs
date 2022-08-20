@@ -8,6 +8,7 @@ using Piot.Flood;
 using Piot.Surge.DatagramType;
 using Piot.Surge.LogicalInput;
 using Piot.Surge.LogicalInputSerialization;
+using Piot.Surge.MonotonicTimeLowerBits;
 using Piot.Surge.OrderedDatagrams;
 using Piot.Surge.Snapshot;
 using Piot.Transport;
@@ -18,15 +19,18 @@ namespace Piot.Surge.Pulse.Host
     {
         private readonly RemoteEndpointId id;
         private readonly LogicalInputQueue inputQueue = new();
+        private readonly SnapshotSyncerClient syncer;
         private OrderedDatagramsIn orderedDatagramsIn = new(0);
 
-        public ConnectionToClient(RemoteEndpointId id)
+        public ConnectionToClient(RemoteEndpointId id, SnapshotSyncerClient syncer)
         {
             this.id = id;
+            this.syncer = syncer;
         }
 
         private void ReceivePredictedInputs(IOctetReader reader, TickId serverIsAtTickId)
         {
+            syncer.lastReceivedMonotonicTimeLowerBits = MonotonicTimeLowerBitsReader.Read(reader);
             var logicalInputs = LogicalInputDeserialize.Deserialize(reader);
             if (logicalInputs.Length == 0)
             {
@@ -47,6 +51,8 @@ namespace Piot.Surge.Pulse.Host
             {
                 inputQueue.AddLogicalInput(logicalInput);
             }
+
+            syncer.clientInputTickCountAheadOfServer = (sbyte)inputQueue.Collection.Length;
         }
 
         public void Receive(IOctetReader reader, TickId serverIsAtTickId)
