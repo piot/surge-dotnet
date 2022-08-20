@@ -26,6 +26,11 @@ namespace Piot.Flood
             array.Span[pos++] = value;
         }
 
+        public void WriteInt8(sbyte value)
+        {
+            array.Span[pos++] = (byte)value;
+        }
+
         public void WriteUInt16(ushort value)
         {
             pos += 2;
@@ -44,10 +49,10 @@ namespace Piot.Flood
             BinaryPrimitives.WriteUInt32BigEndian(array.Span.Slice(pos - 4, 4), value);
         }
 
-        public void WriteUInt64(ulong value)
+        public void WriteInt32(int value)
         {
-            pos += 8;
-            BinaryPrimitives.WriteUInt64BigEndian(array.Span.Slice(pos - 8, 8), value);
+            pos += 4;
+            BinaryPrimitives.WriteInt32BigEndian(array.Span.Slice(pos - 4, 4), value);
         }
 
         public void WriteOctets(Memory<byte> value)

@@ -8,10 +8,11 @@ namespace Piot.Flood
     public interface IOctetReader
     {
         public byte ReadUInt8();
+        public sbyte ReadInt8();
         public ushort ReadUInt16();
         public short ReadInt16();
         public uint ReadUInt32();
-        public ulong ReadUInt64();
+        public int ReadInt32();
 
         public byte[] ReadOctets(int octetCount);
     }

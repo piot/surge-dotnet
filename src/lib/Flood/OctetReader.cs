@@ -23,6 +23,11 @@ namespace Piot.Flood
             return array.Span[pos++];
         }
 
+        public sbyte ReadInt8()
+        {
+            return (sbyte)array.Span[pos++];
+        }
+
         public ushort ReadUInt16()
         {
             pos += 2;
@@ -41,11 +46,12 @@ namespace Piot.Flood
             return BinaryPrimitives.ReadUInt32BigEndian(array.Span.Slice(pos - 4, 4));
         }
 
-        public ulong ReadUInt64()
+        public int ReadInt32()
         {
-            pos += 8;
-            return BinaryPrimitives.ReadUInt64BigEndian(array.Span.Slice(pos - 8, 8));
+            pos += 4;
+            return BinaryPrimitives.ReadInt32BigEndian(array.Span.Slice(pos - 4, 4));
         }
+
 
         public byte[] ReadOctets(int octetCount)
         {
