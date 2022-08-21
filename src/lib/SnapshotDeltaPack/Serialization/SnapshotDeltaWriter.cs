@@ -44,6 +44,9 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
 #endif
             WriteEntityCount(writer, (int)deltaMemory.updatedCount);
             writer.WriteOctets(deltaMemory.updatedMemory);
+
+            WriteEntityCount(writer, (int)deltaMemory.correctionCount);
+            writer.WriteOctets(deltaMemory.correctionMemory);
         }
     }
 }

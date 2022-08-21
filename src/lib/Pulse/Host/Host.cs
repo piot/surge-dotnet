@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using System;
 using System.Collections.Generic;
 using Piot.Clog;
 using Piot.Flood;
@@ -48,7 +49,8 @@ namespace Piot.Surge.Pulse.Host
         {
             var deltaSnapshotInternal = SnapshotDeltaCreator.Scan(authoritativeWorld, serverTickId);
             var convertedDeltaSnapshot = FromSnapshotDeltaInternal.Convert(deltaSnapshotInternal);
-            var deltaPackContainer = SnapshotDeltaPackCreator.Create(authoritativeWorld, convertedDeltaSnapshot);
+            var deltaPackContainer =
+                SnapshotDeltaPackCreator.Create(authoritativeWorld, convertedDeltaSnapshot, Array.Empty<EntityId>());
 
             authoritativeWorld.ClearDelta();
             OverWriter.Overwrite(authoritativeWorld);

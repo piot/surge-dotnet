@@ -13,11 +13,6 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
         public Memory<byte> memory;
     }
 
-    public class SnapshotDeltaWithoutCorrectionPackMemory
-    {
-        public Memory<byte> memory;
-    }
-
     public static class SnapshotDeltaPacker
     {
         /// <summary>
@@ -26,11 +21,11 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
         /// </summary>
         /// <param name="deltaMemory"></param>
         /// <returns>The deleted, created and updated memory packs</returns>
-        public static SnapshotDeltaWithoutCorrectionPackMemory Pack(SnapshotDeltaMemory deltaMemory)
+        public static SnapshotDeltaIncludedCorrectionPackMemory Pack(SnapshotDeltaMemory deltaMemory)
         {
             var writer = new OctetWriter(Constants.MaxSnapshotOctetSize);
             SnapshotDeltaWriter.Write(deltaMemory, writer);
-            return new SnapshotDeltaWithoutCorrectionPackMemory { memory = writer.Octets };
+            return new SnapshotDeltaIncludedCorrectionPackMemory { memory = writer.Octets };
         }
     }
 }

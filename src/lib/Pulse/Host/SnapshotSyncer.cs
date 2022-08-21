@@ -88,11 +88,7 @@ namespace Piot.Surge.Pulse.Host
             {
                 var snapshotDeltaMemory =
                     SnapshotPackContainerToMemory.PackWithFilter(fetchedContainer, Array.Empty<EntityId>());
-                var pack = SnapshotDeltaPacker.Pack(snapshotDeltaMemory);
-                var packWithCorrections = new SnapshotDeltaIncludedCorrectionPackMemory
-                {
-                    memory = pack.memory
-                };
+                var packWithCorrections = SnapshotDeltaPacker.Pack(snapshotDeltaMemory);
                 var deltaPack = new SnapshotDeltaPack.SnapshotDeltaPack(fetchedContainer.TickId, packWithCorrections);
                 deltaPacks.Add(deltaPack);
             }

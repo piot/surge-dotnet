@@ -128,6 +128,8 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
                 updatedEntities.Add(updatedEntity);
             }
 
+            WriteEntityCount(0, undoWriter);
+
             return (deletedEntities.ToArray(), createdEntities.ToArray(), updatedEntities.ToArray());
         }
     }

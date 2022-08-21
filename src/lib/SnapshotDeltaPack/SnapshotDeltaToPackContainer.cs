@@ -18,7 +18,7 @@ namespace Piot.Surge.SnapshotDeltaPack
         /// <param name="snapshotDeltaAfter"></param>
         /// <returns></returns>
         internal static DeltaSnapshotPackContainer SnapshotDeltaToContainer(IEntityContainer world,
-            SnapshotDelta.SnapshotDelta snapshotDeltaAfter)
+            SnapshotDelta.SnapshotDelta snapshotDeltaAfter, EntityId[] correctionEntityIds)
         {
             var targetPackContainer = new DeltaSnapshotPackContainer();
 
@@ -44,6 +44,19 @@ namespace Piot.Surge.SnapshotDeltaPack
                 var writer = new OctetWriter(256);
                 EntityIdWriter.Write(writer, deletedEntityId);
                 targetPackContainer.DeletedEntityContainer.Add(deletedEntityId, writer.Octets);
+            }
+
+            var correctedEntities = correctionEntityIds.Select(correctedEntityId =>
+                    (ICorrectedEntity)new CorrectedEntity(correctedEntityId, world.FetchEntity(correctedEntityId)))
+                .ToArray();
+
+            foreach (var correctedEntity in correctedEntities)
+            {
+                var writer = new OctetWriter(256);
+                EntityIdWriter.Write(writer, correctedEntity.Id);
+                correctedEntity.SerializeAll(writer);
+                correctedEntity.SerializeCorrectionState(writer);
+                targetPackContainer.CorrectionEntityContainer.Add(correctedEntity.Id, writer.Octets);
             }
 
             targetPackContainer.TickId = snapshotDeltaAfter.TickId;

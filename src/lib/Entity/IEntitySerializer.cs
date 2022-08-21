@@ -23,5 +23,12 @@ namespace Piot.Surge
         /// </summary>
         /// <param name="writer"></param>
         public void SerializeAll(IOctetWriter writer);
+
+        /// <summary>
+        ///     Serializes correction state. If nothing extra is needed to serialize beside the logic fields,
+        ///     it is allowed to serialize nothing.
+        /// </summary>
+        /// <param name="writer"></param>
+        public void SerializeCorrectionState(IOctetWriter writer);
     }
 }

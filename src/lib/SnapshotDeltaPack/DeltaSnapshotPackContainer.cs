@@ -12,6 +12,7 @@ namespace Piot.Surge.SnapshotDeltaPack
     /// </summary>
     public class DeltaSnapshotPackContainer
     {
+        private readonly SnapshotEntityPackContainer entityCorrectionContainer = new();
         private readonly SnapshotEntityPackContainer entityCreatedContainer = new();
         private readonly SnapshotEntityPackContainer entityDeletedContainer = new();
         private readonly SnapshotEntityPackContainer entityUpdateContainer = new();
@@ -24,5 +25,8 @@ namespace Piot.Surge.SnapshotDeltaPack
         public IReadPackContainer CreatedEntityContainerRead => entityCreatedContainer;
         public IFeedEntityPackToContainer DeletedEntityContainer => entityDeletedContainer;
         public IReadPackContainer DeletedEntityContainerRead => entityDeletedContainer;
+
+        public IFeedEntityPackToContainer CorrectionEntityContainer => entityCorrectionContainer;
+        public IReadPackContainer CorrectionEntityContainerRead => entityCorrectionContainer;
     }
 }

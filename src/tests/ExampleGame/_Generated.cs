@@ -188,6 +188,10 @@ public class AvatarLogicEntityInternal : IGeneratedEntity
         writer.WriteUInt16(current.fireCooldown);
     }
 
+    public void SerializeCorrectionState(IOctetWriter writer)
+    {
+    }
+
     public void Deserialize(ulong serializeFlags, IOctetReader reader)
     {
         if ((serializeFlags & FireButtonIsDownMask) != 0) current.fireButtonIsDown = reader.ReadUInt8() != 0;
@@ -362,6 +366,10 @@ public class FireballLogicEntityInternal : IGeneratedEntity
     {
         Position3Writer.Write(current.position, writer);
         Velocity3Writer.Write(current.velocity, writer);
+    }
+
+    public void SerializeCorrectionState(IOctetWriter writer)
+    {
     }
 
     public void Deserialize(ulong serializeFlags, IOctetReader reader)

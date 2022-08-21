@@ -24,16 +24,33 @@ namespace Piot.Surge.SnapshotDeltaPack
 
         public uint updatedCount;
         public Memory<byte> updatedMemory;
+
+        public uint correctionCount;
+        public Memory<byte> correctionMemory;
     }
 
     public static class SnapshotPackContainerToMemory
     {
-        private static (uint, Memory<byte>) Pack(IReadPackContainer containerToRead, uint[] excludeEntityIds)
+        private static (uint, Memory<byte>) PackAllExcept(IReadPackContainer containerToRead, uint[] excludeEntityIds)
         {
             uint count = 0;
             var target = new OctetWriter(Constants.MaxDatagramOctetSize);
 
             foreach (var pair in containerToRead.Entries.Where(pair => !excludeEntityIds.Contains(pair.Key)))
+            {
+                count++;
+                target.WriteOctets(pair.Value);
+            }
+
+            return (count, target.Octets);
+        }
+
+        private static (uint, Memory<byte>) PackOnly(IReadPackContainer containerToRead, uint[] includeEntities)
+        {
+            uint count = 0;
+            var target = new OctetWriter(Constants.MaxDatagramOctetSize);
+
+            foreach (var pair in containerToRead.Entries.Where(pair => includeEntities.Contains(pair.Key)))
             {
                 count++;
                 target.WriteOctets(pair.Value);
@@ -57,9 +74,13 @@ namespace Piot.Surge.SnapshotDeltaPack
         {
             var flattenedUInts = excludeEntityIds.Select(entityId => entityId.Value).ToArray();
 
-            var (createdMemoryCount, createMemory) = Pack(container.CreatedEntityContainerRead, flattenedUInts);
-            var (updatedMemoryCount, updatedMemory) = Pack(container.EntityUpdateContainerRead, flattenedUInts);
-            var (deletedMemoryCount, deletedMemory) = Pack(container.DeletedEntityContainerRead, flattenedUInts);
+            var (createdMemoryCount, createMemory) =
+                PackAllExcept(container.CreatedEntityContainerRead, flattenedUInts);
+            var (updatedMemoryCount, updatedMemory) =
+                PackAllExcept(container.EntityUpdateContainerRead, flattenedUInts);
+            var (deletedMemoryCount, deletedMemory) =
+                PackAllExcept(container.DeletedEntityContainerRead, flattenedUInts);
+            var (correctionCount, correctionMemory) = PackOnly(container.CorrectionEntityContainerRead, flattenedUInts);
 
             return new SnapshotDeltaMemory
             {
@@ -69,7 +90,9 @@ namespace Piot.Surge.SnapshotDeltaPack
                 updatedCount = updatedMemoryCount,
                 updatedMemory = updatedMemory,
                 deletedCount = deletedMemoryCount,
-                deletedMemory = deletedMemory
+                deletedMemory = deletedMemory,
+                correctionCount = correctionCount,
+                correctionMemory = correctionMemory
             };
         }
     }

@@ -442,6 +442,17 @@ namespace Piot.Surge.Generator
 ");
         }
 
+        public static void AddSerializeCorrectionState(StringBuilder sb, IEnumerable<LogicFieldInfo> fieldInfos)
+        {
+            sb.Append(@"    public void SerializeCorrectionState(IOctetWriter writer)
+    {
+");
+
+            sb.Append(@"    }
+
+");
+        }
+
         public static void AddInternalMembers(StringBuilder sb)
         {
             sb.Append(@"    private readonly ActionsContainer actionsContainer = new();
@@ -690,6 +701,7 @@ public class ").Append(EntityGeneratedInternal(logicInfo)).Append(" : IGenerated
 
             AddSerialize(sb, logicInfo.FieldInfos);
             AddSerializeAll(sb, logicInfo.FieldInfos);
+            AddSerializeCorrectionState(sb, logicInfo.FieldInfos);
 
             AddDeserialize(sb, logicInfo.FieldInfos);
             AddDeserializeAll(sb, logicInfo.FieldInfos);

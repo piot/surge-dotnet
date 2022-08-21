@@ -372,16 +372,14 @@ public class UnitTest1
             Assert.Empty(createdForPacker);
             Assert.Single(updateForPacker);
 */
-            var snapshotPackContainer = SnapshotDeltaPackCreator.Create(world, snapshotDeltaAfter);
+            var snapshotPackContainer =
+                SnapshotDeltaPackCreator.Create(world, snapshotDeltaAfter, Array.Empty<EntityId>());
 
             var snapshotDeltaMemory =
                 SnapshotPackContainerToMemory.PackWithFilter(snapshotPackContainer, Array.Empty<EntityId>());
 
-            var snapshotDeltaPackPayloadWithout =
+            snapshotDeltaPackPayload =
                 SnapshotDeltaPacker.Pack(snapshotDeltaMemory);
-
-            snapshotDeltaPackPayload = new SnapshotDeltaIncludedCorrectionPackMemory
-                { memory = snapshotDeltaPackPayloadWithout.memory };
         }
 
         var firstTickId = new TickId(8);
@@ -394,7 +392,7 @@ public class UnitTest1
         Assert.Equal(packetQueue.Peek().tickId, firstTickId);
 
 #if DEBUG
-        Assert.Equal(24, packetQueue.Peek().payload.Length);
+        Assert.Equal(26, packetQueue.Peek().payload.Length);
 #else
         Assert.Equal(20, packetQueue.Peek().payload.Length);
 #endif
@@ -436,7 +434,8 @@ public class UnitTest1
     {
         var deltaSnapshotInternal = SnapshotDeltaCreator.Scan(worldToScan, tickId);
         var convertedDeltaSnapshot = FromSnapshotDeltaInternal.Convert(deltaSnapshotInternal);
-        var deltaPackContainer = SnapshotDeltaPackCreator.Create(worldToScan, convertedDeltaSnapshot);
+        var deltaPackContainer =
+            SnapshotDeltaPackCreator.Create(worldToScan, convertedDeltaSnapshot, Array.Empty<EntityId>());
 
         worldToScan.ClearDelta();
         OverWriter.Overwrite(worldToScan);
@@ -444,12 +443,7 @@ public class UnitTest1
         var snapshotDeltaMemory =
             SnapshotPackContainerToMemory.PackWithFilter(deltaPackContainer, Array.Empty<EntityId>());
 
-        var withoutCorrectionPackMemory = SnapshotDeltaPacker.Pack(snapshotDeltaMemory);
-        var complete = new SnapshotDeltaIncludedCorrectionPackMemory
-        {
-            memory = withoutCorrectionPackMemory.memory
-        };
-
+        var complete = SnapshotDeltaPacker.Pack(snapshotDeltaMemory);
         var deltaPack = new SnapshotDeltaPack(tickId, complete);
 
         return (deltaSnapshotInternal, convertedDeltaSnapshot, deltaPack);
@@ -642,7 +636,7 @@ public class UnitTest1
             new SnapshotDeltaIncludedCorrectionPackMemory { memory = undoWriter.Octets });
 
 #if DEBUG
-        Assert.Equal(28, undoWriter.Octets.Length);
+        Assert.Equal(30, undoWriter.Octets.Length);
 #else
         Assert.Equal(24, undoWriter.Octets.Length);
 #endif
