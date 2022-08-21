@@ -9,6 +9,10 @@ using Piot.Surge.Snapshot;
 
 namespace Piot.Surge.SnapshotDeltaPack
 {
+    /// <summary>
+    ///     Holds a queue of previous delta snapshot packs. Used primarily when connection indicates
+    ///     that they want a delta snapshot to be resent.
+    /// </summary>
     public class DeltaSnapshotPackContainerHistory
     {
         private readonly Queue<DeltaSnapshotPackContainer> queue = new();
@@ -26,6 +30,12 @@ namespace Piot.Surge.SnapshotDeltaPack
             tickIdRange = new TickIdRange(tickIdRange.startTickId, tickIdRange.Last);
         }
 
+        /// <summary>
+        ///     Returns a collection of containers for the specified <paramref name="queryIdRange" />.
+        /// </summary>
+        /// <param name="queryIdRange"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
         public DeltaSnapshotPackContainer[] FetchContainers(TickIdRange queryIdRange)
         {
             if (!tickIdRange.Contains(queryIdRange))

@@ -13,7 +13,7 @@ namespace Piot.Flood
         private readonly ReadOnlyMemory<byte> array;
         private int pos;
 
-        public OctetReader(Memory<byte> memory)
+        public OctetReader(ReadOnlyMemory<byte> memory)
         {
             array = memory;
         }
@@ -53,10 +53,10 @@ namespace Piot.Flood
         }
 
 
-        public byte[] ReadOctets(int octetCount)
+        public ReadOnlySpan<byte> ReadOctets(int octetCount)
         {
             pos += octetCount;
-            return array.Span.Slice(pos - octetCount, octetCount).ToArray();
+            return array.Span.Slice(pos - octetCount, octetCount);
         }
     }
 }

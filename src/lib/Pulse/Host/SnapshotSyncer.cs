@@ -49,7 +49,7 @@ namespace Piot.Surge.Pulse.Host
             this.id = id;
         }
 
-        public void Send(Memory<byte> datagram)
+        public void Send(ReadOnlyMemory<byte> datagram)
         {
             sender.SendToEndpoint(id, datagram.Span);
         }

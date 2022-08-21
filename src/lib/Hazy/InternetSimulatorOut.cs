@@ -37,7 +37,7 @@ namespace Piot.Hazy
             var now = timeProvider.TimeInMs;
             while (internetSimulator.PacketQueuePop.Dequeue(now, out var packet))
             {
-                wrappedTransport.SendToEndpoint(packet.endPoint, packet.payload);
+                wrappedTransport.SendToEndpoint(packet.endPoint, packet.payload.Span);
             }
         }
     }

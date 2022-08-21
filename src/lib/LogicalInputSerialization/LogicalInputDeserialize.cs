@@ -55,7 +55,7 @@ namespace Piot.Surge.LogicalInputSerialization
                 };
 
                 var payloadOctetCount = reader.ReadUInt8();
-                input.payload = reader.ReadOctets(payloadOctetCount);
+                input.payload = reader.ReadOctets(payloadOctetCount).ToArray();
 
                 array[i] = input;
             }

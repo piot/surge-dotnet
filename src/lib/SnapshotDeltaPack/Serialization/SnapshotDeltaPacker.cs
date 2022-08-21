@@ -10,7 +10,7 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
 {
     public class SnapshotDeltaIncludedCorrectionPackMemory
     {
-        public Memory<byte> memory;
+        public ReadOnlyMemory<byte> memory;
     }
 
     public static class SnapshotDeltaPacker

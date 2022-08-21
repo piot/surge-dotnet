@@ -38,7 +38,7 @@ namespace Piot.Hazy
             }
 
             remoteEndpoint = packet.endPoint;
-            return packet.payload;
+            return packet.payload.Span;
         }
 
         public void Update()

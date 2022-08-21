@@ -56,7 +56,7 @@ namespace Piot.Surge.LogicalInputSerialization
                 }
 
                 writer.WriteUInt8((byte)input.payload.Length);
-                writer.WriteOctets(input.payload);
+                writer.WriteOctets(input.payload.Span);
 
                 lastFrameId = input.appliedAtTickId;
                 index++;

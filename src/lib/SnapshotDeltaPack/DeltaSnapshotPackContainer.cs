@@ -8,7 +8,10 @@ using Piot.Surge.Snapshot;
 namespace Piot.Surge.SnapshotDeltaPack
 {
     /// <summary>
-    ///     Holds reusable packs for all the entities that has changed from one tick to the next.
+    ///     Holds reusable packs (serialized values) for all the entities that has changed from one tick to the next.
+    ///     The values are stored in this container, so they can be fetched again if a delta snapshots needs to be resent.
+    ///     It also serves as a small optimization for the current delta snapshot, the field values doesn't have to be
+    ///     re-serialized for each client.
     /// </summary>
     public class DeltaSnapshotPackContainer
     {
@@ -25,7 +28,6 @@ namespace Piot.Surge.SnapshotDeltaPack
         public IReadPackContainer CreatedEntityContainerRead => entityCreatedContainer;
         public IFeedEntityPackToContainer DeletedEntityContainer => entityDeletedContainer;
         public IReadPackContainer DeletedEntityContainerRead => entityDeletedContainer;
-
         public IFeedEntityPackToContainer CorrectionEntityContainer => entityCorrectionContainer;
         public IReadPackContainer CorrectionEntityContainerRead => entityCorrectionContainer;
     }

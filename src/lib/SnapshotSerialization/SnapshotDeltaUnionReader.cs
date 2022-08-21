@@ -45,7 +45,7 @@ namespace Piot.Surge.SnapshotSerialization
                 var payload = reader.ReadOctets(payloadOctetCount);
                 var includedCorrection = new SnapshotDeltaIncludedCorrectionPackMemory
                 {
-                    memory = payload
+                    memory = payload.ToArray()
                 };
                 var snapshotDeltaPack =
                     new SnapshotDeltaPack.SnapshotDeltaPack(
@@ -81,7 +81,7 @@ namespace Piot.Surge.SnapshotSerialization
             foreach (var serializedSnapshotDeltaPack in serializedSnapshotDeltaPacks.packs)
             {
                 writer.WriteUInt16((ushort)serializedSnapshotDeltaPack.payload.Length);
-                writer.WriteOctets(serializedSnapshotDeltaPack.payload);
+                writer.WriteOctets(serializedSnapshotDeltaPack.payload.Span);
             }
         }
     }
@@ -112,7 +112,7 @@ namespace Piot.Surge.SnapshotSerialization
     public struct SerializedSnapshotDeltaPackUnionFlattened
     {
         public TickIdRange tickIdRange;
-        public Memory<byte> payload;
+        public ReadOnlyMemory<byte> payload;
     }
 
     public struct SerializedSnapshotDeltaPack

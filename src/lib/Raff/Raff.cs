@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
-using System.Linq;
 using System.Text;
 using Piot.Flood;
 
@@ -57,7 +56,7 @@ namespace Piot.Raff
             writer.WriteOctets(Constants.fileHeader);
         }
 
-        public static void WriteChunk(IOctetWriter writer, FourCC icon, FourCC name, Memory<byte> octets)
+        public static void WriteChunk(IOctetWriter writer, FourCC icon, FourCC name, ReadOnlySpan<byte> octets)
         {
             writer.WriteOctets(icon.Value);
             writer.WriteOctets(name.Value);
@@ -86,10 +85,10 @@ namespace Piot.Raff
         private static FourCC ReadFourCC(IOctetReader reader)
         {
             var octets = reader.ReadOctets(4);
-            return new FourCC(octets);
+            return new FourCC(octets.ToArray());
         }
 
-        public static Memory<byte> ReadChunk(IOctetReader reader, out FourCC icon, out FourCC name)
+        public static ReadOnlySpan<byte> ReadChunk(IOctetReader reader, out FourCC icon, out FourCC name)
         {
             icon = ReadFourCC(reader);
             name = ReadFourCC(reader);
@@ -97,7 +96,8 @@ namespace Piot.Raff
             return reader.ReadOctets((int)length);
         }
 
-        public static Memory<byte> ReadExpectedChunk(IOctetReader reader, FourCC expectedIcon, FourCC expectedName)
+        public static ReadOnlySpan<byte> ReadExpectedChunk(IOctetReader reader, FourCC expectedIcon,
+            FourCC expectedName)
         {
             var octets = ReadChunk(reader, out var icon, out var name);
             if (!icon.Value.Equals(expectedIcon.Value))

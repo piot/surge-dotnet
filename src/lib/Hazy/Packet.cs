@@ -13,6 +13,6 @@ namespace Piot.Hazy
     {
         public RemoteEndpointId endPoint;
         public Milliseconds monotonicTimeMs;
-        public byte[] payload = Array.Empty<byte>();
+        public ReadOnlyMemory<byte> payload = Array.Empty<byte>();
     }
 }

@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using System;
+
 namespace Piot.Flood
 {
     public interface IOctetReader
@@ -14,6 +16,6 @@ namespace Piot.Flood
         public uint ReadUInt32();
         public int ReadInt32();
 
-        public byte[] ReadOctets(int octetCount);
+        public ReadOnlySpan<byte> ReadOctets(int octetCount);
     }
 }

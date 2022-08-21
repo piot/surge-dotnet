@@ -9,6 +9,6 @@ namespace Piot.Surge.LogicalInput
 {
     public interface IInputPackFetch
     {
-        public Memory<byte> Fetch();
+        public Span<byte> Fetch();
     }
 }

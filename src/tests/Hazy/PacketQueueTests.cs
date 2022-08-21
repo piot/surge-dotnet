@@ -38,7 +38,7 @@ public class PacketQueueTests
         var nextWasFound = queue.Dequeue(new Milliseconds(1025), out var nextFoundPacket);
         Assert.True(nextWasFound);
         Assert.Equal(nextPacket.monotonicTimeMs.ms, nextFoundPacket.monotonicTimeMs.ms);
-        Assert.Equal(0x040, nextFoundPacket.payload[0]);
+        Assert.Equal(0x040, nextFoundPacket.payload.ToArray()[0]);
 
         Assert.Equal(1, queue.Count);
     }

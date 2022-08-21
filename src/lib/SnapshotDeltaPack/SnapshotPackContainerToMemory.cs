@@ -17,21 +17,22 @@ namespace Piot.Surge.SnapshotDeltaPack
     {
         public TickId tickId;
         public uint deletedCount;
-        public Memory<byte> deletedMemory;
+        public ReadOnlyMemory<byte> deletedMemory;
 
         public uint createdCount;
-        public Memory<byte> createdMemory;
+        public ReadOnlyMemory<byte> createdMemory;
 
         public uint updatedCount;
-        public Memory<byte> updatedMemory;
+        public ReadOnlyMemory<byte> updatedMemory;
 
         public uint correctionCount;
-        public Memory<byte> correctionMemory;
+        public ReadOnlyMemory<byte> correctionMemory;
     }
 
     public static class SnapshotPackContainerToMemory
     {
-        private static (uint, Memory<byte>) PackAllExcept(IReadPackContainer containerToRead, uint[] excludeEntityIds)
+        private static (uint, ReadOnlyMemory<byte>) PackAllExcept(IReadPackContainer containerToRead,
+            uint[] excludeEntityIds)
         {
             uint count = 0;
             var target = new OctetWriter(Constants.MaxDatagramOctetSize);
@@ -39,13 +40,13 @@ namespace Piot.Surge.SnapshotDeltaPack
             foreach (var pair in containerToRead.Entries.Where(pair => !excludeEntityIds.Contains(pair.Key)))
             {
                 count++;
-                target.WriteOctets(pair.Value);
+                target.WriteOctets(pair.Value.Span);
             }
 
             return (count, target.Octets);
         }
 
-        private static (uint, Memory<byte>) PackOnly(IReadPackContainer containerToRead, uint[] includeEntities)
+        private static (uint, ReadOnlyMemory<byte>) PackOnly(IReadPackContainer containerToRead, uint[] includeEntities)
         {
             uint count = 0;
             var target = new OctetWriter(Constants.MaxDatagramOctetSize);
@@ -53,7 +54,7 @@ namespace Piot.Surge.SnapshotDeltaPack
             foreach (var pair in containerToRead.Entries.Where(pair => includeEntities.Contains(pair.Key)))
             {
                 count++;
-                target.WriteOctets(pair.Value);
+                target.WriteOctets(pair.Value.Span);
             }
 
             return (count, target.Octets);

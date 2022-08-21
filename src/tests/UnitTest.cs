@@ -129,7 +129,7 @@ public class UnitTest1
             LogicInputDatagramPackOut.CreateInputDatagram(datagramsOut, new TickId(42), 0,
                 now, logicalInputQueue.Collection);
 
-        var reader = new OctetReader(outDatagram.ToArray());
+        var reader = new OctetReader(outDatagram);
         var datagramsSequenceIn = OrderedDatagramsInReader.Read(reader);
         Assert.Equal(datagramsOut.Value, datagramsSequenceIn.Value);
         var typeOfDatagram = DatagramTypeReader.Read(reader);
@@ -404,7 +404,7 @@ public class UnitTest1
         var firstPack = packetQueue.Dequeue();
 
         var (deletedEntities, createdEntities, updatedEntities) =
-            SnapshotDeltaUnPacker.UnPack(firstPack.payload, world);
+            SnapshotDeltaUnPacker.UnPack(firstPack.payload.Span, world);
 
         Assert.Single(updatedEntities);
         Assert.Empty(deletedEntities);
@@ -666,7 +666,8 @@ public class UnitTest1
         Assert.NotNull(makeSure);
 
         Assert.True(clientAvatar.IsAlive);
-        var (deletedUnpack, createdUnpack, updatedUnpack) = SnapshotDeltaUnPacker.UnPack(undoPack.payload, clientWorld);
+        var (deletedUnpack, createdUnpack, updatedUnpack) =
+            SnapshotDeltaUnPacker.UnPack(undoPack.payload.Span, clientWorld);
 
         Assert.Empty(createdUnpack);
         Assert.Single(updatedUnpack);

@@ -10,12 +10,12 @@ namespace Piot.Surge.SnapshotDeltaPack
 {
     public interface IFeedEntityPackToContainer
     {
-        public void Add(EntityId entityId, Memory<byte> payload);
+        public void Add(EntityId entityId, ReadOnlyMemory<byte> payload);
     }
 
     public interface IReadPackContainer
     {
-        public Dictionary<uint, Memory<byte>> Entries { get; }
+        public Dictionary<uint, ReadOnlyMemory<byte>> Entries { get; }
     }
 
     /// <summary>
@@ -23,7 +23,7 @@ namespace Piot.Surge.SnapshotDeltaPack
     /// </summary>
     public class SnapshotEntityPackContainer : IFeedEntityPackToContainer, IReadPackContainer
     {
-        public void Add(EntityId entityId, Memory<byte> payload)
+        public void Add(EntityId entityId, ReadOnlyMemory<byte> payload)
         {
             if (Entries.ContainsKey(entityId.Value))
             {
@@ -33,9 +33,9 @@ namespace Piot.Surge.SnapshotDeltaPack
             Entries.Add(entityId.Value, payload);
         }
 
-        public Dictionary<uint, Memory<byte>> Entries { get; } = new();
+        public Dictionary<uint, ReadOnlyMemory<byte>> Entries { get; } = new();
 
-        public Memory<byte> PackForEntity(EntityId entityId)
+        public ReadOnlyMemory<byte> PackForEntity(EntityId entityId)
         {
             var wasFound = Entries.TryGetValue(entityId.Value, out var foundPack);
             if (!wasFound)

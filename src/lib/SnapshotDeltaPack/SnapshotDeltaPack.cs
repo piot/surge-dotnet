@@ -14,7 +14,7 @@ namespace Piot.Surge.SnapshotDeltaPack
     /// </summary>
     public class SnapshotDeltaPack
     {
-        public Memory<byte> payload;
+        public ReadOnlyMemory<byte> payload;
         public TickId tickId;
 
         public SnapshotDeltaPack(TickId tickId, SnapshotDeltaIncludedCorrectionPackMemory payload)

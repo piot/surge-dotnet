@@ -10,9 +10,9 @@ namespace Piot.Surge.LogicalInput
 {
     public static class CompareOctets
     {
-        public static bool Compare(byte[] a, byte[] b)
+        public static bool Compare(ReadOnlySpan<byte> a, ReadOnlySpan<byte> b)
         {
-            return new ReadOnlySpan<byte>(a).SequenceEqual(b);
+            return a.SequenceEqual(b);
         }
     }
 
@@ -23,7 +23,7 @@ namespace Piot.Surge.LogicalInput
     public struct LogicalInput
     {
         public TickId appliedAtTickId;
-        public byte[] payload;
+        public ReadOnlyMemory<byte> payload;
 
         public override bool Equals(object? obj)
         {
@@ -35,7 +35,7 @@ namespace Piot.Surge.LogicalInput
             var other = (LogicalInput)obj;
 
             return other.appliedAtTickId.tickId == appliedAtTickId.tickId &&
-                   CompareOctets.Compare(other.payload, payload);
+                   CompareOctets.Compare(other.payload.Span, payload.Span);
         }
     }
 }

@@ -19,7 +19,7 @@ namespace Piot.Flood
             array = new byte[size];
         }
 
-        public Memory<byte> Octets => array.Slice(0, pos);
+        public ReadOnlyMemory<byte> Octets => array.Slice(0, pos);
 
         public void WriteUInt8(byte value)
         {
@@ -55,10 +55,10 @@ namespace Piot.Flood
             BinaryPrimitives.WriteInt32BigEndian(array.Span.Slice(pos - 4, 4), value);
         }
 
-        public void WriteOctets(Memory<byte> value)
+        public void WriteOctets(ReadOnlySpan<byte> readOnlySpan)
         {
-            value.Span.CopyTo(array.Span.Slice(pos, value.Length));
-            pos += value.Length;
+            readOnlySpan.CopyTo(array.Span.Slice(pos, readOnlySpan.Length));
+            pos += readOnlySpan.Length;
         }
     }
 }

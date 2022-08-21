@@ -22,7 +22,7 @@ namespace Piot.Surge
     {
         public const uint PayloadOctetCountPerDatagram = 1100;
 
-        public static void Write(Action<Memory<byte>> send, SerializedSnapshotDeltaPackUnionFlattened pack,
+        public static void Write(Action<ReadOnlyMemory<byte>> send, SerializedSnapshotDeltaPackUnionFlattened pack,
             MonotonicTimeLowerBits.MonotonicTimeLowerBits monotonicTimeLowerBits, sbyte clientInputTicksAhead,
             OrderedDatagramsOutIncrease orderedDatagramsIncrease)
         {
@@ -32,7 +32,8 @@ namespace Piot.Surge
 
             for (var datagramIndex = 0; datagramIndex < datagramCount; ++datagramIndex)
             {
-                var writer = new OctetWriter(Constants.MaxDatagramOctetSize);
+                var fullWriter = new OctetWriter(Constants.MaxDatagramOctetSize);
+                var writer = fullWriter as IOctetWriter;
 
                 OrderedDatagramsOutWriter.Write(writer, orderedDatagramsIncrease.Value);
                 DatagramTypeWriter.Write(writer, DatagramType.DatagramType.DeltaSnapshots);
@@ -51,7 +52,7 @@ namespace Piot.Surge
 
                 writer.WriteOctets(payloadSlice);
 
-                send(writer.Octets);
+                send(fullWriter.Octets);
                 orderedDatagramsIncrease.Increase();
             }
         }

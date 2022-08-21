@@ -31,22 +31,22 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
             }
 
             WriteEntityCount(writer, (int)deltaMemory.deletedCount);
-            writer.WriteOctets(deltaMemory.deletedMemory);
+            writer.WriteOctets(deltaMemory.deletedMemory.Span);
 
 #if DEBUG
             writer.WriteUInt8(SnapshotSerialization.Constants.SnapshotDeltaCreatedSync);
 #endif
             WriteEntityCount(writer, (int)deltaMemory.createdCount);
-            writer.WriteOctets(deltaMemory.createdMemory);
+            writer.WriteOctets(deltaMemory.createdMemory.Span);
 
 #if DEBUG
             writer.WriteUInt8(SnapshotSerialization.Constants.SnapshotDeltaUpdatedSync);
 #endif
             WriteEntityCount(writer, (int)deltaMemory.updatedCount);
-            writer.WriteOctets(deltaMemory.updatedMemory);
+            writer.WriteOctets(deltaMemory.updatedMemory.Span);
 
             WriteEntityCount(writer, (int)deltaMemory.correctionCount);
-            writer.WriteOctets(deltaMemory.correctionMemory);
+            writer.WriteOctets(deltaMemory.correctionMemory.Span);
         }
     }
 }
