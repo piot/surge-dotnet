@@ -12,6 +12,7 @@ namespace Piot.Surge.SnapshotDeltaPack
     ///     The values are stored in this container, so they can be fetched again if a delta snapshots needs to be resent.
     ///     It also serves as a small optimization for the current delta snapshot, the field values doesn't have to be
     ///     re-serialized for each client.
+    ///     We trade octet based packs instead of bit stream based packs for the performance of putting together a snapshot.
     /// </summary>
     public class DeltaSnapshotPackContainer
     {

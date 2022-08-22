@@ -5,6 +5,7 @@
 
 using System.Linq;
 using Piot.Flood;
+using Piot.Surge.LocalPlayer;
 using Piot.Surge.SnapshotDeltaPack.Serialization;
 
 namespace Piot.Surge.SnapshotDeltaPack
@@ -47,13 +48,15 @@ namespace Piot.Surge.SnapshotDeltaPack
             }
 
             var correctedEntities = correctionEntityIds.Select(correctedEntityId =>
-                    (ICorrectedEntity)new CorrectedEntity(correctedEntityId, world.FetchEntity(correctedEntityId)))
+                    (ICorrectedEntity)new CorrectedEntity(correctedEntityId, new LocalPlayerIndex(0),
+                        world.FetchEntity(correctedEntityId)))
                 .ToArray();
 
             foreach (var correctedEntity in correctedEntities)
             {
                 var writer = new OctetWriter(256);
                 EntityIdWriter.Write(writer, correctedEntity.Id);
+                LocalPlayerIndexWriter.Write(correctedEntity.ControlledByLocalPlayerIndex, writer);
                 correctedEntity.SerializeAll(writer);
                 correctedEntity.SerializeCorrectionState(writer);
                 targetPackContainer.CorrectionEntityContainer.Add(correctedEntity.Id, writer.Octets);

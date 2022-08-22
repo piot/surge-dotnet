@@ -5,20 +5,24 @@
 
 using System;
 using Piot.Flood;
+using Piot.Surge.LocalPlayer;
 
 namespace Piot.Surge.SnapshotDeltaPack.Serialization
 {
     public class CorrectedEntity : ICorrectedEntity
     {
-        public CorrectedEntity(EntityId id, IEntitySerializer correctionSerializer)
+        public CorrectedEntity(EntityId id, LocalPlayerIndex localPlayerIndex, IEntitySerializer correctionSerializer)
         {
             Id = id;
             CorrectionSerializer = correctionSerializer;
+            ControlledByLocalPlayerIndex = localPlayerIndex;
         }
 
         public IEntitySerializer CorrectionSerializer { get; }
 
         public EntityId Id { get; }
+
+        public LocalPlayerIndex ControlledByLocalPlayerIndex { get; }
 
         public void SerializeCorrectionState(IOctetWriter writer)
         {
