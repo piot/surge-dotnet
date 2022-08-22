@@ -12,6 +12,7 @@ using Piot.Surge.Snapshot;
 using Piot.Surge.SnapshotDeltaInternal;
 using Piot.Surge.SnapshotDeltaPack;
 using Piot.Surge.SnapshotDeltaPack.Serialization;
+using Piot.Surge.TransportStats;
 using Piot.Transport;
 
 namespace Piot.Surge.Pulse.Host
@@ -25,17 +26,21 @@ namespace Piot.Surge.Pulse.Host
         private readonly TimeTicker.TimeTicker simulationTicker;
         private readonly SnapshotSyncer snapshotSyncer;
         private readonly ITransport transport;
+        private readonly TransportStatsBoth transportWithStats;
         private TickId serverTickId;
 
-        public Host(ITransport transport, ILog log)
+        public Host(ITransport transport, Milliseconds now, ILog log)
         {
+            transportWithStats = new TransportStatsBoth(transport, now);
+            this.transport = transportWithStats;
             snapshotSyncer = new SnapshotSyncer(transport);
             authoritativeWorld = new AuthoritativeWorld();
-            this.transport = transport;
             this.log = log;
             simulationTicker = new(new Milliseconds(0), SimulationTick, new Milliseconds(16),
                 log.SubLog("SimulationTick"));
         }
+
+        public TransportStats.TransportStats Stats => transportWithStats.Stats;
 
         private void SimulationTick()
         {
@@ -60,7 +65,7 @@ namespace Piot.Surge.Pulse.Host
 
         private void ReceiveFromClients()
         {
-            for (var i = 0; i < 30; i++)
+            for (var i = 0; i < 30; i++) // Have a maximum of datagrams to process each update, to avoid stalling
             {
                 var datagram = transport.Receive(out var clientId);
                 if (datagram.IsEmpty)
@@ -85,6 +90,7 @@ namespace Piot.Surge.Pulse.Host
         {
             ReceiveFromClients();
             simulationTicker.Update(now);
+            transportWithStats.Update(now);
         }
     }
 }

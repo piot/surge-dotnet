@@ -3,11 +3,34 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using System;
 using System.Runtime.CompilerServices;
 using Piot.MonotonicTime;
 
 namespace Piot.Stats
 {
+    public static class StandardFormatter
+    {
+        public static string Format(int value)
+        {
+            return $"{value}";
+        }
+    }
+
+    public static class BitFormatter
+    {
+        public static string Format(int value)
+        {
+            return value switch
+            {
+                < 1000 => $"{value} bit",
+                < 1_000_000 => $"{value / 1000.0:0.0} kbit",
+                < 1_000_000_000 => $"{value / 1_000_000.0:0.#} Mbit",
+                _ => $"{value / 1_000_000_000:0.#} Gbit"
+            };
+        }
+    }
+
     public class StatPerSecond
     {
         private readonly Milliseconds minimumAverageTime;
@@ -18,9 +41,12 @@ namespace Piot.Stats
         private Stat stat;
         private long total;
 
-        public StatPerSecond(Milliseconds now, Milliseconds minimumAverageTime)
+        public StatPerSecond(Milliseconds now, Milliseconds minimumAverageTime, Func<int, string>? formatter = null)
         {
+            stat.Formatter = formatter ?? StandardFormatter.Format;
+
             Reset(now);
+
             this.minimumAverageTime = minimumAverageTime;
         }
 
@@ -30,7 +56,7 @@ namespace Piot.Stats
         public void Add(int a)
         {
             total += a;
-            count++;
+            count++; // count is technically not needed, but is nice to know how many samples the average was based on.
 
             if (a < min)
             {

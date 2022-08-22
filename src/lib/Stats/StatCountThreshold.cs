@@ -40,14 +40,17 @@ namespace Piot.Stats
                 max = a;
             }
 
-            if (count >= countThreshold)
+            if (count < countThreshold)
             {
-                stat.average = (int)(total / count);
-                stat.min = min;
-                stat.max = max;
-                stat.count = count;
-                Reset();
+                return;
             }
+
+            stat.average = (int)(total / count);
+            stat.min = min;
+            stat.max = max;
+            stat.count = count;
+
+            Reset();
         }
 
         private void Reset()
