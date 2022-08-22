@@ -4,6 +4,7 @@ A more detailed look at the contents of an individual Snapshot Message.
 
 == Snapshot Message
 
+[cols="3,1,4"]
 |===
 |Type|Name|Description
 
@@ -31,12 +32,21 @@ A more detailed look at the contents of an individual Snapshot Message.
 |UpdatedEntityInfos
 |<<Updated Entity Info>>
 
+|`U16`
+|CorrectionStateCount
+|Number of following correction states for the clients locally predicted entities. Typically 0-4.
+
+|`<<Correction State Entity Info>>[CorrectionStateCount]`
+|CorrectionStateEntityInfos
+|<<Correction State Entity Info>>
+
 |===
 
 === Entity Info
 
 ==== Created Entity Info
 
+[cols="1,1,4"]
 |===
 |Type|Name|Description
 
@@ -56,7 +66,7 @@ A more detailed look at the contents of an individual Snapshot Message.
 
 ==== Updated Entity Info
 
-[width=95%]
+[cols="1,1,4"]
 |===
 |Type|Name|Description
 
@@ -71,14 +81,29 @@ A more detailed look at the contents of an individual Snapshot Message.
 |`U16` (if high bit set in `ChangedFieldsMaskLow`)
 |`ChangedFieldsMaskHi`
 a|If the highest bit is set in `ChangedFieldsMaskLow`, then the 16 bits are shifted 15 bits to the left. The combined value is called `ChangedFieldsMask`.
-
 [source,csharp]
 ----
 ChangedFieldsMask = (ChangedFieldsMaskHi << 15) \| ChangedFieldsMaskLow & 0x7fff)
 ----
 
+|===
+
+==== Correction State Entity Info
+
+[cols="1,1,4"]
+|===
+|Type|Name|Description
+
+|`U32`
+|EntityId
+|ID of the entity that the correction state should be applied to
+
+|`U8`
+|LocalPlayerIndex
+|Which of the local player indexes that should control the correction state.
+
 |`U8[?]`
 |EntityFields
-|Payload with the field values that have a bit set in `ChangedFieldsMask` in order.
+|Payload with all the field values in the Entity serialized in order.
 
 |===

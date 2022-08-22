@@ -1,23 +1,30 @@
 = Surge Protocol
 
-The Surge protocol is based on datagrams, e.g. UDP. It does not handle connections nor sessions, since they differ widly on different services and transports.
+:network-byte-order: footnote:[wikipedia: https://en.wikipedia.org/wiki/Endianness#Networking[Networking Endianness]]
+
+The Surge protocol is based on datagrams, e.g. UDP. It does not handle connections, encryption, counter replay attacks, IP Spoofing, sessions, etc, since they differ widly on different unreliable datagram services and transports.
+
+If not already decided on an existing unreliable datagram transport, netcode.io looks interesting.
+
+All values are sent in Network Byte Order {network-byte-order} (big endian) unless otherwise specified.
 
 
 == Datagram
 
 === Snapshot Datagrams
 
-Sent from authoritative host to the client. When connection quality is good, only one snapshot is sent. If snapshots are dropped
-or network quality is likely to be bad, a few extra delta snapshots are sent (redundancy).
+Sent from authoritative host to the client. When connection quality is good, only one snapshot is sent after each tick.
+If snapshots are dropped or network quality is likely to be bad, a few extra delta snapshots are sent (redundancy).
 
 Contains all fields that changed for all  ghosts that changed during each of the snapshots.
 Also contains fully non compressed correction state for the predicting avatars on the client
  (usually one, unless multiple local players). The ghosts and the predicting avatars should be deterministic in isolation.
 
+[cols="1,2,4"]
 |===
 |Type|Name|Description
 
-| +Ordered Datagrams+
+|<<Ordered Datagrams>>
 |OrderedDatagrams
 |See <<Ordered Datagrams>>
 
@@ -31,7 +38,7 @@ Also contains fully non compressed correction state for the predicting avatars o
 
 |`S8`
 |Input Step Id diff
-|The input TickId diff. Optimal values are around +1 to +3.
+|The input TickId diff. Optimal values are around +1 to +3. Negative values indicates that the host had to guess input values since the input queue was starved.
 
 |`U32`
 |LastSnapshotId
@@ -39,7 +46,7 @@ Also contains fully non compressed correction state for the predicting avatars o
 
 |`U8`
 |SnapshotCount
-|How many snapshots are contained going back. Must be at least one.
+|How many snapshots are contained going backwards. Must be at least one.
 
 `FirstSnapshotID = LastSnapshotId - (SnapshotCount - 1)`.
 
@@ -66,6 +73,7 @@ If we have around 300 ms as a maximum latency from a QoS perspective and assume 
 
 With a redundancy about 16, that must fit in a single datagram, results in a max size of each logical input to 70 octets.
 
+[cols="1,2,4"]
 |===
 |Type|Name|Description
 
@@ -95,14 +103,16 @@ With a redundancy about 16, that must fit in a single datagram, results in a max
 
 |`U8[InputStreamCount]`
 |LocalPlayerIndicies
-|The local player indicies. Every <<Logical Input Chunk>> is considered to have the data serialized for each player in this order.
+|The local player indicies. Every <<Logical Input Chunk>> is considered to have the data serialized for each client local player in this order.
+
+The local player index is something that the client assigns on its own. Usually from 1-4, which represents the bound input devices in order.
 
 |`U32`
 |FirstSnapshotId
 |Input was predicted and applied when state was at this `FirstSnapshotId`. Receiver should assume that it increased by one
 after each `InputStreamCount` LogicalInputChunks.
 
-|`LogicalInputChunk[InputCount{nbsp}*{nbsp}InputStreamCount]`
+|`LogicalInputChunk [InputCount*InputStreamCount]`
 |InputChunks
 |Input chunks repeated `InputCount{nbsp}*{nbsp}InputStreamCount` times. See <<Logical Input Chunk>>.
 
@@ -110,6 +120,7 @@ after each `InputStreamCount` LogicalInputChunks.
 
 ==== Logical Input Chunk
 
+[cols="1,1,4"]
 |===
 |Type|Name|Description
 
@@ -133,6 +144,7 @@ Normally this is handled by the transport layer used, but needed when using unse
 Receiver should discard any datagram that is not considered a successor to the previously received datagram.
 If no datagram has been received, just accept the first one.
 
+[cols="1,1,4"]
 |===
 |Type|Name|Description
 
@@ -146,6 +158,7 @@ If no datagram has been received, just accept the first one.
 
 Sent from Client to Host, to signal the latest useful snapshot that was received and put in a queue. As well as how many that was dropped after that (to the Clients' knowledge). The host will resend any dropped snapshots.
 
+[cols="1,2,4"]
 |===
 |Type|Name|Description
 
