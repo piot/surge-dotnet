@@ -20,7 +20,7 @@ public class TestOutputLogger : ILogTarget
     {
         var strings = args.Select(x => x.ToString());
         var values = args.Length > 0 ? $"({string.Join(", ", strings)})" : "";
-        var line = $"{level} : [{prefix}] {message} {values}";
+        var line = $"{level,8} : [{prefix}] {message} {values}";
         output.WriteLine(line);
     }
 }
