@@ -21,13 +21,13 @@ namespace Piot.Surge.Pulse.Client
     {
         private readonly ClientDeltaSnapshotPlayback deltaSnapshotPlayback;
         private readonly ILog log;
+        private readonly OrderedDatagramsInChecker orderedDatagramsInChecker = new();
         private readonly ClientPredictor predictor;
+        private readonly StatCountThreshold statsHostInputQueueCount = new(60);
+
+        private readonly StatCountThreshold statsRoundTripTime = new(20);
         private readonly ITransportClient transport;
         private readonly ClientWorld world;
-        private OrderedDatagramsInChecker orderedDatagramsInChecker = new();
-
-        private readonly StatCountThreshold statsRoundTripTime = new(62);
-        private readonly StatCountThreshold statsHostInputQueueCount = new(60);
 
         public Client(ILog log, Milliseconds now, Milliseconds targetDeltaTimeMs, IEntityCreation entityCreation,
             ITransportClient transportClient, IInputPackFetch fetch)
@@ -46,19 +46,23 @@ namespace Piot.Surge.Pulse.Client
             var pongTime = LowerBitsToMonotonic.LowerBitsToMonotonicMs(now, pongTimeLowerBits);
             var roundTripTimeMs = now.ms - pongTime.ms;
             statsRoundTripTime.Add((int)roundTripTimeMs);
-            log.DebugLowLevel("RoundTripTime {RoundTripTimeMs} {AverageRoundTripTimeMs}", roundTripTimeMs, statsRoundTripTime.Stat.average);
-            
+            log.DebugLowLevel("RoundTripTime {RoundTripTimeMs} {AverageRoundTripTimeMs}", roundTripTimeMs,
+                statsRoundTripTime.Stat.average);
+
             var numberOfInputInQueue = reader.ReadInt8();
             statsHostInputQueueCount.Add(numberOfInputInQueue);
-            log.DebugLowLevel("InputQueueCountFromHost {InputQueueCount} {AverageInputQueueCount}", numberOfInputInQueue, statsHostInputQueueCount.Stat.average);
+            log.DebugLowLevel("InputQueueCountFromHost {InputQueueCount} {AverageInputQueueCount}",
+                numberOfInputInQueue, statsHostInputQueueCount.Stat.average);
         }
-        
+
         private void ReceiveSnapshot(IOctetReader reader, Milliseconds now)
         {
             log.DebugLowLevel("receiving snapshot datagram from server");
             ReceiveSnapshotExtraData(reader, now);
-            SnapshotPackDatagramHeaderReader.Read(reader, out var tickIdRange, out var datagramIndex, out bool isLastOne);
-            log.DebugLowLevel("receive snapshot header {TickIdRange} {DatagramIndex} {IsLastOne}", tickIdRange, datagramIndex, isLastOne);
+            SnapshotPackDatagramHeaderReader.Read(reader, out var tickIdRange, out var datagramIndex,
+                out var isLastOne);
+            log.DebugLowLevel("receive snapshot header {TickIdRange} {DatagramIndex} {IsLastOne}", tickIdRange,
+                datagramIndex, isLastOne);
             var unionOfSnapshots = SnapshotDeltaUnionReader.Read(reader);
             deltaSnapshotPlayback.FeedSnapshotsUnion(unionOfSnapshots);
         }
@@ -67,7 +71,8 @@ namespace Piot.Surge.Pulse.Client
         {
             if (!orderedDatagramsInChecker.ReadAndCheck(reader))
             {
-                log.Notice("ordered datagram in wrong order, discarding datagram {OrderedDatagramsIn}", orderedDatagramsInChecker);
+                log.Notice("ordered datagram in wrong order, discarding datagram {OrderedDatagramsIn}",
+                    orderedDatagramsInChecker);
                 return;
             }
 

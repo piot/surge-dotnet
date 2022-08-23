@@ -56,7 +56,6 @@ namespace Piot.Surge.SnapshotDeltaPack
             var (startOffset, endOffset) = tickIdRange.Offsets(queryIdRange);
 
             var sourceArray = queue.ToArray();
-            log.DebugLowLevel("range {StartOffset}, {EndOffset}", startOffset, endOffset);
 
             var targetContainers = new DeltaSnapshotPackContainer[endOffset - startOffset + 1];
             for (var i = startOffset; i <= endOffset; ++i)

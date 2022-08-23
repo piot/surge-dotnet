@@ -44,7 +44,7 @@ namespace Piot.Surge.Pulse.Host
 
         private void SimulationTick()
         {
-            log.Debug("Simulation Tick! {Tick}", serverTickId);
+            log.Debug("Simulation Tick! {TickId}", serverTickId);
             var packContainer = StoreWorldChangesToPackContainer();
             snapshotSyncer.SendSnapshot(packContainer);
             serverTickId = new TickId(serverTickId.tickId + 1);

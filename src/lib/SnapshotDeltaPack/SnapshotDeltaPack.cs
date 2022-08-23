@@ -25,7 +25,7 @@ namespace Piot.Surge.SnapshotDeltaPack
 
         public override string ToString()
         {
-            return $"[snapshotDeltaPack {tickId} {payload}]";
+            return $"[snapshotDeltaPack tickId: {tickId} payload length: {payload.Length}]";
         }
     }
 }

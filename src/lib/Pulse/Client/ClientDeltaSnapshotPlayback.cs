@@ -65,7 +65,6 @@ namespace Piot.Surge.Pulse.Client
 
         private void NextSnapshotTick()
         {
-            log.DebugLowLevel("Try to read next snapshot in queue");
             var targetDeltaTimeMsValue = targetDeltaTimeMs.ms;
             // Our goal is to have just two snapshots in the queue.
             // So adjust the playback speed using the playback delta time.
@@ -76,6 +75,8 @@ namespace Piot.Surge.Pulse.Client
                 _ => targetDeltaTimeMsValue
             };
 
+            log.DebugLowLevel("Try to read next snapshot in queue. {PlaybackDeltaTimeMs}", deltaTimeMs);
+
             snapshotPlaybackTicker.DeltaTime = new Milliseconds(deltaTimeMs);
 
             if (queue.Count == 0)
@@ -85,6 +86,7 @@ namespace Piot.Surge.Pulse.Client
             }
 
             var deltaSnapshot = queue.Dequeue();
+            log.DebugLowLevel("dequeued snapshot {DeltaSnapshot}", deltaSnapshot);
             var snapshotReader = new OctetReader(deltaSnapshot.payload);
             SnapshotDeltaReader.Read(snapshotReader, clientWorld);
 
@@ -92,6 +94,7 @@ namespace Piot.Surge.Pulse.Client
             // All the changed fields are set to the new values and Tick() is called to trigger the resulting effects of
             // the logic running for one tick.
             Ticker.Tick(clientWorld);
+            log.DebugLowLevel("tick ghost logics {EntityCount}", clientWorld.AllEntities.Length);
 
             predictor.ReadCorrections(snapshotReader);
         }

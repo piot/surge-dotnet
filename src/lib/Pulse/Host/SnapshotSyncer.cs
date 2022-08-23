@@ -58,14 +58,14 @@ namespace Piot.Surge.Pulse.Host
 
     public class SnapshotSyncer
     {
+        private readonly ILog log;
         private readonly DeltaSnapshotPackContainerHistory snapshotHistory;
         private readonly List<SnapshotSyncerClient> syncClients = new();
         private readonly ITransportSend transportSend;
-        private readonly ILog log;
-        
+
         public SnapshotSyncer(ITransportSend transportSend, ILog log)
         {
-            snapshotHistory = new (log);
+            snapshotHistory = new(log);
             this.transportSend = transportSend;
             this.log = log;
         }
