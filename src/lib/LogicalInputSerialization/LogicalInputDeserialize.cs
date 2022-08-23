@@ -41,10 +41,7 @@ namespace Piot.Surge.LogicalInputSerialization
             {
                 LogicalInput.LogicalInput input = new()
                 {
-                    appliedAtTickId =
-                    {
-                        tickId = lastFrameId.tickId
-                    }
+                    appliedAtTickId = new(lastFrameId.tickId)
                 };
 
                 var payloadOctetCount = reader.ReadUInt8();

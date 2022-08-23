@@ -103,7 +103,7 @@ public class UnitTest1
     {
         var logicalInputQueue = new LogicalInputQueue();
         logicalInputQueue.AddLogicalInput(new LogicalInput
-            { appliedAtTickId = new TickId { tickId = 20 }, payload = new byte[] { 0x0a, 0x0b } });
+            { appliedAtTickId = new TickId(20), payload = new byte[] { 0x0a, 0x0b } });
 
         var writer = new OctetWriter(23);
 
@@ -121,7 +121,7 @@ public class UnitTest1
     {
         var logicalInputQueue = new LogicalInputQueue();
         logicalInputQueue.AddLogicalInput(new LogicalInput
-            { appliedAtTickId = new TickId { tickId = 20 }, payload = new byte[] { 0x0a, 0x0b } });
+            { appliedAtTickId = new TickId(20), payload = new byte[] { 0x0a, 0x0b } });
 
         var now = new Milliseconds(0x954299);
 

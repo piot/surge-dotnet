@@ -31,8 +31,7 @@ namespace Piot.Surge.ChangeMaskSerialization
                 return new ChangedFieldsMask { mask = v };
             }
 
-            ulong completeMask = (ushort)(v & 0x7fff);
-
+            var completeMask = (ulong)(v & 0x7fff);
 
             var next = reader.ReadUInt16();
             completeMask <<= 15;

@@ -12,8 +12,8 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
 {
     public class SnapshotDeltaReaderInfoEntity
     {
-        public ulong changeMask;
-        public IEntity entity;
+        public readonly ulong changeMask;
+        public readonly IEntity entity;
 
         public SnapshotDeltaReaderInfoEntity(IEntity entity, ulong changeMask)
         {

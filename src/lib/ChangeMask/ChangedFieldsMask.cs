@@ -21,15 +21,5 @@ namespace Piot.Surge.ChangeMask
         {
             this.mask = mask;
         }
-
-        public static ulong MergeBits(ulong first, ulong second)
-        {
-            if ((first & DeletedMaskBit) != 0)
-            {
-                throw new Exception($"Can not merge previously deleted masks {first:08X} {second:08X}");
-            }
-
-            return first | second;
-        }
     }
 }

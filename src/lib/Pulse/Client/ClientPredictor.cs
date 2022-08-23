@@ -20,7 +20,7 @@ namespace Piot.Surge.Pulse.Client
     /// </summary>
     public class ClientPredictor : IClientPredictorCorrections
     {
-        private readonly OrderedDatagramsOut datagramsOut = new();
+        private readonly OrderedDatagramsOut datagramsOut;
         private readonly IInputPackFetch inputPackFetch;
         private readonly ILog log;
         private readonly LogicalInputQueue predictedInputs = new();

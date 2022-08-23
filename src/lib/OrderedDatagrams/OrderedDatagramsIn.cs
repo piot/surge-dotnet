@@ -10,7 +10,7 @@ namespace Piot.Surge.OrderedDatagrams
     /// <summary>
     ///     Very simple protocol to detect out of order and dropped datagrams.
     /// </summary>
-    public struct OrderedDatagramsIn
+    public readonly struct OrderedDatagramsIn
     {
         public OrderedDatagramsIn(byte sequenceId)
         {

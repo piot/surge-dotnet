@@ -5,7 +5,7 @@
 
 namespace Piot.Surge.OrderedDatagrams
 {
-    public struct OrderedDatagramsOut
+    public readonly struct OrderedDatagramsOut
     {
         public OrderedDatagramsOut(byte initialValue)
         {

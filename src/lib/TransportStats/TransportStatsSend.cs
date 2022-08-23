@@ -21,9 +21,9 @@ namespace Piot.Surge.TransportStats
         public TransportStatsSend(Milliseconds now, ITransportSend transportSend)
         {
             var deltaTimeUntilStats = new Milliseconds(1000);
-            bitsPerSecond = new StatPerSecond(now, deltaTimeUntilStats, BitFormatter.Format);
-            datagramCountPerSecond = new StatPerSecond(now, deltaTimeUntilStats);
-            datagramOctetSize = new StatCountThreshold(62);
+            bitsPerSecond = new (now, deltaTimeUntilStats, BitFormatter.Format);
+            datagramCountPerSecond = new (now, deltaTimeUntilStats);
+            datagramOctetSize = new (62);
             wrappedTransport = transportSend;
         }
 

@@ -23,7 +23,7 @@ namespace Piot.Surge.Pulse.Host
         private readonly LogicalInputQueue inputQueue = new();
         private readonly ILog log;
         private readonly SnapshotSyncerClient syncer;
-        private OrderedDatagramsIn orderedDatagramsIn = new(0);
+        private OrderedDatagramsIn orderedDatagramsIn;
 
         public ConnectionToClient(RemoteEndpointId id, SnapshotSyncerClient syncer, ILog log)
         {

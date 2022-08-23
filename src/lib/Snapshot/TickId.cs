@@ -14,9 +14,9 @@ namespace Piot.Surge.Snapshot
     ///     about two years. The uint.MaxValue value, <c>0xffffffff</c>, is reserved and can not be
     ///     used as a normal tickId.
     /// </summary>
-    public struct TickId
+    public readonly struct TickId
     {
-        public uint tickId;
+        public readonly uint tickId;
 
         public TickId(uint tickId)
         {

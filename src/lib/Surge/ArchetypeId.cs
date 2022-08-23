@@ -7,9 +7,9 @@ using System;
 
 namespace Piot.Surge
 {
-    public struct ArchetypeId
+    public readonly struct ArchetypeId
     {
-        public ushort id;
+        public readonly ushort id;
 
         public ArchetypeId(ushort id)
         {
