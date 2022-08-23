@@ -17,6 +17,14 @@ namespace Piot.Stats
         }
     }
 
+    public static class StandardFormatterPerSecond
+    {
+        public static string Format(int value)
+        {
+            return $"{value}/s";
+        }
+    }
+
     public static class BitFormatter
     {
         public static string Format(int value)
@@ -31,9 +39,18 @@ namespace Piot.Stats
         }
     }
 
+    public static class BitsPerSecondFormatter
+    {
+        public static string Format(int value)
+        {
+            return $"{BitFormatter.Format(value)}/s";
+        }
+    }
+
     public class StatPerSecond
     {
         private readonly Milliseconds minimumAverageTime;
+        private uint averageCount;
         private uint count;
         private Milliseconds lastTime;
         private int max;
@@ -57,22 +74,10 @@ namespace Piot.Stats
         {
             total += a;
             count++; // count is technically not needed, but is nice to know how many samples the average was based on.
-
-            if (a < min)
-            {
-                min = a;
-            }
-
-            if (a > max)
-            {
-                max = a;
-            }
         }
 
         private void Reset(Milliseconds now)
         {
-            min = int.MaxValue;
-            max = int.MinValue;
             count = 0;
             total = 0;
             lastTime = now;
@@ -86,10 +91,30 @@ namespace Piot.Stats
             }
 
             var deltaMilliseconds = now.ms - lastTime.ms;
-            stat.average = (int)(total * 1000 / deltaMilliseconds);
+
+            var a = (int)(total * 1000 / deltaMilliseconds);
+            if (a < min)
+            {
+                min = a;
+            }
+
+            if (a > max)
+            {
+                max = a;
+            }
+
+            stat.average = a;
             stat.min = min;
             stat.max = max;
             stat.count = count;
+
+            averageCount++;
+            if (averageCount > 5)
+            {
+                min = int.MaxValue;
+                max = int.MinValue;
+                averageCount = 0;
+            }
 
             Reset(now);
         }

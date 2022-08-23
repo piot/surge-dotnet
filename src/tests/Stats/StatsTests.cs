@@ -60,8 +60,8 @@ public class StatsTests
         stat.Update(after);
         Assert.Equal(-98 + 3 + 55 + 3, stat.Stat.average);
         Assert.Equal(4u, stat.Stat.count);
-        Assert.Equal(-98, stat.Stat.min);
-        Assert.Equal(55, stat.Stat.max);
+        Assert.Equal(-37, stat.Stat.min);
+        Assert.Equal(0, stat.Stat.max);
     }
 
     [Fact]
@@ -92,7 +92,7 @@ public class StatsTests
 
         Assert.Equal((-3 + 3 + 55 + 3 + 3 + 8 + 66 + 3) / 1.5, stat.Stat.average);
         Assert.Equal(8u, stat.Stat.count);
-        Assert.Equal(-3, stat.Stat.min);
-        Assert.Equal(66, stat.Stat.max);
+        Assert.Equal(0, stat.Stat.min);
+        Assert.Equal(92, stat.Stat.max);
     }
 }

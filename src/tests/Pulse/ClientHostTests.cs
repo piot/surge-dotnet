@@ -34,12 +34,12 @@ public class ClientHostTests
         log = new Log(logTarget, LogLevel.LowLevel);
     }
 
-    private Client CreateClient(Milliseconds now, ITransportClient transportClient)
+    private Client CreateClient(Milliseconds now, ITransport transport)
     {
         var clientDeltaTime = new Milliseconds(16);
         var inputFetch = new MockInputFetch();
         var client = new Client(log.SubLog("Client"), now, clientDeltaTime, new GeneratedEntityCreation(),
-            transportClient, inputFetch);
+            transport, inputFetch);
 
         return client;
     }

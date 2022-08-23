@@ -395,7 +395,7 @@ public class UnitTest1
 #if DEBUG
         Assert.Equal(26, packetQueue.Peek().payload.Length);
 #else
-        Assert.Equal(20, packetQueue.Peek().payload.Length);
+        Assert.Equal(22, packetQueue.Peek().payload.Length);
 #endif
 
         Assert.Equal(6, ((AvatarLogic)spawnedAvatar.Logic).position.x);
@@ -639,7 +639,7 @@ public class UnitTest1
 #if DEBUG
         Assert.Equal(30, undoWriter.Octets.Length);
 #else
-        Assert.Equal(24, undoWriter.Octets.Length);
+        Assert.Equal(26, undoWriter.Octets.Length);
 #endif
         foreach (var clientCreatedEntity in created)
         {

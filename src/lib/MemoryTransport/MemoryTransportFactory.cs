@@ -9,7 +9,7 @@ namespace Piot.Surge.MemoryTransport
 {
     public static class MemoryTransportFactory
     {
-        public static (ITransportClient, ITransport) CreateClientAndHostTransport()
+        public static (ITransport, ITransport) CreateClientAndHostTransport()
         {
             var client = new MemoryTransportBoth();
             var host = new MemoryTransportBoth();
@@ -17,9 +17,7 @@ namespace Piot.Surge.MemoryTransport
             host.SetEnqueueTarget(client, new RemoteEndpointId(0));
             client.SetEnqueueTarget(host, new RemoteEndpointId(2));
 
-            var clientTransport = new TransportClient(client);
-
-            return (clientTransport, host);
+            return (client, host);
         }
     }
 }

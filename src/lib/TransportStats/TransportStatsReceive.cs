@@ -20,11 +20,14 @@ namespace Piot.Surge.TransportStats
 
         public TransportStatsReceive(Milliseconds now, ITransportReceive transportReceive)
         {
-            var deltaTimeUntilStats = new Milliseconds(1000);
-            bitsPerSecond = new(now, deltaTimeUntilStats, BitFormatter.Format);
-            datagramCountPerSecond = new(now, deltaTimeUntilStats);
-            datagramOctetSize = new(62);
+            var deltaTimeUntilStats = new Milliseconds(500);
+            bitsPerSecond = new(now, deltaTimeUntilStats, BitsPerSecondFormatter.Format);
+            datagramCountPerSecond = new(now, deltaTimeUntilStats, StandardFormatterPerSecond.Format);
+            datagramOctetSize = new(25);
             wrappedTransport = transportReceive;
+            stats.bitsPerSecond = bitsPerSecond.Stat;
+            stats.datagramCountPerSecond = datagramCountPerSecond.Stat;
+            stats.datagramOctetSize = datagramOctetSize.Stat;
         }
 
         public TransportStatsInDirection Stats => stats;
@@ -32,9 +35,13 @@ namespace Piot.Surge.TransportStats
         public ReadOnlySpan<byte> Receive(out RemoteEndpointId remoteEndpointId)
         {
             var payload = wrappedTransport.Receive(out remoteEndpointId);
-            bitsPerSecond.Add(payload.Length * 8);
-            datagramOctetSize.Add(payload.Length);
-            datagramCountPerSecond.Add(1);
+            if (payload.Length > 0)
+            {
+                bitsPerSecond.Add(payload.Length * 8);
+                datagramOctetSize.Add(payload.Length);
+                datagramCountPerSecond.Add(1);
+            }
+
             return payload;
         }
 

@@ -18,6 +18,7 @@ namespace Piot.Stats
 
         public StatCountThreshold(uint countThreshold)
         {
+            stat.Formatter = StandardFormatter.Format;
             this.countThreshold = countThreshold;
             Reset();
         }

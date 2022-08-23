@@ -18,7 +18,7 @@ namespace Piot.Stats
 
         public Func<int, string> Formatter
         {
-            set => formatter = value;
+            set => formatter = value ?? throw new ArgumentException("wrong argument");
         }
 
         public Stat(Func<int, string> formatter)
@@ -32,7 +32,7 @@ namespace Piot.Stats
 
         public override string ToString()
         {
-            return $"{formatter(average)}/s min:{formatter(min)}, max: {formatter(max)} ({count})";
+            return $"[{formatter(average)} min:{formatter(min)}, max:{formatter(max)} ({count})]";
         }
     }
 }

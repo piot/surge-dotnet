@@ -15,7 +15,8 @@ namespace Piot.Surge.TransportStats
 
         public override string ToString()
         {
-            return $"{datagramCountPerSecond} {bitsPerSecond} {datagramOctetSize}";
+            return
+                $"[datagramCount:{datagramCountPerSecond} bandwidth:{bitsPerSecond} datagramOctetSize:{datagramOctetSize}]";
         }
     }
 
@@ -26,7 +27,7 @@ namespace Piot.Surge.TransportStats
 
         public override string ToString()
         {
-            return $"send:{send} receive:{receive}";
+            return $"[\n  send:{send}\n  receive:{receive}\n]";
         }
     }
 }

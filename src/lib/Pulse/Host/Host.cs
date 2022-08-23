@@ -29,10 +29,10 @@ namespace Piot.Surge.Pulse.Host
         private readonly TransportStatsBoth transportWithStats;
         private TickId serverTickId;
 
-        public Host(ITransport transport, Milliseconds now, ILog log)
+        public Host(ITransport hostTransport, Milliseconds now, ILog log)
         {
-            transportWithStats = new TransportStatsBoth(transport, now);
-            this.transport = transportWithStats;
+            transportWithStats = new TransportStatsBoth(hostTransport, now);
+            transport = transportWithStats;
             snapshotSyncer = new SnapshotSyncer(transport, log.SubLog("Syncer"));
             authoritativeWorld = new AuthoritativeWorld();
             this.log = log;
@@ -92,6 +92,7 @@ namespace Piot.Surge.Pulse.Host
             ReceiveFromClients();
             simulationTicker.Update(now);
             transportWithStats.Update(now);
+            log.DebugLowLevel("stats: {Stats}", transportWithStats.Stats);
         }
     }
 }

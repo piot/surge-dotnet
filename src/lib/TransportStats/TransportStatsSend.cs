@@ -20,17 +20,26 @@ namespace Piot.Surge.TransportStats
 
         public TransportStatsSend(Milliseconds now, ITransportSend transportSend)
         {
-            var deltaTimeUntilStats = new Milliseconds(1000);
-            bitsPerSecond = new (now, deltaTimeUntilStats, BitFormatter.Format);
-            datagramCountPerSecond = new (now, deltaTimeUntilStats);
-            datagramOctetSize = new (62);
+            var deltaTimeUntilStats = new Milliseconds(500);
+            bitsPerSecond = new(now, deltaTimeUntilStats, BitsPerSecondFormatter.Format);
+            datagramCountPerSecond = new(now, deltaTimeUntilStats, StandardFormatterPerSecond.Format);
+            datagramOctetSize = new(25);
             wrappedTransport = transportSend;
+
+            stats.bitsPerSecond = bitsPerSecond.Stat;
+            stats.datagramCountPerSecond = datagramCountPerSecond.Stat;
+            stats.datagramOctetSize = datagramOctetSize.Stat;
         }
 
         public TransportStatsInDirection Stats => stats;
 
         public void SendToEndpoint(RemoteEndpointId remoteEndpointId, ReadOnlySpan<byte> payload)
         {
+            if (payload.Length <= 0)
+            {
+                return;
+            }
+
             bitsPerSecond.Add(payload.Length * 8);
             datagramOctetSize.Add(payload.Length);
             datagramCountPerSecond.Add(1);

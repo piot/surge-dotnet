@@ -13,6 +13,7 @@ using Piot.Surge.LogicalInput;
 using Piot.Surge.MonotonicTimeLowerBits;
 using Piot.Surge.OrderedDatagrams;
 using Piot.Surge.SnapshotSerialization;
+using Piot.Surge.TransportStats;
 using Piot.Transport;
 
 namespace Piot.Surge.Pulse.Client
@@ -26,15 +27,19 @@ namespace Piot.Surge.Pulse.Client
         private readonly StatCountThreshold statsHostInputQueueCount = new(60);
 
         private readonly StatCountThreshold statsRoundTripTime = new(20);
-        private readonly ITransportClient transport;
+        private readonly ITransport transportBoth;
+        private readonly ITransportClient transportClient;
+        private readonly TransportStatsBoth transportWithStats;
         private readonly ClientWorld world;
 
         public Client(ILog log, Milliseconds now, Milliseconds targetDeltaTimeMs, IEntityCreation entityCreation,
-            ITransportClient transportClient, IInputPackFetch fetch)
+            ITransport assignedTransport, IInputPackFetch fetch)
         {
             this.log = log;
             world = new ClientWorld(entityCreation);
-            transport = transportClient;
+            transportWithStats = new(assignedTransport, now);
+            transportBoth = transportWithStats;
+            transportClient = new TransportClient(transportBoth);
             predictor = new ClientPredictor(fetch, transportClient, now, targetDeltaTimeMs, log.SubLog("Predictor"));
             deltaSnapshotPlayback =
                 new ClientDeltaSnapshotPlayback(now, world, predictor, targetDeltaTimeMs, log.SubLog("GhostPlayback"));
@@ -91,7 +96,7 @@ namespace Piot.Surge.Pulse.Client
         {
             for (var i = 0; i < 30; i++)
             {
-                var datagram = transport.ReceiveFromHost();
+                var datagram = transportClient.ReceiveFromHost();
                 if (datagram.IsEmpty)
                 {
                     return;
@@ -105,8 +110,11 @@ namespace Piot.Surge.Pulse.Client
         public void Update(Milliseconds now)
         {
             ReceiveDatagramsFromHost(now);
+            transportWithStats.Update(now);
             predictor.Update(now);
             deltaSnapshotPlayback.Update(now);
+            var readStats = transportWithStats.Stats;
+            log.DebugLowLevel("stats: {Stats}", readStats);
         }
     }
 }
