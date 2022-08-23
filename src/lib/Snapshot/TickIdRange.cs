@@ -40,7 +40,7 @@ namespace Piot.Surge.Snapshot
                 throw new ArgumentOutOfRangeException(nameof(other));
             }
 
-            return (other.startTickId.tickId - startTickId.tickId, other.lastTickId.tickId - lastTickId.tickId);
+            return (other.startTickId.tickId - startTickId.tickId, other.lastTickId.tickId - startTickId.tickId);
         }
 
         public uint Length => lastTickId.tickId - startTickId.tickId + 1;

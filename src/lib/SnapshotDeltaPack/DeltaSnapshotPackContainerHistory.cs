@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using Piot.Clog;
 using Piot.Surge.Snapshot;
 
 namespace Piot.Surge.SnapshotDeltaPack
@@ -15,19 +16,28 @@ namespace Piot.Surge.SnapshotDeltaPack
     /// </summary>
     public class DeltaSnapshotPackContainerHistory
     {
+        private readonly ILog log;
         private readonly Queue<DeltaSnapshotPackContainer> queue = new();
         private TickIdRange tickIdRange;
+
+        public DeltaSnapshotPackContainerHistory(ILog log)
+        {
+            this.log = log;
+        }
 
         public void Add(DeltaSnapshotPackContainer container)
         {
             var tickId = container.TickId;
             if (queue.Count > 0 && !tickId.IsImmediateFollowing(tickIdRange.Last))
             {
-                throw new ArgumentOutOfRangeException(nameof(tickId));
+                throw new ArgumentOutOfRangeException(nameof(tickId),
+                    $"was expecting snapshot pack container following {tickIdRange.Last}, but was {tickId}");
             }
 
+            log.DebugLowLevel("Adding snapshot container {Container}", container);
+
             queue.Enqueue(container);
-            tickIdRange = new TickIdRange(tickIdRange.startTickId, tickIdRange.Last);
+            tickIdRange = new TickIdRange(tickIdRange.startTickId, tickId);
         }
 
         /// <summary>
@@ -46,6 +56,7 @@ namespace Piot.Surge.SnapshotDeltaPack
             var (startOffset, endOffset) = tickIdRange.Offsets(queryIdRange);
 
             var sourceArray = queue.ToArray();
+            log.DebugLowLevel("range {StartOffset}, {EndOffset}", startOffset, endOffset);
 
             var targetContainers = new DeltaSnapshotPackContainer[endOffset - startOffset + 1];
             for (var i = startOffset; i <= endOffset; ++i)

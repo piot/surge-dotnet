@@ -31,5 +31,10 @@ namespace Piot.Surge.SnapshotDeltaPack
         public IReadPackContainer DeletedEntityContainerRead => entityDeletedContainer;
         public IFeedEntityPackToContainer CorrectionEntityContainer => entityCorrectionContainer;
         public IReadPackContainer CorrectionEntityContainerRead => entityCorrectionContainer;
+
+        public override string ToString()
+        {
+            return $"[DeltaSnapshotPackContainer {TickId}]";
+        }
     }
 }

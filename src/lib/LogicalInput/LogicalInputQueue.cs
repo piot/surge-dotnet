@@ -17,21 +17,30 @@ namespace Piot.Surge.LogicalInput
     public class LogicalInputQueue
     {
         private readonly Queue<LogicalInput> queue = new();
-        private TickId lastFrameId;
+
+        private bool isInitialized;
+        private TickId waitingForTickId;
 
         public LogicalInput[] Collection => queue.ToArray();
 
-        public TickId WaitingForTickId => new(lastFrameId.tickId + 1);
+        public TickId WaitingForTickId => waitingForTickId;
 
         public void AddLogicalInput(LogicalInput logicalInput)
         {
-            if (lastFrameId.tickId >= logicalInput.appliedAtTickId.tickId)
+            if (!isInitialized)
             {
-                throw new Exception("wrong frame id for logical input");
+                waitingForTickId = logicalInput.appliedAtTickId;
+                isInitialized = true;
+            }
+
+            if (waitingForTickId.tickId != logicalInput.appliedAtTickId.tickId)
+            {
+                throw new Exception(
+                    $"wrong frame id for logical input. expected {waitingForTickId} but received {logicalInput.appliedAtTickId}");
             }
 
             queue.Enqueue(logicalInput);
-            lastFrameId = logicalInput.appliedAtTickId;
+            waitingForTickId = new(logicalInput.appliedAtTickId.tickId + 1);
         }
 
         public void DiscardUpToAndIncluding(TickId tickId)

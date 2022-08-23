@@ -40,5 +40,10 @@ namespace Piot.Surge.OrderedDatagrams
 
             return diff > 0 && diff <= 127;
         }
+
+        public override string ToString()
+        {
+            return $"[OrderedDatagramsIn {Value}]";
+        }
     }
 }

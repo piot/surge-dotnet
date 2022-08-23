@@ -19,7 +19,8 @@ public class TestOutputLogger : ILogTarget
     public void Log(LogLevel level, string prefix, string message, object[] args)
     {
         var strings = args.Select(x => x.ToString());
-        var line = $"{level} : [{prefix}] {message} {string.Join(",", strings)}";
+        var values = args.Length > 0 ? $"({string.Join(", ", strings)})" : "";
+        var line = $"{level} : [{prefix}] {message} {values}";
         output.WriteLine(line);
     }
 }

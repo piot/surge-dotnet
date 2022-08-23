@@ -23,14 +23,14 @@ namespace Piot.Surge.LogicalInputSerialization
         /// <param name="Milliseconds"></param>
         /// <param name="inputs"></param>
         /// <returns></returns>
-        public static ReadOnlyMemory<byte> CreateInputDatagram(OrderedDatagramsOut sequenceOut,
+        public static ReadOnlySpan<byte> CreateInputDatagram(OrderedDatagramsOut sequenceOut,
             TickId lastReceivedSnapshot, byte droppedSnapshotCount, Milliseconds now,
             LogicalInput.LogicalInput[] inputs)
         {
             var datagramWriter = new OctetWriter(Constants.MaxDatagramOctetSize);
             LogicInputDatagramSerialize.Serialize(datagramWriter, sequenceOut, lastReceivedSnapshot,
                 droppedSnapshotCount, now, inputs);
-            return datagramWriter.Octets;
+            return datagramWriter.Octets.Span;
         }
     }
 }

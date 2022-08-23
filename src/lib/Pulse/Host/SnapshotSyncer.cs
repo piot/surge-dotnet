@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using Piot.Clog;
 using Piot.Surge.OrderedDatagrams;
 using Piot.Surge.Snapshot;
 using Piot.Surge.SnapshotDeltaPack;
@@ -57,13 +58,16 @@ namespace Piot.Surge.Pulse.Host
 
     public class SnapshotSyncer
     {
-        private readonly DeltaSnapshotPackContainerHistory snapshotHistory = new();
+        private readonly DeltaSnapshotPackContainerHistory snapshotHistory;
         private readonly List<SnapshotSyncerClient> syncClients = new();
         private readonly ITransportSend transportSend;
-
-        public SnapshotSyncer(ITransportSend transportSend)
+        private readonly ILog log;
+        
+        public SnapshotSyncer(ITransportSend transportSend, ILog log)
         {
+            snapshotHistory = new (log);
             this.transportSend = transportSend;
+            this.log = log;
         }
 
         public SnapshotSyncerClient Create(RemoteEndpointId id)
@@ -88,7 +92,7 @@ namespace Piot.Surge.Pulse.Host
             {
                 var snapshotDeltaMemory =
                     SnapshotPackContainerToMemory.PackWithFilter(fetchedContainer, Array.Empty<EntityId>());
-                var packWithCorrections = SnapshotDeltaPacker.Pack(snapshotDeltaMemory);
+                var packWithCorrections = SnapshotDeltaPacker.Pack(snapshotDeltaMemory, log);
                 var deltaPack = new SnapshotDeltaPack.SnapshotDeltaPack(fetchedContainer.TickId, packWithCorrections);
                 deltaPacks.Add(deltaPack);
             }
@@ -103,6 +107,7 @@ namespace Piot.Surge.Pulse.Host
 
             var unionFlattened = SnapshotDeltaUnionPacker.Pack(serializedUnion);
 
+            log.DebugLowLevel("sending datagrams {Flattened}", unionFlattened);
             SnapshotDeltaPackUnionToDatagramsWriter.Write(sender.Send, unionFlattened,
                 connection.lastReceivedMonotonicTimeLowerBits, connection.clientInputTickCountAheadOfServer,
                 connection.DatagramsOutIncrease);

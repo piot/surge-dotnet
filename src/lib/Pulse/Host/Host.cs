@@ -33,7 +33,7 @@ namespace Piot.Surge.Pulse.Host
         {
             transportWithStats = new TransportStatsBoth(transport, now);
             this.transport = transportWithStats;
-            snapshotSyncer = new SnapshotSyncer(transport);
+            snapshotSyncer = new SnapshotSyncer(transport, log.SubLog("Syncer"));
             authoritativeWorld = new AuthoritativeWorld();
             this.log = log;
             simulationTicker = new(new Milliseconds(0), SimulationTick, new Milliseconds(16),
@@ -44,10 +44,10 @@ namespace Piot.Surge.Pulse.Host
 
         private void SimulationTick()
         {
-            log.Debug("Simulation Tick!");
-            serverTickId = new TickId(serverTickId.tickId + 1);
+            log.Debug("Simulation Tick! {Tick}", serverTickId);
             var packContainer = StoreWorldChangesToPackContainer();
             snapshotSyncer.SendSnapshot(packContainer);
+            serverTickId = new TickId(serverTickId.tickId + 1);
         }
 
         private DeltaSnapshotPackContainer StoreWorldChangesToPackContainer()
@@ -76,7 +76,8 @@ namespace Piot.Surge.Pulse.Host
                 if (!connections.TryGetValue(clientId.Value, out var connectionToClient))
                 {
                     var syncer = snapshotSyncer.Create(clientId);
-                    connectionToClient = new ConnectionToClient(clientId, syncer);
+                    connectionToClient =
+                        new ConnectionToClient(clientId, syncer, log.SubLog($"Client{clientId.Value}"));
                     orderedConnections.Add(connectionToClient);
                     connections.Add(clientId.Value, connectionToClient);
                 }

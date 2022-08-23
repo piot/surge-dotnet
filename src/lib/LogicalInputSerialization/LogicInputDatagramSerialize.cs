@@ -9,6 +9,7 @@ using Piot.Surge.DatagramType;
 using Piot.Surge.MonotonicTimeLowerBits;
 using Piot.Surge.OrderedDatagrams;
 using Piot.Surge.Snapshot;
+using Piot.Surge.SnapshotReceiveStatus;
 
 namespace Piot.Surge.LogicalInputSerialization
 {

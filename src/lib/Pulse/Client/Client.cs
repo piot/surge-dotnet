@@ -7,8 +7,10 @@ using System;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
+using Piot.Stats;
 using Piot.Surge.DatagramType;
 using Piot.Surge.LogicalInput;
+using Piot.Surge.MonotonicTimeLowerBits;
 using Piot.Surge.OrderedDatagrams;
 using Piot.Surge.SnapshotSerialization;
 using Piot.Transport;
@@ -22,35 +24,50 @@ namespace Piot.Surge.Pulse.Client
         private readonly ClientPredictor predictor;
         private readonly ITransportClient transport;
         private readonly ClientWorld world;
-        private OrderedDatagramsIn orderedDatagramsIn = new(0);
+        private OrderedDatagramsInChecker orderedDatagramsInChecker = new();
+
+        private readonly StatCountThreshold statsRoundTripTime = new(62);
+        private readonly StatCountThreshold statsHostInputQueueCount = new(60);
 
         public Client(ILog log, Milliseconds now, Milliseconds targetDeltaTimeMs, IEntityCreation entityCreation,
-            ITransportClient transport, IInputPackFetch fetch)
+            ITransportClient transportClient, IInputPackFetch fetch)
         {
             this.log = log;
             world = new ClientWorld(entityCreation);
-            this.transport = transport;
-            predictor = new ClientPredictor(fetch, now, targetDeltaTimeMs, log.SubLog("Predictor"));
+            transport = transportClient;
+            predictor = new ClientPredictor(fetch, transportClient, now, targetDeltaTimeMs, log.SubLog("Predictor"));
             deltaSnapshotPlayback =
                 new ClientDeltaSnapshotPlayback(now, world, predictor, targetDeltaTimeMs, log.SubLog("GhostPlayback"));
         }
 
-        private void ReceiveSnapshot(IOctetReader reader)
+        private void ReceiveSnapshotExtraData(IOctetReader reader, Milliseconds now)
         {
+            var pongTimeLowerBits = MonotonicTimeLowerBitsReader.Read(reader);
+            var pongTime = LowerBitsToMonotonic.LowerBitsToMonotonicMs(now, pongTimeLowerBits);
+            var roundTripTimeMs = now.ms - pongTime.ms;
+            statsRoundTripTime.Add((int)roundTripTimeMs);
+            log.DebugLowLevel("RoundTripTime {RoundTripTimeMs} {AverageRoundTripTimeMs}", roundTripTimeMs, statsRoundTripTime.Stat.average);
+            
+            var numberOfInputInQueue = reader.ReadInt8();
+            statsHostInputQueueCount.Add(numberOfInputInQueue);
+            log.DebugLowLevel("InputQueueCountFromHost {InputQueueCount} {AverageInputQueueCount}", numberOfInputInQueue, statsHostInputQueueCount.Stat.average);
+        }
+        
+        private void ReceiveSnapshot(IOctetReader reader, Milliseconds now)
+        {
+            log.DebugLowLevel("receiving snapshot datagram from server");
+            ReceiveSnapshotExtraData(reader, now);
+            SnapshotPackDatagramHeaderReader.Read(reader, out var tickIdRange, out var datagramIndex, out bool isLastOne);
+            log.DebugLowLevel("receive snapshot header {TickIdRange} {DatagramIndex} {IsLastOne}", tickIdRange, datagramIndex, isLastOne);
             var unionOfSnapshots = SnapshotDeltaUnionReader.Read(reader);
             deltaSnapshotPlayback.FeedSnapshotsUnion(unionOfSnapshots);
         }
 
-        private void ReceiveDatagramFromHost(IOctetReader reader)
+        private void ReceiveDatagramFromHost(IOctetReader reader, Milliseconds now)
         {
-            var sequenceIn = OrderedDatagramsInReader.Read(reader);
-            if (orderedDatagramsIn.IsValidSuccessor(sequenceIn))
+            if (!orderedDatagramsInChecker.ReadAndCheck(reader))
             {
-                orderedDatagramsIn = new OrderedDatagramsIn(sequenceIn.Value);
-            }
-            else
-            {
-                log.DebugLowLevel("ordered datagram in wrong order, discarding datagram");
+                log.Notice("ordered datagram in wrong order, discarding datagram {OrderedDatagramsIn}", orderedDatagramsInChecker);
                 return;
             }
 
@@ -58,14 +75,14 @@ namespace Piot.Surge.Pulse.Client
             switch (datagramType)
             {
                 case DatagramType.DatagramType.DeltaSnapshots:
-                    ReceiveSnapshot(reader);
+                    ReceiveSnapshot(reader, now);
                     break;
                 default:
                     throw new Exception($"illegal datagram type {datagramType} from host");
             }
         }
 
-        private void ReceiveDatagramsFromHost()
+        private void ReceiveDatagramsFromHost(Milliseconds now)
         {
             for (var i = 0; i < 30; i++)
             {
@@ -76,13 +93,13 @@ namespace Piot.Surge.Pulse.Client
                 }
 
                 var datagramReader = new OctetReader(datagram.ToArray());
-                ReceiveDatagramFromHost(datagramReader);
+                ReceiveDatagramFromHost(datagramReader, now);
             }
         }
 
         public void Update(Milliseconds now)
         {
-            ReceiveDatagramsFromHost();
+            ReceiveDatagramsFromHost(now);
             predictor.Update(now);
             deltaSnapshotPlayback.Update(now);
         }

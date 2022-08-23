@@ -50,6 +50,7 @@ namespace Piot.Surge.TimeTicker
             }
         }
 
+        public Milliseconds Now { get; private set; }
 
         public void Update(Milliseconds now)
         {
@@ -71,9 +72,9 @@ namespace Piot.Surge.TimeTicker
 
             lastTick.ms += iterationCount * deltaTimeMs;
 
+            Now = now;
             for (var i = 0; i < iterationCount; i++)
             {
-                log.Debug("Tick() {Time} {Iteration}", now.ms, i);
                 Tick();
             }
         }

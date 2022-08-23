@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System;
+using Piot.Clog;
 using Piot.Flood;
 
 namespace Piot.Surge.SnapshotDeltaPack.Serialization
@@ -20,14 +20,14 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
         /// </summary>
         /// <param name="writer"></param>
         /// <param name="deltaMemory"></param>
-        internal static void Write(SnapshotDeltaMemory deltaMemory, IOctetWriter writer)
+        internal static void Write(SnapshotDeltaMemory deltaMemory, IOctetWriter writer, ILog log)
         {
 #if DEBUG
             writer.WriteUInt8(SnapshotSerialization.Constants.SnapshotDeltaSync);
 #endif
             if (deltaMemory.deletedCount == 0 && deltaMemory.createdCount == 0 && deltaMemory.updatedCount == 0)
             {
-                throw new Exception("suspicious, nothing has changed in this delta");
+                log.Notice("suspicious, nothing has changed in this SnapshotDeltaMemory {TickId}", deltaMemory.tickId);
             }
 
             WriteEntityCount(writer, (int)deltaMemory.deletedCount);

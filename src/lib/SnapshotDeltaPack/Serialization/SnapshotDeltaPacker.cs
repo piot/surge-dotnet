@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
+using Piot.Clog;
 using Piot.Flood;
 
 namespace Piot.Surge.SnapshotDeltaPack.Serialization
@@ -21,10 +22,10 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
         /// </summary>
         /// <param name="deltaMemory"></param>
         /// <returns>The deleted, created and updated memory packs</returns>
-        public static SnapshotDeltaIncludedCorrectionPackMemory Pack(SnapshotDeltaMemory deltaMemory)
+        public static SnapshotDeltaIncludedCorrectionPackMemory Pack(SnapshotDeltaMemory deltaMemory, ILog log)
         {
             var writer = new OctetWriter(Constants.MaxSnapshotOctetSize);
-            SnapshotDeltaWriter.Write(deltaMemory, writer);
+            SnapshotDeltaWriter.Write(deltaMemory, writer, log);
             return new SnapshotDeltaIncludedCorrectionPackMemory { memory = writer.Octets };
         }
     }

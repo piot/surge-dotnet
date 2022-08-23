@@ -56,6 +56,18 @@ public class OrderedDatagramsTests
     }
 
     [Fact]
+    public void OrderedDatagramsValidWrap()
+    {
+        OrderedDatagramsInChecker sequence = new();
+        {
+            OctetWriter writer = new(1);
+            writer.WriteUInt8(0);
+            OctetReader reader = new(writer.Octets);
+            Assert.True(sequence.ReadAndCheck(reader));
+        }
+    }
+
+    [Fact]
     public void OrderedDatagramsWrite()
     {
         OrderedDatagramsOutIncrease sequence = new();

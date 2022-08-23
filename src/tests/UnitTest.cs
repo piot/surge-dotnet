@@ -19,6 +19,7 @@ using Piot.Surge.SnapshotDelta;
 using Piot.Surge.SnapshotDeltaInternal;
 using Piot.Surge.SnapshotDeltaPack;
 using Piot.Surge.SnapshotDeltaPack.Serialization;
+using Piot.Surge.SnapshotReceiveStatus;
 using Piot.Surge.SnapshotSerialization;
 using Piot.Surge.Types;
 using Piot.Surge.TypeSerialization;
@@ -129,7 +130,7 @@ public class UnitTest1
             LogicInputDatagramPackOut.CreateInputDatagram(datagramsOut, new TickId(42), 0,
                 now, logicalInputQueue.Collection);
 
-        var reader = new OctetReader(outDatagram);
+        var reader = new OctetReader(outDatagram.ToArray());
         var datagramsSequenceIn = OrderedDatagramsInReader.Read(reader);
         Assert.Equal(datagramsOut.Value, datagramsSequenceIn.Value);
         var typeOfDatagram = DatagramTypeReader.Read(reader);
@@ -379,7 +380,7 @@ public class UnitTest1
                 SnapshotPackContainerToMemory.PackWithFilter(snapshotPackContainer, Array.Empty<EntityId>());
 
             snapshotDeltaPackPayload =
-                SnapshotDeltaPacker.Pack(snapshotDeltaMemory);
+                SnapshotDeltaPacker.Pack(snapshotDeltaMemory, log);
         }
 
         var firstTickId = new TickId(8);
@@ -430,7 +431,7 @@ public class UnitTest1
 
     private static (SnapshotDeltaInternal, SnapshotDelta, SnapshotDeltaPack) ScanConvertAndCreate(
         AuthoritativeWorld worldToScan,
-        TickId tickId)
+        TickId tickId, ILog log)
     {
         var deltaSnapshotInternal = SnapshotDeltaCreator.Scan(worldToScan, tickId);
         var convertedDeltaSnapshot = FromSnapshotDeltaInternal.Convert(deltaSnapshotInternal);
@@ -443,7 +444,7 @@ public class UnitTest1
         var snapshotDeltaMemory =
             SnapshotPackContainerToMemory.PackWithFilter(deltaPackContainer, Array.Empty<EntityId>());
 
-        var complete = SnapshotDeltaPacker.Pack(snapshotDeltaMemory);
+        var complete = SnapshotDeltaPacker.Pack(snapshotDeltaMemory, log);
         var deltaPack = new SnapshotDeltaPack(tickId, complete);
 
         return (deltaSnapshotInternal, convertedDeltaSnapshot, deltaPack);
@@ -464,7 +465,7 @@ public class UnitTest1
 
         /* FIRST Snapshot */
         var firstTickId = new TickId(10);
-        var (firstDelta, firstDeltaConverted, firstDeltaPack) = ScanConvertAndCreate(world, firstTickId);
+        var (firstDelta, firstDeltaConverted, firstDeltaPack) = ScanConvertAndCreate(world, firstTickId, log);
 
         var internalInfo = firstDelta.FetchEntity(spawnedAvatar.Id);
         Assert.Equal(ChangedFieldsMask.AllFieldChangedMaskBits, internalInfo.changeMask);
@@ -483,7 +484,7 @@ public class UnitTest1
         /* SECOND Snapshot */
         var secondTickId = new TickId(11);
 
-        var (secondDelta, secondDeltaConverted, secondDeltaPack) = ScanConvertAndCreate(world, secondTickId);
+        var (secondDelta, secondDeltaConverted, secondDeltaPack) = ScanConvertAndCreate(world, secondTickId, log);
 
         var secondInternalInfo = secondDelta.FetchEntity(spawnedAvatar.Id);
 
@@ -504,7 +505,7 @@ public class UnitTest1
         var serverSpawnedAvatarForAssertAtThree = world.FetchEntity<AvatarLogicEntityInternal>(spawnedAvatar.Id);
         var thirdTickId = new TickId(12);
 
-        var (thirdDelta, thirdDeltaConverted, thirdDeltaPack) = ScanConvertAndCreate(world, thirdTickId);
+        var (thirdDelta, thirdDeltaConverted, thirdDeltaPack) = ScanConvertAndCreate(world, thirdTickId, log);
 
         var thirdInternalInfo = thirdDelta.FetchEntity(spawnedAvatar.Id);
 
@@ -524,7 +525,7 @@ public class UnitTest1
         /* FOURTH */
         var fourthTickId = new TickId(13);
 
-        var (fourthDelta, fourthDeltaConverted, fourthDeltaPack) = ScanConvertAndCreate(world, fourthTickId);
+        var (fourthDelta, fourthDeltaConverted, fourthDeltaPack) = ScanConvertAndCreate(world, fourthTickId, log);
 
         var fourthInternalInfo = fourthDelta.FetchEntity(spawnedAvatar.Id);
         Assert.Equal(

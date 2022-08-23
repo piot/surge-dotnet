@@ -65,7 +65,7 @@ namespace Piot.Surge.Pulse.Client
 
         private void NextSnapshotTick()
         {
-            log.DebugLowLevel("NextSnapshotTick!");
+            log.DebugLowLevel("Try to read next snapshot in queue");
             var targetDeltaTimeMsValue = targetDeltaTimeMs.ms;
             // Our goal is to have just two snapshots in the queue.
             // So adjust the playback speed using the playback delta time.
@@ -76,13 +76,11 @@ namespace Piot.Surge.Pulse.Client
                 _ => targetDeltaTimeMsValue
             };
 
-            log.DebugLowLevel("setup delta time until next playback tick: {DeltaTimeMs}", deltaTimeMs);
-
             snapshotPlaybackTicker.DeltaTime = new Milliseconds(deltaTimeMs);
 
             if (queue.Count == 0)
             {
-                log.Debug("Snapshot playback has stalled because incoming snapshot queue is empty");
+                log.Notice("Snapshot playback has stalled because incoming snapshot queue is empty");
                 return;
             }
 

@@ -7,7 +7,10 @@ using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.Surge.LogicalInput;
+using Piot.Surge.LogicalInputSerialization;
+using Piot.Surge.OrderedDatagrams;
 using Piot.Surge.Snapshot;
+using Piot.Transport;
 
 namespace Piot.Surge.Pulse.Client
 {
@@ -17,16 +20,20 @@ namespace Piot.Surge.Pulse.Client
     /// </summary>
     public class ClientPredictor : IClientPredictorCorrections
     {
+        private readonly OrderedDatagramsOut datagramsOut = new();
         private readonly IInputPackFetch inputPackFetch;
         private readonly ILog log;
         private readonly LogicalInputQueue predictedInputs = new();
         private readonly TimeTicker.TimeTicker predictionTicker;
+        private readonly ITransportClient transportClient;
         private TickId predictTickId;
 
-        public ClientPredictor(IInputPackFetch inputPackFetch, Milliseconds now, Milliseconds targetDeltaTimeMs,
+        public ClientPredictor(IInputPackFetch inputPackFetch, ITransportClient transportClient, Milliseconds now,
+            Milliseconds targetDeltaTimeMs,
             ILog log)
         {
             this.log = log;
+            this.transportClient = transportClient;
             this.inputPackFetch = inputPackFetch;
             predictionTicker = new(now, PredictionTick, targetDeltaTimeMs,
                 log.SubLog("PredictionTick"));
@@ -67,14 +74,25 @@ namespace Piot.Surge.Pulse.Client
 
         private void PredictionTick()
         {
-            log.Debug("Prediction Tick!");
+            var now = predictionTicker.Now;
+
+            log.Debug("Prediction Tick {TickId}", predictTickId);
             var inputOctets = inputPackFetch.Fetch();
             var logicalInput = new LogicalInput.LogicalInput
             {
                 appliedAtTickId = predictTickId,
                 payload = inputOctets.ToArray()
             };
+
+            log.DebugLowLevel("Adding logical input {LogicalInput}", logicalInput);
             predictedInputs.AddLogicalInput(logicalInput);
+
+            var outDatagram =
+                LogicInputDatagramPackOut.CreateInputDatagram(datagramsOut, new TickId(42), 0,
+                    now, predictedInputs.Collection);
+            log.DebugLowLevel("Sending inputs to host");
+            transportClient.SendToHost(outDatagram);
+
             predictTickId = new TickId(predictTickId.tickId + 1);
         }
     }

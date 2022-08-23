@@ -39,13 +39,6 @@ namespace Piot.Surge.LogicalInputSerialization
 
             for (var i = 0; i < inputCount; ++i)
             {
-                if (i > 0)
-                {
-                    var deltaFrameId = reader.ReadUInt8();
-                    lastFrameId.tickId += deltaFrameId;
-                }
-
-
                 LogicalInput.LogicalInput input = new()
                 {
                     appliedAtTickId =
@@ -55,6 +48,11 @@ namespace Piot.Surge.LogicalInputSerialization
                 };
 
                 var payloadOctetCount = reader.ReadUInt8();
+                if (payloadOctetCount > 70)
+                {
+                    throw new Exception("suspicious input payload octet count");
+                }
+
                 input.payload = reader.ReadOctets(payloadOctetCount).ToArray();
 
                 array[i] = input;

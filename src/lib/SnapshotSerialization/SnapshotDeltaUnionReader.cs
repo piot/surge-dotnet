@@ -113,6 +113,11 @@ namespace Piot.Surge.SnapshotSerialization
     {
         public TickIdRange tickIdRange;
         public ReadOnlyMemory<byte> payload;
+
+        public override string ToString()
+        {
+            return $"[UnionFlattened {tickIdRange}]";
+        }
     }
 
     public struct SerializedSnapshotDeltaPack

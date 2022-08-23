@@ -21,7 +21,12 @@ namespace Piot.Transport
     {
     }
 
-    public struct RemoteEndpointId
+    public interface ITransportEnqueue
+    {
+        public void Feed(RemoteEndpointId remoteEndpointId, ReadOnlySpan<byte> payload);
+    }
+
+    public readonly struct RemoteEndpointId
     {
         public RemoteEndpointId(uint channel)
         {
@@ -29,5 +34,10 @@ namespace Piot.Transport
         }
 
         public uint Value { get; }
+
+        public override string ToString()
+        {
+            return $"[EndpointId {Value}]";
+        }
     }
 }

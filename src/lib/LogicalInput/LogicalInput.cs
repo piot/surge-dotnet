@@ -37,5 +37,10 @@ namespace Piot.Surge.LogicalInput
             return other.appliedAtTickId.tickId == appliedAtTickId.tickId &&
                    CompareOctets.Compare(other.payload.Span, payload.Span);
         }
+
+        public override string ToString()
+        {
+            return $"[LogicalInput TickId:{appliedAtTickId} octetSize:{payload.Length}]";
+        }
     }
 }
