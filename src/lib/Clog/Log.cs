@@ -331,7 +331,7 @@ namespace Piot.Clog
 
         public ILog SubLog(string debugPrefix)
         {
-            return new Log(target, LogLevel, prefix != "" ? "/" + debugPrefix : debugPrefix);
+            return new Log(target, LogLevel, prefix != "" ? prefix + "/" + debugPrefix : debugPrefix);
         }
 
         public LogLevel LogLevel { get; set; } = LogLevel.LowLevel;
