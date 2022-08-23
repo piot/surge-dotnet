@@ -97,7 +97,7 @@ namespace Piot.Surge.Pulse.Client
                     return;
                 }
 
-                var datagramReader = new OctetReader(datagram.ToArray());
+                var datagramReader = new OctetReader(datagram);
                 ReceiveDatagramFromHost(datagramReader, now);
             }
         }

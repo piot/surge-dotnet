@@ -43,7 +43,7 @@ namespace Piot.Surge.SnapshotDeltaPack
                 target.WriteOctets(pair.Value.Span);
             }
 
-            return (count, target.Octets);
+            return (count, target.Octets.ToArray());
         }
 
         private static (uint, ReadOnlyMemory<byte>) PackOnly(IReadPackContainer containerToRead, uint[] includeEntities)
@@ -57,7 +57,7 @@ namespace Piot.Surge.SnapshotDeltaPack
                 target.WriteOctets(pair.Value.Span);
             }
 
-            return (count, target.Octets);
+            return (count, target.Octets.ToArray());
         }
 
         /// <summary>

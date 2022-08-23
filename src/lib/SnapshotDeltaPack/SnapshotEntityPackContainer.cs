@@ -10,7 +10,7 @@ namespace Piot.Surge.SnapshotDeltaPack
 {
     public interface IFeedEntityPackToContainer
     {
-        public void Add(EntityId entityId, ReadOnlyMemory<byte> payload);
+        public void Add(EntityId entityId, ReadOnlySpan<byte> payload);
     }
 
     public interface IReadPackContainer
@@ -23,14 +23,14 @@ namespace Piot.Surge.SnapshotDeltaPack
     /// </summary>
     public class SnapshotEntityPackContainer : IFeedEntityPackToContainer, IReadPackContainer
     {
-        public void Add(EntityId entityId, ReadOnlyMemory<byte> payload)
+        public void Add(EntityId entityId, ReadOnlySpan<byte> payload)
         {
             if (Entries.ContainsKey(entityId.Value))
             {
                 throw new Exception($"pack for {entityId} already inserted");
             }
 
-            Entries.Add(entityId.Value, payload);
+            Entries.Add(entityId.Value, payload.ToArray());
         }
 
         public Dictionary<uint, ReadOnlyMemory<byte>> Entries { get; } = new();

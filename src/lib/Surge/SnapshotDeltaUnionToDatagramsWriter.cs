@@ -52,7 +52,7 @@ namespace Piot.Surge
 
                 writer.WriteOctets(payloadSlice);
 
-                send(fullWriter.Octets);
+                send(fullWriter.Octets.ToArray());
                 orderedDatagramsIncrease.Increase();
             }
         }

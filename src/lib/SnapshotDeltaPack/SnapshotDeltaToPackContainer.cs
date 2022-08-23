@@ -37,14 +37,14 @@ namespace Piot.Surge.SnapshotDeltaPack
             {
                 var writer = new OctetWriter(256);
                 PackUpdatedEntity.Write(writer, updateEntity.Id, updateEntity.ChangeMask, updateEntity.Serializer);
-                targetPackContainer.EntityUpdateContainer.Add(updateEntity.Id, writer.Octets);
+                targetPackContainer.EntityUpdateContainer.Add(updateEntity.Id, writer.Octets.ToArray());
             }
 
             foreach (var deletedEntityId in snapshotDeltaAfter.deletedIds)
             {
                 var writer = new OctetWriter(256);
                 EntityIdWriter.Write(writer, deletedEntityId);
-                targetPackContainer.DeletedEntityContainer.Add(deletedEntityId, writer.Octets);
+                targetPackContainer.DeletedEntityContainer.Add(deletedEntityId, writer.Octets.ToArray());
             }
 
             var correctedEntities = correctionEntityIds.Select(correctedEntityId =>
@@ -59,7 +59,7 @@ namespace Piot.Surge.SnapshotDeltaPack
                 LocalPlayerIndexWriter.Write(correctedEntity.ControlledByLocalPlayerIndex, writer);
                 correctedEntity.SerializeAll(writer);
                 correctedEntity.SerializeCorrectionState(writer);
-                targetPackContainer.CorrectionEntityContainer.Add(correctedEntity.Id, writer.Octets);
+                targetPackContainer.CorrectionEntityContainer.Add(correctedEntity.Id, writer.Octets.ToArray());
             }
 
             targetPackContainer.TickId = snapshotDeltaAfter.TickId;

@@ -78,7 +78,7 @@ public class UnitTest1
         var writer = new OctetWriter(23);
         writer.WriteUInt8(42);
 
-        Assert.Equal(42, writer.Octets.Span[0]);
+        Assert.Equal(42, writer.Octets[0]);
         Assert.Equal(1, writer.Octets.Length);
     }
 
@@ -262,7 +262,7 @@ public class UnitTest1
         (avatarButtonDown as IEntitySerializer).Serialize(AvatarLogicEntityInternal.FireButtonIsDownMask,
             writerButtonDown);
         Assert.Equal(1, writerButtonDown.Octets.Length);
-        Assert.Equal(1, writerButtonDown.Octets.Span[0]);
+        Assert.Equal(1, writerButtonDown.Octets[0]);
 
         var readerButtonDown = new OctetReader(writerButtonDown.Octets);
 
@@ -272,7 +272,7 @@ public class UnitTest1
             readerButtonDown, writerButtonHistory);
 
         Assert.Equal(1, writerButtonHistory.Octets.Length);
-        Assert.Equal(0, writerButtonHistory.Octets.Span[0]);
+        Assert.Equal(0, writerButtonHistory.Octets[0]);
 
         var rollbackReader = new OctetReader(writerButtonHistory.Octets);
 
@@ -556,7 +556,7 @@ public class UnitTest1
         var clientWorld = new ClientWorld(new GeneratedEntityCreation()) as IEntityContainerWithCreation;
 
         var undoWriter = new OctetWriter(1200);
-        var unionReader = new OctetReader(allSerializedSnapshots.payload);
+        var unionReader = new OctetReader(allSerializedSnapshots.payload.Span);
         var deserializedUnion = SnapshotDeltaUnionReader.Read(unionReader);
 
         var firstTickId = allSerializedSnapshots.tickIdRange.startTickId;
@@ -566,7 +566,7 @@ public class UnitTest1
         Assert.Equal(lastTickId.tickId, deserializedUnion.tickIdRange.lastTickId.tickId);
 
         var firstPack = deserializedUnion.packs[0];
-        var firstSnapshotReader = new OctetReader(firstPack.payload);
+        var firstSnapshotReader = new OctetReader(firstPack.payload.Span);
         var (_, _, updateEntitiesInFirst) = SnapshotDeltaReader.Read(firstSnapshotReader, clientWorld);
 
         var clientSpawnedEntity = clientWorld.FetchEntity<AvatarLogicEntityInternal>(spawnedAvatarId);
@@ -591,7 +591,7 @@ public class UnitTest1
 
         foreach (var snapshotDelta in allButTheLastPacks)
         {
-            var snapshotReader = new OctetReader(snapshotDelta.payload);
+            var snapshotReader = new OctetReader(snapshotDelta.payload.Span);
             var (_, _, updateEntities) = SnapshotDeltaReader.Read(snapshotReader, clientWorld);
             Ticker.Tick(clientWorld);
             Notifier.Notify(updateEntities);
@@ -605,7 +605,7 @@ public class UnitTest1
         Assert.Equal(6, clientSpawnedEntity.Self.position.x);
 
         var secondToLastPack = deserializedUnion.packs[deserializedUnion.packs.Length - 2];
-        var secondToLastReader = new OctetReader(secondToLastPack.payload);
+        var secondToLastReader = new OctetReader(secondToLastPack.payload.Span);
         var (_, _, secondToLastUpdatedEntities) = SnapshotDeltaReader.Read(secondToLastReader, clientWorld);
 
 
@@ -619,7 +619,7 @@ public class UnitTest1
         Assert.True(clientSpawnedEntity.Self.fireButtonIsDown);
 
         var lastPack = deserializedUnion.packs.Last();
-        var lastSnapshotReader = new OctetReader(lastPack.payload);
+        var lastSnapshotReader = new OctetReader(lastPack.payload.Span);
 
         var (deleted, created, clientUpdated) =
             SnapshotDeltaReaderWithUndo.ReadWithUndo(lastSnapshotReader, clientWorld, undoWriter);
@@ -634,7 +634,7 @@ public class UnitTest1
         OverWriter.Overwrite(clientWorld);
 
         var undoPack = new SnapshotDeltaPack(firstTickId,
-            new SnapshotDeltaIncludedCorrectionPackMemory { memory = undoWriter.Octets });
+            new SnapshotDeltaIncludedCorrectionPackMemory { memory = undoWriter.Octets.ToArray() });
 
 #if DEBUG
         Assert.Equal(30, undoWriter.Octets.Length);

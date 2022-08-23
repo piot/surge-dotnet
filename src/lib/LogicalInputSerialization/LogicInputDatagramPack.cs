@@ -30,7 +30,7 @@ namespace Piot.Surge.LogicalInputSerialization
             var datagramWriter = new OctetWriter(Constants.MaxDatagramOctetSize);
             LogicInputDatagramSerialize.Serialize(datagramWriter, sequenceOut, lastReceivedSnapshot,
                 droppedSnapshotCount, now, inputs);
-            return datagramWriter.Octets.Span;
+            return datagramWriter.Octets;
         }
     }
 }

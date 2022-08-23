@@ -13,9 +13,9 @@ namespace Piot.Flood
         private readonly ReadOnlyMemory<byte> array;
         private int pos;
 
-        public OctetReader(ReadOnlyMemory<byte> memory)
+        public OctetReader(ReadOnlySpan<byte> span)
         {
-            array = memory;
+            array = span.ToArray();
         }
 
         public byte ReadUInt8()

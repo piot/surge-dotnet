@@ -87,7 +87,7 @@ namespace Piot.Surge.Pulse.Client
 
             var deltaSnapshot = queue.Dequeue();
             log.DebugLowLevel("dequeued snapshot {DeltaSnapshot}", deltaSnapshot);
-            var snapshotReader = new OctetReader(deltaSnapshot.payload);
+            var snapshotReader = new OctetReader(deltaSnapshot.payload.Span);
             SnapshotDeltaReader.Read(snapshotReader, clientWorld);
 
             // Ghosts are never predicted, corrected, nor rolled back

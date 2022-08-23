@@ -98,7 +98,7 @@ namespace Piot.Surge.SnapshotSerialization
             return new SerializedSnapshotDeltaPackUnionFlattened
             {
                 tickIdRange = serializedSnapshotDeltaPacks.tickIdRange,
-                payload = unionStream.Octets
+                payload = unionStream.Octets.ToArray()
             };
         }
     }

@@ -26,7 +26,7 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
         {
             var writer = new OctetWriter(Constants.MaxSnapshotOctetSize);
             SnapshotDeltaWriter.Write(deltaMemory, writer, log);
-            return new SnapshotDeltaIncludedCorrectionPackMemory { memory = writer.Octets };
+            return new SnapshotDeltaIncludedCorrectionPackMemory { memory = writer.Octets.ToArray() };
         }
     }
 }

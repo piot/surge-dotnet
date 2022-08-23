@@ -19,7 +19,7 @@ namespace Piot.Flood
             array = new byte[size];
         }
 
-        public ReadOnlyMemory<byte> Octets => array.Slice(0, pos);
+        public ReadOnlySpan<byte> Octets => array.Slice(0, pos).Span;
 
         public void WriteUInt8(byte value)
         {
