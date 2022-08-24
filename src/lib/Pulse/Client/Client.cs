@@ -48,7 +48,6 @@ namespace Piot.Surge.Pulse.Client
         }
 
 
-        
         private void ReceiveSnapshotExtraData(IOctetReader reader, Milliseconds now)
         {
             var pongTimeLowerBits = MonotonicTimeLowerBitsReader.Read(reader);
@@ -67,7 +66,7 @@ namespace Piot.Surge.Pulse.Client
             {
                 predictor.AdjustPredictionSpeed(serverIsProcessingTickId, (uint)statsRoundTripTime.Stat.average);
             }
-            
+
             log.DebugLowLevel("InputQueueCountFromHost {InputQueueCount} {AverageInputQueueCount}",
                 numberOfInputInQueue, statsHostInputQueueCount.Stat.average);
         }

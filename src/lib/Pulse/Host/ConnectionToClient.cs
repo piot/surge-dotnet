@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
-using System.Net.NetworkInformation;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.Surge.DatagramType;
@@ -20,25 +19,24 @@ namespace Piot.Surge.Pulse.Host
 {
     public class ConnectionToClient
     {
-        private readonly RemoteEndpointId id;
-        private readonly LogicalInputQueue inputQueue = new();
         private readonly ILog log;
         private readonly SnapshotSyncerClient syncer;
-        private OrderedDatagramsIn orderedDatagramsIn;
         public EntityId ControllingEntityId;
+        private OrderedDatagramsIn orderedDatagramsIn;
 
-        public LogicalInputQueue InputQueue => inputQueue;
-        public RemoteEndpointId Id => id;
 
-        public bool HasAssignedEntity => false;
-
-        
         public ConnectionToClient(RemoteEndpointId id, SnapshotSyncerClient syncer, ILog log)
         {
-            this.id = id;
+            Id = id;
             this.log = log;
             this.syncer = syncer;
         }
+
+        public LogicalInputQueue InputQueue { get; } = new();
+
+        public RemoteEndpointId Id { get; }
+
+        public bool HasAssignedEntity => false;
 
         private void ReceivePredictedInputs(IOctetReader reader, TickId serverIsAtTickId)
         {
@@ -56,11 +54,11 @@ namespace Piot.Surge.Pulse.Host
 
             var first = logicalInputs[0];
 
-            if (first.appliedAtTickId.tickId > inputQueue.WaitingForTickId.tickId && inputQueue.IsInitialized)
+            if (first.appliedAtTickId.tickId > InputQueue.WaitingForTickId.tickId && InputQueue.IsInitialized)
             {
                 log.Notice(
-                    $"there is a gap in the input queue. Input queue is waiting for {inputQueue.WaitingForTickId} but first received in this datagram {first.appliedAtTickId}");
-                inputQueue.Reset();
+                    $"there is a gap in the input queue. Input queue is waiting for {InputQueue.WaitingForTickId} but first received in this datagram {first.appliedAtTickId}");
+                InputQueue.Reset();
             }
 
 
@@ -71,15 +69,16 @@ namespace Piot.Surge.Pulse.Host
                     continue;
                 }
 
-                if (logicalInput.appliedAtTickId.tickId > inputQueue.WaitingForTickId.tickId)
+                if (logicalInput.appliedAtTickId.tickId > InputQueue.WaitingForTickId.tickId)
                 {
                     //
                 }
-                inputQueue.AddLogicalInput(logicalInput);
+
+                InputQueue.AddLogicalInput(logicalInput);
             }
 
-            log.DebugLowLevel("input Queue on server for connection {ConnectionId} is {Count}", Id, inputQueue.Count);
-            syncer.clientInputTickCountAheadOfServer = (sbyte)inputQueue.Count;
+            log.DebugLowLevel("input Queue on server for connection {ConnectionId} is {Count}", Id, InputQueue.Count);
+            syncer.clientInputTickCountAheadOfServer = (sbyte)InputQueue.Count;
         }
 
         public void Receive(IOctetReader reader, TickId serverIsAtTickId)
@@ -97,7 +96,7 @@ namespace Piot.Surge.Pulse.Host
                     ReceivePredictedInputs(reader, serverIsAtTickId);
                     break;
                 default:
-                    throw new Exception($"illegal datagram type {datagramType} from client ${id}");
+                    throw new Exception($"illegal datagram type {datagramType} from client ${Id}");
             }
         }
     }

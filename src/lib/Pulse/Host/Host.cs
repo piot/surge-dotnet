@@ -20,8 +20,8 @@ namespace Piot.Surge.Pulse.Host
     public class Host
     {
         private readonly AuthoritativeWorld authoritativeWorld;
-        private readonly IEntityContainerWithChanges entityContainer;
         private readonly Dictionary<uint, ConnectionToClient> connections = new();
+        private readonly IEntityContainerWithChanges entityContainer;
         private readonly ILog log;
         private readonly List<ConnectionToClient> orderedConnections = new();
         private readonly TimeTicker.TimeTicker simulationTicker;
@@ -80,7 +80,7 @@ namespace Piot.Surge.Pulse.Host
         {
             Ticker.Tick(entityContainer);
         }
-        
+
         private void SimulationTick()
         {
             log.Debug("== Simulation Tick! {TickId}", serverTickId);
