@@ -10,14 +10,14 @@ using Piot.Clog;
 
 namespace Piot.Surge.Generator
 {
-    public static class LogicScanner
+    public static class GameInputScanner
     {
         /// <summary>
-        ///     Scans .NET type information to find types that have the LogicAttribute attached.
+        ///     Scans .NET type information to find types that have the GameInputAttribute attached.
         /// </summary>
         /// <param name="output"></param>
         /// <returns></returns>
-        public static IEnumerable<Type> ScanForLogics(ILog output)
+        public static IEnumerable<Type> ScanForGameInputs(ILog output)
         {
             var assemblies2 = AppDomain.CurrentDomain.GetAssemblies();
 
@@ -27,11 +27,11 @@ namespace Piot.Surge.Generator
                 allTypes.AddRange(assembly.GetTypes());
             }
 
-            var logicClasses = allTypes
-                .Where(type => ScannerHelper.IsStruct(type) && ScannerHelper.HasAttribute<LogicAttribute>(type))
+            var gameInputStructs = allTypes
+                .Where(type => ScannerHelper.IsStruct(type) && ScannerHelper.HasAttribute<InputAttribute>(type))
                 .ToArray();
 
-            return logicClasses;
+            return gameInputStructs;
         }
     }
 }

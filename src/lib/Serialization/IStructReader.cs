@@ -3,19 +3,12 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using Piot.Surge;
-using Piot.Surge.Types;
+using Piot.Flood;
 
-namespace Tests.ExampleGame;
-
-[Input]
-public struct GameInput
+namespace Piot.Surge.Serialization
 {
-    public Aiming aiming;
-    public bool primaryAbility;
-    public bool secondaryAbility;
-    public bool tertiaryAbility;
-
-    public bool ultimateAbility;
-    //public Vector2 desiredMovement;
+    public interface IStructReader<out T> where T : struct
+    {
+        public T Read(IOctetReader reader);
+    }
 }

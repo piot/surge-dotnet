@@ -18,10 +18,4 @@ namespace Piot.Surge
     {
         public bool generate { get; set; }
     }
-
-    [AttributeUsage(AttributeTargets.Field)]
-    public class InputSourceAttribute : Attribute
-    {
-        public string BindName { get; set; } = string.Empty;
-    }
 }

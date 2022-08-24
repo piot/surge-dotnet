@@ -12,16 +12,19 @@ namespace Tests.ExampleGame;
 [Logic]
 public struct AvatarLogic : ILogic
 {
-    [InputSource(BindName = nameof(GameInput.fire))]
     public bool fireButtonIsDown;
-
-    [InputSource(BindName = nameof(GameInput.aiming))]
     public Aiming aiming;
 
     public Position3 position;
 
     public ushort ammoCount;
     public ushort fireCooldown;
+
+    public void SetInput(GameInput input)
+    {
+        fireButtonIsDown = input.primaryAbility;
+        aiming = input.aiming;
+    }
 
     public override string ToString()
     {

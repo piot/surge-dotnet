@@ -70,10 +70,11 @@ namespace Piot.Surge.Generator
 
     public class LogicInfo
     {
-        public LogicInfo(Type type, MethodInfo tickMethod, ILog log)
+        public LogicInfo(Type type, MethodInfo tickMethod, MethodInfo? setInputMethod, ILog log)
         {
             Type = type;
             TickMethod = tickMethod;
+            SetInputMethod = setInputMethod;
             var parameters = tickMethod.GetParameters();
             if (parameters.Length != 1)
             {
@@ -114,6 +115,9 @@ namespace Piot.Surge.Generator
         public Type CommandsInterface { get; }
 
         public MethodInfo TickMethod { get; }
+        public MethodInfo? SetInputMethod { get; }
+
+        public bool IsAvatar => SetInputMethod is not null;
 
         public Type Type { get; }
 
@@ -126,7 +130,7 @@ namespace Piot.Surge.Generator
         }
     }
 
-    public static class LogicInfoScanner
+    public static class LogicInfoCollector
     {
         /// <summary>
         ///     Scans the specified <paramref name="types" /> and checks if the type contains a method called Tick.
@@ -135,23 +139,22 @@ namespace Piot.Surge.Generator
         /// <param name="log"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public static IEnumerable<LogicInfo> Scan(IEnumerable<Type> types, ILog log)
+        public static IEnumerable<LogicInfo> Collect(IEnumerable<Type> types, ILog log)
         {
             var logicInfos = new List<LogicInfo>();
             foreach (var type in types)
             {
-                var methodInfo = type.GetMethod("Tick");
-                if (methodInfo == null)
+                var tickMethodInfo = ScannerHelper.ImplementedMethod(type, "Tick");
+                var setInputMethod = type.GetMethod("SetInput");
+                if (setInputMethod is not null)
                 {
-                    throw new Exception("Each logic must have a tick method");
+                    if (setInputMethod.IsAbstract)
+                    {
+                        throw new Exception($"SetInput can not be abstract in type {type.Name}");
+                    }
                 }
 
-                if (methodInfo.IsAbstract)
-                {
-                    throw new Exception("Each logic tick can not be abstract");
-                }
-
-                var logicInfo = new LogicInfo(type, methodInfo, log);
+                var logicInfo = new LogicInfo(type, tickMethodInfo, setInputMethod, log);
                 logicInfos.Add(logicInfo);
                 log.Info("Found logic {LogicInfo}", logicInfo);
             }

@@ -23,10 +23,10 @@ public class ScannerTests
     [Fact]
     public void FindLogics()
     {
-        var allLogics = Scanner.ScanForLogics(log);
+        var allLogics = LogicScanner.ScanForLogics(log);
         Assert.Equal(2, allLogics.Count());
 
-        var logicInfos = LogicInfoScanner.Scan(allLogics, log);
+        var logicInfos = LogicInfoCollector.Collect(allLogics, log);
         Assert.Equal(2, logicInfos.Count());
     }
 }

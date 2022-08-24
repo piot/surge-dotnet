@@ -61,7 +61,7 @@ namespace Piot.Surge.Generator
         public static void AddEndDeclaration(StringBuilder sb)
         {
             sb.Append(@"
-    }
+}
 ");
         }
 
@@ -152,7 +152,7 @@ namespace Piot.Surge.Generator
         public static void AddClassDeclaration(StringBuilder sb, string className)
         {
             sb.Append($"public class {className}").Append(@"
-    {
+{
 ");
         }
 
@@ -484,6 +484,7 @@ namespace Piot.Surge.Generator
         outFacing.OnDestroyed?.Invoke();
     }
 
+
 ");
         }
 
@@ -662,6 +663,26 @@ public class ").Append(Suffix(logicInfo.Type.Name, "Entity")).Append(@"
 ");
         }
 
+        public static void AddSetInputMethod(StringBuilder sb)
+        {
+            sb.Append(@"
+            public void SetInput(IOctetReader reader)
+            {
+                current.SetInput(GameInputReader.Read(reader));
+            }
+");
+        }
+
+        public static void AddSetInputMethodThatThrowsException(StringBuilder sb)
+        {
+            sb.Append(@"
+            public void SetInput(IOctetReader reader)
+            {
+               throw new Exception($""You can only set inputs for Avatars. {GetType().Name} is not an avatar"");
+            }
+");
+        }
+
         public static void AddInternalEntity(StringBuilder sb, LogicInfo logicInfo)
         {
             sb.Append(@"
@@ -695,6 +716,15 @@ public class ").Append(EntityGeneratedInternal(logicInfo)).Append(" : IGenerated
             // ----- methods ----
 
             AddInternalMethods(sb);
+
+            if (logicInfo.IsAvatar)
+            {
+                AddSetInputMethod(sb);
+            }
+            else
+            {
+                AddSetInputMethodThatThrowsException(sb);
+            }
 
             DoActions(sb, logicInfo.CommandInfos);
             UnDoActions(sb, logicInfo.CommandInfos);
@@ -730,13 +760,37 @@ public class ").Append(EntityGeneratedInternal(logicInfo)).Append(" : IGenerated
             AddArchetypeIdConstants(sb, infos);
         }
 
+        public static void AddGenerateInputReader(StringBuilder sb, GameInputInfo gameInputInfo)
+        {
+            AddClassDeclaration(sb, "GameInputReader");
+            var gameInputName = FullName(gameInputInfo.Type);
+            sb.Append(@$"    public static {gameInputName} Read(IOctetReader reader)
+    {{
+        return new()
+        {{
+");
+
+            foreach (var fieldInfo in gameInputInfo.FieldInfos)
+            {
+                var fieldName = fieldInfo.FieldInfo.Name;
+                sb.Append(
+                    $@"             {fieldName} = {DeSerializeMethod(fieldInfo.FieldInfo.FieldType)},
+");
+            }
+
+            sb.Append("        }; // end of new");
+
+            AddEndDeclaration(sb);
+
+            AddEndDeclaration(sb);
+        }
 
         /// <summary>
         ///     Generates C# source code that handle the serialization of the user specific (game specific) types.
         /// </summary>
         /// <param name="infos"></param>
         /// <returns></returns>
-        public static string Generate(IEnumerable<LogicInfo> infos)
+        public static string Generate(IEnumerable<LogicInfo> infos, GameInputInfo gameInputInfo)
         {
             var sb = new StringBuilder();
 
@@ -757,6 +811,8 @@ namespace Piot.Surge.Internal.Generated
 
             AddEngineWorld(sb, infos);
             AddEngineNotifier(sb, infos);
+
+            AddGenerateInputReader(sb, gameInputInfo);
 
             foreach (var logicInfo in infos)
             {

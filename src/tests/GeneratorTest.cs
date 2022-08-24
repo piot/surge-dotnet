@@ -23,12 +23,17 @@ public class GeneratorTests
     [Fact]
     public void GenerateSourceCode()
     {
-        var allLogics = Scanner.ScanForLogics(log);
+        var allLogics = LogicScanner.ScanForLogics(log);
         Assert.Equal(2, allLogics.Count());
 
-        var logicInfos = LogicInfoScanner.Scan(allLogics, log);
+        var logicInfos = LogicInfoCollector.Collect(allLogics, log);
         Assert.Equal(2, logicInfos.Count());
-        var code = SourceGenerator.Generate(logicInfos);
+
+        var allInputs = GameInputScanner.ScanForGameInputs(log);
+        var gameInputInfos = GameInputInfoCollector.Collect(allInputs, log);
+        Assert.Equal(1, gameInputInfos.Count());
+
+        var code = SourceGenerator.Generate(logicInfos, gameInputInfos.First());
         log.Info(code);
 
         const string target = "../../../../tests/ExampleGame/_Generated.cs";
