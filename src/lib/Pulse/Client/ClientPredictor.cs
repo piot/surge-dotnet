@@ -6,6 +6,7 @@
 using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
+using Piot.Surge.LocalPlayer;
 using Piot.Surge.LogicalInput;
 using Piot.Surge.LogicalInputSerialization;
 using Piot.Surge.OrderedDatagrams;
@@ -107,7 +108,7 @@ namespace Piot.Surge.Pulse.Client
             var now = predictionTicker.Now;
 
             log.Debug("--- Prediction Tick {TickId}", predictTickId);
-            var inputOctets = inputPackFetch.Fetch();
+            var inputOctets = inputPackFetch.Fetch(new LocalPlayerIndex(0));
             var logicalInput = new LogicalInput.LogicalInput
             {
                 appliedAtTickId = predictTickId,

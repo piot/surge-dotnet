@@ -18,4 +18,9 @@ namespace Piot.Surge
     {
         public bool generate { get; set; }
     }
+
+    [AttributeUsage(AttributeTargets.Method)]
+    public class InputFetchAttribute : Attribute
+    {
+    }
 }

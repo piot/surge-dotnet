@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using Piot.Surge;
+using Piot.Surge.LocalPlayer;
 using Piot.Surge.Types;
 
 namespace Tests.ExampleGame;
@@ -18,4 +19,17 @@ public struct GameInput
 
     public bool ultimateAbility;
     //public Vector2 desiredMovement;
+}
+
+public static class GameInputFetch
+{
+    [InputFetch]
+    public static GameInput ReadFromDevice(LocalPlayerIndex index)
+    {
+        return new()
+        {
+            primaryAbility = true,
+            secondaryAbility = false
+        };
+    }
 }

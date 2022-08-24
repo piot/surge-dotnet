@@ -4,11 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
+using Piot.Surge.LocalPlayer;
 
 namespace Piot.Surge.LogicalInput
 {
     public interface IInputPackFetch
     {
-        public Span<byte> Fetch();
+        public ReadOnlySpan<byte> Fetch(LocalPlayerIndex playerIndex);
     }
 }

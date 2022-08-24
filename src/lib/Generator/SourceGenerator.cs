@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 
 // ReSharper disable MemberCanBePrivate.Global
@@ -22,6 +23,11 @@ namespace Piot.Surge.Generator
         public static string FullName(Type t)
         {
             return t.FullName!.Replace('+', '.');
+        }
+
+        public static string FullName(MethodInfo methodInfo)
+        {
+            return methodInfo.DeclaringType?.FullName + "." + methodInfo.Name;
         }
 
         public static string ActionsName(Type t)
@@ -156,12 +162,21 @@ namespace Piot.Surge.Generator
 ");
         }
 
+
+        public static void AddStaticClassDeclaration(StringBuilder sb, string className)
+        {
+            sb.Append($"public static class {className}").Append(@"
+{
+");
+        }
+
         public static void AddClassDeclaration(StringBuilder sb, string className, string inheritFrom)
         {
             sb.Append($"public class {className} : {inheritFrom}").Append(@"
     {
 ");
         }
+
 
         public static void AddActionStructs(StringBuilder sb, IEnumerable<CommandInfo> commandInfos)
         {
@@ -549,7 +564,7 @@ namespace Piot.Surge.Generator
             {
                 sb.Append(@"                new() { ")
                     .Append(
-                        $"mask = {MaskName(fieldInfo)}, name = new TypeInformationFieldName(nameof(current.{fieldInfo.FieldInfo.Name})), type = typeof({fieldInfo.FieldInfo.FieldType})")
+                        $"mask = {MaskName(fieldInfo)}, name = new (nameof(current.{fieldInfo.FieldInfo.Name})), type = typeof({fieldInfo.FieldInfo.FieldType})")
                     .Append(@" },
 ");
             }
@@ -755,7 +770,7 @@ public class ").Append(EntityGeneratedInternal(logicInfo)).Append($" : {inherit}
 
         public static void AddGameInputReader(StringBuilder sb, GameInputInfo gameInputInfo)
         {
-            AddClassDeclaration(sb, "GameInputReader");
+            AddStaticClassDeclaration(sb, "GameInputReader");
             var gameInputName = FullName(gameInputInfo.Type);
             sb.Append(@$"    public static {gameInputName} Read(IOctetReader reader)
     {{
@@ -778,12 +793,57 @@ public class ").Append(EntityGeneratedInternal(logicInfo)).Append($" : {inherit}
             AddEndDeclaration(sb);
         }
 
+        public static void AddGameInputWriter(StringBuilder sb, GameInputInfo gameInputInfo)
+        {
+            AddStaticClassDeclaration(sb, "GameInputWriter");
+            var gameInputName = FullName(gameInputInfo.Type);
+            sb.Append(@$"    public static void Write(IOctetWriter writer, {gameInputName} input)
+    {{
+");
+
+            foreach (var fieldInfo in gameInputInfo.FieldInfos)
+            {
+                var fieldName = fieldInfo.FieldInfo.Name;
+                var completeVariable = $"input.{fieldName}";
+                sb.Append(
+                    $@"       {SerializeMethod(fieldInfo.FieldInfo.FieldType, completeVariable)};
+");
+            }
+
+
+            AddEndDeclaration(sb);
+
+            AddEndDeclaration(sb);
+        }
+
+        public static void AddGameInputFetch(StringBuilder sb, GameInputFetchInfo inputFetchInfo)
+        {
+            var fetchMethodName = FullName(inputFetchInfo.MethodInfo);
+            sb.Append(@$"
+
+public class GeneratedInputFetch : IInputPackFetch
+{{
+    public ReadOnlySpan<byte> Fetch(LocalPlayerIndex index)
+    {{
+        var gameInput = {fetchMethodName}(index); // Found from scanning
+        var writer = new OctetWriter(256);
+        GameInputWriter.Write(writer, gameInput);
+
+        return writer.Octets;
+    }}
+}}
+
+");
+        }
+
+
         /// <summary>
         ///     Generates C# source code that handle the serialization of the user specific (game specific) types.
         /// </summary>
         /// <param name="infos"></param>
         /// <returns></returns>
-        public static string Generate(IEnumerable<LogicInfo> infos, GameInputInfo gameInputInfo)
+        public static string Generate(IEnumerable<LogicInfo> infos, GameInputInfo gameInputInfo,
+            GameInputFetchInfo gameInputFetchInfo)
         {
             var sb = new StringBuilder();
 
@@ -794,6 +854,8 @@ public class ").Append(EntityGeneratedInternal(logicInfo)).Append($" : {inherit}
 using Piot.Surge.FastTypeInformation;
 using Piot.Flood;
 using Piot.Surge.TypeSerialization;
+using Piot.Surge.LogicalInput;
+using Piot.Surge.LocalPlayer;
 
 namespace Piot.Surge.Internal.Generated
 {
@@ -806,6 +868,8 @@ namespace Piot.Surge.Internal.Generated
             AddEngineNotifier(sb, infos);
 
             AddGameInputReader(sb, gameInputInfo);
+            AddGameInputWriter(sb, gameInputInfo);
+            AddGameInputFetch(sb, gameInputFetchInfo);
 
             foreach (var logicInfo in infos)
             {
