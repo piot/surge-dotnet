@@ -8,6 +8,7 @@ using Piot.Flood;
 using Piot.Surge.DatagramType;
 using Piot.Surge.MonotonicTimeLowerBits;
 using Piot.Surge.OrderedDatagrams;
+using Piot.Surge.Snapshot;
 using Piot.Surge.SnapshotSerialization;
 
 namespace Piot.Surge
@@ -24,6 +25,7 @@ namespace Piot.Surge
 
         public static void Write(Action<ReadOnlyMemory<byte>> send, SerializedSnapshotDeltaPackUnionFlattened pack,
             MonotonicTimeLowerBits.MonotonicTimeLowerBits monotonicTimeLowerBits, sbyte clientInputTicksAhead,
+            TickId serverTickId,
             OrderedDatagramsOutIncrease orderedDatagramsIncrease)
         {
             var datagramCount = pack.payload.Length / PayloadOctetCountPerDatagram + 1;
@@ -39,6 +41,7 @@ namespace Piot.Surge
                 DatagramTypeWriter.Write(writer, DatagramType.DatagramType.DeltaSnapshots);
                 MonotonicTimeLowerBitsWriter.Write(monotonicTimeLowerBits, writer);
                 writer.WriteInt8(clientInputTicksAhead);
+                TickIdWriter.Write(writer, serverTickId);
 
                 var lastOne = datagramIndex + 1 == datagramCount;
                 SnapshotPackDatagramHeaderWriter.Write(writer, pack.tickIdRange, datagramIndex, lastOne);

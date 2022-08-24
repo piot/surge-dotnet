@@ -77,7 +77,7 @@ namespace Piot.Surge.Pulse.Client
 
             log.DebugLowLevel("Try to read next snapshot in queue. {PlaybackDeltaTimeMs}", deltaTimeMs);
 
-            snapshotPlaybackTicker.DeltaTime = new Milliseconds(deltaTimeMs);
+            snapshotPlaybackTicker.DeltaTime = new(deltaTimeMs);
 
             if (queue.Count == 0)
             {
@@ -96,7 +96,7 @@ namespace Piot.Surge.Pulse.Client
             Ticker.Tick(clientWorld);
             log.DebugLowLevel("tick ghost logics {EntityCount}", clientWorld.AllEntities.Length);
 
-            predictor.ReadCorrections(snapshotReader);
+            predictor.ReadCorrections(deltaSnapshot.tickId, snapshotReader);
         }
     }
 }

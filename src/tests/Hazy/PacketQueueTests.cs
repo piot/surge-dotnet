@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 using Piot.Hazy;
-using Piot.MonotonicTime;
 
 namespace Tests.Hazy;
 
@@ -16,7 +15,7 @@ public class PacketQueueTests
         var queue = new PacketQueue();
 
         var packet = new Packet
-            { monotonicTimeMs = new Milliseconds { ms = 1030 }, payload = new byte[] { 0x80, 0x40 } };
+            { monotonicTimeMs = new(1030), payload = new byte[] { 0x80, 0x40 } };
 
         Assert.Equal(0, queue.Count);
 
@@ -25,17 +24,17 @@ public class PacketQueueTests
         Assert.Equal(1, queue.Count);
 
         var nextPacket = new Packet
-            { monotonicTimeMs = new Milliseconds { ms = 1020 }, payload = new byte[] { 0x40, 0x10 } };
+            { monotonicTimeMs = new(1020), payload = new byte[] { 0x40, 0x10 } };
 
         queue.AddPacket(nextPacket);
 
         Assert.Equal(2, queue.Count);
 
-        var wasFound = queue.Dequeue(new Milliseconds(0), out var foundPacket);
+        var wasFound = queue.Dequeue(new(0), out var foundPacket);
         Assert.False(wasFound);
         Assert.Equal(0, foundPacket.monotonicTimeMs.ms);
 
-        var nextWasFound = queue.Dequeue(new Milliseconds(1025), out var nextFoundPacket);
+        var nextWasFound = queue.Dequeue(new(1025), out var nextFoundPacket);
         Assert.True(nextWasFound);
         Assert.Equal(nextPacket.monotonicTimeMs.ms, nextFoundPacket.monotonicTimeMs.ms);
         Assert.Equal(0x040, nextFoundPacket.payload.ToArray()[0]);

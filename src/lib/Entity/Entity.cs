@@ -94,5 +94,10 @@ namespace Piot.Surge
         }
 
         public IAction[] Actions => generatedEntity.Actions;
+
+        public override string ToString()
+        {
+            return $"[entity {Id} {generatedEntity.ArchetypeId}]";
+        }
     }
 }

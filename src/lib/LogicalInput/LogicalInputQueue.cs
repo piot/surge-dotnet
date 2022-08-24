@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System;
 using System.Collections.Generic;
 using Piot.Surge.Snapshot;
 
@@ -18,38 +17,65 @@ namespace Piot.Surge.LogicalInput
     {
         private readonly Queue<LogicalInput> queue = new();
 
-        private bool isInitialized;
         private TickId waitingForTickId;
 
         public LogicalInput[] Collection => queue.ToArray();
 
+        public int Count => queue.Count;
+
         public TickId WaitingForTickId => waitingForTickId;
+
+        public bool IsInitialized { get; private set; }
 
         public void AddLogicalInput(LogicalInput logicalInput)
         {
-            if (!isInitialized)
+            if (!IsInitialized)
             {
                 waitingForTickId = logicalInput.appliedAtTickId;
-                isInitialized = true;
+                IsInitialized = true;
             }
 
-            if (waitingForTickId.tickId != logicalInput.appliedAtTickId.tickId)
+            if (logicalInput.appliedAtTickId.tickId > waitingForTickId.tickId)
             {
-                throw new Exception(
-                    $"wrong frame id for logical input. expected {waitingForTickId} but received {logicalInput.appliedAtTickId}");
+                // TickId can only go up, so it means that we have dropped inputs at previous ticks
+                // We can only remove all inputs and add this one
+                Reset();
             }
 
             queue.Enqueue(logicalInput);
             waitingForTickId = new(logicalInput.appliedAtTickId.tickId + 1);
         }
 
-        public void DiscardUpToAndIncluding(TickId tickId)
+        public void Reset()
+        {
+            queue.Clear();
+        }
+
+        public bool HasInputForTickId(TickId tickId)
+        {
+            if (queue.Count == 0)
+            {
+                return false;
+            }
+
+            var firstTickId = queue.Peek().appliedAtTickId.tickId;
+            var lastTick = waitingForTickId.tickId - 1;
+
+            return tickId.tickId >= firstTickId && tickId.tickId <= lastTick;
+        }
+
+
+        public void DiscardUpToAndExcluding(TickId tickId)
         {
             while (queue.Count > 0)
             {
-                if (queue.Peek().appliedAtTickId.tickId <= tickId.tickId)
+                if (queue.Peek().appliedAtTickId.tickId < tickId.tickId)
                 {
                     queue.Dequeue();
+                }
+                else
+                {
+                    break;
                 }
             }
         }

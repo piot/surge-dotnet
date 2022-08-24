@@ -10,7 +10,7 @@ using System.Runtime.CompilerServices;
 
 namespace Piot.Surge
 {
-    public class AuthoritativeWorld : IEntityContainerWithChanges
+    public class AuthoritativeWorld : IEntityContainerWithChanges, IAuthoritativeEntityContainer
     {
         protected readonly List<IEntity> created = new();
         private readonly List<IEntity> deleted = new();
@@ -18,6 +18,15 @@ namespace Piot.Surge
         private uint lastEntityId;
 
         public Dictionary<ulong, IEntity> Entities { get; } = new();
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IEntity SpawnEntity(IGeneratedEntity generatedEntity)
+        {
+            var freeEntityId = FindFreeEntityId();
+
+            return AddEntity(new EntityId(freeEntityId), generatedEntity);
+        }
 
         public IEntity[] Created => created.ToArray();
         public IEntity[] Deleted => deleted.ToArray();
@@ -122,15 +131,6 @@ namespace Piot.Surge
             }
 
             throw new Exception("Could not find free entity id");
-        }
-
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEntity SpawnEntity(IGeneratedEntity generatedEntity)
-        {
-            var freeEntityId = FindFreeEntityId();
-
-            return AddEntity(new EntityId(freeEntityId), generatedEntity);
         }
     }
 }

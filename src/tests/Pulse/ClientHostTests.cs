@@ -60,6 +60,11 @@ public class ClientHostTests
         var client = CreateClient(initNow, clientTransport);
         var host = CreateHost(initNow, hostTransport);
 
+        var world = host.AuthoritativeWorld;
+
+        //var spawnedEntity = world.SpawnEntity(new AvatarLogicEntityInternal());
+        //log.Info("Spawned entity {Entity}", spawnedEntity);
+
         for (var iteration = 0; iteration < 62; iteration++)
         {
             var now = new Milliseconds(20 + iteration * 14);

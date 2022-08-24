@@ -25,6 +25,8 @@ namespace Piot.Stats
 
         public Stat Stat => stat;
 
+        public bool IsReady { get; private set; }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Add(int a)
         {
@@ -50,6 +52,7 @@ namespace Piot.Stats
             stat.min = min;
             stat.max = max;
             stat.count = count;
+            IsReady = true;
 
             Reset();
         }

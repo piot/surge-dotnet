@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
+using System.Net.NetworkInformation;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.Surge.DatagramType;
@@ -24,7 +25,14 @@ namespace Piot.Surge.Pulse.Host
         private readonly ILog log;
         private readonly SnapshotSyncerClient syncer;
         private OrderedDatagramsIn orderedDatagramsIn;
+        public EntityId ControllingEntityId;
 
+        public LogicalInputQueue InputQueue => inputQueue;
+        public RemoteEndpointId Id => id;
+
+        public bool HasAssignedEntity => false;
+
+        
         public ConnectionToClient(RemoteEndpointId id, SnapshotSyncerClient syncer, ILog log)
         {
             this.id = id;
@@ -48,22 +56,30 @@ namespace Piot.Surge.Pulse.Host
 
             var first = logicalInputs[0];
 
-            if (first.appliedAtTickId.tickId > inputQueue.WaitingForTickId.tickId)
+            if (first.appliedAtTickId.tickId > inputQueue.WaitingForTickId.tickId && inputQueue.IsInitialized)
             {
-                return;
+                log.Notice(
+                    $"there is a gap in the input queue. Input queue is waiting for {inputQueue.WaitingForTickId} but first received in this datagram {first.appliedAtTickId}");
+                inputQueue.Reset();
             }
 
-            if (first.appliedAtTickId.tickId < serverIsAtTickId.tickId)
-            {
-                return;
-            }
 
             foreach (var logicalInput in logicalInputs)
             {
+                if (logicalInput.appliedAtTickId.tickId < serverIsAtTickId.tickId)
+                {
+                    continue;
+                }
+
+                if (logicalInput.appliedAtTickId.tickId > inputQueue.WaitingForTickId.tickId)
+                {
+                    //
+                }
                 inputQueue.AddLogicalInput(logicalInput);
             }
 
-            syncer.clientInputTickCountAheadOfServer = (sbyte)inputQueue.Collection.Length;
+            log.DebugLowLevel("input Queue on server for connection {ConnectionId} is {Count}", Id, inputQueue.Count);
+            syncer.clientInputTickCountAheadOfServer = (sbyte)inputQueue.Count;
         }
 
         public void Receive(IOctetReader reader, TickId serverIsAtTickId)

@@ -21,6 +21,7 @@ namespace Piot.Surge.Pulse.Client
     public class ClientPredictor : IClientPredictorCorrections
     {
         private readonly OrderedDatagramsOut datagramsOut;
+        private readonly Milliseconds fixedSimulationDeltaTimeMs;
         private readonly IInputPackFetch inputPackFetch;
         private readonly ILog log;
         private readonly LogicalInputQueue predictedInputs = new();
@@ -35,12 +36,16 @@ namespace Piot.Surge.Pulse.Client
             this.log = log;
             this.transportClient = transportClient;
             this.inputPackFetch = inputPackFetch;
+            fixedSimulationDeltaTimeMs = targetDeltaTimeMs;
             predictionTicker = new(now, PredictionTick, targetDeltaTimeMs,
                 log.SubLog("PredictionTick"));
         }
 
-        void IClientPredictorCorrections.ReadCorrections(IOctetReader snapshotReader)
+        void IClientPredictorCorrections.ReadCorrections(TickId correctionsForTickId, IOctetReader snapshotReader)
         {
+            log.DebugLowLevel("we have corrections for {TickId}, clear old predicted inputs", correctionsForTickId);
+
+            predictedInputs.DiscardUpToAndExcluding(correctionsForTickId);
             /*
               var correctionStates = SnapshotCorrectionsReader.Read(snapshotReader, predictedEntities);
              
@@ -67,6 +72,31 @@ namespace Piot.Surge.Pulse.Client
             */
         }
 
+
+        public void AdjustPredictionSpeed(TickId lastReceivedServerTickId, uint roundTripTimeMs)
+        {
+            var targetPredictionTicks = roundTripTimeMs / fixedSimulationDeltaTimeMs.ms;
+
+            var tickIdThatWeShouldSendNowInTheory = lastReceivedServerTickId.tickId + targetPredictionTicks;
+            const int counterJitter = 2;
+            const int counterProcessOrder = 1;
+            var tickIdThatWeShouldSendNow = tickIdThatWeShouldSendNowInTheory + counterProcessOrder + counterJitter;
+
+            var predictionDiffInTicks = predictTickId.tickId - tickIdThatWeShouldSendNow;
+
+            var newDeltaTimeMs = predictionDiffInTicks switch
+            {
+                < 0 => fixedSimulationDeltaTimeMs.ms * 100 / 120,
+                > 30 => 0,
+                > 0 => fixedSimulationDeltaTimeMs.ms * 100 / 80,
+                _ => fixedSimulationDeltaTimeMs.ms
+            };
+
+            log.DebugLowLevel("New Prediction Speed {Diff} {NewDeltaTimeMs}", predictionDiffInTicks, newDeltaTimeMs);
+
+            predictionTicker.DeltaTime = new(newDeltaTimeMs);
+        }
+
         public void Update(Milliseconds now)
         {
             predictionTicker.Update(now);
@@ -76,7 +106,7 @@ namespace Piot.Surge.Pulse.Client
         {
             var now = predictionTicker.Now;
 
-            log.Debug("Prediction Tick {TickId}", predictTickId);
+            log.Debug("--- Prediction Tick {TickId}", predictTickId);
             var inputOctets = inputPackFetch.Fetch();
             var logicalInput = new LogicalInput.LogicalInput
             {

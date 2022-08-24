@@ -117,7 +117,7 @@ namespace Piot.Surge.Generator
         public MethodInfo TickMethod { get; }
         public MethodInfo? SetInputMethod { get; }
 
-        public bool IsAvatar => SetInputMethod is not null;
+        public bool CanTakeInput => SetInputMethod is not null;
 
         public Type Type { get; }
 

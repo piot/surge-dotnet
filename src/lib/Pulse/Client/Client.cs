@@ -31,6 +31,7 @@ namespace Piot.Surge.Pulse.Client
         private readonly ITransportClient transportClient;
         private readonly TransportStatsBoth transportWithStats;
         private readonly ClientWorld world;
+        private Milliseconds fixedSimulationDeltaTimeMs;
 
         public Client(ILog log, Milliseconds now, Milliseconds targetDeltaTimeMs, IEntityCreation entityCreation,
             ITransport assignedTransport, IInputPackFetch fetch)
@@ -43,8 +44,11 @@ namespace Piot.Surge.Pulse.Client
             predictor = new ClientPredictor(fetch, transportClient, now, targetDeltaTimeMs, log.SubLog("Predictor"));
             deltaSnapshotPlayback =
                 new ClientDeltaSnapshotPlayback(now, world, predictor, targetDeltaTimeMs, log.SubLog("GhostPlayback"));
+            fixedSimulationDeltaTimeMs = targetDeltaTimeMs;
         }
 
+
+        
         private void ReceiveSnapshotExtraData(IOctetReader reader, Milliseconds now)
         {
             var pongTimeLowerBits = MonotonicTimeLowerBitsReader.Read(reader);
@@ -56,6 +60,14 @@ namespace Piot.Surge.Pulse.Client
 
             var numberOfInputInQueue = reader.ReadInt8();
             statsHostInputQueueCount.Add(numberOfInputInQueue);
+
+            var serverIsProcessingTickId = TickIdReader.Read(reader);
+
+            if (statsRoundTripTime.IsReady)
+            {
+                predictor.AdjustPredictionSpeed(serverIsProcessingTickId, (uint)statsRoundTripTime.Stat.average);
+            }
+            
             log.DebugLowLevel("InputQueueCountFromHost {InputQueueCount} {AverageInputQueueCount}",
                 numberOfInputInQueue, statsHostInputQueueCount.Stat.average);
         }

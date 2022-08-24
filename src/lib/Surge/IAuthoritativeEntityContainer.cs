@@ -3,13 +3,10 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using Piot.Flood;
-using Piot.Surge.Snapshot;
-
-namespace Piot.Surge.Pulse.Client
+namespace Piot.Surge
 {
-    public interface IClientPredictorCorrections
+    public interface IAuthoritativeEntityContainer
     {
-        public void ReadCorrections(TickId tickId, IOctetReader snapshotReader);
+        public IEntity SpawnEntity(IGeneratedEntity generatedEntity);
     }
 }

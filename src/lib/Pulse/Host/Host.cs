@@ -19,7 +19,8 @@ namespace Piot.Surge.Pulse.Host
 {
     public class Host
     {
-        private readonly IEntityContainerWithChanges authoritativeWorld;
+        private readonly AuthoritativeWorld authoritativeWorld;
+        private readonly IEntityContainerWithChanges entityContainer;
         private readonly Dictionary<uint, ConnectionToClient> connections = new();
         private readonly ILog log;
         private readonly List<ConnectionToClient> orderedConnections = new();
@@ -35,16 +36,56 @@ namespace Piot.Surge.Pulse.Host
             transport = transportWithStats;
             snapshotSyncer = new SnapshotSyncer(transport, log.SubLog("Syncer"));
             authoritativeWorld = new AuthoritativeWorld();
+            entityContainer = authoritativeWorld;
             this.log = log;
             simulationTicker = new(new Milliseconds(0), SimulationTick, new Milliseconds(16),
                 log.SubLog("SimulationTick"));
         }
 
+        public IAuthoritativeEntityContainer AuthoritativeWorld => authoritativeWorld;
+
         public TransportStats.TransportStats Stats => transportWithStats.Stats;
 
+        private void SetInputsFromClientsToEntities()
+        {
+            foreach (var connection in orderedConnections)
+            {
+                if (!connection.InputQueue.HasInputForTickId(serverTickId))
+                {
+                    // The old data on the input is intentionally kept
+                    log.Notice($"connection {connection.Id} didn't have an input for tick {serverTickId}");
+                    continue;
+                }
+
+                var input = connection.InputQueue.Dequeue();
+                if (!connection.HasAssignedEntity)
+                {
+                    continue;
+                }
+
+                var targetEntity = entityContainer.FetchEntity(connection.ControllingEntityId);
+                var inputDeserialize = targetEntity.GeneratedEntity as IInputDeserialize;
+                if (inputDeserialize is null)
+                {
+                    throw new Exception(
+                        $"It is not possible to control Entity {connection.ControllingEntityId}, it has no IDeserializeInput interface");
+                }
+
+                var inputReader = new OctetReader(input.payload.Span);
+                inputDeserialize.SetInput(inputReader);
+            }
+        }
+
+        private void TickWorld()
+        {
+            Ticker.Tick(entityContainer);
+        }
+        
         private void SimulationTick()
         {
-            log.Debug("Simulation Tick! {TickId}", serverTickId);
+            log.Debug("== Simulation Tick! {TickId}", serverTickId);
+            SetInputsFromClientsToEntities();
+            TickWorld();
             var packContainer = StoreWorldChangesToPackContainer();
             snapshotSyncer.SendSnapshot(packContainer);
             serverTickId = new TickId(serverTickId.tickId + 1);
@@ -52,13 +93,13 @@ namespace Piot.Surge.Pulse.Host
 
         private DeltaSnapshotPackContainer StoreWorldChangesToPackContainer()
         {
-            var deltaSnapshotInternal = SnapshotDeltaCreator.Scan(authoritativeWorld, serverTickId);
+            var deltaSnapshotInternal = SnapshotDeltaCreator.Scan(entityContainer, serverTickId);
             var convertedDeltaSnapshot = FromSnapshotDeltaInternal.Convert(deltaSnapshotInternal);
             var deltaPackContainer =
-                SnapshotDeltaPackCreator.Create(authoritativeWorld, convertedDeltaSnapshot, Array.Empty<EntityId>());
+                SnapshotDeltaPackCreator.Create(entityContainer, convertedDeltaSnapshot, Array.Empty<EntityId>());
 
-            authoritativeWorld.ClearDelta();
-            OverWriter.Overwrite(authoritativeWorld);
+            entityContainer.ClearDelta();
+            OverWriter.Overwrite(entityContainer);
 
             return deltaPackContainer;
         }

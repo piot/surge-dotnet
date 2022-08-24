@@ -5,9 +5,9 @@
 
 namespace Piot.MonotonicTime
 {
-    public struct Milliseconds
+    public readonly struct Milliseconds
     {
-        public long ms;
+        public readonly long ms;
 
         public Milliseconds(long ms)
         {

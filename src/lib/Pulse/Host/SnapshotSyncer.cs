@@ -110,6 +110,7 @@ namespace Piot.Surge.Pulse.Host
             log.DebugLowLevel("sending datagrams {Flattened}", unionFlattened);
             SnapshotDeltaPackUnionToDatagramsWriter.Write(sender.Send, unionFlattened,
                 connection.lastReceivedMonotonicTimeLowerBits, connection.clientInputTickCountAheadOfServer,
+                serverTickId,
                 connection.DatagramsOutIncrease);
         }
 

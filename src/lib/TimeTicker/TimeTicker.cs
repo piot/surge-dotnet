@@ -28,7 +28,7 @@ namespace Piot.Surge.TimeTicker
             }
 
             Tick = action;
-            lastTick.ms = now.ms;
+            lastTick = now;
             this.deltaTimeMs = deltaTimeMs.ms;
             this.log = log;
 #if DEBUG
@@ -61,7 +61,7 @@ namespace Piot.Surge.TimeTicker
                     $"monotonic time can only stand still or move forward ${now} ${lastTick}");
             }
 
-            lastUpdateTime.ms = now.ms;
+            lastUpdateTime = now;
 
 #endif
             var iterationCount = (now.ms - lastTick.ms) / deltaTimeMs;
@@ -70,7 +70,7 @@ namespace Piot.Surge.TimeTicker
                 return;
             }
 
-            lastTick.ms += iterationCount * deltaTimeMs;
+            lastTick = new Milliseconds(lastTick.ms + iterationCount * deltaTimeMs);
 
             Now = now;
             for (var i = 0; i < iterationCount; i++)

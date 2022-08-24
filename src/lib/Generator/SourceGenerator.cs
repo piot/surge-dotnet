@@ -673,20 +673,17 @@ public class ").Append(Suffix(logicInfo.Type.Name, "Entity")).Append(@"
 ");
         }
 
-        public static void AddSetInputMethodThatThrowsException(StringBuilder sb)
-        {
-            sb.Append(@"
-            public void SetInput(IOctetReader reader)
-            {
-               throw new Exception($""You can only set inputs for Avatars. {GetType().Name} is not an avatar"");
-            }
-");
-        }
 
         public static void AddInternalEntity(StringBuilder sb, LogicInfo logicInfo)
         {
+            var inherit = "IGeneratedEntity";
+            if (logicInfo.CanTakeInput)
+            {
+                inherit += ", IInputDeserialize";
+            }
+
             sb.Append(@"
-public class ").Append(EntityGeneratedInternal(logicInfo)).Append(" : IGeneratedEntity").Append(@"
+public class ").Append(EntityGeneratedInternal(logicInfo)).Append($" : {inherit}").Append(@"
 {
 ");
             AddInternalMembers(sb);
@@ -717,13 +714,9 @@ public class ").Append(EntityGeneratedInternal(logicInfo)).Append(" : IGenerated
 
             AddInternalMethods(sb);
 
-            if (logicInfo.IsAvatar)
+            if (logicInfo.CanTakeInput)
             {
                 AddSetInputMethod(sb);
-            }
-            else
-            {
-                AddSetInputMethodThatThrowsException(sb);
             }
 
             DoActions(sb, logicInfo.CommandInfos);
@@ -760,7 +753,7 @@ public class ").Append(EntityGeneratedInternal(logicInfo)).Append(" : IGenerated
             AddArchetypeIdConstants(sb, infos);
         }
 
-        public static void AddGenerateInputReader(StringBuilder sb, GameInputInfo gameInputInfo)
+        public static void AddGameInputReader(StringBuilder sb, GameInputInfo gameInputInfo)
         {
             AddClassDeclaration(sb, "GameInputReader");
             var gameInputName = FullName(gameInputInfo.Type);
@@ -812,7 +805,7 @@ namespace Piot.Surge.Internal.Generated
             AddEngineWorld(sb, infos);
             AddEngineNotifier(sb, infos);
 
-            AddGenerateInputReader(sb, gameInputInfo);
+            AddGameInputReader(sb, gameInputInfo);
 
             foreach (var logicInfo in infos)
             {
