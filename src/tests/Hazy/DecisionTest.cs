@@ -5,6 +5,7 @@
 
 using Piot.Clog;
 using Piot.Hazy;
+using Piot.Random;
 using Xunit.Abstractions;
 
 namespace Tests.Hazy;
@@ -24,7 +25,7 @@ public class DecisionTests
     public void TestDecision()
     {
         var decision = new Decision(0.00002d, 0.002d, 0.01d, 0.001d);
-        var random = new SystemRandom();
+        var random = new PseudoRandom(23);
         var normalActionCount = 0;
 
         for (var i = 0; i < 100; i++)

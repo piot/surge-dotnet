@@ -6,6 +6,7 @@
 using Piot.Clog;
 using Piot.Hazy;
 using Piot.MonotonicTime;
+using Piot.Random;
 using Piot.Surge.Internal.Generated;
 using Piot.Surge.MemoryTransport;
 using Piot.Surge.Pulse.Client;
@@ -58,7 +59,7 @@ public class ClientHostTests
         var timeProvider = new MonotonicTimeMockMs(initNow);
         if (useInternetSimulation)
         {
-            var randomizer = new SystemRandom();
+            var randomizer = new PseudoRandom(0x48019422);
             internetSimulatedHostTransport =
                 new InternetSimulatorTransport(hostTransport, timeProvider, randomizer,
                     log.SubLog("InternetSimulator"));

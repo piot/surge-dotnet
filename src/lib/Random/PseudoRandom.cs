@@ -3,22 +3,24 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System;
-
-namespace Piot.Hazy
+namespace Piot.Random
 {
-    public interface IRandom
+    public class PseudoRandom : IRandom
     {
-        int Random(int max);
-    }
+        private ulong value;
 
-    public class SystemRandom : IRandom
-    {
-        private readonly Random rand = new();
+        public PseudoRandom(ulong seed)
+        {
+            value = seed;
+        }
 
         public int Random(int max)
         {
-            return rand.Next(max);
+            uint randomValue;
+
+            (value, randomValue) = PseudoRandomNext.Next(value);
+
+            return (int)(randomValue % (uint)max);
         }
     }
 }

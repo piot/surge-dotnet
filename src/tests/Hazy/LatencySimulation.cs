@@ -6,6 +6,7 @@
 using Piot.Clog;
 using Piot.Hazy;
 using Piot.MonotonicTime;
+using Piot.Random;
 using Xunit.Abstractions;
 
 namespace Tests.Hazy;
@@ -24,7 +25,7 @@ public class LatencySimulationTests
     [Fact]
     public void TestLatency()
     {
-        var random = new SystemRandom();
+        var random = new PseudoRandom(42);
 
         var latencySimulation = new LatencySimulator(20, 95, new Milliseconds(), random, log);
 

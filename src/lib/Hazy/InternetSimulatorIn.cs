@@ -6,6 +6,7 @@
 using System;
 using Piot.Clog;
 using Piot.MonotonicTime;
+using Piot.Random;
 using Piot.Transport;
 
 namespace Piot.Hazy
