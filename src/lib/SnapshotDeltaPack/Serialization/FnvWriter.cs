@@ -5,13 +5,13 @@
 
 using Piot.Flood;
 
-namespace Piot.Surge
+namespace Piot.Surge.SnapshotDeltaPack.Serialization
 {
-    public interface IEntityDeserializer
+    public static class FnvWriter
     {
-        public void Deserialize(ulong serializeFlags, IOctetReader reader);
-        public void DeserializeAll(IOctetReader reader);
-
-        public void DeserializeCorrectionState(IOctetReader reader);
+        public static void Write(IOctetWriter writer, uint fnv)
+        {
+            writer.WriteUInt32(fnv);
+        }
     }
 }

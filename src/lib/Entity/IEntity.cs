@@ -17,6 +17,8 @@ namespace Piot.Surge
     {
         public EntityMode Mode { get; set; }
 
+        public EntityRollMode RollMode { get; set; }
+
         public bool IsAlive { get; }
 
         public EntityId Id { get; }

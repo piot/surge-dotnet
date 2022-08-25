@@ -24,6 +24,11 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
 
         public LocalPlayerIndex ControlledByLocalPlayerIndex { get; }
 
+        public void SerializePrevious(ulong changedFieldsMask, IOctetWriter writer)
+        {
+            throw new NotImplementedException();
+        }
+
         public void SerializeCorrectionState(IOctetWriter writer)
         {
             CorrectionSerializer.SerializeCorrectionState(writer);

@@ -21,20 +21,22 @@ namespace Piot.Surge.Pulse.Client
     /// </summary>
     public class ClientPredictor : IClientPredictorCorrections
     {
+        private readonly ReadCorrection corrections = new();
         private readonly OrderedDatagramsOut datagramsOut;
         private readonly Milliseconds fixedSimulationDeltaTimeMs;
         private readonly IInputPackFetch inputPackFetch;
         private readonly ILog log;
-        private readonly LogicalInputQueue predictedInputs = new();
         private readonly TimeTicker.TimeTicker predictionTicker;
         private readonly ITransportClient transportClient;
+        private readonly ClientWorld world;
         private TickId predictTickId;
 
         public ClientPredictor(IInputPackFetch inputPackFetch, ITransportClient transportClient, Milliseconds now,
-            Milliseconds targetDeltaTimeMs,
+            Milliseconds targetDeltaTimeMs, ClientWorld world,
             ILog log)
         {
             this.log = log;
+            this.world = world;
             this.transportClient = transportClient;
             this.inputPackFetch = inputPackFetch;
             fixedSimulationDeltaTimeMs = targetDeltaTimeMs;
@@ -42,37 +44,10 @@ namespace Piot.Surge.Pulse.Client
                 log.SubLog("PredictionTick"));
         }
 
-        void IClientPredictorCorrections.ReadCorrections(TickId correctionsForTickId, IOctetReader snapshotReader)
+        public void ReadCorrections(TickId tickId, IOctetReader snapshotReader)
         {
-            log.DebugLowLevel("we have corrections for {TickId}, clear old predicted inputs", correctionsForTickId);
-
-            predictedInputs.DiscardUpToAndExcluding(correctionsForTickId);
-            /*
-              var correctionStates = SnapshotCorrectionsReader.Read(snapshotReader, predictedEntities);
-             
-            foreach (var correctionState in correctionStates)
-            {
-                if (correctionState.Checksum == previousCorrectionState.Checksum)
-                {
-                    continue;
-                }
-
-                // Undo all local prediction up to the point where the mis-predict was detected.
-                predictedEntity.RewindToJustBefore(correctionState.tickId);
-                predictedStates.DiscardToJustBefore(correctionState.tickId);
-                predictedInputs.DiscardUpToAndIncluding(correctionState.TickId);
-                
-                foreach (var predictedInput in predictedInputs.Collection)
-                {
-                    predictedEntity.SimulateWithUndo(predictedInput);
-                    var captureWriter = new OctetWriter(1200);
-                    predictedEntity.SerializeAll(captureWriter);
-                    predictedStates.StorePredictionState(predictedInput.appliedAtTickId, captureWriter.Octets);
-                }
-            }
-            */
+            corrections.ReadCorrections(tickId, snapshotReader, world, log);
         }
-
 
         public void AdjustPredictionSpeed(TickId lastReceivedServerTickId, uint roundTripTimeMs)
         {
@@ -116,11 +91,11 @@ namespace Piot.Surge.Pulse.Client
             };
 
             log.DebugLowLevel("Adding logical input {LogicalInput}", logicalInput);
-            predictedInputs.AddLogicalInput(logicalInput);
+            corrections.PredictedInputs.AddLogicalInput(logicalInput);
 
             var outDatagram =
                 LogicInputDatagramPackOut.CreateInputDatagram(datagramsOut, new TickId(42), 0,
-                    now, predictedInputs.Collection);
+                    now, corrections.PredictedInputs.Collection);
             log.DebugLowLevel("Sending inputs to host");
             transportClient.SendToHost(outDatagram);
 

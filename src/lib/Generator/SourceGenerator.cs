@@ -417,16 +417,17 @@ namespace Piot.Surge.Generator
 ");
         }
 
-        public static void AddSerialize(StringBuilder sb, IEnumerable<LogicFieldInfo> fieldInfos)
+        public static void AddSerializeHelper(StringBuilder sb, IEnumerable<LogicFieldInfo> fieldInfos,
+            string methodName, string targetFieldName)
         {
-            sb.Append(@"    public void Serialize(ulong serializeFlags, IOctetWriter writer)
-    {
+            sb.Append($@"    public void {methodName}(ulong serializeFlags, IOctetWriter writer)
+    {{
 ");
 
             foreach (var fieldInfo in fieldInfos)
             {
                 var fieldName = fieldInfo.FieldInfo.Name;
-                var completeVariable = $"current.{fieldName}";
+                var completeVariable = $"{targetFieldName}.{fieldName}";
                 sb.Append(
                     $@"        if ((serializeFlags & {MaskName(fieldInfo)}) != 0) {SerializeMethod(fieldInfo.FieldInfo.FieldType, completeVariable)};
 ");
@@ -435,6 +436,16 @@ namespace Piot.Surge.Generator
             sb.Append(@"    }
 
 ");
+        }
+
+        public static void AddSerialize(StringBuilder sb, IEnumerable<LogicFieldInfo> fieldInfos)
+        {
+            AddSerializeHelper(sb, fieldInfos, "Serialize", "current");
+        }
+
+        public static void AddSerializePrevious(StringBuilder sb, IEnumerable<LogicFieldInfo> fieldInfos)
+        {
+            AddSerializeHelper(sb, fieldInfos, "SerializePrevious", "last");
         }
 
         public static void AddSerializeAll(StringBuilder sb, IEnumerable<LogicFieldInfo> fieldInfos)
@@ -460,6 +471,17 @@ namespace Piot.Surge.Generator
         public static void AddSerializeCorrectionState(StringBuilder sb, IEnumerable<LogicFieldInfo> fieldInfos)
         {
             sb.Append(@"    public void SerializeCorrectionState(IOctetWriter writer)
+    {
+");
+
+            sb.Append(@"    }
+
+");
+        }
+
+        public static void AddDeserializeCorrectionState(StringBuilder sb, IEnumerable<LogicFieldInfo> fieldInfos)
+        {
+            sb.Append(@"    public void DeserializeCorrectionState(IOctetReader reader)
     {
 ");
 
@@ -738,8 +760,10 @@ public class ").Append(EntityGeneratedInternal(logicInfo)).Append($" : {inherit}
             UnDoActions(sb, logicInfo.CommandInfos);
 
             AddSerialize(sb, logicInfo.FieldInfos);
+            AddSerializePrevious(sb, logicInfo.FieldInfos);
             AddSerializeAll(sb, logicInfo.FieldInfos);
             AddSerializeCorrectionState(sb, logicInfo.FieldInfos);
+            AddDeserializeCorrectionState(sb, logicInfo.FieldInfos);
 
             AddDeserialize(sb, logicInfo.FieldInfos);
             AddDeserializeAll(sb, logicInfo.FieldInfos);

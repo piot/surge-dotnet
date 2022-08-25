@@ -21,6 +21,7 @@ namespace Piot.Surge
             this.generatedEntity = generatedEntity;
         }
 
+        public EntityRollMode RollMode { get; set; }
         public bool IsAlive => Mode != EntityMode.Deleted;
 
         public EntityMode Mode { get; set; }
@@ -43,6 +44,11 @@ namespace Piot.Surge
             generatedEntity.SerializeAll(writer);
         }
 
+        public void SerializePrevious(ulong changedFieldsMask, IOctetWriter writer)
+        {
+            generatedEntity.SerializePrevious(changedFieldsMask, writer);
+        }
+
         public void SerializeCorrectionState(IOctetWriter writer)
         {
             generatedEntity.SerializeCorrectionState(writer);
@@ -56,6 +62,11 @@ namespace Piot.Surge
         void IEntityDeserializer.DeserializeAll(IOctetReader reader)
         {
             generatedEntity.DeserializeAll(reader);
+        }
+
+        public void DeserializeCorrectionState(IOctetReader reader)
+        {
+            generatedEntity.DeserializeCorrectionState(reader);
         }
 
         public void Tick()

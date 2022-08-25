@@ -31,7 +31,6 @@ namespace Piot.Surge.Pulse.Client
         private readonly ITransportClient transportClient;
         private readonly TransportStatsBoth transportWithStats;
         private readonly ClientWorld world;
-        private Milliseconds fixedSimulationDeltaTimeMs;
 
         public Client(ILog log, Milliseconds now, Milliseconds targetDeltaTimeMs, IEntityCreation entityCreation,
             ITransport assignedTransport, IInputPackFetch fetch)
@@ -41,10 +40,10 @@ namespace Piot.Surge.Pulse.Client
             transportWithStats = new(assignedTransport, now);
             transportBoth = transportWithStats;
             transportClient = new TransportClient(transportBoth);
-            predictor = new ClientPredictor(fetch, transportClient, now, targetDeltaTimeMs, log.SubLog("Predictor"));
+            predictor = new ClientPredictor(fetch, transportClient, now, targetDeltaTimeMs, world,
+                log.SubLog("Predictor"));
             deltaSnapshotPlayback =
                 new ClientDeltaSnapshotPlayback(now, world, predictor, targetDeltaTimeMs, log.SubLog("GhostPlayback"));
-            fixedSimulationDeltaTimeMs = targetDeltaTimeMs;
         }
 
 
