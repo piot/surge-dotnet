@@ -11,7 +11,7 @@ namespace Piot.Surge.Types
         public int y;
         public int z;
 
-        private const int MeterResolution = 512;
+        internal const int MeterResolution = 512;
 
         public Position3(int x, int y, int z)
         {
@@ -19,7 +19,6 @@ namespace Piot.Surge.Types
             this.y = y;
             this.z = z;
         }
-
 
         public static Position3 operator +(Position3 a, Velocity3 b)
         {

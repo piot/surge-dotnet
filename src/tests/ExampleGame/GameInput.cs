@@ -18,7 +18,7 @@ public struct GameInput
     public bool tertiaryAbility;
 
     public bool ultimateAbility;
-    //public Vector2 desiredMovement;
+    public Velocity2 desiredMovement;
 }
 
 public static class GameInputFetch
