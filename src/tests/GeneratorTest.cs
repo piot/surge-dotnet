@@ -17,7 +17,8 @@ public class GeneratorTests
     public GeneratorTests(ITestOutputHelper output)
     {
         logTarget = new TestOutputLogger(output);
-        log = new Log(logTarget);
+        var combinedLogTarget = new CombinedLogTarget(new ILogTarget[] { logTarget, new ConsoleOutputLogger() });
+        log = new Log(combinedLogTarget);
     }
 
     [Fact]
@@ -38,7 +39,6 @@ public class GeneratorTests
         var inputFetchInfos = GameInputFetchInfoCollector.Collect(inputFetchers, log);
 
         var code = SourceGenerator.Generate(logicInfos, gameInputInfos.First(), inputFetchInfos.First());
-        log.Info(code);
 
         const string target = "../../../../tests/ExampleGame/_Generated.cs";
         File.Delete(target);

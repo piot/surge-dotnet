@@ -16,11 +16,13 @@ public class TestOutputLogger : ILogTarget
         this.output = output;
     }
 
+
     public void Log(LogLevel level, string prefix, string message, object[] args)
     {
         var strings = args.Select(x => x.ToString());
         var values = args.Length > 0 ? $"({string.Join(", ", strings)})" : "";
         var line = $"{level,8} : [{prefix}] {message} {values}";
+
         output.WriteLine(line);
     }
 }

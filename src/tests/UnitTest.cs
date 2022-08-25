@@ -69,7 +69,9 @@ public class UnitTest1
     public UnitTest1(ITestOutputHelper output)
     {
         logTarget = new TestOutputLogger(output);
-        log = new Log(logTarget);
+        var combinedLogTarget = new CombinedLogTarget(new ILogTarget[] { logTarget, new ConsoleOutputLogger() });
+
+        log = new Log(combinedLogTarget);
     }
 
     [Fact]

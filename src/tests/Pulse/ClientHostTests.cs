@@ -23,7 +23,8 @@ public class ClientHostTests
     public ClientHostTests(ITestOutputHelper output)
     {
         logTarget = new TestOutputLogger(output);
-        log = new Log(logTarget, LogLevel.LowLevel);
+        var combinedLogTarget = new CombinedLogTarget(new ILogTarget[] { logTarget, new ConsoleOutputLogger() });
+        log = new Log(combinedLogTarget, LogLevel.LowLevel);
     }
 
     private Client CreateClient(Milliseconds now, ITransport transport)
