@@ -52,23 +52,21 @@ namespace Piot.Hazy
                         insertTime = foundPacket.monotonicTimeMs.ms - 5;
                     }
 
-                    packetQueue.AddPacket(new Packet
-                        { monotonicTimeMs = new Milliseconds(insertTime), payload = octets.ToArray() });
+                    packetQueue.AddPacket(new(new Milliseconds(insertTime), endpointId, octets));
                 }
                     break;
                 case PacketAction.Duplicate:
-                    packetQueue.AddPacket(new Packet { monotonicTimeMs = withLatency, payload = octets.ToArray() });
+                    packetQueue.AddPacket(new(withLatency, endpointId, octets));
                     var nextLatency = new Milliseconds(now.ms + LatencySimulator.LatencyInMs.ms + 1);
-                    packetQueue.AddPacket(new Packet { monotonicTimeMs = nextLatency, payload = octets.ToArray() });
+                    packetQueue.AddPacket(new(nextLatency, endpointId, octets));
                     break;
                 case PacketAction.Normal:
-                    packetQueue.AddPacket(new Packet { monotonicTimeMs = withLatency, payload = octets.ToArray() });
+                    packetQueue.AddPacket(new(withLatency, endpointId, octets));
                     break;
                 case PacketAction.Tamper:
                 {
                     var packetSize = random.Random(1100) + 10;
-                    packetQueue.AddPacket(new Packet
-                        { monotonicTimeMs = withLatency, payload = RandomOctetArray(packetSize, random) });
+                    packetQueue.AddPacket(new(withLatency, endpointId, RandomOctetArray(packetSize, random)));
                 }
                     break;
                 default:

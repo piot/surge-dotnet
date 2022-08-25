@@ -86,7 +86,7 @@ namespace Piot.Hazy
                 }
             }
 
-            foundPacket = new Packet();
+            foundPacket = new();
             return false;
         }
     }

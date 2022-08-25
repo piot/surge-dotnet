@@ -3,22 +3,18 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System;
-
-namespace Piot.Hazy
+namespace Piot.MonotonicTime
 {
-    public interface IRandom
+    public class MonotonicTimeMockMs : IMonotonicTimeMs
     {
-        int Random(int max);
-    }
-
-    public class SystemRandom : IRandom
-    {
-        private readonly Random rand = new();
-
-        public int Random(int max)
+        public MonotonicTimeMockMs(Milliseconds now)
         {
-            return rand.Next(max);
+            TimeInMs = now;
         }
+
+        /// <summary>
+        ///     Returns the monotonic time in milliseconds. Implementation is mostly for testing.
+        /// </summary>
+        public Milliseconds TimeInMs { get; set; }
     }
 }

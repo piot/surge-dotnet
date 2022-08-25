@@ -10,16 +10,6 @@ using Xunit.Abstractions;
 
 namespace Tests.Hazy;
 
-public class SystemRandom : IRandom
-{
-    private readonly Random rand = new();
-
-    public int Random(int max)
-    {
-        return rand.Next(max);
-    }
-}
-
 public class LatencySimulationTests
 {
     private readonly ILog log;

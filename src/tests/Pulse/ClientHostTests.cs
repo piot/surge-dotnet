@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using Piot.Clog;
+using Piot.Hazy;
 using Piot.MonotonicTime;
 using Piot.Surge.Internal.Generated;
 using Piot.Surge.MemoryTransport;
@@ -48,17 +49,33 @@ public class ClientHostTests
 
         var (clientTransport, hostTransport) = MemoryTransportFactory.CreateClientAndHostTransport();
 
+        const bool useInternetSimulation = true;
+
+        var hostTransportToUse = hostTransport;
+        InternetSimulatorTransport? internetSimulatedHostTransport;
+
+        var timeProvider = new MonotonicTimeMockMs(initNow);
+        if (useInternetSimulation)
+        {
+            var randomizer = new SystemRandom();
+            internetSimulatedHostTransport =
+                new InternetSimulatorTransport(hostTransport, timeProvider, randomizer,
+                    log.SubLog("InternetSimulator"));
+            hostTransportToUse = internetSimulatedHostTransport;
+        }
+
         var client = CreateClient(initNow, clientTransport);
-        var host = CreateHost(initNow, hostTransport);
+        var host = CreateHost(initNow, hostTransportToUse);
 
-        var world = host.AuthoritativeWorld;
-
+        //var world = host.AuthoritativeWorld;
         //var spawnedEntity = world.SpawnEntity(new AvatarLogicEntityInternal());
         //log.Info("Spawned entity {Entity}", spawnedEntity);
 
         for (var iteration = 0; iteration < 62; iteration++)
         {
             var now = new Milliseconds(20 + iteration * 14);
+            timeProvider.TimeInMs = now;
+            internetSimulatedHostTransport?.Update();
             client.Update(now);
             host.Update(now);
         }
