@@ -5,8 +5,6 @@
 
 using System;
 using Piot.Flood;
-using Piot.Surge.ChangeMask;
-using Piot.Surge.ChangeMaskSerialization;
 using Piot.Surge.LogicalInput;
 
 namespace Piot.Surge.Pulse.Client
@@ -27,23 +25,10 @@ namespace Piot.Surge.Pulse.Client
                 }
 
                 var inputReader = new OctetReader(predictedInput.payload.Span);
-
-                predictedEntity.Overwrite();
                 inputDeserialize.SetInput(inputReader);
-                predictedEntity.Tick();
-                var changes = predictedEntity.GeneratedEntity.Changes();
-                var undoWriter = new OctetWriter(1200);
-                var changedFieldsMask = new ChangedFieldsMask(changes);
 
-                ChangedFieldsMaskWriter.WriteChangedFieldsMask(undoWriter, changedFieldsMask);
-                predictedEntity.SerializePrevious(changes, undoWriter);
-
-                rollbackQueue.EnqueueUndoPack(predictedInput.appliedAtTickId, undoWriter.Octets);
-
-                var savePredictedStateWriter = new OctetWriter(1200);
-                predictedEntity.SerializeAll(savePredictedStateWriter);
-                predictedEntity.SerializeCorrectionState(savePredictedStateWriter);
-                predictionStateHistory.Enqueue(predictedInput.appliedAtTickId, savePredictedStateWriter.Octets);
+                PredictionTicker.Predict(predictedEntity, predictedInput.appliedAtTickId, rollbackQueue,
+                    predictionStateHistory);
             }
         }
     }

@@ -16,8 +16,14 @@ namespace Piot.Surge.Pulse.Client
     {
         private readonly PredictionStateChecksumQueue predictionStateChecksumHistory = new();
         private readonly RollbackQueue rollbackQueue = new();
+        private EntityId assignedPredictionEntityId;
+
+        private bool hasReceivedAssignedPredictionEntityId;
 
         public LogicalInputQueue PredictedInputs { get; } = new();
+
+        public (bool, EntityId) AssignedPredictEntityId =>
+            (hasReceivedAssignedPredictionEntityId, assignedPredictionEntityId);
 
         /// <summary>
         ///     Handles incoming correction states
@@ -57,6 +63,19 @@ namespace Piot.Surge.Pulse.Client
                     continue;
                 }
 
+                if (!hasReceivedAssignedPredictionEntityId)
+                {
+                    hasReceivedAssignedPredictionEntityId = true;
+                    assignedPredictionEntityId = targetEntityId;
+                }
+                else
+                {
+                    if (targetEntityId.Value != assignedPredictionEntityId.Value)
+                    {
+                        throw new NotImplementedException("not implemented the ability to switch entity to predict");
+                    }
+                }
+
                 log.Notice("Mis-predict at {TickId} for entity {EntityId}", correctionsForTickId, targetEntityId);
                 var targetEntity = world.FetchEntity(targetEntityId);
 
@@ -66,6 +85,17 @@ namespace Piot.Surge.Pulse.Client
 
                 targetEntity.RollMode = EntityRollMode.Predict;
             }
+        }
+
+        public void Predict(TickId predictTickId, IEntityContainer world)
+        {
+            if (!hasReceivedAssignedPredictionEntityId)
+            {
+                throw new Exception("can not predict, we do not have any assigned prediction entity");
+            }
+
+            var predictEntity = world.FetchEntity(assignedPredictionEntityId);
+            PredictionTicker.Predict(predictEntity, predictTickId, rollbackQueue, predictionStateChecksumHistory);
         }
     }
 }

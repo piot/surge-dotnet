@@ -82,6 +82,13 @@ namespace Piot.Surge.Pulse.Client
         {
             var now = predictionTicker.Now;
 
+            var (hasAssignedEntityId, assignedEntityId) = corrections.AssignedPredictEntityId;
+            if (!hasAssignedEntityId)
+            {
+                log.Notice("We have not been assigned an entity to predict, returning");
+                return;
+            }
+
             log.Debug("--- Prediction Tick {TickId}", predictTickId);
             var inputOctets = inputPackFetch.Fetch(new LocalPlayerIndex(0));
             var logicalInput = new LogicalInput.LogicalInput
@@ -98,6 +105,8 @@ namespace Piot.Surge.Pulse.Client
                     now, corrections.PredictedInputs.Collection);
             log.DebugLowLevel("Sending inputs to host");
             transportClient.SendToHost(outDatagram);
+
+            corrections.Predict(predictTickId, world);
 
             predictTickId = new TickId(predictTickId.tickId + 1);
         }
