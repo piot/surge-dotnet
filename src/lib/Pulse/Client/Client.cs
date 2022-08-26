@@ -33,10 +33,11 @@ namespace Piot.Surge.Pulse.Client
         private readonly ClientWorld world;
 
         public Client(ILog log, Milliseconds now, Milliseconds targetDeltaTimeMs, IEntityCreation entityCreation,
+            INotifyWorld notifyWorld,
             ITransport assignedTransport, IInputPackFetch fetch)
         {
             this.log = log;
-            world = new ClientWorld(entityCreation);
+            world = new ClientWorld(entityCreation, notifyWorld);
             transportWithStats = new(assignedTransport, now);
             transportBoth = transportWithStats;
             transportClient = new TransportClient(transportBoth);

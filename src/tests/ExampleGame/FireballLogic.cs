@@ -19,7 +19,7 @@ public struct FireballLogic : ILogic
     public Position3 position;
     public Velocity3 velocity;
 
-    public void Tick(SimulationMode mode, IFireballLogicActions commands)
+    public void Tick(IFireballLogicActions commands)
     {
         position += velocity;
         if (Math.Abs(position.x) > 2000)

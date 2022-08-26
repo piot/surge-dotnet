@@ -47,24 +47,20 @@ public class GeneratedEntityCreation : IEntityCreation
     }
 }
 
-// --------------- EngineWorld ---------------
-public class EngineWorld
+public class GeneratedEngineWorld : INotifyWorld
 {
     public Action<AvatarLogicEntity>? OnSpawnAvatarLogic;
     public Action<FireballLogicEntity>? OnSpawnFireballLogic;
-}
 
-public class NotifyEngineWorld
-{
-    public static void NotifyCreation(IEntity entity, EngineWorld engineWorld)
+    public void NotifyCreation(IGeneratedEntity entity)
     {
         switch (entity)
         {
             case AvatarLogicEntityInternal internalEntity:
-                engineWorld.OnSpawnAvatarLogic?.Invoke(internalEntity.OutFacing);
+                OnSpawnAvatarLogic?.Invoke(internalEntity.OutFacing);
                 break;
             case FireballLogicEntityInternal internalEntity:
-                engineWorld.OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
+                OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
                 break;
 
             default:
@@ -124,7 +120,6 @@ public struct CastFireball : IAction
 {
     public Position3 position;
     public Vector3 direction;
-    public bool isAuthoritative;
 }
 
 // --------------- Internal Action Implementation ---------------
@@ -142,19 +137,19 @@ public class AvatarLogicActions : AvatarLogic.IAvatarLogicActions
         actionsContainer.Add(new FireChainLightning { direction = direction });
     }
 
-    public void CastFireball(Position3 position, Vector3 direction, bool isAuthoritative)
+    public void CastFireball(Position3 position, Vector3 direction)
     {
-        actionsContainer.Add(new CastFireball
-            { position = position, direction = direction, isAuthoritative = isAuthoritative });
+        actionsContainer.Add(new CastFireball { position = position, direction = direction });
     }
 }
 
 public class AvatarLogicEntity
 {
-    public delegate void CastFireballDelegate(Position3 position, Vector3 direction, bool isAuthoritative);
+    public delegate void CastFireballDelegate(Position3 position, Vector3 direction);
 
     public delegate void FireChainLightningDelegate(Vector3 direction);
 
+    private readonly AvatarLogicEntityInternal internalEntity;
     public CastFireballDelegate? DoCastFireball;
     public FireChainLightningDelegate? DoFireChainLightning;
 
@@ -165,6 +160,7 @@ public class AvatarLogicEntity
     public Action? OnCastButtonIsDownChanged;
 
     public Action? OnCastCooldownChanged;
+
     public Action? OnDestroyed;
     public Action? OnFireButtonIsDownChanged;
 
@@ -176,6 +172,15 @@ public class AvatarLogicEntity
     public Action? OnSpawned;
     public CastFireballDelegate? UnDoCastFireball;
     public FireChainLightningDelegate? UnDoFireChainLightning;
+
+    internal AvatarLogicEntity(AvatarLogicEntityInternal internalEntity)
+    {
+        this.internalEntity = internalEntity;
+    }
+
+    public EntityRollMode RollMode => internalEntity.RollMode;
+
+    public AvatarLogic Self => internalEntity.Self;
 }
 
 public class AvatarLogicEntityInternal : IGeneratedEntity, IInputDeserialize
@@ -189,10 +194,14 @@ public class AvatarLogicEntityInternal : IGeneratedEntity, IInputDeserialize
     public const ulong ManaAmountMask = 0x00000040;
     public const ulong CastCooldownMask = 0x00000080;
     private readonly ActionsContainer actionsContainer = new();
-
-
     private AvatarLogic current;
     private AvatarLogic last;
+
+
+    public AvatarLogicEntityInternal()
+    {
+        OutFacing = new(this);
+    }
 
     public AvatarLogic Self => current;
 
@@ -201,7 +210,9 @@ public class AvatarLogicEntityInternal : IGeneratedEntity, IInputDeserialize
         set => current = value;
     }
 
-    public AvatarLogicEntity OutFacing { get; } = new();
+    public AvatarLogicEntity OutFacing { get; }
+
+    public EntityRollMode RollMode { get; set; }
 
     public ArchetypeId ArchetypeId => ArchetypeIdConstants.AvatarLogic;
 
@@ -234,7 +245,7 @@ public class AvatarLogicEntityInternal : IGeneratedEntity, IInputDeserialize
                 OutFacing.DoFireChainLightning?.Invoke(thing.direction);
                 break;
             case CastFireball thing:
-                OutFacing.DoCastFireball?.Invoke(thing.position, thing.direction, thing.isAuthoritative);
+                OutFacing.DoCastFireball?.Invoke(thing.position, thing.direction);
                 break;
         }
     }
@@ -247,7 +258,7 @@ public class AvatarLogicEntityInternal : IGeneratedEntity, IInputDeserialize
                 OutFacing.UnDoFireChainLightning?.Invoke(thing.direction);
                 break;
             case CastFireball thing:
-                OutFacing.UnDoCastFireball?.Invoke(thing.position, thing.direction, thing.isAuthoritative);
+                OutFacing.UnDoCastFireball?.Invoke(thing.position, thing.direction);
                 break;
         }
     }
@@ -414,10 +425,10 @@ public class AvatarLogicEntityInternal : IGeneratedEntity, IInputDeserialize
     }
 
 
-    public void Tick(SimulationMode mode)
+    public void Tick()
     {
         var actions = new AvatarLogicActions(actionsContainer);
-        current.Tick(mode, actions);
+        current.Tick(actions);
     }
 
     public ulong Changes()
@@ -566,13 +577,24 @@ public class FireballLogicEntity
 {
     public delegate void ExplodeDelegate();
 
+    private readonly FireballLogicEntityInternal internalEntity;
     public ExplodeDelegate? DoExplode;
+
     public Action? OnDestroyed;
     public Action? OnPositionChanged;
     public Action? OnSpawned;
 
     public Action? OnVelocityChanged;
     public ExplodeDelegate? UnDoExplode;
+
+    internal FireballLogicEntity(FireballLogicEntityInternal internalEntity)
+    {
+        this.internalEntity = internalEntity;
+    }
+
+    public EntityRollMode RollMode => internalEntity.RollMode;
+
+    public FireballLogic Self => internalEntity.Self;
 }
 
 public class FireballLogicEntityInternal : IGeneratedEntity
@@ -580,10 +602,14 @@ public class FireballLogicEntityInternal : IGeneratedEntity
     public const ulong PositionMask = 0x00000001;
     public const ulong VelocityMask = 0x00000002;
     private readonly ActionsContainer actionsContainer = new();
-
-
     private FireballLogic current;
     private FireballLogic last;
+
+
+    public FireballLogicEntityInternal()
+    {
+        OutFacing = new(this);
+    }
 
     public FireballLogic Self => current;
 
@@ -592,7 +618,9 @@ public class FireballLogicEntityInternal : IGeneratedEntity
         set => current = value;
     }
 
-    public FireballLogicEntity OutFacing { get; } = new();
+    public FireballLogicEntity OutFacing { get; }
+
+    public EntityRollMode RollMode { get; set; }
 
     public ArchetypeId ArchetypeId => ArchetypeIdConstants.FireballLogic;
 
@@ -698,10 +726,10 @@ public class FireballLogicEntityInternal : IGeneratedEntity
     }
 
 
-    public void Tick(SimulationMode mode)
+    public void Tick()
     {
         var actions = new FireballLogicActions(actionsContainer);
-        current.Tick(mode, actions);
+        current.Tick(actions);
     }
 
     public ulong Changes()

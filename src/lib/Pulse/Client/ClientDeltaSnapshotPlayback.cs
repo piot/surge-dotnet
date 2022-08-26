@@ -93,8 +93,7 @@ namespace Piot.Surge.Pulse.Client
             // Ghosts are never predicted, corrected, nor rolled back
             // All the changed fields are set to the new values and Tick() is called to trigger the resulting effects of
             // the logic running for one tick.
-            var clientSimulationMode = new SimulationMode(TickMode.Predict);
-            Ticker.Tick(clientWorld, clientSimulationMode);
+            Ticker.Tick(clientWorld);
             log.DebugLowLevel("tick ghost logics {EntityCount}", clientWorld.AllEntities.Length);
 
             predictor.ReadCorrections(deltaSnapshot.tickId, snapshotReader);

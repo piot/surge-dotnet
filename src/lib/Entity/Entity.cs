@@ -21,7 +21,12 @@ namespace Piot.Surge
             this.generatedEntity = generatedEntity;
         }
 
-        public EntityRollMode RollMode { get; set; }
+        public EntityRollMode RollMode
+        {
+            get => generatedEntity.RollMode;
+            set => generatedEntity.RollMode = value;
+        }
+
         public bool IsAlive => Mode != EntityMode.Deleted;
 
         public EntityMode Mode { get; set; }
@@ -69,9 +74,9 @@ namespace Piot.Surge
             generatedEntity.DeserializeCorrectionState(reader);
         }
 
-        public void Tick(SimulationMode mode)
+        public void Tick()
         {
-            generatedEntity.Tick(mode);
+            generatedEntity.Tick();
         }
 
         public void Overwrite()

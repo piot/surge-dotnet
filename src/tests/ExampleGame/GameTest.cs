@@ -7,46 +7,26 @@ using Piot.Clog;
 using Piot.Hazy;
 using Piot.MonotonicTime;
 using Piot.Random;
-using Piot.Surge.Internal.Generated;
 using Piot.Surge.MemoryTransport;
-using Piot.Surge.Pulse.Client;
-using Piot.Surge.Pulse.Host;
-using Piot.Transport;
+using Tests.ExampleGame;
 using Xunit.Abstractions;
 
 namespace Tests.Pulse;
 
-public class ClientHostTests
+public class GameTests
 {
     private readonly ILog log;
     private readonly TestOutputLogger logTarget;
 
-    public ClientHostTests(ITestOutputHelper output)
+    public GameTests(ITestOutputHelper output)
     {
         logTarget = new TestOutputLogger(output);
         var combinedLogTarget = new CombinedLogTarget(new ILogTarget[] { logTarget, new ConsoleOutputLogger() });
         log = new Log(combinedLogTarget, LogLevel.LowLevel);
     }
 
-    private Client CreateClient(Milliseconds now, ITransport transport)
-    {
-        var clientDeltaTime = new Milliseconds(16);
-        var inputFetch = new GeneratedInputFetch();
-        var notifyWorld = new GeneratedEngineWorld();
-        var client = new Client(log.SubLog("Client"), now, clientDeltaTime, new GeneratedEntityCreation(), notifyWorld,
-            transport, inputFetch);
-
-        return client;
-    }
-
-    private Host CreateHost(Milliseconds now, ITransport transport)
-    {
-        var host = new Host(transport, now, log.SubLog("Host"));
-        return host;
-    }
-
     [Fact]
-    public void TestClientAndHostUpdates()
+    public void TestExampleGame()
     {
         var initNow = new Milliseconds(10);
 
@@ -67,8 +47,10 @@ public class ClientHostTests
             hostTransportToUse = internetSimulatedHostTransport;
         }
 
-        var client = CreateClient(initNow, clientTransport);
-        var host = CreateHost(initNow, hostTransportToUse);
+
+        var clientGame = new Game(clientTransport, log.SubLog("client"));
+        var hostGame = new Game(hostTransport, log.SubLog("host"));
+
 
         //var world = host.AuthoritativeWorld;
         //var spawnedEntity = world.SpawnEntity(new AvatarLogicEntityInternal());
@@ -79,8 +61,8 @@ public class ClientHostTests
             var now = new Milliseconds(20 + iteration * 14);
             timeProvider.TimeInMs = now;
             internetSimulatedHostTransport?.Update();
-            client.Update(now);
-            host.Update(now);
+            clientGame.Update(now);
+            hostGame.Update(now);
         }
     }
 }

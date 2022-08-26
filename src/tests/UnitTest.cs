@@ -295,8 +295,7 @@ public class UnitTest1
 
         Assert.Equal(0, avatar.Self.position.x);
         Assert.Equal(0u, (avatar as IEntityChanges).Changes());
-        var mode = new SimulationMode(TickMode.Predict);
-        (avatar as ISimpleLogic).Tick(mode);
+        (avatar as ISimpleLogic).Tick();
 
         Assert.Equal(3, avatar.Self.position.x);
         Assert.Equal(AvatarLogicEntityInternal.PositionMask, (avatar as IEntityChanges).Changes());
@@ -339,15 +338,15 @@ public class UnitTest1
         Assert.Equal(0u, (avatarInfo as IEntityChanges).Changes());
 
         var packetQueue = new SnapshotDeltaPackQueue();
+        var notifyWorld = new GeneratedEngineWorld();
 
-        var world = new ClientWorld(new GeneratedEntityCreation());
+        var world = new ClientWorld(new GeneratedEntityCreation(), notifyWorld);
 
         var spawnedAvatar = world.SpawnEntity(avatarInfo);
 
         var scanWorld = (IEntityContainerWithChanges)world;
         var allEntities = (world as IEntityContainer).AllEntities;
-        var simulationMode = new SimulationMode(TickMode.Predict);
-        Ticker.Tick(allEntities, simulationMode);
+        Ticker.Tick(allEntities);
         Assert.Equal(3, ((AvatarLogic)spawnedAvatar.Logic).position.x);
 
         var firstTick = new TickId(0);
@@ -358,7 +357,7 @@ public class UnitTest1
         Assert.Single(snapshotDelta.createdIds);
 
 
-        Ticker.Tick(allEntities, simulationMode);
+        Ticker.Tick(allEntities);
         var secondTick = new TickId(1);
         var snapshotDeltaAfter = FromSnapshotDeltaInternal.Convert(SnapshotDeltaCreator.Scan(scanWorld, secondTick));
         world.ClearDelta();
@@ -479,8 +478,7 @@ public class UnitTest1
         Assert.Empty(firstDeltaConverted.deletedIds);
 
 
-        var hostSimulationMode = new SimulationMode(TickMode.Authoritative);
-        Ticker.Tick(world, hostSimulationMode);
+        Ticker.Tick(world);
 
         var serverSpawnedAvatarForAssert = world.FetchEntity<AvatarLogicEntityInternal>(spawnedAvatar.Id);
         Assert.Equal(3, serverSpawnedAvatarForAssert.Self.position.x);
@@ -502,7 +500,7 @@ public class UnitTest1
         Assert.Equal(AvatarLogicEntityInternal.PositionMask, secondDeltaConverted.updatedEntities[0].changeMask.mask);
 
         var serverSpawnedAvatar = (AvatarLogicEntityInternal)spawnedAvatar.GeneratedEntity;
-        Ticker.Tick(world, hostSimulationMode);
+        Ticker.Tick(world);
 
 
         /* THIRD */
@@ -516,8 +514,7 @@ public class UnitTest1
 
         log.Info("Server fire happens at position", serverSpawnedAvatar.Self.position.x);
 
-        var simulationMode = new SimulationMode(TickMode.Authoritative);
-        Ticker.Tick(world, simulationMode);
+        Ticker.Tick(world);
 
 
         Assert.Equal(9, serverSpawnedAvatarForAssertAtThree.Self.position.x);
@@ -559,7 +556,8 @@ public class UnitTest1
     public void BasicUndo()
     {
         var (allSerializedSnapshots, spawnedAvatarId) = PrepareThreeServerSnapshotDeltas();
-        var clientWorld = new ClientWorld(new GeneratedEntityCreation()) as IEntityContainerWithCreation;
+        var notifyWorld = new GeneratedEngineWorld();
+        var clientWorld = new ClientWorld(new GeneratedEntityCreation(), notifyWorld) as IEntityContainerWithCreation;
 
         var undoWriter = new OctetWriter(1200);
         var unionReader = new OctetReader(allSerializedSnapshots.payload.Span);
@@ -579,8 +577,7 @@ public class UnitTest1
         var clientAvatar = clientWorld.FetchEntity(spawnedAvatarId);
 
         Assert.Equal(0, clientSpawnedEntity.Self.fireCooldown);
-        var clientSimulationMode = new SimulationMode(TickMode.Predict);
-        Ticker.Tick(clientWorld, clientSimulationMode);
+        Ticker.Tick(clientWorld);
         Assert.Equal(0, clientSpawnedEntity.Self.fireCooldown);
         Notifier.Notify(updateEntitiesInFirst);
 
@@ -603,7 +600,7 @@ public class UnitTest1
         {
             var snapshotReader = new OctetReader(snapshotDelta.payload.Span);
             var (_, _, updateEntities) = SnapshotDeltaReader.Read(snapshotReader, clientWorld);
-            Ticker.Tick(clientWorld, clientSimulationMode);
+            Ticker.Tick(clientWorld);
             Notifier.Notify(updateEntities);
             OverWriter.Overwrite(clientWorld);
         }
@@ -621,7 +618,7 @@ public class UnitTest1
 
         Assert.Equal(0, clientSpawnedEntity.Self.fireCooldown);
         Assert.True(clientSpawnedEntity.Self.fireButtonIsDown);
-        Ticker.Tick(clientWorld, clientSimulationMode);
+        Ticker.Tick(clientWorld);
         Notifier.Notify(secondToLastUpdatedEntities);
         OverWriter.Overwrite(clientWorld);
 
@@ -639,7 +636,7 @@ public class UnitTest1
         Assert.Equal(99, clientSpawnedEntity.Self.ammoCount);
         Assert.True(clientSpawnedEntity.Self.fireButtonIsDown);
 
-        Ticker.Tick(clientWorld, clientSimulationMode);
+        Ticker.Tick(clientWorld);
         Notifier.Notify(clientUpdated);
         OverWriter.Overwrite(clientWorld);
 

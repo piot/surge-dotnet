@@ -10,12 +10,14 @@ namespace Piot.Surge
     public class ClientWorld : AuthoritativeWorld, IEntityContainerWithCreation
     {
         private readonly IEntityCreation creator;
+        private readonly INotifyWorld notifyWorld;
 
         private ulong lastEntityId;
 
-        public ClientWorld(IEntityCreation creator)
+        public ClientWorld(IEntityCreation creator, INotifyWorld notifyWorld)
         {
             this.creator = creator;
+            this.notifyWorld = notifyWorld;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -25,6 +27,7 @@ namespace Piot.Surge
 
             created.Add(newEntity);
             Entities.Add(entityId.Value, newEntity);
+            notifyWorld.NotifyCreation(newEntity.GeneratedEntity);
 
             return newEntity;
         }

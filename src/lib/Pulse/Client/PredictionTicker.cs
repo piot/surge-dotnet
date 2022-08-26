@@ -17,8 +17,7 @@ namespace Piot.Surge.Pulse.Client
         {
             predictedEntity.Overwrite();
 
-            var nonAuthoritativeMode = new SimulationMode(TickMode.Predict);
-            predictedEntity.Tick(nonAuthoritativeMode);
+            predictedEntity.Tick();
 
             var changes = predictedEntity.GeneratedEntity.Changes();
             var undoWriter = new OctetWriter(1200);

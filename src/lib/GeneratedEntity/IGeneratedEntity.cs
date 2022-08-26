@@ -15,6 +15,8 @@ namespace Piot.Surge
     {
         public ILogic Logic { get; }
 
+        public EntityRollMode RollMode { get; set; }
+
         public ArchetypeId ArchetypeId { get; }
 
         public TypeInformation TypeInformation { get; }

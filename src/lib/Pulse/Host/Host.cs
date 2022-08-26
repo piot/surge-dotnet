@@ -78,8 +78,7 @@ namespace Piot.Surge.Pulse.Host
 
         private void TickWorld()
         {
-            var authoritativeSimulationMode = new SimulationMode(TickMode.Authoritative);
-            Ticker.Tick(entityContainer, authoritativeSimulationMode);
+            Ticker.Tick(entityContainer);
         }
 
         private void SimulationTick()

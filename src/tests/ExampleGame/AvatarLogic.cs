@@ -52,7 +52,7 @@ public struct AvatarLogic : ILogic
         /// <param name="position"></param>
         /// <param name="direction"></param>
         /// <param name="isAuthoritative"></param>
-        public void CastFireball(Position3 position, Vector3 direction, bool isAuthoritative);
+        public void CastFireball(Position3 position, Vector3 direction);
     }
 
     private void Fire(IAvatarLogicActions commands)
@@ -68,12 +68,12 @@ public struct AvatarLogic : ILogic
         commands.FireChainLightning(fakeAiming); // aiming.ToDirection
     }
 
-    private void Cast(SimulationMode mode, IAvatarLogicActions commands)
+    private void Cast(IAvatarLogicActions commands)
     {
         manaAmount -= 10;
 
         var castDirection = aiming.ToDirection;
-        commands.CastFireball(position, castDirection, mode.IsAuthoritative);
+        commands.CastFireball(position, castDirection);
         castCooldown = 40;
     }
 
@@ -102,7 +102,7 @@ public struct AvatarLogic : ILogic
         }
     }
 
-    public void Tick(SimulationMode mode, IAvatarLogicActions commands)
+    public void Tick(IAvatarLogicActions commands)
     {
         TickDownCoolDowns();
 
@@ -113,7 +113,7 @@ public struct AvatarLogic : ILogic
 
         if (ShouldCast)
         {
-            Cast(mode, commands);
+            Cast(commands);
         }
 
         AlwaysMoveRight();

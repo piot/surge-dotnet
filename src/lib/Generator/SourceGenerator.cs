@@ -97,10 +97,10 @@ namespace Piot.Surge.Generator
 ");
         }
 
+
         public static void AddEngineWorld(StringBuilder sb, IEnumerable<LogicInfo> infos)
         {
-            AddSection(sb, "EngineWorld");
-            AddClassDeclaration(sb, "EngineWorld");
+            AddClassDeclaration(sb, "GeneratedEngineWorld", "INotifyWorld");
 
             foreach (var info in infos)
             {
@@ -108,14 +108,9 @@ namespace Piot.Surge.Generator
 ");
             }
 
-            AddEndDeclaration(sb);
-        }
 
-        public static void AddEngineNotifier(StringBuilder sb, IEnumerable<LogicInfo> infos)
-        {
-            AddClassDeclaration(sb, "NotifyEngineWorld");
             sb.Append(@"
-        public static void NotifyCreation(IEntity entity, EngineWorld engineWorld)
+        public void NotifyCreation(IGeneratedEntity entity)
         {
             switch (entity)
             {
@@ -124,7 +119,7 @@ namespace Piot.Surge.Generator
             foreach (var info in infos)
             {
                 sb.Append($"case {EntityGeneratedInternal(info)} internalEntity:").Append(@"
-").Append($"engineWorld.OnSpawn{info.Type.Name}?.Invoke(internalEntity.OutFacing);").Append(@"
+").Append($"OnSpawn{info.Type.Name}?.Invoke(internalEntity.OutFacing);").Append(@"
     break;
 ");
             }
@@ -138,6 +133,30 @@ namespace Piot.Surge.Generator
 
             AddEndDeclaration(sb);
         }
+
+
+        /*
+         * public class GeneratedEntityWorld
+{
+    public Action<AvatarLogicEntity>? OnSpawnAvatarLogic;
+    public Action<FireballLogicEntity>? OnSpawnFireballLogic;
+        public void NotifyCreation(IEntity entity)
+        {
+            switch (entity)
+            {
+case AvatarLogicEntityInternal internalEntity:
+OnSpawnAvatarLogic?.Invoke(internalEntity.OutFacing);
+    break;
+case FireballLogicEntityInternal internalEntity:
+OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
+    break;
+
+                default:
+                    throw new Exception("Internal error");
+            }
+        }
+}
+         */
 
 
         public static void AddChangeDelegate(StringBuilder sb, LogicInfo logicInfo, LogicFieldInfo fieldInfo)
@@ -408,10 +427,10 @@ namespace Piot.Surge.Generator
             var actionsImplementationName = ActionsName(info.Type);
             sb.Append(@"
 
-    public void Tick(SimulationMode mode)
+    public void Tick()
     {
         var actions = ").Append($"new {actionsImplementationName}(actionsContainer);").Append(@"
-        current.Tick(mode, actions);
+        current.Tick(actions);
     }
 
 ");
@@ -683,9 +702,20 @@ namespace Piot.Surge.Generator
 
         public static void AddOutFacingEntity(StringBuilder sb, LogicInfo logicInfo)
         {
+            var outFacingClassName = Suffix(logicInfo.Type.Name, "Entity");
             sb.Append(@"
-public class ").Append(Suffix(logicInfo.Type.Name, "Entity")).Append(@"
-{
+public class ").Append(outFacingClassName).Append($@"
+{{
+    public EntityRollMode RollMode => internalEntity.RollMode;
+
+    private readonly {EntityGeneratedInternal(logicInfo)} internalEntity;
+    internal {outFacingClassName}({EntityGeneratedInternal(logicInfo)} internalEntity)
+    {{
+        this.internalEntity = internalEntity;
+    }}
+
+    public {FullName(logicInfo.Type)} Self => internalEntity.Self;
+
     public Action? OnDestroyed;
     public Action? OnSpawned;
 ");
@@ -725,11 +755,19 @@ public class ").Append(EntityGeneratedInternal(logicInfo)).Append($" : {inherit}
 ");
             AddInternalMembers(sb);
 
+            sb.Append(@$"public {EntityGeneratedInternal(logicInfo)}()
+    {{
+        outFacing = new(this);
+    }}
+");
+
 
             sb.Append("    ").Append(FullName(logicInfo.Type)).Append(@" current;
     ").Append(FullName(logicInfo.Type)).Append(@" last;
 
 ").Append($"    public {FullName(logicInfo.Type)} Self => current;").Append(@"
+
+        public EntityRollMode RollMode { get; set; }
 
 ").Append($" internal {FullName(logicInfo.Type)} Current").Append(@"
             {
@@ -737,7 +775,7 @@ public class ").Append(EntityGeneratedInternal(logicInfo)).Append($" : {inherit}
             }
 ");
 
-            sb.Append($"     {Suffix(logicInfo.Type.Name, "Entity")} outFacing = new();").Append(@"
+            sb.Append($"     {Suffix(logicInfo.Type.Name, "Entity")} outFacing;").Append(@"
 ").Append($"    public {Suffix(logicInfo.Type.Name, "Entity")} OutFacing => outFacing;").Append(@"
 
 ");
@@ -889,7 +927,6 @@ namespace Piot.Surge.Internal.Generated
             AddEntityCreation(sb, infos);
 
             AddEngineWorld(sb, infos);
-            AddEngineNotifier(sb, infos);
 
             AddGameInputReader(sb, gameInputInfo);
             AddGameInputWriter(sb, gameInputInfo);
