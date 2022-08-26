@@ -13,6 +13,7 @@ namespace Tests.ExampleGame;
 public struct AvatarLogic : ILogic
 {
     public bool fireButtonIsDown;
+    public bool castButtonIsDown;
     public Aiming aiming;
 
     public Position3 position;
@@ -20,9 +21,14 @@ public struct AvatarLogic : ILogic
     public ushort ammoCount;
     public ushort fireCooldown;
 
+    public ushort manaAmount;
+    public ushort castCooldown;
+
+
     public void SetInput(GameInput input)
     {
         fireButtonIsDown = input.primaryAbility;
+        castButtonIsDown = input.secondaryAbility;
         aiming = input.aiming;
     }
 
@@ -33,7 +39,20 @@ public struct AvatarLogic : ILogic
 
     public interface IAvatarLogicActions : ILogicActions
     {
-        public void FireVolley(Vector3 direction);
+        /// <summary>
+        ///     Fires very fast-moving Chain Lightning
+        /// </summary>
+        /// <param name="direction"></param>
+        public void FireChainLightning(Vector3 direction);
+
+        /// <summary>
+        ///     Casts a fireball in the given direction. Starts playing the effects.
+        ///     If <paramref name="isAuthoritative" /> is true, then fireball is spawned as well.
+        /// </summary>
+        /// <param name="position"></param>
+        /// <param name="direction"></param>
+        /// <param name="isAuthoritative"></param>
+        public void CastFireball(Position3 position, Vector3 direction, bool isAuthoritative);
     }
 
     private void Fire(IAvatarLogicActions commands)
@@ -46,12 +65,24 @@ public struct AvatarLogic : ILogic
             Y = position.y,
             Z = position.z
         };
-        commands.FireVolley(fakeAiming); // aiming.ToDirection
+        commands.FireChainLightning(fakeAiming); // aiming.ToDirection
+    }
+
+    private void Cast(SimulationMode mode, IAvatarLogicActions commands)
+    {
+        manaAmount -= 10;
+
+        var castDirection = aiming.ToDirection;
+        commands.CastFireball(position, castDirection, mode.IsAuthoritative);
+        castCooldown = 40;
     }
 
     private bool CanFire => fireCooldown == 0 && ammoCount > 0;
 
     private bool ShouldFire => fireButtonIsDown && CanFire;
+
+    private bool CanCast => castCooldown == 0 && manaAmount > 10;
+    private bool ShouldCast => castButtonIsDown && CanCast;
 
     private void AlwaysMoveRight()
     {
@@ -64,15 +95,25 @@ public struct AvatarLogic : ILogic
         {
             fireCooldown--;
         }
+
+        if (castCooldown > 0)
+        {
+            castCooldown--;
+        }
     }
 
-    public void Tick(IAvatarLogicActions commands)
+    public void Tick(SimulationMode mode, IAvatarLogicActions commands)
     {
         TickDownCoolDowns();
 
         if (ShouldFire)
         {
             Fire(commands);
+        }
+
+        if (ShouldCast)
+        {
+            Cast(mode, commands);
         }
 
         AlwaysMoveRight();

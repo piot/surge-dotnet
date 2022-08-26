@@ -193,11 +193,11 @@ namespace Piot.Surge.Generator
                     sb.Append($"    public {parameter.type} {parameter.name}").Append(@";
 ");
                 }
-            }
 
-            sb.Append(@"
+                sb.Append(@"
 }
 ");
+            }
         }
 
         public static void AddActionImplementation(StringBuilder sb, LogicInfo info)
@@ -408,10 +408,10 @@ namespace Piot.Surge.Generator
             var actionsImplementationName = ActionsName(info.Type);
             sb.Append(@"
 
-    public void Tick()
+    public void Tick(SimulationMode mode)
     {
         var actions = ").Append($"new {actionsImplementationName}(actionsContainer);").Append(@"
-        current.Tick(actions);
+        current.Tick(mode, actions);
     }
 
 ");

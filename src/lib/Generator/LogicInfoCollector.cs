@@ -76,12 +76,18 @@ namespace Piot.Surge.Generator
             TickMethod = tickMethod;
             SetInputMethod = setInputMethod;
             var parameters = tickMethod.GetParameters();
-            if (parameters.Length != 1)
+            if (parameters.Length != 2)
             {
-                throw new Exception("we can only allow one parameter to Tick()");
+                throw new Exception(
+                    "we can only allow two parameter to Tick(). first is SimulationMode, the other is a game specific actions container");
             }
 
-            var commandsInterface = parameters.Single().ParameterType;
+            if (parameters[0].ParameterType != typeof(SimulationMode))
+            {
+                throw new Exception("first parameter must be SimulationMode in all Tick() methods");
+            }
+
+            var commandsInterface = parameters[1].ParameterType;
             if (!commandsInterface.IsInterface)
             {
                 throw new Exception("Tick() must take an interface as a single parameter");

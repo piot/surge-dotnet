@@ -69,9 +69,9 @@ namespace Piot.Surge
             generatedEntity.DeserializeCorrectionState(reader);
         }
 
-        public void Tick()
+        public void Tick(SimulationMode mode)
         {
-            generatedEntity.Tick();
+            generatedEntity.Tick(mode);
         }
 
         public void Overwrite()

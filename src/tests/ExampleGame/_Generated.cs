@@ -115,9 +115,16 @@ public class GeneratedInputFetch : IInputPackFetch
 }
 
 // --------------- Internal Action Structs ---------------
-public struct FireVolley : IAction
+public struct FireChainLightning : IAction
 {
     public Vector3 direction;
+}
+
+public struct CastFireball : IAction
+{
+    public Position3 position;
+    public Vector3 direction;
+    public bool isAuthoritative;
 }
 
 // --------------- Internal Action Implementation ---------------
@@ -130,38 +137,57 @@ public class AvatarLogicActions : AvatarLogic.IAvatarLogicActions
         this.actionsContainer = actionsContainer;
     }
 
-    public void FireVolley(Vector3 direction)
+    public void FireChainLightning(Vector3 direction)
     {
-        actionsContainer.Add(new FireVolley { direction = direction });
+        actionsContainer.Add(new FireChainLightning { direction = direction });
+    }
+
+    public void CastFireball(Position3 position, Vector3 direction, bool isAuthoritative)
+    {
+        actionsContainer.Add(new CastFireball
+            { position = position, direction = direction, isAuthoritative = isAuthoritative });
     }
 }
 
 public class AvatarLogicEntity
 {
-    public delegate void FireVolleyDelegate(Vector3 direction);
+    public delegate void CastFireballDelegate(Position3 position, Vector3 direction, bool isAuthoritative);
 
-    public FireVolleyDelegate? DoFireVolley;
+    public delegate void FireChainLightningDelegate(Vector3 direction);
+
+    public CastFireballDelegate? DoCastFireball;
+    public FireChainLightningDelegate? DoFireChainLightning;
 
     public Action? OnAimingChanged;
 
     public Action? OnAmmoCountChanged;
+
+    public Action? OnCastButtonIsDownChanged;
+
+    public Action? OnCastCooldownChanged;
     public Action? OnDestroyed;
     public Action? OnFireButtonIsDownChanged;
 
     public Action? OnFireCooldownChanged;
 
+    public Action? OnManaAmountChanged;
+
     public Action? OnPositionChanged;
     public Action? OnSpawned;
-    public FireVolleyDelegate? UnDoFireVolley;
+    public CastFireballDelegate? UnDoCastFireball;
+    public FireChainLightningDelegate? UnDoFireChainLightning;
 }
 
 public class AvatarLogicEntityInternal : IGeneratedEntity, IInputDeserialize
 {
     public const ulong FireButtonIsDownMask = 0x00000001;
-    public const ulong AimingMask = 0x00000002;
-    public const ulong PositionMask = 0x00000004;
-    public const ulong AmmoCountMask = 0x00000008;
-    public const ulong FireCooldownMask = 0x00000010;
+    public const ulong CastButtonIsDownMask = 0x00000002;
+    public const ulong AimingMask = 0x00000004;
+    public const ulong PositionMask = 0x00000008;
+    public const ulong AmmoCountMask = 0x00000010;
+    public const ulong FireCooldownMask = 0x00000020;
+    public const ulong ManaAmountMask = 0x00000040;
+    public const ulong CastCooldownMask = 0x00000080;
     private readonly ActionsContainer actionsContainer = new();
 
 
@@ -204,8 +230,11 @@ public class AvatarLogicEntityInternal : IGeneratedEntity, IInputDeserialize
     {
         switch (action)
         {
-            case FireVolley thing:
-                OutFacing.DoFireVolley?.Invoke(thing.direction);
+            case FireChainLightning thing:
+                OutFacing.DoFireChainLightning?.Invoke(thing.direction);
+                break;
+            case CastFireball thing:
+                OutFacing.DoCastFireball?.Invoke(thing.position, thing.direction, thing.isAuthoritative);
                 break;
         }
     }
@@ -214,8 +243,11 @@ public class AvatarLogicEntityInternal : IGeneratedEntity, IInputDeserialize
     {
         switch (action)
         {
-            case FireVolley thing:
-                OutFacing.UnDoFireVolley?.Invoke(thing.direction);
+            case FireChainLightning thing:
+                OutFacing.UnDoFireChainLightning?.Invoke(thing.direction);
+                break;
+            case CastFireball thing:
+                OutFacing.UnDoCastFireball?.Invoke(thing.position, thing.direction, thing.isAuthoritative);
                 break;
         }
     }
@@ -225,6 +257,11 @@ public class AvatarLogicEntityInternal : IGeneratedEntity, IInputDeserialize
         if ((serializeFlags & FireButtonIsDownMask) != 0)
         {
             writer.WriteUInt8(current.fireButtonIsDown ? (byte)1 : (byte)0);
+        }
+
+        if ((serializeFlags & CastButtonIsDownMask) != 0)
+        {
+            writer.WriteUInt8(current.castButtonIsDown ? (byte)1 : (byte)0);
         }
 
         if ((serializeFlags & AimingMask) != 0)
@@ -246,6 +283,16 @@ public class AvatarLogicEntityInternal : IGeneratedEntity, IInputDeserialize
         {
             writer.WriteUInt16(current.fireCooldown);
         }
+
+        if ((serializeFlags & ManaAmountMask) != 0)
+        {
+            writer.WriteUInt16(current.manaAmount);
+        }
+
+        if ((serializeFlags & CastCooldownMask) != 0)
+        {
+            writer.WriteUInt16(current.castCooldown);
+        }
     }
 
     public void SerializePrevious(ulong serializeFlags, IOctetWriter writer)
@@ -253,6 +300,11 @@ public class AvatarLogicEntityInternal : IGeneratedEntity, IInputDeserialize
         if ((serializeFlags & FireButtonIsDownMask) != 0)
         {
             writer.WriteUInt8(last.fireButtonIsDown ? (byte)1 : (byte)0);
+        }
+
+        if ((serializeFlags & CastButtonIsDownMask) != 0)
+        {
+            writer.WriteUInt8(last.castButtonIsDown ? (byte)1 : (byte)0);
         }
 
         if ((serializeFlags & AimingMask) != 0)
@@ -274,15 +326,28 @@ public class AvatarLogicEntityInternal : IGeneratedEntity, IInputDeserialize
         {
             writer.WriteUInt16(last.fireCooldown);
         }
+
+        if ((serializeFlags & ManaAmountMask) != 0)
+        {
+            writer.WriteUInt16(last.manaAmount);
+        }
+
+        if ((serializeFlags & CastCooldownMask) != 0)
+        {
+            writer.WriteUInt16(last.castCooldown);
+        }
     }
 
     public void SerializeAll(IOctetWriter writer)
     {
         writer.WriteUInt8(current.fireButtonIsDown ? (byte)1 : (byte)0);
+        writer.WriteUInt8(current.castButtonIsDown ? (byte)1 : (byte)0);
         AimingWriter.Write(current.aiming, writer);
         Position3Writer.Write(current.position, writer);
         writer.WriteUInt16(current.ammoCount);
         writer.WriteUInt16(current.fireCooldown);
+        writer.WriteUInt16(current.manaAmount);
+        writer.WriteUInt16(current.castCooldown);
     }
 
     public void SerializeCorrectionState(IOctetWriter writer)
@@ -298,6 +363,11 @@ public class AvatarLogicEntityInternal : IGeneratedEntity, IInputDeserialize
         if ((serializeFlags & FireButtonIsDownMask) != 0)
         {
             current.fireButtonIsDown = reader.ReadUInt8() != 0;
+        }
+
+        if ((serializeFlags & CastButtonIsDownMask) != 0)
+        {
+            current.castButtonIsDown = reader.ReadUInt8() != 0;
         }
 
         if ((serializeFlags & AimingMask) != 0)
@@ -319,22 +389,35 @@ public class AvatarLogicEntityInternal : IGeneratedEntity, IInputDeserialize
         {
             current.fireCooldown = reader.ReadUInt16();
         }
+
+        if ((serializeFlags & ManaAmountMask) != 0)
+        {
+            current.manaAmount = reader.ReadUInt16();
+        }
+
+        if ((serializeFlags & CastCooldownMask) != 0)
+        {
+            current.castCooldown = reader.ReadUInt16();
+        }
     }
 
     public void DeserializeAll(IOctetReader reader)
     {
         current.fireButtonIsDown = reader.ReadUInt8() != 0;
+        current.castButtonIsDown = reader.ReadUInt8() != 0;
         current.aiming = AimingReader.Read(reader);
         current.position = Position3Reader.Read(reader);
         current.ammoCount = reader.ReadUInt16();
         current.fireCooldown = reader.ReadUInt16();
+        current.manaAmount = reader.ReadUInt16();
+        current.castCooldown = reader.ReadUInt16();
     }
 
 
-    public void Tick()
+    public void Tick(SimulationMode mode)
     {
         var actions = new AvatarLogicActions(actionsContainer);
-        current.Tick(actions);
+        current.Tick(mode, actions);
     }
 
     public ulong Changes()
@@ -344,6 +427,11 @@ public class AvatarLogicEntityInternal : IGeneratedEntity, IInputDeserialize
         if (current.fireButtonIsDown != last.fireButtonIsDown)
         {
             mask |= FireButtonIsDownMask;
+        }
+
+        if (current.castButtonIsDown != last.castButtonIsDown)
+        {
+            mask |= CastButtonIsDownMask;
         }
 
         if (current.aiming != last.aiming)
@@ -366,6 +454,16 @@ public class AvatarLogicEntityInternal : IGeneratedEntity, IInputDeserialize
             mask |= FireCooldownMask;
         }
 
+        if (current.manaAmount != last.manaAmount)
+        {
+            mask |= ManaAmountMask;
+        }
+
+        if (current.castCooldown != last.castCooldown)
+        {
+            mask |= CastCooldownMask;
+        }
+
         return mask;
     }
 
@@ -374,6 +472,11 @@ public class AvatarLogicEntityInternal : IGeneratedEntity, IInputDeserialize
         if ((serializeFlags & FireButtonIsDownMask) != 0)
         {
             OutFacing.OnFireButtonIsDownChanged?.Invoke();
+        }
+
+        if ((serializeFlags & CastButtonIsDownMask) != 0)
+        {
+            OutFacing.OnCastButtonIsDownChanged?.Invoke();
         }
 
         if ((serializeFlags & AimingMask) != 0)
@@ -395,6 +498,16 @@ public class AvatarLogicEntityInternal : IGeneratedEntity, IInputDeserialize
         {
             OutFacing.OnFireCooldownChanged?.Invoke();
         }
+
+        if ((serializeFlags & ManaAmountMask) != 0)
+        {
+            OutFacing.OnManaAmountChanged?.Invoke();
+        }
+
+        if ((serializeFlags & CastCooldownMask) != 0)
+        {
+            OutFacing.OnCastCooldownChanged?.Invoke();
+        }
     }
 
     public TypeInformation TypeInformation
@@ -407,10 +520,16 @@ public class AvatarLogicEntityInternal : IGeneratedEntity, IInputDeserialize
                 {
                     mask = FireButtonIsDownMask, name = new(nameof(current.fireButtonIsDown)), type = typeof(bool)
                 },
+                new()
+                {
+                    mask = CastButtonIsDownMask, name = new(nameof(current.castButtonIsDown)), type = typeof(bool)
+                },
                 new() { mask = AimingMask, name = new(nameof(current.aiming)), type = typeof(Aiming) },
                 new() { mask = PositionMask, name = new(nameof(current.position)), type = typeof(Position3) },
                 new() { mask = AmmoCountMask, name = new(nameof(current.ammoCount)), type = typeof(ushort) },
-                new() { mask = FireCooldownMask, name = new(nameof(current.fireCooldown)), type = typeof(ushort) }
+                new() { mask = FireCooldownMask, name = new(nameof(current.fireCooldown)), type = typeof(ushort) },
+                new() { mask = ManaAmountMask, name = new(nameof(current.manaAmount)), type = typeof(ushort) },
+                new() { mask = CastCooldownMask, name = new(nameof(current.castCooldown)), type = typeof(ushort) }
             });
         }
     }
@@ -579,10 +698,10 @@ public class FireballLogicEntityInternal : IGeneratedEntity
     }
 
 
-    public void Tick()
+    public void Tick(SimulationMode mode)
     {
         var actions = new FireballLogicActions(actionsContainer);
-        current.Tick(actions);
+        current.Tick(mode, actions);
     }
 
     public ulong Changes()

@@ -94,6 +94,9 @@ namespace Piot.Surge.Pulse.Client
             }
 
             var predictEntity = world.FetchEntity(assignedPredictionEntityId);
+
+            predictEntity.RollMode = EntityRollMode.Predict;
+
             PredictionTicker.Predict(predictEntity, predictTickId, rollbackQueue, predictionStateChecksumHistory);
         }
     }

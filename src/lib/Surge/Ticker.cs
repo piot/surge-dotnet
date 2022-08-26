@@ -7,11 +7,11 @@ namespace Piot.Surge
 {
     public static class Ticker
     {
-        public static void Tick(IEntity[] entities)
+        public static void Tick(IEntity[] entities, SimulationMode mode)
         {
             foreach (var entity in entities)
             {
-                entity.Tick();
+                entity.Tick(mode);
             }
         }
 
@@ -19,9 +19,9 @@ namespace Piot.Surge
         ///     Calls Tick() on all entities in the <paramref name="world" />.
         /// </summary>
         /// <param name="world"></param>
-        public static void Tick(IEntityContainer world)
+        public static void Tick(IEntityContainer world, SimulationMode mode)
         {
-            Tick(world.AllEntities);
+            Tick(world.AllEntities, mode);
         }
     }
 }
