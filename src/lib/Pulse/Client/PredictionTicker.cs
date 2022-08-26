@@ -12,12 +12,13 @@ namespace Piot.Surge.Pulse.Client
 {
     public static class PredictionTicker
     {
-        public static void Predict(IEntity predictedEntity, TickId appliedAtTickId, RollbackQueue rollbackQueue, PredictionStateChecksumQueue predictionStateHistory)
+        public static void Predict(IEntity predictedEntity, TickId appliedAtTickId, RollbackQueue rollbackQueue,
+            PredictionStateChecksumQueue predictionStateHistory)
         {
             predictedEntity.Overwrite();
 
             predictedEntity.Tick();
-            
+
             var changes = predictedEntity.GeneratedEntity.Changes();
             var undoWriter = new OctetWriter(1200);
             var changedFieldsMask = new ChangedFieldsMask(changes);

@@ -54,10 +54,9 @@ namespace Piot.Surge.Pulse.Client
 
                 var correctionPayload = snapshotReader.ReadOctets(octetCount);
 
-                var incomingFnvChecksum = Fnv.Fnv.ToFnv(correctionPayload);
                 var storedPredictionStateChecksum =
                     predictionStateChecksumHistory.DequeueForTickId(correctionsForTickId);
-                if (storedPredictionStateChecksum.fnvChecksum == incomingFnvChecksum)
+                if (storedPredictionStateChecksum.IsEqual(correctionPayload))
                 {
                     log.DebugLowLevel("prediction for {TickId} was correct, continuing", correctionsForTickId);
                     continue;
