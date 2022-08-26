@@ -30,23 +30,23 @@ namespace Piot.Surge.Pulse.Client
         private readonly ITransport transportBoth;
         private readonly ITransportClient transportClient;
         private readonly TransportStatsBoth transportWithStats;
-        private readonly ClientWorld world;
 
         public Client(ILog log, Milliseconds now, Milliseconds targetDeltaTimeMs, IEntityCreation entityCreation,
             INotifyWorld notifyWorld,
             ITransport assignedTransport, IInputPackFetch fetch)
         {
             this.log = log;
-            world = new ClientWorld(entityCreation, notifyWorld);
+            World = new ClientWorld(entityCreation, notifyWorld);
             transportWithStats = new(assignedTransport, now);
             transportBoth = transportWithStats;
             transportClient = new TransportClient(transportBoth);
-            predictor = new ClientPredictor(fetch, transportClient, now, targetDeltaTimeMs, world,
+            predictor = new ClientPredictor(fetch, transportClient, now, targetDeltaTimeMs, World,
                 log.SubLog("Predictor"));
             deltaSnapshotPlayback =
-                new ClientDeltaSnapshotPlayback(now, world, predictor, targetDeltaTimeMs, log.SubLog("GhostPlayback"));
+                new ClientDeltaSnapshotPlayback(now, World, predictor, targetDeltaTimeMs, log.SubLog("GhostPlayback"));
         }
 
+        public ClientWorld World { get; }
 
         private void ReceiveSnapshotExtraData(IOctetReader reader, Milliseconds now)
         {

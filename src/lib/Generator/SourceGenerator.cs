@@ -25,6 +25,11 @@ namespace Piot.Surge.Generator
             return t.FullName!.Replace('+', '.');
         }
 
+        public static string ShortName(Type t)
+        {
+            return t.Name;
+        }
+
         public static string FullName(MethodInfo methodInfo)
         {
             return methodInfo.DeclaringType?.FullName + "." + methodInfo.Name;
@@ -98,6 +103,34 @@ namespace Piot.Surge.Generator
         }
 
 
+        public static void AddEngineSpawner(StringBuilder sb, IEnumerable<LogicInfo> infos)
+        {
+            AddClassDeclaration(sb, "GeneratedEngineSpawner");
+            sb.Append(@"
+    private readonly IAuthoritativeEntityContainer container;
+
+    public GeneratedEngineSpawner(IAuthoritativeEntityContainer container)
+    {
+        this.container = container;
+    }
+");
+            foreach (var info in infos)
+            {
+                var logicName = FullName(info.Type);
+                sb.Append(@$"
+    public IEntity Spawn{ShortName(info.Type)}({logicName} logic)
+    {{ 
+        return container.SpawnEntity(new {EntityGeneratedInternal(info)}
+        {{
+            Current = logic
+        }});
+     }}
+");
+            }
+
+            AddEndDeclaration(sb);
+        }
+
         public static void AddEngineWorld(StringBuilder sb, IEnumerable<LogicInfo> infos)
         {
             AddClassDeclaration(sb, "GeneratedEngineWorld", "INotifyWorld");
@@ -110,7 +143,7 @@ namespace Piot.Surge.Generator
 
 
             sb.Append(@"
-        public void NotifyCreation(IGeneratedEntity entity)
+        void INotifyWorld.NotifyCreation(IGeneratedEntity entity)
         {
             switch (entity)
             {
@@ -927,6 +960,7 @@ namespace Piot.Surge.Internal.Generated
             AddEntityCreation(sb, infos);
 
             AddEngineWorld(sb, infos);
+            AddEngineSpawner(sb, infos);
 
             AddGameInputReader(sb, gameInputInfo);
             AddGameInputWriter(sb, gameInputInfo);
