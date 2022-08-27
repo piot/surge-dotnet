@@ -24,12 +24,12 @@ public struct GameInput
 public static class GameInputFetch
 {
     [InputFetch]
-    public static GameInput ReadFromDevice(LocalPlayerIndex index)
+    public static GameInput ReadFromDevice(LocalPlayerIndex _)
     {
         return new()
         {
             primaryAbility = true,
-            secondaryAbility = false
+            secondaryAbility = true
         };
     }
 }

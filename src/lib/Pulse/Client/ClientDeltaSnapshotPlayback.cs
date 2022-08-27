@@ -17,14 +17,14 @@ namespace Piot.Surge.Pulse.Client
     /// </summary>
     public class ClientDeltaSnapshotPlayback
     {
-        private readonly IEntityContainerWithCreation clientWorld;
+        private readonly IEntityContainerWithGhostCreator clientWorld;
         private readonly ILog log;
         private readonly IClientPredictorCorrections predictor;
         private readonly SnapshotDeltaPackQueue queue = new();
         private readonly TimeTicker.TimeTicker snapshotPlaybackTicker;
         private readonly Milliseconds targetDeltaTimeMs;
 
-        public ClientDeltaSnapshotPlayback(Milliseconds now, IEntityContainerWithCreation clientWorld,
+        public ClientDeltaSnapshotPlayback(Milliseconds now, IEntityContainerWithGhostCreator clientWorld,
             IClientPredictorCorrections predictor, Milliseconds targetDeltaTimeMs, ILog log)
         {
             this.log = log;

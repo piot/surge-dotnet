@@ -30,7 +30,7 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
         /// <param name="entityContainer"></param>
         /// <returns></returns>
         public static (IEntity[], IEntity[], SnapshotDeltaReaderInfoEntity[]) Read(IOctetReader reader,
-            IEntityContainerWithCreation entityContainerWithCreation)
+            IEntityContainerWithGhostCreator entityGhostContainerWithCreator)
         {
 #if DEBUG
             if (reader.ReadUInt8() != SnapshotSerialization.Constants.SnapshotDeltaSync)
@@ -43,9 +43,9 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
             for (var i = 0; i < deletedEntityCount; ++i)
             {
                 var entityId = EntityIdReader.Read(reader);
-                var deletedEntity = entityContainerWithCreation.FetchEntity(entityId);
+                var deletedEntity = entityGhostContainerWithCreator.FetchEntity(entityId);
                 deletedEntities.Add(deletedEntity);
-                entityContainerWithCreation.DeleteEntity(entityId);
+                entityGhostContainerWithCreator.DeleteEntity(entityId);
             }
 
 
@@ -61,7 +61,7 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
             {
                 var entityId = EntityIdReader.Read(reader);
                 var entityArchetype = new ArchetypeId(reader.ReadUInt16());
-                var entityToDeserialize = entityContainerWithCreation.CreateEntity(entityArchetype, entityId);
+                var entityToDeserialize = entityGhostContainerWithCreator.CreateGhostEntity(entityArchetype, entityId);
                 entityToDeserialize.DeserializeAll(reader);
                 createdEntities.Add(entityToDeserialize);
             }
@@ -81,7 +81,7 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
                 var entityId = EntityIdReader.Read(reader);
                 var serializeMask = ChangedFieldsMaskReader.ReadChangedFieldMask(reader);
 
-                var entityToDeserialize = entityContainerWithCreation.FetchEntity(entityId);
+                var entityToDeserialize = entityGhostContainerWithCreator.FetchEntity(entityId);
                 entityToDeserialize.Deserialize(serializeMask.mask, reader);
                 updatedEntities.Add(new SnapshotDeltaReaderInfoEntity(entityToDeserialize, serializeMask.mask));
             }

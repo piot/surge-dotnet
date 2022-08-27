@@ -3,14 +3,15 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using System.Collections.Generic;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
-using Piot.Surge.LocalPlayer;
 using Piot.Surge.LogicalInput;
 using Piot.Surge.LogicalInputSerialization;
 using Piot.Surge.OrderedDatagrams;
 using Piot.Surge.Snapshot;
+using Piot.Surge.SnapshotDeltaPack.Serialization;
 using Piot.Transport;
 
 namespace Piot.Surge.Pulse.Client
@@ -21,18 +22,18 @@ namespace Piot.Surge.Pulse.Client
     /// </summary>
     public class ClientPredictor : IClientPredictorCorrections
     {
-        private readonly ReadCorrection corrections = new();
         private readonly OrderedDatagramsOut datagramsOut;
         private readonly Milliseconds fixedSimulationDeltaTimeMs;
         private readonly IInputPackFetch inputPackFetch;
+        private readonly Dictionary<byte, AvatarPredictor> localAvatarPredictors = new();
         private readonly ILog log;
         private readonly TimeTicker.TimeTicker predictionTicker;
         private readonly ITransportClient transportClient;
-        private readonly ClientWorld world;
+        private readonly IEntityContainer world;
         private TickId predictTickId;
 
         public ClientPredictor(IInputPackFetch inputPackFetch, ITransportClient transportClient, Milliseconds now,
-            Milliseconds targetDeltaTimeMs, ClientWorld world,
+            Milliseconds targetDeltaTimeMs, IEntityContainer world,
             ILog log)
         {
             this.log = log;
@@ -44,9 +45,28 @@ namespace Piot.Surge.Pulse.Client
                 log.SubLog("PredictionTick"));
         }
 
-        public void ReadCorrections(TickId tickId, IOctetReader snapshotReader)
+        public void ReadCorrections(TickId correctionsForTickId, IOctetReader snapshotReader)
         {
-            corrections.ReadCorrections(tickId, snapshotReader, world, log);
+            log.DebugLowLevel("we have corrections for {TickId}, clear old predicted inputs", correctionsForTickId);
+
+            var correctionsCount = snapshotReader.ReadUInt16();
+
+            for (var i = 0; i < correctionsCount; ++i)
+            {
+                var (targetEntityId, localPlayerIndex, octetCount) = CorrectionsHeaderReader.Read(snapshotReader);
+                var targetEntity = world.FetchEntity(targetEntityId);
+                var wasFound = localAvatarPredictors.TryGetValue(localPlayerIndex.Value, out var predictor);
+                if (!wasFound || predictor is null)
+                {
+                    predictor = new AvatarPredictor(localPlayerIndex, targetEntity,
+                        log.SubLog($"AvatarPredictor/{localPlayerIndex}"));
+                    localAvatarPredictors[localPlayerIndex.Value] = predictor;
+                }
+
+                var correctionPayload = snapshotReader.ReadOctets(octetCount);
+
+                predictor.ReadCorrection(correctionsForTickId, correctionPayload);
+            }
         }
 
         public void AdjustPredictionSpeed(TickId lastReceivedServerTickId, uint roundTripTimeMs)
@@ -80,33 +100,43 @@ namespace Piot.Surge.Pulse.Client
 
         private void PredictionTick()
         {
-            var now = predictionTicker.Now;
-
-            var (hasAssignedEntityId, assignedEntityId) = corrections.AssignedPredictEntityId;
-            if (!hasAssignedEntityId)
+            if (localAvatarPredictors.Count == 0)
             {
-                log.Notice("We have not been assigned an entity to predict, returning");
+                log.DebugLowLevel("We have no avatar predictors, returning");
                 return;
             }
 
-            log.Debug("--- Prediction Tick {TickId}", predictTickId);
-            var inputOctets = inputPackFetch.Fetch(new LocalPlayerIndex(0));
-            var logicalInput = new LogicalInput.LogicalInput
-            {
-                appliedAtTickId = predictTickId,
-                payload = inputOctets.ToArray()
-            };
+            var now = predictionTicker.Now;
 
-            log.DebugLowLevel("Adding logical input {LogicalInput}", logicalInput);
-            corrections.PredictedInputs.AddLogicalInput(logicalInput);
+            foreach (var localAvatarPredictor in localAvatarPredictors.Values)
+            {
+                log.Debug("--- Prediction Tick {TickId}", predictTickId);
+                var inputOctets = inputPackFetch.Fetch(localAvatarPredictor.LocalPlayerIndex);
+                var logicalInput = new LogicalInput.LogicalInput
+                {
+                    appliedAtTickId = predictTickId,
+                    payload = inputOctets.ToArray()
+                };
+
+                log.DebugLowLevel("Adding logical input {LogicalInput}", logicalInput);
+                localAvatarPredictor.PredictedInputs.AddLogicalInput(logicalInput);
+                localAvatarPredictor.Predict(logicalInput);
+            }
+
+            var inputForAllPlayers = new LogicalInputArrayForPlayer[localAvatarPredictors.Count];
+            var index = 0;
+            foreach (var localAvatarPredictor in localAvatarPredictors.Values)
+            {
+                var inputForLocal = localAvatarPredictor.PredictedInputs.Collection;
+                inputForAllPlayers[index].inputForEachPlayerInSequence = inputForLocal;
+                index++;
+            }
 
             var outDatagram =
                 LogicInputDatagramPackOut.CreateInputDatagram(datagramsOut, new TickId(42), 0,
-                    now, corrections.PredictedInputs.Collection);
+                    now, new LogicalInputsForAllLocalPlayers(inputForAllPlayers));
             log.DebugLowLevel("Sending inputs to host");
             transportClient.SendToHost(outDatagram);
-
-            corrections.Predict(predictTickId, world);
 
             predictTickId = new TickId(predictTickId.tickId + 1);
         }

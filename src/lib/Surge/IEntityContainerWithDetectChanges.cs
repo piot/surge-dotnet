@@ -5,7 +5,7 @@
 
 namespace Piot.Surge
 {
-    public interface IEntityContainerWithChanges : IEntityContainer, IEntityContainerChanges
+    public interface IEntityContainerWithDetectChanges : IEntityContainer, IDetectEntityChanges
     {
     }
 }

@@ -94,16 +94,21 @@ With a redundancy about 16, that must fit in a single datagram, results in a max
 |The lower bits of the monotonic time.
 
 |`U8`
-|InputCount
-|The number of inputs that follows, in the range of 0 to 16.
-
-|`U8`
 |InputStreamCount
-|The number of input streams. One stream for each local player. Usually one.
+|The number of input streams. One stream for each local player. Usually one, unless for example splitscreen.
 
-|`U8[InputStreamCount]`
-|LocalPlayerIndicies
-|The local player indicies. Every <<Logical Input Chunk>> is considered to have the data serialized for each client local player in this order.
+|`LogicalInputStream [InputStreamCount]`
+|InputChunks
+|Input chunks repeated `InputStreamCount` times. See <<Logical Input Stream>>.
+
+|===
+
+==== Logical Input Stream
+
+|===
+|`U8`
+|LocalPlayerIndex
+|The local player index.
 
 The local player index is something that the client assigns on its own. Usually from 1-4, which represents the bound input devices in order.
 
@@ -112,9 +117,13 @@ The local player index is something that the client assigns on its own. Usually 
 |Input was predicted and applied when state was at this `FirstSnapshotId`. Receiver should assume that it increased by one
 after each `InputStreamCount` LogicalInputChunks.
 
-|`LogicalInputChunk [InputCount*InputStreamCount]`
+|`U8`
+|InputCount
+|The number of inputs that follows, in the range of 0 to 16.
+
+|`LogicalInputChunk [InputCount]`
 |InputChunks
-|Input chunks repeated `InputCount{nbsp}*{nbsp}InputStreamCount` times. See <<Logical Input Chunk>>.
+|Input chunks repeated `InputCount` times. See <<Logical Input Chunk>>.
 
 |===
 

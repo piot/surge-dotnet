@@ -10,7 +10,7 @@ using System.Runtime.CompilerServices;
 
 namespace Piot.Surge
 {
-    public class AuthoritativeWorld : IEntityContainerWithChanges, IAuthoritativeEntityContainer
+    public class AuthoritativeWorld : IEntityContainerWithDetectChanges, IAuthoritativeEntityContainer
     {
         protected readonly List<IEntity> created = new();
         private readonly List<IEntity> deleted = new();

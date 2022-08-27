@@ -17,7 +17,7 @@ namespace Piot.Surge.SnapshotDeltaInternal
         /// </summary>
         /// <param name="world">entity container with change information</param>
         /// <returns></returns>
-        public static SnapshotDeltaInternal Scan(IEntityContainerWithChanges world, TickId tickId)
+        public static SnapshotDeltaInternal Scan(IEntityContainerWithDetectChanges world, TickId tickId)
         {
             var deletedEntities = world.Deleted.Select(entity => entity.Id).ToArray();
 

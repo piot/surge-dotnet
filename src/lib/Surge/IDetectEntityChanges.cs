@@ -5,7 +5,11 @@
 
 namespace Piot.Surge
 {
-    public interface IEntityContainerWithCreation : IEntityContainer, IEntityCreation
+    public interface IDetectEntityChanges
     {
+        public IEntity[] Created { get; }
+        public IEntity[] Deleted { get; }
+
+        void ClearDelta();
     }
 }

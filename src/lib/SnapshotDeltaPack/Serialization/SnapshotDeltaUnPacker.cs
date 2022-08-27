@@ -18,10 +18,11 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
         /// <returns></returns>
         public static (IEntity[] deletedEntities, IEntity[]createdEntities,
             SnapshotDeltaReaderInfoEntity[] updatedEntities) UnPack(ReadOnlySpan<byte> pack,
-                IEntityContainerWithCreation entityContainer)
+                IEntityContainerWithGhostCreator entityGhostContainer)
         {
             var reader = new OctetReader(pack.ToArray());
-            var (deletedEntities, createdEntities, updatedEntities) = SnapshotDeltaReader.Read(reader, entityContainer);
+            var (deletedEntities, createdEntities, updatedEntities) =
+                SnapshotDeltaReader.Read(reader, entityGhostContainer);
 
             return (deletedEntities, createdEntities, updatedEntities);
         }

@@ -6,6 +6,7 @@
 using System;
 using System.Linq;
 using Piot.Flood;
+using Piot.Surge.LogicalInput;
 using Piot.Surge.SnapshotSerialization;
 
 namespace Piot.Surge.LogicalInputSerialization
@@ -17,49 +18,40 @@ namespace Piot.Surge.LogicalInputSerialization
         ///     The inputs should be fed to this method with redundancy. All outstanding inputs should be
         ///     sent each network tick in order to handle packet drops.
         /// </summary>
-        public static void Serialize(IOctetWriter writer, LogicalInput.LogicalInput[] inputs)
+        public static void Serialize(IOctetWriter writer, LogicalInputsForAllLocalPlayers inputsForLocalPlayers)
         {
-            if (inputs.Length > 255)
+            writer.WriteUInt8((byte)inputsForLocalPlayers.inputForEachPlayerInSequence.Length);
+
+            foreach (var inputsForPlayer in inputsForLocalPlayers.inputForEachPlayerInSequence)
             {
-                throw new Exception("too many inputs to serialize");
-            }
-
-            writer.WriteUInt8((byte)inputs.Length);
-            if (inputs.Length == 0)
-            {
-                return;
-            }
-
-            const byte InputStreamCount = 1;
-            // TODO: Support more streams
-            writer.WriteUInt8(InputStreamCount);
-
-            var first = inputs.First();
-
-            TickIdWriter.Write(writer, first.appliedAtTickId);
-            var lastFrameId = first.appliedAtTickId;
-
-            var index = 0;
-            foreach (var input in inputs)
-            {
-                if (input.appliedAtTickId.tickId < lastFrameId.tickId)
+                var tickCount = inputsForPlayer.inputForEachPlayerInSequence.Length;
+                if (tickCount > 255)
                 {
-                    throw new Exception("logical input in wrong order in collection");
+                    throw new Exception("too many inputs to serialize");
                 }
 
-                if (index != 0)
+                writer.WriteUInt8((byte)tickCount);
+                if (tickCount == 0)
                 {
-                    if (!input.appliedAtTickId.IsImmediateFollowing(lastFrameId))
+                    continue;
+                }
+
+                var first = inputsForPlayer.inputForEachPlayerInSequence.First();
+                TickIdWriter.Write(writer, first.appliedAtTickId);
+
+                var expectedTickIdValue = first.appliedAtTickId.tickId;
+                foreach (var logicalInput in inputsForPlayer.inputForEachPlayerInSequence)
+                {
+                    if (logicalInput.appliedAtTickId.tickId != expectedTickIdValue)
                     {
-                        throw new Exception("logical input wrong delta ");
+                        throw new Exception("logical input in wrong order in collection");
                     }
+
+                    writer.WriteUInt8((byte)logicalInput.payload.Length);
+                    writer.WriteOctets(logicalInput.payload.Span);
+
+                    expectedTickIdValue++;
                 }
-
-                writer.WriteUInt8((byte)input.payload.Length);
-                writer.WriteOctets(input.payload.Span);
-
-                lastFrameId = input.appliedAtTickId;
-                index++;
             }
         }
     }

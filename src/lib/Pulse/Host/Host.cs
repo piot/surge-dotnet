@@ -21,7 +21,7 @@ namespace Piot.Surge.Pulse.Host
     {
         private readonly AuthoritativeWorld authoritativeWorld;
         private readonly Dictionary<uint, ConnectionToClient> connections = new();
-        private readonly IEntityContainerWithChanges entityContainer;
+        private readonly IEntityContainerWithDetectChanges entityContainerWithDetectEntity;
         private readonly ILog log;
         private readonly List<ConnectionToClient> orderedConnections = new();
         private readonly TimeTicker.TimeTicker simulationTicker;
@@ -36,7 +36,7 @@ namespace Piot.Surge.Pulse.Host
             transport = transportWithStats;
             snapshotSyncer = new SnapshotSyncer(transport, log.SubLog("Syncer"));
             authoritativeWorld = new AuthoritativeWorld();
-            entityContainer = authoritativeWorld;
+            entityContainerWithDetectEntity = authoritativeWorld;
             this.log = log;
             simulationTicker = new(new Milliseconds(0), SimulationTick, new Milliseconds(16),
                 log.SubLog("SimulationTick"));
@@ -50,35 +50,39 @@ namespace Piot.Surge.Pulse.Host
         {
             foreach (var connection in orderedConnections)
             {
-                if (!connection.InputQueue.HasInputForTickId(serverTickId))
+                foreach (var connectionPlayer in connection.ConnectionPlayers.Values)
                 {
-                    // The old data on the input is intentionally kept
-                    log.Notice($"connection {connection.Id} didn't have an input for tick {serverTickId}");
-                    continue;
-                }
+                    var logicalInputQueue = connectionPlayer.LogicalInputQueue;
+                    if (!logicalInputQueue.HasInputForTickId(serverTickId))
+                    {
+                        // The old data on the input is intentionally kept
+                        log.Notice($"connection {connection.Id} didn't have an input for tick {serverTickId}");
+                        continue;
+                    }
 
-                var input = connection.InputQueue.Dequeue();
-                if (!connection.HasAssignedEntity)
-                {
-                    continue;
-                }
+                    var input = logicalInputQueue.Dequeue();
+                    if (!connection.HasAssignedEntity)
+                    {
+                        continue;
+                    }
 
-                var targetEntity = entityContainer.FetchEntity(connection.ControllingEntityId);
-                var inputDeserialize = targetEntity.GeneratedEntity as IInputDeserialize;
-                if (inputDeserialize is null)
-                {
-                    throw new Exception(
-                        $"It is not possible to control Entity {connection.ControllingEntityId}, it has no IDeserializeInput interface");
-                }
+                    var targetEntity = entityContainerWithDetectEntity.FetchEntity(connection.ControllingEntityId);
+                    var inputDeserialize = targetEntity.GeneratedEntity as IInputDeserialize;
+                    if (inputDeserialize is null)
+                    {
+                        throw new Exception(
+                            $"It is not possible to control Entity {connection.ControllingEntityId}, it has no IDeserializeInput interface");
+                    }
 
-                var inputReader = new OctetReader(input.payload.Span);
-                inputDeserialize.SetInput(inputReader);
+                    var inputReader = new OctetReader(input.payload.Span);
+                    inputDeserialize.SetInput(inputReader);
+                }
             }
         }
 
         private void TickWorld()
         {
-            Ticker.Tick(entityContainer);
+            Ticker.Tick(entityContainerWithDetectEntity);
         }
 
         private void SimulationTick()
@@ -93,13 +97,14 @@ namespace Piot.Surge.Pulse.Host
 
         private DeltaSnapshotPackContainer StoreWorldChangesToPackContainer()
         {
-            var deltaSnapshotInternal = SnapshotDeltaCreator.Scan(entityContainer, serverTickId);
+            var deltaSnapshotInternal = SnapshotDeltaCreator.Scan(entityContainerWithDetectEntity, serverTickId);
             var convertedDeltaSnapshot = FromSnapshotDeltaInternal.Convert(deltaSnapshotInternal);
             var deltaPackContainer =
-                SnapshotDeltaPackCreator.Create(entityContainer, convertedDeltaSnapshot, Array.Empty<EntityId>());
+                SnapshotDeltaPackCreator.Create(entityContainerWithDetectEntity, convertedDeltaSnapshot,
+                    Array.Empty<EntityId>());
 
-            entityContainer.ClearDelta();
-            OverWriter.Overwrite(entityContainer);
+            entityContainerWithDetectEntity.ClearDelta();
+            OverWriter.Overwrite(entityContainerWithDetectEntity);
 
             return deltaPackContainer;
         }

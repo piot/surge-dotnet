@@ -5,8 +5,8 @@
 
 namespace Piot.Surge
 {
-    public interface IEntityCreation
+    public interface IEntityGhostCreator
     {
-        IEntity CreateEntity(ArchetypeId archetypeId, EntityId id);
+        IEntity CreateGhostEntity(ArchetypeId archetypeId, EntityId id);
     }
 }

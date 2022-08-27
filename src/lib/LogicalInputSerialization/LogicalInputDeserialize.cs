@@ -4,7 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
+using System.Collections.Generic;
 using Piot.Flood;
+using Piot.Surge.LogicalInput;
 using Piot.Surge.SnapshotSerialization;
 
 namespace Piot.Surge.LogicalInputSerialization
@@ -18,43 +20,50 @@ namespace Piot.Surge.LogicalInputSerialization
         /// <param name="reader"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public static LogicalInput.LogicalInput[] Deserialize(IOctetReader reader)
+        public static LogicalInputsForAllLocalPlayers Deserialize(IOctetReader reader)
         {
-            var inputCount = reader.ReadUInt8();
-            if (inputCount == 0)
+            var localPlayerCount = reader.ReadUInt8();
+            if (localPlayerCount == 0)
             {
-                return Array.Empty<LogicalInput.LogicalInput>();
+                return new(Array.Empty<LogicalInputArrayForPlayer>());
             }
 
-            var inputStreamCount = reader.ReadUInt8();
-            if (inputStreamCount != 1)
+            var players = new List<LogicalInputArrayForPlayer>();
+            for (var localPlayerIndex = 0; localPlayerIndex < localPlayerCount; ++localPlayerIndex)
             {
-                throw new NotImplementedException("only support for a single input stream for now");
-            }
-
-            var array = new LogicalInput.LogicalInput[inputCount];
-
-            var firstFrameId = TickIdReader.Read(reader);
-
-            for (var i = 0; i < inputCount; ++i)
-            {
-                LogicalInput.LogicalInput input = new()
+                var inputCount = reader.ReadUInt8();
+                if (inputCount == 0)
                 {
-                    appliedAtTickId = new((uint)(firstFrameId.tickId + i))
-                };
-
-                var payloadOctetCount = reader.ReadUInt8();
-                if (payloadOctetCount > 70)
-                {
-                    throw new Exception("suspicious input payload octet count");
+                    continue;
                 }
 
-                input.payload = reader.ReadOctets(payloadOctetCount).ToArray();
+                var array = new LogicalInput.LogicalInput[inputCount];
 
-                array[i] = input;
+                var firstFrameId = TickIdReader.Read(reader);
+
+                for (var i = 0; i < inputCount; ++i)
+                {
+                    LogicalInput.LogicalInput input = new()
+                    {
+                        appliedAtTickId = new((uint)(firstFrameId.tickId + i))
+                    };
+
+                    var payloadOctetCount = reader.ReadUInt8();
+                    if (payloadOctetCount > 70)
+                    {
+                        throw new Exception("suspicious input payload octet count");
+                    }
+
+                    input.payload = reader.ReadOctets(payloadOctetCount).ToArray();
+
+                    array[i] = input;
+                }
+
+                var play = new LogicalInputArrayForPlayer(new((byte)localPlayerIndex), array);
+                players.Add(play);
             }
 
-            return array;
+            return new(players.ToArray());
         }
     }
 }

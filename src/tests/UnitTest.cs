@@ -10,6 +10,7 @@ using Piot.Surge;
 using Piot.Surge.ChangeMask;
 using Piot.Surge.DatagramType;
 using Piot.Surge.Internal.Generated;
+using Piot.Surge.LocalPlayer;
 using Piot.Surge.LogicalInput;
 using Piot.Surge.LogicalInputSerialization;
 using Piot.Surge.MonotonicTimeLowerBits;
@@ -109,13 +110,16 @@ public class UnitTest1
 
         var writer = new OctetWriter(23);
 
-        LogicalInputSerialize.Serialize(writer, logicalInputQueue.Collection);
-
+        LogicalInputSerialize.Serialize(writer,
+            new LogicalInputsForAllLocalPlayers(new LogicalInputArrayForPlayer[]
+                { new(new LocalPlayerIndex(0), logicalInputQueue.Collection) }));
 
         var reader = new OctetReader(writer.Octets);
         var encounteredLogicalPositions = LogicalInputDeserialize.Deserialize(reader);
 
-        Assert.Equal(logicalInputQueue.Collection, encounteredLogicalPositions, new CompareLogicalInputCollections());
+        Assert.Equal(logicalInputQueue.Collection,
+            encounteredLogicalPositions.inputForEachPlayerInSequence[0].inputForEachPlayerInSequence,
+            new CompareLogicalInputCollections());
     }
 
     [Fact]
@@ -130,7 +134,9 @@ public class UnitTest1
         var datagramsOut = new OrderedDatagramsOut();
         var outDatagram =
             LogicInputDatagramPackOut.CreateInputDatagram(datagramsOut, new TickId(42), 0,
-                now, logicalInputQueue.Collection);
+                now,
+                new LogicalInputsForAllLocalPlayers(new LogicalInputArrayForPlayer[]
+                    { new(new LocalPlayerIndex(0), logicalInputQueue.Collection) }));
 
         var reader = new OctetReader(outDatagram.ToArray());
         var datagramsSequenceIn = OrderedDatagramsInReader.Read(reader);
@@ -144,7 +150,9 @@ public class UnitTest1
         Assert.Equal(0, droppedFrames);
         var encounteredLogicalPositions = LogicalInputDeserialize.Deserialize(reader);
 
-        Assert.Equal(logicalInputQueue.Collection, encounteredLogicalPositions, new CompareLogicalInputCollections());
+        Assert.Equal(logicalInputQueue.Collection,
+            encounteredLogicalPositions.inputForEachPlayerInSequence[0].inputForEachPlayerInSequence,
+            new CompareLogicalInputCollections());
     }
 
 
@@ -155,14 +163,16 @@ public class UnitTest1
 
         var writer = new OctetWriter(23);
 
-        LogicalInputSerialize.Serialize(writer, logicalInputQueue.Collection);
+        LogicalInputSerialize.Serialize(writer,
+            new LogicalInputsForAllLocalPlayers(new LogicalInputArrayForPlayer[]
+                { new(new LocalPlayerIndex(0), logicalInputQueue.Collection) }));
 
-        Assert.Equal(1, writer.Octets.Length);
+        Assert.Equal(2, writer.Octets.Length);
 
         var reader = new OctetReader(writer.Octets);
         var encounteredLogicalPositions = LogicalInputDeserialize.Deserialize(reader);
 
-        Assert.Equal(logicalInputQueue.Collection, encounteredLogicalPositions, new CompareLogicalInputCollections());
+        Assert.Empty(encounteredLogicalPositions.inputForEachPlayerInSequence);
 
         Assert.Throws<IndexOutOfRangeException>(() => reader.ReadUInt8());
     }
@@ -340,11 +350,11 @@ public class UnitTest1
         var packetQueue = new SnapshotDeltaPackQueue();
         var notifyWorld = new GeneratedEngineWorld();
 
-        var world = new ClientWorld(new GeneratedEntityCreation(), notifyWorld);
+        var world = new WorldWithGhostCreator(new GeneratedEntityGhostCreator(), notifyWorld);
 
         var spawnedAvatar = world.SpawnEntity(avatarInfo);
 
-        var scanWorld = (IEntityContainerWithChanges)world;
+        var scanWorld = (IEntityContainerWithDetectChanges)world;
         var allEntities = (world as IEntityContainer).AllEntities;
         Ticker.Tick(allEntities);
         Assert.Equal(3, ((AvatarLogic)spawnedAvatar.Logic).position.x);
@@ -464,7 +474,7 @@ public class UnitTest1
 
         var spawnedAvatar = world.SpawnEntity(avatarInfo);
 
-        var scanWorld = (IEntityContainerWithChanges)world;
+        var scanWorld = (IEntityContainerWithDetectChanges)world;
 
         /* FIRST Snapshot */
         var firstTickId = new TickId(10);
@@ -557,7 +567,9 @@ public class UnitTest1
     {
         var (allSerializedSnapshots, spawnedAvatarId) = PrepareThreeServerSnapshotDeltas();
         var notifyWorld = new GeneratedEngineWorld();
-        var clientWorld = new ClientWorld(new GeneratedEntityCreation(), notifyWorld) as IEntityContainerWithCreation;
+        var clientWorld =
+            new WorldWithGhostCreator(new GeneratedEntityGhostCreator(), notifyWorld) as
+                IEntityContainerWithGhostCreator;
 
         var undoWriter = new OctetWriter(1200);
         var unionReader = new OctetReader(allSerializedSnapshots.payload.Span);

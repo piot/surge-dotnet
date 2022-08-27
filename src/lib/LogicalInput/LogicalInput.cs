@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
+using Piot.Surge.LocalPlayer;
 using Piot.Surge.Snapshot;
 
 namespace Piot.Surge.LogicalInput
@@ -17,11 +18,36 @@ namespace Piot.Surge.LogicalInput
     }
 
 
+    public readonly struct LogicalInputsForAllLocalPlayers
+    {
+        public readonly LogicalInputArrayForPlayer[] inputForEachPlayerInSequence;
+
+        public LogicalInputsForAllLocalPlayers(LogicalInputArrayForPlayer[] inputForEachPlayerInSequence)
+        {
+            this.inputForEachPlayerInSequence = inputForEachPlayerInSequence;
+        }
+    }
+
+    public struct LogicalInputArrayForPlayer
+    {
+        public LogicalInput[] inputForEachPlayerInSequence;
+        public LocalPlayerIndex localPlayerIndex;
+
+        public LogicalInputArrayForPlayer(LocalPlayerIndex localPlayerIndex,
+            LogicalInput[] inputForEachPlayerInSequence)
+        {
+            this.localPlayerIndex = localPlayerIndex;
+            this.inputForEachPlayerInSequence = inputForEachPlayerInSequence;
+        }
+    }
+
+
     /// <summary>
     ///     Serialized Game specific input stored in the <see cref="LogicalInput.payload" />.
     /// </summary>
     public struct LogicalInput
     {
+        public LocalPlayerIndex localPlayerIndex;
         public TickId appliedAtTickId;
         public ReadOnlyMemory<byte> payload;
 
@@ -40,7 +66,8 @@ namespace Piot.Surge.LogicalInput
 
         public override string ToString()
         {
-            return $"[LogicalInput TickId:{appliedAtTickId} octetSize:{payload.Length}]";
+            return
+                $"[LogicalInput TickId:{appliedAtTickId} octetSize:{payload.Length} localPlayerIndex:{localPlayerIndex}]";
         }
     }
 }

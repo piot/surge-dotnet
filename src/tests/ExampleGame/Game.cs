@@ -5,6 +5,7 @@
 
 using Piot.Clog;
 using Piot.MonotonicTime;
+using Piot.Surge;
 using Piot.Surge.Internal.Generated;
 using Piot.Surge.Pulse.Client;
 using Piot.Surge.Types;
@@ -17,20 +18,21 @@ public class Game
     private readonly Client client;
     private readonly ILog log;
 
-    public Game(ITransport transport, bool isAuthoritative, ILog log)
+    public Game(ITransport transport, ILog log)
     {
         this.log = log;
         var now = new Milliseconds(0);
         var delta = new Milliseconds(16);
 
-        var entityCreation = new GeneratedEntityCreation();
+        var entityCreation = new GeneratedEntityGhostCreator();
         var generatedWorld = new GeneratedEngineWorld();
+        var worldWithGhostCreator = new WorldWithGhostCreator(entityCreation, generatedWorld);
 
-        client = new(log, now, delta, entityCreation, generatedWorld,
+        client = new(log, now, delta, worldWithGhostCreator,
             transport, new GeneratedInputFetch());
         var world = client.World;
 
-        var generatedSpawner = new GeneratedEngineSpawner(world);
+        var generatedSpawner = new GeneratedEngineSpawner(worldWithGhostCreator);
 
         generatedWorld.OnSpawnAvatarLogic += avatar =>
         {
@@ -42,7 +44,7 @@ public class Game
             avatar.DoCastFireball += (position, direction) =>
             {
                 log.Debug("Play cast effect!");
-                if (!isAuthoritative)
+                if (!world.IsAuthoritative)
                 {
                     return;
                 }
@@ -53,6 +55,14 @@ public class Game
                     velocity = new Velocity3((int)direction.X, (int)direction.Y, (int)direction.Z)
                 };
                 generatedSpawner.SpawnFireballLogic(fireballLogic);
+            };
+
+            avatar.OnPostUpdate += () =>
+            {
+                var self = avatar.Self;
+                if (self.manaAmount < 10)
+                {
+                }
             };
         };
     }

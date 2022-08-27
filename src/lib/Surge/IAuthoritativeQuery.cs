@@ -5,14 +5,8 @@
 
 namespace Piot.Surge
 {
-    public interface IEntityContainer
+    public interface IAuthoritativeQuery
     {
-        IEntity[] AllEntities { get; }
-        public IEntity FetchEntity(EntityId entityId);
-        public T? FindEntity<T>(EntityId entityId);
-        public T FetchEntity<T>(EntityId entityId);
-
-        void DeleteEntity(EntityId entityId);
-        void DeleteEntity(IEntity entity);
+        public bool IsAuthoritative { get; }
     }
 }

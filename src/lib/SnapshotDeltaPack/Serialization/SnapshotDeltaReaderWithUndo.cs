@@ -35,11 +35,11 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
         ///     The undoWriter can be used to undo the overwritten entities.
         /// </summary>
         /// <param name="reader">Octet stream to read from.</param>
-        /// <param name="entityContainer">Interface that handles the entityContainer of new entities.</param>
+        /// <param name="entityGhostContainer">Interface that handles the entityGhostContainer of new entities.</param>
         /// <param name="undoWriter">Octet stream to write the undo stream to.</param>
         /// <returns></returns>
         public static (IEntity[], IEntity[], SnapshotDeltaReaderInfoEntity[]) ReadWithUndo(IOctetReader reader,
-            IEntityContainerWithCreation entityContainer,
+            IEntityContainerWithGhostCreator entityGhostContainer,
             IOctetWriter undoWriter)
         {
 #if DEBUG
@@ -56,7 +56,7 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
             for (var i = 0; i < deletedEntityCount; ++i)
             {
                 var entityId = EntityIdReader.Read(reader);
-                var deletedEntity = entityContainer.FetchEntity(entityId);
+                var deletedEntity = entityGhostContainer.FetchEntity(entityId);
 
                 deletedEntities.Add(deletedEntity);
             }
@@ -79,7 +79,7 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
                 EntityIdWriter.Write(undoWriter, entityId); // Set as deleted entity for undo
 
                 var entityArchetype = new ArchetypeId(reader.ReadUInt16());
-                var entityToDeserialize = entityContainer.CreateEntity(entityArchetype, entityId);
+                var entityToDeserialize = entityGhostContainer.CreateGhostEntity(entityArchetype, entityId);
 
                 createdEntities.Add(entityToDeserialize);
                 entityToDeserialize.DeserializeAll(reader);
@@ -93,7 +93,7 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
                 EntityIdWriter.Write(undoWriter, deletedEntity.Id);
                 deletedEntity.SerializeAll(undoWriter);
 
-                entityContainer.DeleteEntity(deletedEntity);
+                entityGhostContainer.DeleteEntity(deletedEntity);
             }
 
 #if DEBUG
@@ -115,7 +115,7 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
                 var entityId = EntityIdReader.Read(reader);
                 var serializeMask = ChangedFieldsMaskReader.ReadChangedFieldMask(reader);
 
-                var entityToDeserialize = entityContainer.FetchEntity(entityId);
+                var entityToDeserialize = entityGhostContainer.FetchEntity(entityId);
 
 
                 EntityIdWriter.Write(undoWriter, entityId);

@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
@@ -31,22 +30,23 @@ namespace Piot.Surge.Pulse.Client
         private readonly ITransportClient transportClient;
         private readonly TransportStatsBoth transportWithStats;
 
-        public Client(ILog log, Milliseconds now, Milliseconds targetDeltaTimeMs, IEntityCreation entityCreation,
-            INotifyWorld notifyWorld,
+        public Client(ILog log, Milliseconds now, Milliseconds targetDeltaTimeMs,
+            IEntityContainerWithGhostCreator worldWithGhostCreator,
             ITransport assignedTransport, IInputPackFetch fetch)
         {
             this.log = log;
-            World = new ClientWorld(entityCreation, notifyWorld);
+            World = worldWithGhostCreator;
             transportWithStats = new(assignedTransport, now);
             transportBoth = transportWithStats;
             transportClient = new TransportClient(transportBoth);
-            predictor = new ClientPredictor(fetch, transportClient, now, targetDeltaTimeMs, World,
+            predictor = new ClientPredictor(fetch, transportClient, now, targetDeltaTimeMs, worldWithGhostCreator,
                 log.SubLog("Predictor"));
             deltaSnapshotPlayback =
-                new ClientDeltaSnapshotPlayback(now, World, predictor, targetDeltaTimeMs, log.SubLog("GhostPlayback"));
+                new ClientDeltaSnapshotPlayback(now, worldWithGhostCreator, predictor, targetDeltaTimeMs,
+                    log.SubLog("GhostPlayback"));
         }
 
-        public ClientWorld World { get; }
+        public IEntityContainerWithGhostCreator World { get; }
 
         private void ReceiveSnapshotExtraData(IOctetReader reader, Milliseconds now)
         {
@@ -99,7 +99,7 @@ namespace Piot.Surge.Pulse.Client
                     ReceiveSnapshot(reader, now);
                     break;
                 default:
-                    throw new Exception($"illegal datagram type {datagramType} from host");
+                    throw new DeserializeException($"illegal datagram type {datagramType} from host");
             }
         }
 

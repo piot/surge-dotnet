@@ -6,6 +6,7 @@
 using System;
 using Piot.Flood;
 using Piot.MonotonicTime;
+using Piot.Surge.LogicalInput;
 using Piot.Surge.OrderedDatagrams;
 using Piot.Surge.Snapshot;
 
@@ -25,7 +26,7 @@ namespace Piot.Surge.LogicalInputSerialization
         /// <returns></returns>
         public static ReadOnlySpan<byte> CreateInputDatagram(OrderedDatagramsOut sequenceOut,
             TickId lastReceivedSnapshot, byte droppedSnapshotCount, Milliseconds now,
-            LogicalInput.LogicalInput[] inputs)
+            LogicalInputsForAllLocalPlayers inputs)
         {
             var datagramWriter = new OctetWriter(Constants.MaxDatagramOctetSize);
             LogicInputDatagramSerialize.Serialize(datagramWriter, sequenceOut, lastReceivedSnapshot,
