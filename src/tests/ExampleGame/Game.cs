@@ -8,6 +8,7 @@ using Piot.MonotonicTime;
 using Piot.Surge;
 using Piot.Surge.Internal.Generated;
 using Piot.Surge.Pulse.Client;
+using Piot.Surge.Pulse.Host;
 using Piot.Surge.Types;
 using Piot.Transport;
 
@@ -15,10 +16,11 @@ namespace Tests.ExampleGame;
 
 public class Game
 {
-    private readonly Client client;
+    private readonly Client? client;
+    private readonly Host? host;
     private readonly ILog log;
 
-    public Game(ITransport transport, ILog log)
+    public Game(ITransport transport, bool isHosting, ILog log)
     {
         this.log = log;
         var now = new Milliseconds(0);
@@ -28,9 +30,15 @@ public class Game
         var generatedWorld = new GeneratedEngineWorld();
         var worldWithGhostCreator = new WorldWithGhostCreator(entityCreation, generatedWorld);
 
-        client = new(log, now, delta, worldWithGhostCreator,
-            transport, new GeneratedInputFetch());
-        var world = client.World;
+        if (isHosting)
+        {
+            host = new Host(transport, worldWithGhostCreator, now, log);
+        }
+        else
+        {
+            client = new(log, now, delta, worldWithGhostCreator,
+                transport, new GeneratedInputFetch());
+        }
 
         var generatedSpawner = new GeneratedEngineSpawner(worldWithGhostCreator);
 
@@ -44,7 +52,7 @@ public class Game
             avatar.DoCastFireball += (position, direction) =>
             {
                 log.Debug("Play cast effect!");
-                if (!world.IsAuthoritative)
+                if (!worldWithGhostCreator.IsAuthoritative)
                 {
                     return;
                 }
@@ -70,6 +78,7 @@ public class Game
     public void Update(Milliseconds now)
     {
         log.Debug("Update");
-        client.Update(now);
+        client?.Update(now);
+        host?.Update(now);
     }
 }

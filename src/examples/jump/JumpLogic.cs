@@ -8,23 +8,11 @@ using Piot.Surge.Types;
 
 namespace Jump;
 
-public class JumperLogic : ILogic
+public struct JumperLogic : ILogic
 {
-    public Position3 aiming = new();
+    public Position3 aiming;
     public bool isFiring;
-    public Action? onIsFiringChanged;
-    public Action? onPositionChanged;
     public Position3 position;
-
-    public JumperLogic()
-    {
-        onPositionChanged += OnPositionChanged;
-    }
-
-    private void OnPositionChanged()
-    {
-        Console.WriteLine("Position was changed");
-    }
 
     public void Tick()
     {
@@ -37,7 +25,6 @@ public class RocketLogic : ILogic
 {
     public int damage;
     public Position3 position = new();
-
 
     public void Tick()
     {

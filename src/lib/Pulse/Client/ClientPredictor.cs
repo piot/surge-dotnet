@@ -100,12 +100,6 @@ namespace Piot.Surge.Pulse.Client
 
         private void PredictionTick()
         {
-            if (localAvatarPredictors.Count == 0)
-            {
-                log.DebugLowLevel("We have no avatar predictors, returning");
-                return;
-            }
-
             var now = predictionTicker.Now;
 
             foreach (var localAvatarPredictor in localAvatarPredictors.Values)

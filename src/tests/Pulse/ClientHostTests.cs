@@ -44,7 +44,8 @@ public class ClientHostTests
 
     private Host CreateHost(Milliseconds now, ITransport transport)
     {
-        var host = new Host(transport, now, log.SubLog("Host"));
+        var worldWithDetectChanges = new AuthoritativeWorld();
+        var host = new Host(transport, worldWithDetectChanges, now, log.SubLog("Host"));
         return host;
     }
 

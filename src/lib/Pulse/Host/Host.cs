@@ -19,9 +19,8 @@ namespace Piot.Surge.Pulse.Host
 {
     public class Host
     {
-        private readonly AuthoritativeWorld authoritativeWorld;
+        //private readonly AuthoritativeWorld authoritativeWorld;
         private readonly Dictionary<uint, ConnectionToClient> connections = new();
-        private readonly IEntityContainerWithDetectChanges entityContainerWithDetectEntity;
         private readonly ILog log;
         private readonly List<ConnectionToClient> orderedConnections = new();
         private readonly TimeTicker.TimeTicker simulationTicker;
@@ -30,19 +29,18 @@ namespace Piot.Surge.Pulse.Host
         private readonly TransportStatsBoth transportWithStats;
         private TickId serverTickId;
 
-        public Host(ITransport hostTransport, Milliseconds now, ILog log)
+        public Host(ITransport hostTransport, IEntityContainerWithDetectChanges world, Milliseconds now, ILog log)
         {
             transportWithStats = new TransportStatsBoth(hostTransport, now);
             transport = transportWithStats;
             snapshotSyncer = new SnapshotSyncer(transport, log.SubLog("Syncer"));
-            authoritativeWorld = new AuthoritativeWorld();
-            entityContainerWithDetectEntity = authoritativeWorld;
+            AuthoritativeWorld = world;
             this.log = log;
             simulationTicker = new(new Milliseconds(0), SimulationTick, new Milliseconds(16),
                 log.SubLog("SimulationTick"));
         }
 
-        public IAuthoritativeEntityContainer AuthoritativeWorld => authoritativeWorld;
+        public IEntityContainerWithDetectChanges AuthoritativeWorld { get; }
 
         public TransportStats.TransportStats Stats => transportWithStats.Stats;
 
@@ -66,7 +64,7 @@ namespace Piot.Surge.Pulse.Host
                         continue;
                     }
 
-                    var targetEntity = entityContainerWithDetectEntity.FetchEntity(connection.ControllingEntityId);
+                    var targetEntity = AuthoritativeWorld.FetchEntity(connection.ControllingEntityId);
                     var inputDeserialize = targetEntity.GeneratedEntity as IInputDeserialize;
                     if (inputDeserialize is null)
                     {
@@ -82,7 +80,7 @@ namespace Piot.Surge.Pulse.Host
 
         private void TickWorld()
         {
-            Ticker.Tick(entityContainerWithDetectEntity);
+            Ticker.Tick(AuthoritativeWorld);
         }
 
         private void SimulationTick()
@@ -97,14 +95,14 @@ namespace Piot.Surge.Pulse.Host
 
         private DeltaSnapshotPackContainer StoreWorldChangesToPackContainer()
         {
-            var deltaSnapshotInternal = SnapshotDeltaCreator.Scan(entityContainerWithDetectEntity, serverTickId);
+            var deltaSnapshotInternal = SnapshotDeltaCreator.Scan(AuthoritativeWorld, serverTickId);
             var convertedDeltaSnapshot = FromSnapshotDeltaInternal.Convert(deltaSnapshotInternal);
             var deltaPackContainer =
-                SnapshotDeltaPackCreator.Create(entityContainerWithDetectEntity, convertedDeltaSnapshot,
+                SnapshotDeltaPackCreator.Create(AuthoritativeWorld, convertedDeltaSnapshot,
                     Array.Empty<EntityId>());
 
-            entityContainerWithDetectEntity.ClearDelta();
-            OverWriter.Overwrite(entityContainerWithDetectEntity);
+            AuthoritativeWorld.ClearDelta();
+            OverWriter.Overwrite(AuthoritativeWorld);
 
             return deltaPackContainer;
         }

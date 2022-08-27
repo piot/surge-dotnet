@@ -48,8 +48,8 @@ public class GameTests
         }
 
 
-        var clientGame = new Game(clientTransport, log.SubLog("client"));
-        var hostGame = new Game(hostTransport, log.SubLog("host"));
+        var clientGame = new Game(clientTransport, false, log.SubLog("client"));
+        var hostGame = new Game(hostTransport, true, log.SubLog("host"));
 
 
         //var world = host.AuthoritativeWorld;
