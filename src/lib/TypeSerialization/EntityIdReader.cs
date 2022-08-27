@@ -11,7 +11,7 @@ namespace Piot.Surge
     {
         public static EntityId Read(IOctetReader reader)
         {
-            return new EntityId(reader.ReadUInt32());
+            return new EntityId(reader.ReadUInt16());
         }
     }
 }

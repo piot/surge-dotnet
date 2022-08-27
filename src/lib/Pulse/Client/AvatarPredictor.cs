@@ -23,7 +23,7 @@ namespace Piot.Surge.Pulse.Client
         public AvatarPredictor(LocalPlayerIndex localPlayerIndex, IEntity assignedAvatar, ILog log)
         {
             this.log = log;
-            this.LocalPlayerIndex = localPlayerIndex;
+            LocalPlayerIndex = localPlayerIndex;
             this.assignedAvatar = assignedAvatar;
         }
 

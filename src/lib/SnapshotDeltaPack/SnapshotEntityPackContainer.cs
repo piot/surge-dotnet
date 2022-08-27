@@ -15,7 +15,7 @@ namespace Piot.Surge.SnapshotDeltaPack
 
     public interface IReadPackContainer
     {
-        public Dictionary<uint, ReadOnlyMemory<byte>> Entries { get; }
+        public Dictionary<ushort, ReadOnlyMemory<byte>> Entries { get; }
     }
 
     /// <summary>
@@ -33,7 +33,7 @@ namespace Piot.Surge.SnapshotDeltaPack
             Entries.Add(entityId.Value, payload.ToArray());
         }
 
-        public Dictionary<uint, ReadOnlyMemory<byte>> Entries { get; } = new();
+        public Dictionary<ushort, ReadOnlyMemory<byte>> Entries { get; } = new();
 
         public ReadOnlyMemory<byte> PackForEntity(EntityId entityId)
         {
