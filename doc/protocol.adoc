@@ -38,17 +38,17 @@ Also contains fully non compressed correction state for the predicting avatars o
 
 |`S8`
 |Input Step Id diff
-|The input TickId diff. Optimal values are around +1 to +3. Negative values indicates that the host had to guess input values since the input queue was starved.
+|The input TickId diff on the host incoming input queue from the client. Optimal values are around +1 to +3. Negative values indicates that the host had to guess input values since the input queue was starved. Combined value for all the local players (in almost all cases the local players are sending the same highest tickId).
 
 |`U32`
-|LastSnapshotId
-|Last snapshotID in the range
+|LastTickId
+|Last tickID in the range
 
 |`U8`
 |SnapshotCount
-|How many snapshots are contained going backwards. Must be at least one.
+|How many snapshots (resending older snapshots) are contained in the payload slice going backwards. Must be at least one.
 
-`FirstSnapshotID = LastSnapshotId - (SnapshotCount - 1)`.
+`FirstTickId = LastTickId - (SnapshotCount - 1)`.
 
 |`U8`
 |PayloadPartIndex
@@ -67,7 +67,7 @@ For more info about the `PayloadSlice`, check out xref:snapshot.adoc#SnapshotMes
 === Predicted Logical Input Datagrams
 Sent by client to authoritative host for the locally predicted avatars on the client (usually just one).
 
-The protocol has, by design, no way of splitting in multiple datagrams.
+The logical input datagrams has, by design, no way of splitting inputs over multiple datagrams.
 
 If we have around 300 ms as a maximum latency from a QoS perspective and assume a 16ms simulation tick, that comes down to around 16 locally predicted inputs.
 
@@ -99,23 +99,32 @@ With a redundancy about 16, that must fit in a single datagram, results in a max
 
 |`LogicalInputStream [InputStreamCount]`
 |InputChunks
-|Input chunks repeated `InputStreamCount` times. See <<Logical Input Stream>>.
+|Input streams repeated `InputStreamCount` times. See <<Logical Input Stream>>.
 
 |===
 
 ==== Logical Input Stream
 
+
+[cols="1,1,4"]
 |===
 |`U8`
-|LocalPlayerIndex
-|The local player index.
+|LocalPlayerIndex and AssignmentId
+|The lower 4 bits are the local player index, and the high 4 bits is the assignment ID.
 
-The local player index is something that the client assigns on its own. Usually from 1-4, which represents the bound input devices in order.
+The `*LocalPlayerIndex*` is something that the client assigns on its own. Usually from 1-4, which represents the bound input devices in order.
+
+`*AssignmentId*`, input related to the host assigned assignment ID (basically indirectly for which Entity the player is predicting).
+
 
 |`U32`
-|FirstSnapshotId
-|Input was predicted and applied when state was at this `FirstSnapshotId`. Receiver should assume that it increased by one
+
+_(TODO: change to `U8` in future versions)_
+|FirstTickId
+|Input was predicted and applied when state was at this `FirstTickId`. Receiver should assume that it increased by one
 after each `InputStreamCount` LogicalInputChunks.
+
+Note, this can be compressed to only use the lower 8 bits or so for the SnapshotId (TickId), since the client can not be ahead or behind more than around 30 ticks (a span of 60).
 
 |`U8`
 |InputCount
@@ -135,7 +144,9 @@ after each `InputStreamCount` LogicalInputChunks.
 
 |`U8`
 |PayloadLength
-|The number of following octets. 1-70 octets if one stream (with full 16 redundancy), 1-35 for two streams. 0 is allowed if no data available yet, like a recently joined player.
+|The number of following octets.
+
+1-70 octets if one stream (with full 16 redundancy), 1-35 for two streams. 0 is not allowed.
 
 |`U8[PayloadLength]`
 |Payload
@@ -171,12 +182,14 @@ Sent from Client to Host, to signal the latest useful snapshot that was received
 |===
 |Type|Name|Description
 
-|`U32`
-|TickIdForLastSnapshot
+|`U32` (TODO: change to `U8` in future versions)
+|TickIdForLastReceivedSnapshot
 |The TickId for the last Snapshot that the client received in a consecutive unbroken sequence.
+
+Note, this can be compressed to only use the lower 8 bits or so for the `TickIdForLastSnapshot`, since the client can not be ahead or behind more than around 30 ticks (a span of 60).
 
 |`U8`
 |DroppedSnapshotCount
-|The number of dropped snapshots after `TickIdForLastSnapshot`. 0 - 30.
+|The number of dropped snapshots after `TickIdForLastReceivedSnapshot`. 0 - 30.
 
 |===

@@ -12,7 +12,7 @@ A more detailed look at the contents of an individual Snapshot Message.
 |DeletedCount
 |Number of following EntityIds
 
-|`U32[DeletedCount]`
+|`U16[DeletedCount]`
 |DeletedEntityIds
 |EntityIds that was deleted
 
@@ -50,7 +50,7 @@ A more detailed look at the contents of an individual Snapshot Message.
 |===
 |Type|Name|Description
 
-|`U32`
+|`U16`
 |EntityId
 |ID of the created entity
 
@@ -70,7 +70,7 @@ A more detailed look at the contents of an individual Snapshot Message.
 |===
 |Type|Name|Description
 
-|`U32`
+|`U16`
 |EntityId
 |ID of the updated entity
 
@@ -94,7 +94,7 @@ ChangedFieldsMask = (ChangedFieldsMaskHi << 15) \| ChangedFieldsMaskLow & 0x7fff
 |===
 |Type|Name|Description
 
-|`U32`
+|`U16`
 |EntityId
 |ID of the entity that the correction state should be applied to
 
@@ -105,5 +105,9 @@ ChangedFieldsMask = (ChangedFieldsMaskHi << 15) \| ChangedFieldsMaskLow & 0x7fff
 |`U8[?]`
 |EntityFields
 |Payload with all the field values in the Entity serialized in order.
+
+|`U8[?]`
+|GameSpecificCorrectionData
+|Payload with usually low level physics state information and/or detailed movement state.
 
 |===
