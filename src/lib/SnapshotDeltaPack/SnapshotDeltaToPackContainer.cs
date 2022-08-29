@@ -6,6 +6,7 @@
 using System.Linq;
 using Piot.Flood;
 using Piot.Surge.LocalPlayer;
+using Piot.Surge.Snapshot;
 using Piot.Surge.SnapshotDeltaPack.Serialization;
 
 namespace Piot.Surge.SnapshotDeltaPack
@@ -18,7 +19,7 @@ namespace Piot.Surge.SnapshotDeltaPack
         /// <param name="world"></param>
         /// <param name="snapshotDeltaAfter"></param>
         /// <returns></returns>
-        internal static DeltaSnapshotPackContainer SnapshotDeltaToContainer(IEntityContainer world,
+        internal static SnapshotDeltaPack SnapshotDeltaToContainer(IEntityContainer world,
             SnapshotDelta.SnapshotDelta snapshotDeltaAfter)
         {
             var writer = new OctetWriter(Constants.MaxSnapshotOctetSize);
@@ -41,7 +42,7 @@ namespace Piot.Surge.SnapshotDeltaPack
                 PackUpdatedEntity.Write(writer, updateEntity.Id, updateEntity.ChangeMask, updateEntity.Serializer);
             }
 
-            return new DeltaSnapshotPackContainer(snapshotDeltaAfter.TickId, writer.Octets);
+            return new (TickIdRange.FromTickId(snapshotDeltaAfter.TickId), writer.Octets);
         }
     }
 }

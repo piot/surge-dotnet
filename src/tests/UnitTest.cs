@@ -348,7 +348,7 @@ public class UnitTest1
         Assert.Equal(0, avatarInfo.Self.position.x);
         Assert.Equal(0u, (avatarInfo as IEntityChanges).Changes());
 
-        var packetQueue = new SnapshotDeltaPackQueue();
+        var packetQueue = new SnapshotDeltaPackIncludingCorrectionsQueue();
         var notifyWorld = new GeneratedEngineWorld();
 
         var world = new WorldWithGhostCreator(new GeneratedEntityGhostCreator(), notifyWorld);

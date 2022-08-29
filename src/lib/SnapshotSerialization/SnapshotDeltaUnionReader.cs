@@ -6,6 +6,7 @@
 using System;
 using Piot.Flood;
 using Piot.Surge.Snapshot;
+using Piot.Surge.SnapshotDeltaPack;
 using Piot.Surge.SnapshotDeltaPack.Serialization;
 
 namespace Piot.Surge.SnapshotSerialization
@@ -29,7 +30,7 @@ namespace Piot.Surge.SnapshotSerialization
         /// <param name="reader"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public static SerializedSnapshotDeltaPackUnion Read(IOctetReader reader)
+        public static SnapshotDeltaPackIncludingCorrections Read(IOctetReader reader)
         {
 #if DEBUG
             if (reader.ReadUInt8() != Constants.UnionSync)
@@ -38,98 +39,10 @@ namespace Piot.Surge.SnapshotSerialization
             }
 #endif
             var frameIdRange = TickIdRangeReader.Read(reader);
-            var packs = new SnapshotDeltaPack.SnapshotDeltaPack[frameIdRange.Length];
-            for (var i = 0; i < frameIdRange.Length; ++i)
-            {
-                var payloadOctetCount = reader.ReadUInt16();
-                var payload = reader.ReadOctets(payloadOctetCount);
-                var includedCorrection = new SnapshotDeltaIncludedCorrectionPackMemory
-                {
-                    memory = payload.ToArray()
-                };
-                var snapshotDeltaPack =
-                    new SnapshotDeltaPack.SnapshotDeltaPack(
-                        new TickId((uint)(frameIdRange.startTickId.tickId + i)), includedCorrection);
-                packs[i] = snapshotDeltaPack;
-            }
+            var payloadOctetCount = reader.ReadUInt16();
+            var payload = reader.ReadOctets(payloadOctetCount);
 
-            return new SerializedSnapshotDeltaPackUnion
-            {
-                tickIdRange = frameIdRange,
-                packs = packs
-            };
+            return new (frameIdRange, payload);
         }
-    }
-
-
-    public static class SnapshotDeltaUnionWriter
-    {
-        /// <summary>
-        ///     Written on the host to be sent to a client.
-        ///     In many cases the union only consists of a single delta compressed snapshot.
-        ///     But in the case of previously dropped snapshots, host resends snapshots in
-        ///     ascending, consecutive order.
-        /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="serializedSnapshotDeltaPacks"></param>
-        public static void Write(IOctetWriter writer, SerializedSnapshotDeltaPackUnion serializedSnapshotDeltaPacks)
-        {
-#if DEBUG
-            writer.WriteUInt8(Constants.UnionSync);
-#endif
-            TickIdRangeWriter.Write(writer, serializedSnapshotDeltaPacks.tickIdRange);
-            foreach (var serializedSnapshotDeltaPack in serializedSnapshotDeltaPacks.packs)
-            {
-                writer.WriteUInt16((ushort)serializedSnapshotDeltaPack.payload.Length);
-                writer.WriteOctets(serializedSnapshotDeltaPack.payload.Span);
-            }
-        }
-    }
-
-
-    public static class SnapshotDeltaUnionPacker
-    {
-        public static SerializedSnapshotDeltaPackUnionFlattened Pack(
-            SerializedSnapshotDeltaPackUnion serializedSnapshotDeltaPacks)
-        {
-            var unionStream = new OctetWriter(10 * 1200);
-
-            SnapshotDeltaUnionWriter.Write(unionStream, serializedSnapshotDeltaPacks);
-            return new SerializedSnapshotDeltaPackUnionFlattened
-            {
-                tickIdRange = serializedSnapshotDeltaPacks.tickIdRange,
-                payload = unionStream.Octets.ToArray()
-            };
-        }
-    }
-
-    public struct SerializedSnapshotDeltaPackUnion
-    {
-        public TickIdRange tickIdRange;
-        public SnapshotDeltaPack.SnapshotDeltaPack[] packs;
-    }
-
-    public struct SerializedSnapshotDeltaPackUnionFlattened
-    {
-        public TickIdRange tickIdRange;
-        public ReadOnlyMemory<byte> payload;
-
-        public override string ToString()
-        {
-            return $"[UnionFlattened {tickIdRange}]";
-        }
-    }
-
-    public struct SerializedSnapshotDeltaPack
-    {
-        public TickId tickId;
-        public byte[] payload;
-    }
-
-    public struct SerializedSnapshotDeltaPackForEntity
-    {
-        public TickId tickId;
-        public EntityId entityId;
-        public byte[] payload;
     }
 }

@@ -23,6 +23,11 @@ namespace Piot.Surge.Snapshot
             this.lastTickId = lastTickId;
         }
 
+        public static TickIdRange FromTickId(TickId tickId)
+        {
+            return new(tickId, tickId);
+        }
+
         public bool Contains(TickIdRange other)
         {
             return other.startTickId.tickId >= startTickId.tickId && other.lastTickId.tickId <= lastTickId.tickId;

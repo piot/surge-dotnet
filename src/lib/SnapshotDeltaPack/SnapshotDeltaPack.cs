@@ -5,27 +5,32 @@
 
 using System;
 using Piot.Surge.Snapshot;
-using Piot.Surge.SnapshotDeltaPack.Serialization;
 
 namespace Piot.Surge.SnapshotDeltaPack
 {
     /// <summary>
     ///     Holds a complete delta snapshot serialized pack payload.
+    ///     Holds reusable packs (serialized values) for all the entities that has changed from one tick to the next.
+    ///     The values are stored in this container, so they can be fetched again if a delta snapshots needs to be resent.
+    ///     It also serves as a small optimization for the current delta snapshot, the field values doesn't have to be
+    ///     re-serialized for each client.
     /// </summary>
     public class SnapshotDeltaPack
     {
         public ReadOnlyMemory<byte> payload;
-        public TickId tickId;
+        public TickIdRange tickIdRange;
 
-        public SnapshotDeltaPack(TickId tickId, SnapshotDeltaIncludedCorrectionPackMemory payload)
+        public TickIdRange TickIdRange => tickIdRange;
+        
+        public SnapshotDeltaPack(TickIdRange tickIdRange, ReadOnlySpan<byte> payload)
         {
-            this.tickId = tickId;
-            this.payload = payload.memory;
+            this.tickIdRange = tickIdRange;
+            this.payload = payload.ToArray();
         }
 
         public override string ToString()
         {
-            return $"[snapshotDeltaPack tickId: {tickId} payload length: {payload.Length}]";
+            return $"[snapshotDeltaPack tickId: {tickIdRange} payload length: {payload.Length}]";
         }
     }
 }

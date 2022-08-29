@@ -90,11 +90,11 @@ namespace Piot.Surge.Pulse.Host
             SetInputsFromClientsToEntities();
             TickWorld();
             var (masks, packContainer) = StoreWorldChangesToPackContainer();
-            snapshotSyncer.SendSnapshot(masks, packContainer);
+            snapshotSyncer.SendSnapshot(masks, Array.Empty<ConnectionPlayer>(), packContainer);
             serverTickId = new TickId(serverTickId.tickId + 1);
         }
 
-        private (SnapshotDeltaEntityMasks, DeltaSnapshotPackContainer) StoreWorldChangesToPackContainer()
+        private (SnapshotDeltaEntityMasks, SnapshotDeltaPack.SnapshotDeltaPack) StoreWorldChangesToPackContainer()
         {
             var snapshotDelta = SnapshotDeltaCreator.Scan(AuthoritativeWorld, serverTickId);
             var deltaPackContainer =

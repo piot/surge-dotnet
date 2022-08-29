@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using Piot.Clog;
+using Piot.Flood;
 using Piot.Surge.OrderedDatagrams;
 using Piot.Surge.Snapshot;
 using Piot.Surge.SnapshotDeltaMasks;
@@ -34,7 +35,9 @@ namespace Piot.Surge.Pulse.Host
         {
             Endpoint = id;
         }
-
+        
+        public Entity? AssignedPredictEntity {  get; set; }
+        
         public RemoteEndpointId Endpoint { get; }
         public OrderedDatagramsOutIncrease DatagramsOutIncrease { get; } = new();
         public bool WantsResend => false;
@@ -60,14 +63,14 @@ namespace Piot.Surge.Pulse.Host
     public class SnapshotSyncer
     {
         private readonly ILog log;
-        private readonly DeltaSnapshotPackContainerHistory snapshotHistory;
         private readonly SnapshotDeltaEntityMasksHistory entityMasksHistory = new();
         private readonly List<SnapshotSyncerClient> syncClients = new();
         private readonly ITransportSend transportSend;
+        private readonly DeltaSnapshotPackCache deltaSnapshotPackCache;
 
-        public SnapshotSyncer(ITransportSend transportSend, ILog log)
+        public SnapshotSyncer(ITransportSend transportSend,  ILog log)
         {
-            snapshotHistory = new(log);
+            deltaSnapshotPackCache = new(log);
             this.transportSend = transportSend;
             this.log = log;
         }
@@ -81,35 +84,41 @@ namespace Piot.Surge.Pulse.Host
             return client;
         }
 
-        private void SendUsingContainers(SnapshotSyncerClient connection, TickId serverTickId)
+        private void SendUsingContainers(SnapshotSyncerClient connection, ConnectionPlayer[] connectionPlayers, TickId serverTickId)
         {
             var rangeToSend = connection.WantsResend
                 ? connection.WaitingForTickIds
                 : new TickIdRange(serverTickId, serverTickId);
 
-            var fetchedContainers = snapshotHistory.FetchContainers(rangeToSend);
-
-            List<SnapshotDeltaPack.SnapshotDeltaPack> deltaPacks = new();
-            foreach (var fetchedContainer in fetchedContainers)
+            var wasFound = deltaSnapshotPackCache.FetchPack(rangeToSend, out var fetchedContainer);
+            if (!wasFound)
             {
-                var snapshotDeltaMemory =
-                    SnapshotDeltaPacker.Pack(fetchedContainer, log);
-                var deltaPack = new SnapshotDeltaPack.SnapshotDeltaPack(fetchedContainer.TickId, snapshotDeltaMemory);
-                deltaPacks.Add(deltaPack);
+                var combinedMasks = entityMasksHistory.Fetch(rangeToSend);
             }
 
-            var serializedUnion = new SerializedSnapshotDeltaPackUnion
+            SnapshotDeltaPackIncludingCorrections includingCorrections;
+            if (connectionPlayers.Length > 0)
             {
-                tickIdRange = rangeToSend,
-                packs = deltaPacks.ToArray()
-            };
+                var writer = new OctetWriter(Constants.MaxSnapshotOctetSize);
+                writer.WriteOctets(fetchedContainer.payload.Span);
+                writer.WriteUInt8((byte)connectionPlayers.Length);
+
+                foreach (var predicted in connectionPlayers)
+                {
+                    
+                }
+
+                includingCorrections = new(rangeToSend, writer.Octets);
+            }
+            else
+            {
+                includingCorrections = new (rangeToSend, fetchedContainer.payload.Span);
+            }
 
             var sender = new WrappedSender(transportSend, connection.Endpoint);
 
-            var unionFlattened = SnapshotDeltaUnionPacker.Pack(serializedUnion);
-
-            log.DebugLowLevel("sending datagrams {Flattened}", unionFlattened);
-            SnapshotDeltaPackUnionToDatagramsWriter.Write(sender.Send, unionFlattened,
+            log.DebugLowLevel("sending datagrams {Flattened}", fetchedContainer);
+            SnapshotDeltaPackUnionToDatagramsWriter.Write(sender.Send, includingCorrections,
                 connection.lastReceivedMonotonicTimeLowerBits, connection.clientInputTickCountAheadOfServer,
                 serverTickId,
                 connection.DatagramsOutIncrease);
@@ -120,13 +129,12 @@ namespace Piot.Surge.Pulse.Host
             var maskUnion = entityMasksHistory.Fetch(connection.WaitingForTickIds);
         }
 
-        public void SendSnapshot(SnapshotDeltaEntityMasks masks, DeltaSnapshotPackContainer container)
+        public void SendSnapshot(SnapshotDeltaEntityMasks masks, ConnectionPlayer[] connectionPlayers, SnapshotDeltaPack.SnapshotDeltaPack container)
         {
-            snapshotHistory.Add(container);
             entityMasksHistory.Enqueue(masks);
             foreach (var syncClient in syncClients)
             {
-                SendUsingContainers(syncClient, container.TickId);
+                SendUsingContainers(syncClient, connectionPlayers, container.tickIdRange.Last);
             }
         }
     }

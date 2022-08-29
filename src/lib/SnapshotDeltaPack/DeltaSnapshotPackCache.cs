@@ -14,20 +14,20 @@ namespace Piot.Surge.SnapshotDeltaPack
     ///     Holds a queue of previous delta snapshot packs. Used primarily when connection indicates
     ///     that they want a delta snapshot to be resent.
     /// </summary>
-    public class DeltaSnapshotPackContainerHistory
+    public class DeltaSnapshotPackCache
     {
         private readonly ILog log;
-        private readonly Queue<DeltaSnapshotPackContainer> queue = new();
+        private readonly Queue<SnapshotDeltaPack> queue = new();
         private TickIdRange tickIdRange;
 
-        public DeltaSnapshotPackContainerHistory(ILog log)
+        public DeltaSnapshotPackCache(ILog log)
         {
             this.log = log;
         }
 
-        public void Add(DeltaSnapshotPackContainer container)
+        public void Add(SnapshotDeltaPack container)
         {
-            var tickId = container.TickId;
+            var tickId = container.TickIdRange.Last;
             if (queue.Count > 0 && !tickId.IsImmediateFollowing(tickIdRange.Last))
             {
                 throw new ArgumentOutOfRangeException(nameof(tickId),
@@ -41,30 +41,14 @@ namespace Piot.Surge.SnapshotDeltaPack
         }
 
         /// <summary>
-        ///     Returns a collection of containers for the specified <paramref name="queryIdRange" />.
+        ///     Returns a snapshot pack for the specified <paramref name="queryIdRange" />.
         /// </summary>
         /// <param name="queryIdRange"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public DeltaSnapshotPackContainer[] FetchContainers(TickIdRange queryIdRange)
+        public bool FetchPack(TickIdRange queryIdRange, out SnapshotDeltaPack outPack)
         {
-            if (!tickIdRange.Contains(queryIdRange))
-            {
-                throw new ArgumentOutOfRangeException(nameof(queryIdRange));
-            }
-
-            var (startOffset, endOffset) = tickIdRange.Offsets(queryIdRange);
-
-            var sourceArray = queue.ToArray();
-
-            var targetContainers = new DeltaSnapshotPackContainer[endOffset - startOffset + 1];
-            for (var i = startOffset; i <= endOffset; ++i)
-            {
-                var source = sourceArray[i];
-                targetContainers[i - startOffset] = source;
-            }
-
-            return targetContainers;
+            throw new NotImplementedException();
         }
     }
 }

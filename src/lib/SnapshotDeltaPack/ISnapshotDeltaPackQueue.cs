@@ -11,7 +11,7 @@ namespace Piot.Surge.SnapshotDeltaPack
     public interface ISnapshotDeltaPackQueue
     {
         public int Count { get; }
-        public void Enqueue(SnapshotDeltaPack pack);
-        public SnapshotDeltaPack Dequeue();
+        public void Enqueue(SnapshotDeltaPackIncludingCorrections pack);
+        public SnapshotDeltaPackIncludingCorrections Dequeue();
     }
 }
