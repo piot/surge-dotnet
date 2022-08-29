@@ -10,6 +10,7 @@ using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.Surge.Snapshot;
 using Piot.Surge.SnapshotDeltaInternal;
+using Piot.Surge.SnapshotDeltaMasks;
 using Piot.Surge.SnapshotDeltaPack;
 using Piot.Surge.SnapshotDeltaPack.Serialization;
 using Piot.Surge.TransportStats;
@@ -88,23 +89,21 @@ namespace Piot.Surge.Pulse.Host
             log.Debug("== Simulation Tick! {TickId}", serverTickId);
             SetInputsFromClientsToEntities();
             TickWorld();
-            var packContainer = StoreWorldChangesToPackContainer();
-            snapshotSyncer.SendSnapshot(packContainer);
+            var (masks, packContainer) = StoreWorldChangesToPackContainer();
+            snapshotSyncer.SendSnapshot(masks, packContainer);
             serverTickId = new TickId(serverTickId.tickId + 1);
         }
 
-        private DeltaSnapshotPackContainer StoreWorldChangesToPackContainer()
+        private (SnapshotDeltaEntityMasks, DeltaSnapshotPackContainer) StoreWorldChangesToPackContainer()
         {
-            var deltaSnapshotInternal = SnapshotDeltaCreator.Scan(AuthoritativeWorld, serverTickId);
-            var convertedDeltaSnapshot = FromSnapshotDeltaInternal.Convert(deltaSnapshotInternal);
+            var snapshotDelta = SnapshotDeltaCreator.Scan(AuthoritativeWorld, serverTickId);
             var deltaPackContainer =
-                SnapshotDeltaPackCreator.Create(AuthoritativeWorld, convertedDeltaSnapshot,
-                    Array.Empty<EntityId>());
+                SnapshotDeltaPackCreator.Create(AuthoritativeWorld, snapshotDelta);
 
             AuthoritativeWorld.ClearDelta();
             OverWriter.Overwrite(AuthoritativeWorld);
 
-            return deltaPackContainer;
+            return (SnapshotDeltaToEntityMasks.ConvertToEntityMasks(snapshotDelta), deltaPackContainer);
         }
 
         private void ReceiveFromClients()

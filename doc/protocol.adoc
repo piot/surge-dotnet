@@ -1,10 +1,12 @@
 = Surge Protocol
 
 :network-byte-order: footnote:[wikipedia: https://en.wikipedia.org/wiki/Endianness#Networking[Networking Endianness]]
+:netcode-io: footnote:[Netcode homepage https://github.com/networkprotocol/netcode]
+:netcode-io-net: footnote:[Netcode.IO.Net https://github.com/GlaireDaggers/Netcode.IO.NET]
 
 The Surge protocol is based on datagrams, e.g. UDP. It does not handle connections, encryption, counter replay attacks, IP Spoofing, sessions, etc, since they differ widly on different unreliable datagram services and transports.
 
-If not already decided on an existing unreliable datagram transport, netcode.io looks interesting.
+If not already decided on an existing unreliable datagram transport, Netcode.IO{netcode-io} with C# implementation{netcode-io-net} looks interesting.
 
 All values are sent in Network Byte Order {network-byte-order} (big endian) unless otherwise specified.
 
@@ -40,15 +42,24 @@ Also contains fully non compressed correction state for the predicting avatars o
 |Input Step Id diff
 |The input TickId diff on the host incoming input queue from the client. Optimal values are around +1 to +3. Negative values indicates that the host had to guess input values since the input queue was starved. Combined value for all the local players (in almost all cases the local players are sending the same highest tickId).
 
+|`U8`
+|SnapshotType
+|`0x01` = Full Serialization (only used when late joining / rejoining).
+`0x02` = DeltaSnapshot
+
 |`U32`
-|LastTickId
-|Last tickID in the range
+|TickId
+|The tickID that this snapshot represents.
+
 
 |`U8`
-|SnapshotCount
-|How many snapshots (resending older snapshots) are contained in the payload slice going backwards. Must be at least one.
+|MergedSnapshotCount
+|How many tickIds going backward is merged into the payload slice going backwards. Must be at least one.
+If greater than one, it is because packets are dropped and/or connection is deemed to be prone to packet drops.
+In that case, the snapshots are merged (union) into a combined snapshot.
+if SnapshotType is 0x02 then this is set to zero.
 
-`FirstTickId = LastTickId - (SnapshotCount - 1)`.
+`FirstTickId = TickId - (MergedSnapshotCount - 1)`.
 
 |`U8`
 |PayloadPartIndex

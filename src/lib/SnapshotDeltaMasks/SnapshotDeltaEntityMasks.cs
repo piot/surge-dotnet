@@ -27,6 +27,11 @@ namespace Piot.Surge.SnapshotDeltaMasks
 
         public Dictionary<ushort, ulong> EntityMasks { get; }
 
+        public ulong FetchEntity(EntityId entityId)
+        {
+            return EntityMasks[entityId.Value];
+        }
+        
         public TickId TickId { get; }
     }
 }

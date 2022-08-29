@@ -6,6 +6,7 @@
 using System.Collections.Generic;
 using Piot.Surge.ChangeMask;
 using Piot.Surge.SnapshotDelta;
+using Piot.Surge.SnapshotDeltaMasks;
 
 namespace Piot.Surge.SnapshotDeltaInternal
 {
@@ -14,31 +15,31 @@ namespace Piot.Surge.SnapshotDeltaInternal
     /// </summary>
     public static class FromSnapshotDeltaInternal
     {
-        public static SnapshotDelta.SnapshotDelta Convert(SnapshotDeltaInternal internalDelta)
+        public static SnapshotDelta.SnapshotDelta ConvertFromEntityMasksToSnapshotDelta(SnapshotDeltaEntityMasks internalDelta)
         {
             var deletedIds = new List<EntityId>();
             var createdIds = new List<EntityId>();
             var updatedEntities = new List<SnapshotDeltaChangedEntity>();
 
-            foreach (var x in internalDelta.entities)
+            foreach (var x in internalDelta.EntityMasks)
             {
-                var changeMask = x.Value.changeMask;
+                var changeMask = x.Value;
                 if (changeMask == ChangedFieldsMask.AllFieldChangedMaskBits)
                 {
-                    createdIds.Add(new EntityId(x.Key));
+                    createdIds.Add(new (x.Key));
                 }
                 else if ((changeMask & ChangedFieldsMask.DeletedMaskBit) != 0)
                 {
-                    deletedIds.Add(new EntityId(x.Key));
+                    deletedIds.Add(new (x.Key));
                 }
                 else
                 {
-                    updatedEntities.Add(new SnapshotDeltaChangedEntity(new EntityId(x.Key),
-                        new ChangedFieldsMask(x.Value.changeMask)));
+                    updatedEntities.Add(new (new EntityId(x.Key),
+                        new ChangedFieldsMask(x.Value)));
                 }
             }
 
-            return new SnapshotDelta.SnapshotDelta(internalDelta.TickId, deletedIds.ToArray(), createdIds.ToArray(),
+            return new (internalDelta.TickId, deletedIds.ToArray(), createdIds.ToArray(),
                 updatedEntities.ToArray());
         }
     }

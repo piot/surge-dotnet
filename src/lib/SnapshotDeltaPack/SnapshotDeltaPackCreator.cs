@@ -13,10 +13,9 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
         /// <param name="idRange"></param>
         /// <param name="world"></param>
         /// <returns></returns>
-        public static DeltaSnapshotPackContainer Create(IEntityContainer world, SnapshotDelta.SnapshotDelta delta,
-            EntityId[] remoteClientPredictedEntityIds)
+        public static DeltaSnapshotPackContainer Create(IEntityContainer world, SnapshotDelta.SnapshotDelta delta)
         {
-            return SnapshotDeltaToPackContainer.SnapshotDeltaToContainer(world, delta, remoteClientPredictedEntityIds);
+            return SnapshotDeltaToPackContainer.SnapshotDeltaToContainer(world, delta);
         }
     }
 }

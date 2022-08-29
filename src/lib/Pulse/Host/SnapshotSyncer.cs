@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using Piot.Clog;
 using Piot.Surge.OrderedDatagrams;
 using Piot.Surge.Snapshot;
+using Piot.Surge.SnapshotDeltaMasks;
 using Piot.Surge.SnapshotDeltaPack;
 using Piot.Surge.SnapshotDeltaPack.Serialization;
 using Piot.Surge.SnapshotSerialization;
@@ -60,6 +61,7 @@ namespace Piot.Surge.Pulse.Host
     {
         private readonly ILog log;
         private readonly DeltaSnapshotPackContainerHistory snapshotHistory;
+        private readonly SnapshotDeltaEntityMasksHistory entityMasksHistory = new();
         private readonly List<SnapshotSyncerClient> syncClients = new();
         private readonly ITransportSend transportSend;
 
@@ -91,9 +93,8 @@ namespace Piot.Surge.Pulse.Host
             foreach (var fetchedContainer in fetchedContainers)
             {
                 var snapshotDeltaMemory =
-                    SnapshotPackContainerToMemory.PackWithFilter(fetchedContainer, Array.Empty<EntityId>());
-                var packWithCorrections = SnapshotDeltaPacker.Pack(snapshotDeltaMemory, log);
-                var deltaPack = new SnapshotDeltaPack.SnapshotDeltaPack(fetchedContainer.TickId, packWithCorrections);
+                    SnapshotDeltaPacker.Pack(fetchedContainer, log);
+                var deltaPack = new SnapshotDeltaPack.SnapshotDeltaPack(fetchedContainer.TickId, snapshotDeltaMemory);
                 deltaPacks.Add(deltaPack);
             }
 
@@ -114,9 +115,15 @@ namespace Piot.Surge.Pulse.Host
                 connection.DatagramsOutIncrease);
         }
 
-        public void SendSnapshot(DeltaSnapshotPackContainer container)
+        void SendUsingMask(SnapshotSyncerClient connection)
+        {
+            var maskUnion = entityMasksHistory.Fetch(connection.WaitingForTickIds);
+        }
+
+        public void SendSnapshot(SnapshotDeltaEntityMasks masks, DeltaSnapshotPackContainer container)
         {
             snapshotHistory.Add(container);
+            entityMasksHistory.Enqueue(masks);
             foreach (var syncClient in syncClients)
             {
                 SendUsingContainers(syncClient, container.TickId);

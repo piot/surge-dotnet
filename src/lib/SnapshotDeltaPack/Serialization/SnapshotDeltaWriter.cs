@@ -8,45 +8,4 @@ using Piot.Flood;
 
 namespace Piot.Surge.SnapshotDeltaPack.Serialization
 {
-    internal static class SnapshotDeltaWriter
-    {
-        private static void WriteEntityCount(IOctetWriter writer, int entityCount)
-        {
-            writer.WriteUInt16((ushort)entityCount);
-        }
-
-        /// <summary>
-        ///     Serialize deleted, created and updated entities to the writer stream.
-        /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="deltaMemory"></param>
-        internal static void Write(SnapshotDeltaMemory deltaMemory, IOctetWriter writer, ILog log)
-        {
-#if DEBUG
-            writer.WriteUInt8(SnapshotSerialization.Constants.SnapshotDeltaSync);
-#endif
-            if (deltaMemory.deletedCount == 0 && deltaMemory.createdCount == 0 && deltaMemory.updatedCount == 0)
-            {
-                log.Notice("suspicious, nothing has changed in this SnapshotDeltaMemory {TickId}", deltaMemory.tickId);
-            }
-
-            WriteEntityCount(writer, (int)deltaMemory.deletedCount);
-            writer.WriteOctets(deltaMemory.deletedMemory.Span);
-
-#if DEBUG
-            writer.WriteUInt8(SnapshotSerialization.Constants.SnapshotDeltaCreatedSync);
-#endif
-            WriteEntityCount(writer, (int)deltaMemory.createdCount);
-            writer.WriteOctets(deltaMemory.createdMemory.Span);
-
-#if DEBUG
-            writer.WriteUInt8(SnapshotSerialization.Constants.SnapshotDeltaUpdatedSync);
-#endif
-            WriteEntityCount(writer, (int)deltaMemory.updatedCount);
-            writer.WriteOctets(deltaMemory.updatedMemory.Span);
-
-            WriteEntityCount(writer, (int)deltaMemory.correctionCount);
-            writer.WriteOctets(deltaMemory.correctionMemory.Span);
-        }
-    }
 }

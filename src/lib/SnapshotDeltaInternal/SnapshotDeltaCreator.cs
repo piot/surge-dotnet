@@ -7,6 +7,7 @@ using System.Linq;
 using Piot.Surge.ChangeMask;
 using Piot.Surge.Snapshot;
 using Piot.Surge.SnapshotDelta;
+using Piot.Surge.SnapshotDeltaMasks;
 
 namespace Piot.Surge.SnapshotDeltaInternal
 {
@@ -17,7 +18,7 @@ namespace Piot.Surge.SnapshotDeltaInternal
         /// </summary>
         /// <param name="world">entity container with change information</param>
         /// <returns></returns>
-        public static SnapshotDeltaInternal Scan(IEntityContainerWithDetectChanges world, TickId tickId)
+        public static SnapshotDelta.SnapshotDelta Scan(IEntityContainerWithDetectChanges world, TickId tickId)
         {
             var deletedEntities = world.Deleted.Select(entity => entity.Id).ToArray();
 
@@ -29,9 +30,7 @@ namespace Piot.Surge.SnapshotDeltaInternal
                 let changes = entity.GeneratedEntity.Changes()
                 select new SnapshotDeltaChangedEntity(entity.Id, new ChangedFieldsMask(changes))).ToArray();
 
-            var snapshotDelta = new SnapshotDeltaInternal(tickId, deletedEntities, createdEntities, updatedEntities);
-
-            return snapshotDelta;
+            return new SnapshotDelta.SnapshotDelta(tickId, deletedEntities, createdEntities, updatedEntities);
         }
     }
 }

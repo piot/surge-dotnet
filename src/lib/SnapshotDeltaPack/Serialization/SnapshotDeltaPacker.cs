@@ -22,10 +22,10 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
         /// </summary>
         /// <param name="deltaMemory"></param>
         /// <returns>The deleted, created and updated memory packs</returns>
-        public static SnapshotDeltaIncludedCorrectionPackMemory Pack(SnapshotDeltaMemory deltaMemory, ILog log)
+        public static SnapshotDeltaIncludedCorrectionPackMemory Pack(DeltaSnapshotPackContainer deltaMemory, ILog log)
         {
             var writer = new OctetWriter(Constants.MaxSnapshotOctetSize);
-            SnapshotDeltaWriter.Write(deltaMemory, writer, log);
+            writer.WriteOctets(deltaMemory.SerializedPack.Span);
             return new SnapshotDeltaIncludedCorrectionPackMemory { memory = writer.Octets.ToArray() };
         }
     }
