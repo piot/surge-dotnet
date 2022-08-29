@@ -18,7 +18,7 @@ namespace Piot.Surge.MonotonicTimeLowerBits
                 throw new Exception("desync in monotonic time");
             }
 #endif
-            return new MonotonicTimeLowerBits { lowerBits = reader.ReadUInt16() };
+            return new (reader.ReadUInt16() );
         }
     }
 }

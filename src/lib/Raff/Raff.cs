@@ -9,7 +9,7 @@ using Piot.Flood;
 
 namespace Piot.Raff
 {
-    public struct FourCC
+    public readonly struct FourCC
     {
         public FourCC(byte[] x)
         {

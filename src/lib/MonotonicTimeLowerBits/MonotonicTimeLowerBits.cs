@@ -8,9 +8,9 @@ namespace Piot.Surge.MonotonicTimeLowerBits
     /// <summary>
     ///     The 16 lower bits of a monotonic <see cref="MonotonicTime.Milliseconds" />.
     /// </summary>
-    public struct MonotonicTimeLowerBits
+    public readonly struct MonotonicTimeLowerBits
     {
-        public ushort lowerBits;
+        public readonly ushort lowerBits;
 
         public MonotonicTimeLowerBits(ushort lowerBits)
         {

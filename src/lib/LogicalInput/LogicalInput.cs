@@ -64,7 +64,7 @@ namespace Piot.Surge.LogicalInput
                    CompareOctets.Compare(other.payload.Span, payload.Span);
         }
 
-        public override string ToString()
+        public readonly override string ToString()
         {
             return
                 $"[LogicalInput TickId:{appliedAtTickId} octetSize:{payload.Length} localPlayerIndex:{localPlayerIndex}]";
