@@ -5,7 +5,6 @@
 
 using System;
 using Piot.Flood;
-using Piot.Surge.Corrections;
 using Piot.Surge.DatagramType.Serialization;
 using Piot.Surge.MonotonicTimeLowerBits;
 using Piot.Surge.OrderedDatagrams;
@@ -18,7 +17,7 @@ namespace Piot.Surge.SnapshotProtocol.Out
     {
         public const uint PayloadOctetCountPerDatagram = 1100;
 
-        public static void Write(Action<ReadOnlyMemory<byte>> send, SnapshotDeltaPackIncludingCorrections pack,
+        public static void Write(Action<ReadOnlyMemory<byte>> send, SnapshotProtocolPack pack,
             MonotonicTimeLowerBits.MonotonicTimeLowerBits monotonicTimeLowerBits, sbyte clientInputTicksAhead,
             TickId serverTickId,
             OrderedDatagramsOutIncrease orderedDatagramsIncrease)

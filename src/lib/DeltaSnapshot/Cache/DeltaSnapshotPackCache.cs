@@ -38,7 +38,7 @@ namespace Piot.Surge.DeltaSnapshot.Cache
             log.DebugLowLevel("Adding snapshot container {Container}", container);
 
             queue.Enqueue(container);
-            tickIdRange = new TickIdRange(tickIdRange.startTickId, tickId);
+            tickIdRange = new TickIdRange(tickIdRange.Last, tickId);
         }
 
         /// <summary>
@@ -49,7 +49,21 @@ namespace Piot.Surge.DeltaSnapshot.Cache
         /// <exception cref="ArgumentOutOfRangeException"></exception>
         public bool FetchPack(TickIdRange queryIdRange, out DeltaSnapshotPack outPack)
         {
-            throw new NotImplementedException();
+            while (queue.Count > 0)
+            {
+                if (queue.Peek().tickIdRange.Last.tickId < queryIdRange.Last.tickId)
+                {
+                    queue.Dequeue();
+                }
+                else if (queue.Peek().tickIdRange.Last.tickId == queryIdRange.Last.tickId)
+                {
+                    outPack = queue.Dequeue();
+                    return true;
+                }
+            }
+
+            outPack = new(new(), ReadOnlySpan<byte>.Empty);
+            return false;
         }
     }
 }

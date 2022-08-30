@@ -103,6 +103,7 @@ namespace Piot.Surge.Pulse.Host
             SnapshotDeltaPackIncludingCorrections includingCorrections;
             if (connectionPlayers.Length > 0)
             {
+                /*
                 var writer = new OctetWriter(Constants.MaxSnapshotOctetSize);
                 writer.WriteOctets(fetchedContainer.payload.Span);
                 writer.WriteUInt8((byte)connectionPlayers.Length);
@@ -112,16 +113,21 @@ namespace Piot.Surge.Pulse.Host
                 }
 
                 includingCorrections = new(rangeToSend, writer.Octets);
+                */
             }
-            else
-            {
-                includingCorrections = new(rangeToSend, fetchedContainer.payload.Span);
-            }
+
+            var writer = new OctetWriter(Constants.MaxSnapshotOctetSize);
+            writer.WriteOctets(fetchedContainer.payload.Span);
+            writer.WriteUInt16(0); // HACK: for now, no corrections
+
+            includingCorrections = new(rangeToSend, writer.Octets);
+
+            var snapshotProtocolPack = SnapshotProtocolPacker.Pack(includingCorrections);
 
             var sender = new WrappedSender(transportSend, connection.Endpoint);
 
             log.DebugLowLevel("sending datagrams {Flattened}", fetchedContainer);
-            SnapshotPackIncludingCorrectionsWriter.Write(sender.Send, includingCorrections,
+            SnapshotPackIncludingCorrectionsWriter.Write(sender.Send, snapshotProtocolPack,
                 connection.lastReceivedMonotonicTimeLowerBits, connection.clientInputTickCountAheadOfServer,
                 serverTickId,
                 connection.DatagramsOutIncrease);
@@ -133,12 +139,13 @@ namespace Piot.Surge.Pulse.Host
         }
 
         public void SendSnapshot(EntityMasks masks, ConnectionPlayer[] connectionPlayers,
-            DeltaSnapshotPack container)
+            DeltaSnapshotPack deltaSnapshotPack)
         {
+            deltaSnapshotPackCache.Add(deltaSnapshotPack);
             entityMasksHistory.Enqueue(masks);
             foreach (var syncClient in syncClients)
             {
-                SendUsingContainers(syncClient, connectionPlayers, container.tickIdRange.Last);
+                SendUsingContainers(syncClient, connectionPlayers, deltaSnapshotPack.tickIdRange.Last);
             }
         }
     }

@@ -20,6 +20,7 @@ namespace Piot.Surge.SnapshotProtocol.Out
                 indexMask |= 0x80;
             }
 
+
             TickIdRangeWriter.Write(writer, tickIdRange);
             writer.WriteUInt8(indexMask);
         }

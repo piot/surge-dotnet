@@ -80,7 +80,7 @@ namespace Piot.Surge.Pulse.Client
                 out var isLastOne);
             log.DebugLowLevel("receive snapshot header {TickIdRange} {DatagramIndex} {IsLastOne}", tickIdRange,
                 datagramIndex, isLastOne);
-            var unionOfSnapshots = DeltaSnapshotIncludingCorrectionsReader.Read(reader);
+            var unionOfSnapshots = DeltaSnapshotIncludingCorrectionsReader.Read(tickIdRange, reader);
             deltaSnapshotPlayback.FeedSnapshotDeltaPack(unionOfSnapshots);
         }
 

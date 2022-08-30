@@ -92,8 +92,8 @@ namespace Piot.Surge.Pulse.Host
             log.Debug("== Simulation Tick! {TickId}", serverTickId);
             SetInputsFromClientsToEntities();
             TickWorld();
-            var (masks, packContainer) = StoreWorldChangesToPackContainer();
-            snapshotSyncer.SendSnapshot(masks, Array.Empty<ConnectionPlayer>(), packContainer);
+            var (masks, deltaSnapshotPack) = StoreWorldChangesToPackContainer();
+            snapshotSyncer.SendSnapshot(masks, Array.Empty<ConnectionPlayer>(), deltaSnapshotPack);
             serverTickId = new TickId(serverTickId.tickId + 1);
         }
 

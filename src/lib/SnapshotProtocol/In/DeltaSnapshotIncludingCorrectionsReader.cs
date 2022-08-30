@@ -6,7 +6,7 @@
 using System;
 using Piot.Flood;
 using Piot.Surge.Corrections;
-using Piot.Surge.Tick.Serialization;
+using Piot.Surge.Tick;
 
 namespace Piot.Surge.SnapshotProtocol.In
 {
@@ -21,7 +21,7 @@ namespace Piot.Surge.SnapshotProtocol.In
         /// <param name="reader"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public static SnapshotDeltaPackIncludingCorrections Read(IOctetReader reader)
+        public static SnapshotDeltaPackIncludingCorrections Read(TickIdRange tickIdRange, IOctetReader reader)
         {
 #if DEBUG
             if (reader.ReadUInt8() != Constants.UnionSync)
@@ -29,11 +29,10 @@ namespace Piot.Surge.SnapshotProtocol.In
                 throw new Exception("out of sync");
             }
 #endif
-            var frameIdRange = TickIdRangeReader.Read(reader);
             var payloadOctetCount = reader.ReadUInt16();
             var payload = reader.ReadOctets(payloadOctetCount);
 
-            return new(frameIdRange, payload);
+            return new(tickIdRange, payload);
         }
     }
 }
