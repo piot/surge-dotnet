@@ -7,13 +7,14 @@ using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.Stats;
-using Piot.Surge.DatagramType;
+using Piot.Surge.DatagramType.Serialization;
 using Piot.Surge.LogicalInput;
 using Piot.Surge.MonotonicTimeLowerBits;
 using Piot.Surge.OrderedDatagrams;
-using Piot.Surge.SnapshotSerialization;
-using Piot.Surge.TransportStats;
+using Piot.Surge.SnapshotProtocol.In;
+using Piot.Surge.Tick.Serialization;
 using Piot.Transport;
+using Piot.Transport.Stats;
 
 namespace Piot.Surge.Pulse.Client
 {
@@ -75,12 +76,12 @@ namespace Piot.Surge.Pulse.Client
         {
             log.DebugLowLevel("receiving snapshot datagram from server");
             ReceiveSnapshotExtraData(reader, now);
-            SnapshotPackDatagramHeaderReader.Read(reader, out var tickIdRange, out var datagramIndex,
+            DeltaSnapshotPackIncludingCorrectionsHeaderReader.Read(reader, out var tickIdRange, out var datagramIndex,
                 out var isLastOne);
             log.DebugLowLevel("receive snapshot header {TickIdRange} {DatagramIndex} {IsLastOne}", tickIdRange,
                 datagramIndex, isLastOne);
-            var unionOfSnapshots = SnapshotDeltaUnionReader.Read(reader);
-            deltaSnapshotPlayback.FeedSnapshotsUnion(unionOfSnapshots);
+            var unionOfSnapshots = DeltaSnapshotIncludingCorrectionsReader.Read(tickIdRange, reader);
+            deltaSnapshotPlayback.FeedSnapshotDeltaPack(unionOfSnapshots);
         }
 
         private void ReceiveDatagramFromHost(IOctetReader reader, Milliseconds now)

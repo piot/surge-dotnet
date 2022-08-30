@@ -8,12 +8,16 @@ using System.Collections.Generic;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
-using Piot.Surge.Snapshot;
-using Piot.Surge.SnapshotDeltaInternal;
-using Piot.Surge.SnapshotDeltaPack;
-using Piot.Surge.SnapshotDeltaPack.Serialization;
-using Piot.Surge.TransportStats;
+using Piot.Surge.DeltaSnapshot.Convert;
+using Piot.Surge.DeltaSnapshot.EntityMask;
+using Piot.Surge.DeltaSnapshot.Pack;
+using Piot.Surge.DeltaSnapshot.Pack.Convert;
+using Piot.Surge.DeltaSnapshot.Scan;
+using Piot.Surge.Entities;
+using Piot.Surge.Tick;
+using Piot.Surge.TimeTick;
 using Piot.Transport;
+using Piot.Transport.Stats;
 
 namespace Piot.Surge.Pulse.Host
 {
@@ -23,7 +27,7 @@ namespace Piot.Surge.Pulse.Host
         private readonly Dictionary<uint, ConnectionToClient> connections = new();
         private readonly ILog log;
         private readonly List<ConnectionToClient> orderedConnections = new();
-        private readonly TimeTicker.TimeTicker simulationTicker;
+        private readonly TimeTicker simulationTicker;
         private readonly SnapshotSyncer snapshotSyncer;
         private readonly ITransport transport;
         private readonly TransportStatsBoth transportWithStats;
@@ -42,7 +46,7 @@ namespace Piot.Surge.Pulse.Host
 
         public IEntityContainerWithDetectChanges AuthoritativeWorld { get; }
 
-        public TransportStats.TransportStats Stats => transportWithStats.Stats;
+        public TransportStats Stats => transportWithStats.Stats;
 
         private void SetInputsFromClientsToEntities()
         {
@@ -88,23 +92,21 @@ namespace Piot.Surge.Pulse.Host
             log.Debug("== Simulation Tick! {TickId}", serverTickId);
             SetInputsFromClientsToEntities();
             TickWorld();
-            var packContainer = StoreWorldChangesToPackContainer();
-            snapshotSyncer.SendSnapshot(packContainer);
+            var (masks, deltaSnapshotPack) = StoreWorldChangesToPackContainer();
+            snapshotSyncer.SendSnapshot(masks, Array.Empty<ConnectionPlayer>(), deltaSnapshotPack);
             serverTickId = new TickId(serverTickId.tickId + 1);
         }
 
-        private DeltaSnapshotPackContainer StoreWorldChangesToPackContainer()
+        private (EntityMasks, DeltaSnapshotPack) StoreWorldChangesToPackContainer()
         {
-            var deltaSnapshotInternal = SnapshotDeltaCreator.Scan(AuthoritativeWorld, serverTickId);
-            var convertedDeltaSnapshot = FromSnapshotDeltaInternal.Convert(deltaSnapshotInternal);
-            var deltaPackContainer =
-                SnapshotDeltaPackCreator.Create(AuthoritativeWorld, convertedDeltaSnapshot,
-                    Array.Empty<EntityId>());
+            var deltaSnapshotEntityIds = Scanner.Scan(AuthoritativeWorld, serverTickId);
+            var deltaSnapshotPack =
+                DeltaSnapshotToPack.ToDeltaSnapshotPack(AuthoritativeWorld, deltaSnapshotEntityIds);
 
             AuthoritativeWorld.ClearDelta();
             OverWriter.Overwrite(AuthoritativeWorld);
 
-            return deltaPackContainer;
+            return (DeltaSnapshotToEntityMasks.ToEntityMasks(deltaSnapshotEntityIds), deltaSnapshotPack);
         }
 
         private void ReceiveFromClients()

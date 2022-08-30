@@ -6,22 +6,23 @@
 using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
-using Piot.Surge.SnapshotDeltaPack;
+using Piot.Surge.Corrections;
 using Piot.Surge.SnapshotDeltaPack.Serialization;
-using Piot.Surge.SnapshotSerialization;
+using Piot.Surge.TimeTick;
 
 namespace Piot.Surge.Pulse.Client
 {
     /// <summary>
-    ///     Enqueues delta snapshots and plays them back at varying delta time depending on number of delta snapshots in queue.
+    ///     Enqueues delta snapshots and plays them back at varying delta time depending on number of delta snapshots in
+    ///     includingCorrectionsQueue.
     /// </summary>
     public class ClientDeltaSnapshotPlayback
     {
         private readonly IEntityContainerWithGhostCreator clientWorld;
+        private readonly SnapshotDeltaPackIncludingCorrectionsQueue includingCorrectionsQueue = new();
         private readonly ILog log;
         private readonly IClientPredictorCorrections predictor;
-        private readonly SnapshotDeltaPackQueue queue = new();
-        private readonly TimeTicker.TimeTicker snapshotPlaybackTicker;
+        private readonly TimeTicker snapshotPlaybackTicker;
         private readonly Milliseconds targetDeltaTimeMs;
 
         public ClientDeltaSnapshotPlayback(Milliseconds now, IEntityContainerWithGhostCreator clientWorld,
@@ -40,54 +41,53 @@ namespace Piot.Surge.Pulse.Client
             snapshotPlaybackTicker.Update(now);
         }
 
-        public void FeedSnapshotsUnion(SerializedSnapshotDeltaPackUnion snapshots)
+        public void FeedSnapshotDeltaPack(SnapshotDeltaPackIncludingCorrections pack)
         {
-            if (!snapshots.tickIdRange.Contains(queue.WantsTickId))
+            if (!pack.tickIdRange.Contains(includingCorrectionsQueue.WantsTickId))
             {
                 return;
             }
 
-            foreach (var pack in snapshots.packs)
+            if (pack.tickIdRange.Last.tickId < includingCorrectionsQueue.WantsTickId.tickId)
             {
-                if (pack.tickId.tickId < queue.WantsTickId.tickId)
-                {
-                    continue;
-                }
-
-                if (!queue.IsValidPackToInsert(pack.tickId))
-                {
-                    throw new DeserializeException("wrong pack id ordering");
-                }
-
-                queue.Enqueue(pack);
+                return;
             }
+
+            if (!includingCorrectionsQueue.IsValidPackToInsert(pack.tickIdRange.Last))
+            {
+                throw new DeserializeException("wrong pack id ordering");
+            }
+
+            includingCorrectionsQueue.Enqueue(pack);
         }
 
         private void NextSnapshotTick()
         {
             var targetDeltaTimeMsValue = targetDeltaTimeMs.ms;
-            // Our goal is to have just two snapshots in the queue.
+            // Our goal is to have just two snapshots in the includingCorrectionsQueue.
             // So adjust the playback speed using the playback delta time.
-            var deltaTimeMs = queue.Count switch
+            var deltaTimeMs = includingCorrectionsQueue.Count switch
             {
                 < 2 => targetDeltaTimeMsValue * 10 / 8,
                 > 4 => targetDeltaTimeMsValue * 10 / 15,
                 _ => targetDeltaTimeMsValue
             };
 
-            log.DebugLowLevel("Try to read next snapshot in queue. {PlaybackDeltaTimeMs}", deltaTimeMs);
+            log.DebugLowLevel("Try to read next snapshot in includingCorrectionsQueue. {PlaybackDeltaTimeMs}",
+                deltaTimeMs);
 
             snapshotPlaybackTicker.DeltaTime = new(deltaTimeMs);
 
-            if (queue.Count == 0)
+            if (includingCorrectionsQueue.Count == 0)
             {
-                log.Notice("Snapshot playback has stalled because incoming snapshot queue is empty");
+                log.Notice(
+                    "Snapshot playback has stalled because incoming snapshot includingCorrectionsQueue is empty");
                 return;
             }
 
-            var deltaSnapshot = queue.Dequeue();
-            log.DebugLowLevel("dequeued snapshot {DeltaSnapshot}", deltaSnapshot);
-            var snapshotReader = new OctetReader(deltaSnapshot.payload.Span);
+            var deltaSnapshotIncludingCorrections = includingCorrectionsQueue.Dequeue();
+            log.DebugLowLevel("dequeued snapshot {DeltaSnapshotEntityIds}", deltaSnapshotIncludingCorrections);
+            var snapshotReader = new OctetReader(deltaSnapshotIncludingCorrections.payload.Span);
             SnapshotDeltaReader.Read(snapshotReader, clientWorld);
 
             // Ghosts are never predicted, corrected, nor rolled back
@@ -96,7 +96,7 @@ namespace Piot.Surge.Pulse.Client
             Ticker.Tick(clientWorld);
             log.DebugLowLevel("tick ghost logics {EntityCount}", clientWorld.AllEntities.Length);
 
-            predictor.ReadCorrections(deltaSnapshot.tickId, snapshotReader);
+            predictor.ReadCorrections(deltaSnapshotIncludingCorrections.tickIdRange.Last, snapshotReader);
         }
     }
 }

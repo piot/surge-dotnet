@@ -16,4 +16,9 @@
         <PackageReference Include="ClrHeapAllocationAnalyzer" Version="3.0.0"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <Folder Include="DeltaSnapshot\EntityMask\Serialization"/>
+        <Folder Include="DeltaSnapshot\Serialization\Protocol"/>
+    </ItemGroup>
+
 </Project>

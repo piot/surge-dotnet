@@ -9,10 +9,10 @@ using Piot.MonotonicTime;
 using Piot.Random;
 using Piot.Surge;
 using Piot.Surge.Internal.Generated;
-using Piot.Surge.MemoryTransport;
 using Piot.Surge.Pulse.Client;
 using Piot.Surge.Pulse.Host;
 using Piot.Transport;
+using Piot.Transport.Memory;
 using Xunit.Abstractions;
 
 namespace Tests.Pulse;

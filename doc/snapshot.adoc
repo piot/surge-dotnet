@@ -4,9 +4,42 @@ A more detailed look at the contents of an individual Snapshot Message.
 
 == Snapshot Message
 
+=== Full Serialization (0x01)
+
 [cols="3,1,4"]
 |===
 |Type|Name|Description
+
+|`U16`
+|CreatedCount
+|Number of following created entities
+
+|`<<Created Entity Info>>[CreatedCount]`
+|CreatedEntityInfos
+|<<Created Entity Info>>
+
+|`U16`
+|CorrectionStateCount
+|Number of following correction states for the clients locally predicted entities. Typically 0-4.
+
+|`<<Correction State Entity Info>>[CorrectionStateCount]`
+|CorrectionStateEntityInfos
+|<<Correction State Entity Info>>
+
+|===
+
+=== Delta Snapshot (0x02)
+
+[cols="3,1,4"]
+|===
+|Type|Name|Description
+|`U16`
+|CorrectionStateCount
+|Number of following correction states for the clients locally predicted entities. Typically 0-4.
+
+|`<<Correction State Entity Info>>[CorrectionStateCount]`
+|CorrectionStateEntityInfos
+|<<Correction State Entity Info>>
 
 |`U16`
 |DeletedCount
@@ -31,14 +64,6 @@ A more detailed look at the contents of an individual Snapshot Message.
 |`<<Updated Entity Info>>[UpdatedCount]`
 |UpdatedEntityInfos
 |<<Updated Entity Info>>
-
-|`U16`
-|CorrectionStateCount
-|Number of following correction states for the clients locally predicted entities. Typically 0-4.
-
-|`<<Correction State Entity Info>>[CorrectionStateCount]`
-|CorrectionStateEntityInfos
-|<<Correction State Entity Info>>
 
 |===
 
@@ -101,10 +126,6 @@ ChangedFieldsMask = (ChangedFieldsMaskHi << 15) \| ChangedFieldsMaskLow & 0x7fff
 |`U8`
 |LocalPlayerIndex
 |Which of the local player indexes that should control the correction state.
-
-|`U8[?]`
-|EntityFields
-|Payload with all the field values in the Entity serialized in order.
 
 |`U8[?]`
 |GameSpecificCorrectionData

@@ -5,9 +5,9 @@
 
 using Piot.Clog;
 using Piot.Surge;
-using Piot.Surge.ChangeMask;
-using Piot.Surge.Snapshot;
-using Piot.Surge.SnapshotDeltaMasks;
+using Piot.Surge.DeltaSnapshot.EntityMask;
+using Piot.Surge.FieldMask;
+using Piot.Surge.Tick;
 using Xunit.Abstractions;
 
 namespace Tests;
@@ -32,23 +32,23 @@ public class SnapshotDeltaEntityMasksMerger
     [Fact]
     public void TestMerge()
     {
-        var firstMutable = new SnapshotDeltaEntityMasksMutable(ToTickIdRange(18));
+        var firstMutable = new EntityMasksMutable(ToTickIdRange(18));
         firstMutable.Deleted(new EntityId(5));
         firstMutable.SetChangedMask(new EntityId(1), 0x03);
-        var first = new SnapshotDeltaEntityMasks(firstMutable);
+        var first = new EntityMasks(firstMutable);
 
-        var secondMutable = new SnapshotDeltaEntityMasksMutable(ToTickIdRange(19));
+        var secondMutable = new EntityMasksMutable(ToTickIdRange(19));
         secondMutable.SetChangedMask(new EntityId(2), 0xf01);
         secondMutable.SetChangedMask(new EntityId(1), 0x80);
         secondMutable.SetChangedMask(new EntityId(3), 0x23);
-        var second = new SnapshotDeltaEntityMasks(secondMutable);
+        var second = new EntityMasks(secondMutable);
 
-        var thirdMutable = new SnapshotDeltaEntityMasksMutable(ToTickIdRange(20));
+        var thirdMutable = new EntityMasksMutable(ToTickIdRange(20));
         thirdMutable.Deleted(new EntityId(2));
         thirdMutable.SetChangedMask(new EntityId(3), 0x01);
-        var third = new SnapshotDeltaEntityMasks(thirdMutable);
+        var third = new EntityMasks(thirdMutable);
 
-        var merged = Piot.Surge.SnapshotDeltaMasks.SnapshotDeltaEntityMasksMerger.Merge(new[] { first, second, third });
+        var merged = EntityMasksMerger.Merge(new[] { first, second, third });
         Assert.Equal(0x83u, merged.EntityMasks[1]);
         Assert.Equal(ChangedFieldsMask.DeletedMaskBit, merged.EntityMasks[2]);
         Assert.Equal(0x23u, merged.EntityMasks[3]);
