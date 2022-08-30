@@ -20,13 +20,13 @@ namespace Piot.Surge.SnapshotDeltaPack
         public ReadOnlyMemory<byte> payload;
         public TickIdRange tickIdRange;
 
-        public TickIdRange TickIdRange => tickIdRange;
-        
         public SnapshotDeltaPack(TickIdRange tickIdRange, ReadOnlySpan<byte> payload)
         {
             this.tickIdRange = tickIdRange;
             this.payload = payload.ToArray();
         }
+
+        public TickIdRange TickIdRange => tickIdRange;
 
         public override string ToString()
         {

@@ -5,7 +5,6 @@
 
 using System;
 using Piot.Surge.Snapshot;
-using Piot.Surge.SnapshotDeltaPack.Serialization;
 
 namespace Piot.Surge.SnapshotDeltaPack
 {
@@ -24,7 +23,8 @@ namespace Piot.Surge.SnapshotDeltaPack
 
         public override string ToString()
         {
-            return $"[snapshotDeltaPackIncludingCorrections tickIdRange: {tickIdRange} payload length: {payload.Length}]";
+            return
+                $"[snapshotDeltaPackIncludingCorrections tickIdRange: {tickIdRange} payload length: {payload.Length}]";
         }
     }
 }

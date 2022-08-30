@@ -7,7 +7,6 @@ using System.Linq;
 using Piot.Surge.ChangeMask;
 using Piot.Surge.Snapshot;
 using Piot.Surge.SnapshotDelta;
-using Piot.Surge.SnapshotDeltaMasks;
 
 namespace Piot.Surge.SnapshotDeltaInternal
 {

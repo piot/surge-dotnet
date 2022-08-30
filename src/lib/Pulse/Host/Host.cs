@@ -11,7 +11,6 @@ using Piot.MonotonicTime;
 using Piot.Surge.Snapshot;
 using Piot.Surge.SnapshotDeltaInternal;
 using Piot.Surge.SnapshotDeltaMasks;
-using Piot.Surge.SnapshotDeltaPack;
 using Piot.Surge.SnapshotDeltaPack.Serialization;
 using Piot.Surge.TransportStats;
 using Piot.Transport;

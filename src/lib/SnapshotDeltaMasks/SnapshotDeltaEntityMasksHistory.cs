@@ -6,10 +6,10 @@ namespace Piot.Surge.SnapshotDeltaMasks
     public class SnapshotDeltaEntityMasksHistory
     {
         private readonly Queue<SnapshotDeltaEntityMasks> masksQueue = new();
-        
+
         public SnapshotDeltaEntityMasksUnion Fetch(TickIdRange range)
         {
-            return new (range, new ());
+            return new(range, new());
         }
 
         public void DiscardUpTo(TickId tickId)

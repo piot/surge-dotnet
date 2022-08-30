@@ -5,7 +5,6 @@
 
 using System.Linq;
 using Piot.Flood;
-using Piot.Surge.LocalPlayer;
 using Piot.Surge.Snapshot;
 using Piot.Surge.SnapshotDeltaPack.Serialization;
 
@@ -28,7 +27,7 @@ namespace Piot.Surge.SnapshotDeltaPack
             {
                 EntityIdWriter.Write(writer, deletedEntityId);
             }
-            
+
             var createdEntities = snapshotDeltaAfter.createdIds.Select(world.FetchEntity).ToArray();
             foreach (var createdEntity in createdEntities)
             {
@@ -42,7 +41,7 @@ namespace Piot.Surge.SnapshotDeltaPack
                 PackUpdatedEntity.Write(writer, updateEntity.Id, updateEntity.ChangeMask, updateEntity.Serializer);
             }
 
-            return new (TickIdRange.FromTickId(snapshotDeltaAfter.TickId), writer.Octets);
+            return new(TickIdRange.FromTickId(snapshotDeltaAfter.TickId), writer.Octets);
         }
     }
 }

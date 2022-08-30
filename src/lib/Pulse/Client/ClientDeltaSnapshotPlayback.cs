@@ -8,19 +8,19 @@ using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.Surge.SnapshotDeltaPack;
 using Piot.Surge.SnapshotDeltaPack.Serialization;
-using Piot.Surge.SnapshotSerialization;
 
 namespace Piot.Surge.Pulse.Client
 {
     /// <summary>
-    ///     Enqueues delta snapshots and plays them back at varying delta time depending on number of delta snapshots in includingCorrectionsQueue.
+    ///     Enqueues delta snapshots and plays them back at varying delta time depending on number of delta snapshots in
+    ///     includingCorrectionsQueue.
     /// </summary>
     public class ClientDeltaSnapshotPlayback
     {
         private readonly IEntityContainerWithGhostCreator clientWorld;
+        private readonly SnapshotDeltaPackIncludingCorrectionsQueue includingCorrectionsQueue = new();
         private readonly ILog log;
         private readonly IClientPredictorCorrections predictor;
-        private readonly SnapshotDeltaPackIncludingCorrectionsQueue includingCorrectionsQueue = new();
         private readonly TimeTicker.TimeTicker snapshotPlaybackTicker;
         private readonly Milliseconds targetDeltaTimeMs;
 
@@ -72,13 +72,15 @@ namespace Piot.Surge.Pulse.Client
                 _ => targetDeltaTimeMsValue
             };
 
-            log.DebugLowLevel("Try to read next snapshot in includingCorrectionsQueue. {PlaybackDeltaTimeMs}", deltaTimeMs);
+            log.DebugLowLevel("Try to read next snapshot in includingCorrectionsQueue. {PlaybackDeltaTimeMs}",
+                deltaTimeMs);
 
             snapshotPlaybackTicker.DeltaTime = new(deltaTimeMs);
 
             if (includingCorrectionsQueue.Count == 0)
             {
-                log.Notice("Snapshot playback has stalled because incoming snapshot includingCorrectionsQueue is empty");
+                log.Notice(
+                    "Snapshot playback has stalled because incoming snapshot includingCorrectionsQueue is empty");
                 return;
             }
 

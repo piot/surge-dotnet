@@ -5,9 +5,7 @@
 
 using System;
 using Piot.Flood;
-using Piot.Surge.Snapshot;
 using Piot.Surge.SnapshotDeltaPack;
-using Piot.Surge.SnapshotDeltaPack.Serialization;
 
 namespace Piot.Surge.SnapshotSerialization
 {
@@ -42,7 +40,7 @@ namespace Piot.Surge.SnapshotSerialization
             var payloadOctetCount = reader.ReadUInt16();
             var payload = reader.ReadOctets(payloadOctetCount);
 
-            return new (frameIdRange, payload);
+            return new(frameIdRange, payload);
         }
     }
 }
