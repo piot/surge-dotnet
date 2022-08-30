@@ -8,9 +8,11 @@ using System.Collections.Generic;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
+using Piot.Surge.DeltaSnapshot;
+using Piot.Surge.DeltaSnapshot.Convert;
 using Piot.Surge.Snapshot;
-using Piot.Surge.SnapshotDeltaInternal;
-using Piot.Surge.SnapshotDeltaMasks;
+using Piot.Surge.DeltaSnapshot.Pack;
+using Piot.Surge.DeltaSnapshot.EntityMask;
 using Piot.Surge.SnapshotDeltaPack.Serialization;
 using Piot.Surge.TransportStats;
 using Piot.Transport;
@@ -93,16 +95,16 @@ namespace Piot.Surge.Pulse.Host
             serverTickId = new TickId(serverTickId.tickId + 1);
         }
 
-        private (SnapshotDeltaEntityMasks, SnapshotDeltaPack.SnapshotDeltaPack) StoreWorldChangesToPackContainer()
+        private (EntityMasks, DeltaSnapshotPack) StoreWorldChangesToPackContainer()
         {
-            var snapshotDelta = SnapshotDeltaCreator.Scan(AuthoritativeWorld, serverTickId);
+            var snapshotDelta = DeltaSnapshot.Scan.Scanner.Scan(AuthoritativeWorld, serverTickId);
             var deltaPackContainer =
                 SnapshotDeltaPackCreator.Create(AuthoritativeWorld, snapshotDelta);
 
             AuthoritativeWorld.ClearDelta();
             OverWriter.Overwrite(AuthoritativeWorld);
 
-            return (SnapshotDeltaToEntityMasks.ConvertToEntityMasks(snapshotDelta), deltaPackContainer);
+            return (DeltaSnapshotToEntityMasks.ConvertToEntityMasks(snapshotDelta), deltaPackContainer);
         }
 
         private void ReceiveFromClients()

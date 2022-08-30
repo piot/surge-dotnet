@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System.Linq;
-using Piot.Surge.SnapshotDelta;
+using Piot.Surge.DeltaSnapshot;
 
 namespace Piot.Surge.SnapshotDeltaPack
 {

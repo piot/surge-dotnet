@@ -7,9 +7,11 @@ using System;
 using System.Collections.Generic;
 using Piot.Clog;
 using Piot.Flood;
+using Piot.Surge.DeltaSnapshot.Cache;
 using Piot.Surge.OrderedDatagrams;
 using Piot.Surge.Snapshot;
-using Piot.Surge.SnapshotDeltaMasks;
+using Piot.Surge.DeltaSnapshot.EntityMask;
+using Piot.Surge.DeltaSnapshot.Pack;
 using Piot.Surge.SnapshotDeltaPack;
 using Piot.Transport;
 
@@ -61,7 +63,7 @@ namespace Piot.Surge.Pulse.Host
     public class SnapshotSyncer
     {
         private readonly DeltaSnapshotPackCache deltaSnapshotPackCache;
-        private readonly SnapshotDeltaEntityMasksHistory entityMasksHistory = new();
+        private readonly EntityMasksHistory entityMasksHistory = new();
         private readonly ILog log;
         private readonly List<SnapshotSyncerClient> syncClients = new();
         private readonly ITransportSend transportSend;
@@ -127,8 +129,8 @@ namespace Piot.Surge.Pulse.Host
             var maskUnion = entityMasksHistory.Fetch(connection.WaitingForTickIds);
         }
 
-        public void SendSnapshot(SnapshotDeltaEntityMasks masks, ConnectionPlayer[] connectionPlayers,
-            SnapshotDeltaPack.SnapshotDeltaPack container)
+        public void SendSnapshot(EntityMasks masks, ConnectionPlayer[] connectionPlayers,
+            DeltaSnapshotPack container)
         {
             entityMasksHistory.Enqueue(masks);
             foreach (var syncClient in syncClients)

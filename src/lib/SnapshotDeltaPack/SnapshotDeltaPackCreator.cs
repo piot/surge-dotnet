@@ -3,6 +3,9 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using Piot.Surge.DeltaSnapshot.Pack;
+using Piot.Surge.DeltaSnapshot.Pack.Convert;
+
 namespace Piot.Surge.SnapshotDeltaPack.Serialization
 {
     public static class SnapshotDeltaPackCreator
@@ -13,9 +16,9 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
         /// <param name="idRange"></param>
         /// <param name="world"></param>
         /// <returns></returns>
-        public static SnapshotDeltaPack Create(IEntityContainer world, SnapshotDelta.SnapshotDelta delta)
+        public static DeltaSnapshotPack Create(IEntityContainer world, DeltaSnapshot.DeltaSnapshotEntityIds delta)
         {
-            return SnapshotDeltaToPackContainer.SnapshotDeltaToContainer(world, delta);
+            return DeltaSnapshotToPack.ToDeltaSnapshotPack(world, delta);
         }
     }
 }

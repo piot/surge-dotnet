@@ -10,7 +10,7 @@ using Piot.Surge.FastTypeInformation;
 using Piot.Surge.LocalPlayer;
 using Piot.Surge.LogicalInput;
 using Piot.Surge.Types;
-using Piot.Surge.TypeSerialization;
+using Piot.Surge.Types.Serialization;
 using Tests.ExampleGame;
 
 namespace Piot.Surge.Internal.Generated;

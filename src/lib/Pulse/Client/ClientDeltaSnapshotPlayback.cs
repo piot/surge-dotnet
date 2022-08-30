@@ -85,7 +85,7 @@ namespace Piot.Surge.Pulse.Client
             }
 
             var deltaSnapshotIncludingCorrections = includingCorrectionsQueue.Dequeue();
-            log.DebugLowLevel("dequeued snapshot {DeltaSnapshot}", deltaSnapshotIncludingCorrections);
+            log.DebugLowLevel("dequeued snapshot {DeltaSnapshotEntityIds}", deltaSnapshotIncludingCorrections);
             var snapshotReader = new OctetReader(deltaSnapshotIncludingCorrections.payload.Span);
             SnapshotDeltaReader.Read(snapshotReader, clientWorld);
 

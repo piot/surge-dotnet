@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using Piot.Clog;
-using Piot.Surge.ChangeMask;
+using Piot.Surge.FieldMask;
 using Xunit.Abstractions;
 
 namespace Tests;
@@ -24,7 +24,7 @@ public class SnapshotDeltaEntityMaskMergeBits
     [Fact]
     public void TestMerge()
     {
-        var shouldBeDeleted = ChangedFieldsMerger.MergeBits(0x03, ChangedFieldsMask.DeletedMaskBit);
+        var shouldBeDeleted = MaskMerger.MergeBits(0x03, ChangedFieldsMask.DeletedMaskBit);
         Assert.Equal(ChangedFieldsMask.DeletedMaskBit, shouldBeDeleted);
     }
 
@@ -34,7 +34,7 @@ public class SnapshotDeltaEntityMaskMergeBits
     public void TestDeleteThenUpdatedFail()
     {
         var exception = Assert.Throws<ArgumentOutOfRangeException>(() =>
-            ChangedFieldsMerger.MergeBits(ChangedFieldsMask.DeletedMaskBit, 0x03));
+            MaskMerger.MergeBits(ChangedFieldsMask.DeletedMaskBit, 0x03));
         Assert.Equal("first", exception.ParamName);
     }
 }

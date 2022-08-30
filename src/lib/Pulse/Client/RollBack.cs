@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using Piot.Flood;
-using Piot.Surge.ChangeMaskSerialization;
+using Piot.Surge.FieldMask.Serialization;
 using Piot.Surge.Snapshot;
 
 namespace Piot.Surge.Pulse.Client
