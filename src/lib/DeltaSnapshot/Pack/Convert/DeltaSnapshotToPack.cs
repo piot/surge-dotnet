@@ -5,7 +5,7 @@
 
 using System.Linq;
 using Piot.Flood;
-using Piot.Surge.DeltaSnapshotProtocol;
+using Piot.Surge.SnapshotProtocol;
 using Piot.Surge.Tick;
 using Piot.Surge.SnapshotDeltaPack.Serialization;
 using Piot.Surge.Types.Serialization;

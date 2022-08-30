@@ -2,7 +2,7 @@ using Piot.Flood;
 using Piot.Surge.Tick;
 using Piot.Surge.Tick.Serialization;
 
-namespace Piot.Surge.DeltaSnapshotProtocol.ReceiveStatus
+namespace Piot.Surge.SnapshotProtocol.ReceiveStatus
 {
     public static class SnapshotReceiveStatusWriter
     {

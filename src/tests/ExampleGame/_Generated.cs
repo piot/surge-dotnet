@@ -5,10 +5,12 @@
 
 using Piot.Surge.FastTypeInformation;
 using Piot.Flood;
-using Piot.Surge.Type.Serialization;
+using Piot.Surge.Types.Serialization;
 using Piot.Surge.Entities;
+using Piot.Surge.GeneratedEntity;
 using Piot.Surge.LogicalInput;
 using Piot.Surge.LocalPlayer;
+using Piot.Surge.LogicAction;
 
 namespace Piot.Surge.Internal.Generated
 {

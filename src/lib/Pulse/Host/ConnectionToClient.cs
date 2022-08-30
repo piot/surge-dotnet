@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.Surge.DatagramType.Serialization;
-using Piot.Surge.DeltaSnapshotProtocol.ReceiveStatus;
+using Piot.Surge.SnapshotProtocol.ReceiveStatus;
 using Piot.Surge.LogicalInput.Serialization;
 using Piot.Surge.MonotonicTimeLowerBits;
 using Piot.Surge.OrderedDatagrams;

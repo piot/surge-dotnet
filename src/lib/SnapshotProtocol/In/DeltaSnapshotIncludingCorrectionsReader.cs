@@ -8,7 +8,7 @@ using Piot.Flood;
 using Piot.Surge.Corrections;
 using Piot.Surge.Tick.Serialization;
 
-namespace Piot.Surge.DeltaSnapshotProtocol.In
+namespace Piot.Surge.SnapshotProtocol.In
 {
     public static class DeltaSnapshotIncludingCorrectionsReader
     {

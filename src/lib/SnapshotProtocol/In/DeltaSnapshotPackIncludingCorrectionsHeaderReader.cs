@@ -7,7 +7,7 @@ using Piot.Flood;
 using Piot.Surge.Tick;
 using Piot.Surge.Tick.Serialization;
 
-namespace Piot.Surge.DeltaSnapshotProtocol.In
+namespace Piot.Surge.SnapshotProtocol.In
 {
     public static class DeltaSnapshotPackIncludingCorrectionsHeaderReader
     {

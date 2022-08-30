@@ -12,7 +12,7 @@ using Piot.Surge.OrderedDatagrams;
 using Piot.Surge.Tick;
 using Piot.Surge.Tick.Serialization;
 
-namespace Piot.Surge.DeltaSnapshotProtocol.Out
+namespace Piot.Surge.SnapshotProtocol.Out
 {
 
 

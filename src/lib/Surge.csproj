@@ -19,8 +19,6 @@
     <ItemGroup>
       <Folder Include="DeltaSnapshot\EntityMask\Serialization" />
       <Folder Include="DeltaSnapshot\Serialization\Protocol" />
-      <Folder Include="SnapshotReceiveStatus" />
-      <Folder Include="SnapshotSerialization" />
     </ItemGroup>
 
 </Project>

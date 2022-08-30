@@ -1,4 +1,4 @@
-namespace Piot.Surge.DeltaSnapshotProtocol
+namespace Piot.Surge.SnapshotProtocol
 {
     public class Constants
     {
