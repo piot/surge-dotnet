@@ -3,7 +3,9 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-namespace Piot.Surge
+using Piot.Surge.GeneratedEntity;
+
+namespace Piot.Surge.Entities
 {
     public enum EntityMode
     {

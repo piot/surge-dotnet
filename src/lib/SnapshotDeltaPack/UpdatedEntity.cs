@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using Piot.Surge.DeltaSnapshot;
+using Piot.Surge.Entities;
 using Piot.Surge.FieldMask;
 
 namespace Piot.Surge.SnapshotDeltaPack

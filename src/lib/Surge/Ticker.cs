@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using Piot.Surge.Entities;
+
 namespace Piot.Surge
 {
     public static class Ticker

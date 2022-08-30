@@ -4,8 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 using Piot.Flood;
+using Piot.Surge.LogicAction;
+using Piot.Surge.GeneratedEntity;
 
-namespace Piot.Surge
+namespace Piot.Surge.Entities
 {
     /// <summary>
     ///     Representation of a network entity

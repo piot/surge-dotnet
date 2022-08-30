@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using Piot.Flood;
+using Piot.Surge.GeneratedEntity;
 
 namespace Piot.Surge
 {

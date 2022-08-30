@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using Piot.Flood;
+using Piot.Surge.Entities;
 using Piot.Surge.FieldMask;
 using Piot.Surge.FieldMask.Serialization;
 using Piot.Surge.Tick;

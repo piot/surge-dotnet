@@ -6,6 +6,7 @@
 using Piot.Surge.FastTypeInformation;
 using Piot.Flood;
 using Piot.Surge.Type.Serialization;
+using Piot.Surge.Entities;
 using Piot.Surge.LogicalInput;
 using Piot.Surge.LocalPlayer;
 

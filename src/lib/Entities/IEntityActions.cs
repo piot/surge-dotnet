@@ -3,14 +3,12 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-namespace Piot.Surge
+using Piot.Surge.LogicAction;
+
+namespace Piot.Surge.Entities
 {
-    public interface IEntityFireChanges
+    public interface IEntityActions
     {
-        public void FireChanges(ulong changeMask);
-
-        public void FireCreated();
-
-        public void FireDestroyed();
+        IAction[] Actions { get; }
     }
 }

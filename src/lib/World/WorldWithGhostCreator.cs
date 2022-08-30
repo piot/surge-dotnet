@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System.Runtime.CompilerServices;
+using Piot.Surge.Entities;
 
 namespace Piot.Surge
 {

@@ -6,6 +6,7 @@
 using System;
 using Piot.Clog;
 using Piot.Flood;
+using Piot.Surge.Entities;
 using Piot.Surge.LocalPlayer;
 using Piot.Surge.LogicalInput;
 using Piot.Surge.Tick;

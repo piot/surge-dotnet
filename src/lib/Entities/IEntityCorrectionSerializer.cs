@@ -5,10 +5,14 @@
 
 using Piot.Flood;
 
-namespace Piot.Surge
+namespace Piot.Surge.Entities
 {
-    public interface IInputDeserialize
+    public interface IEntityCorrectionSerializer
     {
-        public void SetInput(IOctetReader reader);
+        /// <summary>
+        ///     Serializes complete correction state in the entity.
+        /// </summary>
+        /// <param name="writer"></param>
+        public void SerializeCorrectionState(IOctetWriter writer);
     }
 }

@@ -14,6 +14,7 @@ using Piot.Surge.DeltaSnapshot.Pack;
 using Piot.Surge.DeltaSnapshot.EntityMask;
 using Piot.Surge.DeltaSnapshot.Pack.Convert;
 using Piot.Surge.DeltaSnapshot.Scan;
+using Piot.Surge.Entities;
 using Piot.Transport.Stats;
 using Piot.Transport;
 

@@ -12,14 +12,14 @@ namespace Piot.Surge.TimeTick
     public class TimeTicker : ITimeTicker
     {
         private readonly ILog log;
-        private readonly Action Tick;
+        private readonly System.Action Tick;
         private long deltaTimeMs;
         private Milliseconds lastTick;
 #if DEBUG
         private Milliseconds lastUpdateTime;
 #endif
 
-        public TimeTicker(Milliseconds now, Action action, Milliseconds deltaTimeMs, ILog log)
+        public TimeTicker(Milliseconds now, System.Action action, Milliseconds deltaTimeMs, ILog log)
         {
             if (deltaTimeMs.ms <= 0)
             {

@@ -5,7 +5,7 @@
 
 using Piot.Flood;
 
-namespace Piot.Surge
+namespace Piot.Surge.Entities
 {
     public interface IEntitySerializer
     {

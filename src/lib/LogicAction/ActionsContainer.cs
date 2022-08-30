@@ -3,23 +3,27 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System;
+using System.Collections.Generic;
 
-namespace Piot.Surge
+namespace Piot.Surge.LogicAction
 {
     /// <summary>
-    ///     Discards actions added to it. Useful for testing purposes.
+    ///     Holds a list of actions that is added by a Tick method in the Logic implementation.
     /// </summary>
-    public class NullActionsContainer : IActionsContainer
+    public class ActionsContainer : IActionsContainer
     {
-        public IAction[] Actions { get; } = Array.Empty<IAction>();
+        private readonly List<IAction> actions = new();
 
         public void Add(IAction action)
         {
+            actions.Add(action);
         }
 
-        public void Spawn(ILogic data)
+        public IAction[] Actions => actions.ToArray();
+
+        public void Clear()
         {
+            actions.Clear();
         }
     }
 }

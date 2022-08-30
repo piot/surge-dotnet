@@ -25,6 +25,8 @@ using Piot.Surge.DeltaSnapshot.EntityMask;
 using Piot.Surge.DeltaSnapshot.Pack;
 using Piot.Surge.DeltaSnapshot.Pack.Convert;
 using Piot.Surge.DeltaSnapshotProtocol.ReceiveStatus;
+using Piot.Surge.Entities;
+using Piot.Surge.GeneratedEntity;
 using Piot.Surge.SnapshotDeltaPack;
 using Piot.Surge.SnapshotDeltaPack.Serialization;
 using Piot.Surge.Types;

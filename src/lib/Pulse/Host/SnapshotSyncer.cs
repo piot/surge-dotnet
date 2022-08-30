@@ -16,6 +16,7 @@ using Piot.Surge.DeltaSnapshot.Pack;
 using Piot.Surge.DeltaSnapshotProtocol;
 using Piot.Surge.DeltaSnapshotProtocol.In;
 using Piot.Surge.DeltaSnapshotProtocol.Out;
+using Piot.Surge.Entities;
 using Piot.Surge.SnapshotDeltaPack;
 using Piot.Transport;
 

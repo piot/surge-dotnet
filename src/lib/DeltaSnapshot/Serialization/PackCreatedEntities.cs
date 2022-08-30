@@ -5,6 +5,7 @@
 
 using System;
 using Piot.Flood;
+using Piot.Surge.Entities;
 using Piot.Surge.Types.Serialization;
 
 namespace Piot.Surge.SnapshotDeltaPack.Serialization

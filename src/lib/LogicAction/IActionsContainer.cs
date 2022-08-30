@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-namespace Piot.Surge
+namespace Piot.Surge.LogicAction
 {
-    public interface IEntityActionsDoUnDo
+    public interface IActionsContainer
     {
-        void UnDoAction(IAction action);
-        void DoAction(IAction action);
+        public IAction[] Actions { get; }
+        public void Add(IAction action);
     }
 }

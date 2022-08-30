@@ -3,15 +3,13 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using Piot.Flood;
-
-namespace Piot.Surge
+namespace Piot.Surge.Entities
 {
-    public interface IEntityDeserializer
+    public interface IEntityOverwrite
     {
-        public void Deserialize(ulong serializeFlags, IOctetReader reader);
-        public void DeserializeAll(IOctetReader reader);
-
-        public void DeserializeCorrectionState(IOctetReader reader);
+        /// <summary>
+        ///     Overwrites all detected field changes in the Entity as well as clearing all produced actions.
+        /// </summary>
+        public void Overwrite();
     }
 }

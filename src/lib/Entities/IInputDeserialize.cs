@@ -3,10 +3,12 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-namespace Piot.Surge
+using Piot.Flood;
+
+namespace Piot.Surge.Entities
 {
-    public interface IEntityChanges
+    public interface IInputDeserialize
     {
-        public ulong Changes();
+        public void SetInput(IOctetReader reader);
     }
 }

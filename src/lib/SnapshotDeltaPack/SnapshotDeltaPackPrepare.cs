@@ -5,6 +5,7 @@
 
 using System.Linq;
 using Piot.Surge.DeltaSnapshot;
+using Piot.Surge.Entities;
 
 namespace Piot.Surge.SnapshotDeltaPack
 {

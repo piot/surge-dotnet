@@ -3,16 +3,14 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using Piot.Flood;
-
-namespace Piot.Surge
+namespace Piot.Surge.Entities
 {
-    public interface IEntityCorrectionSerializer
+    public interface IEntityFireChanges
     {
-        /// <summary>
-        ///     Serializes complete correction state in the entity.
-        /// </summary>
-        /// <param name="writer"></param>
-        public void SerializeCorrectionState(IOctetWriter writer);
+        public void FireChanges(ulong changeMask);
+
+        public void FireCreated();
+
+        public void FireDestroyed();
     }
 }

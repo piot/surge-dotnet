@@ -5,6 +5,7 @@
 
 using System.Collections.Generic;
 using Piot.Flood;
+using Piot.Surge.Entities;
 using Piot.Surge.FieldMask.Serialization;
 using Piot.Surge.Types.Serialization;
 
