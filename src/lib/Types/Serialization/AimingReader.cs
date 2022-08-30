@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 using Piot.Flood;
-using Piot.Surge.Types;
 
 namespace Piot.Surge.Types.Serialization
 {

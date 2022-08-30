@@ -5,9 +5,9 @@
 
 using Piot.Clog;
 using Piot.Surge;
+using Piot.Surge.DeltaSnapshot.EntityMask;
 using Piot.Surge.FieldMask;
 using Piot.Surge.Tick;
-using Piot.Surge.DeltaSnapshot.EntityMask;
 using Xunit.Abstractions;
 
 namespace Tests;
@@ -48,7 +48,7 @@ public class SnapshotDeltaEntityMasksMerger
         thirdMutable.SetChangedMask(new EntityId(3), 0x01);
         var third = new EntityMasks(thirdMutable);
 
-        var merged = Piot.Surge.DeltaSnapshot.EntityMask.EntityMasksMerger.Merge(new[] { first, second, third });
+        var merged = EntityMasksMerger.Merge(new[] { first, second, third });
         Assert.Equal(0x83u, merged.EntityMasks[1]);
         Assert.Equal(ChangedFieldsMask.DeletedMaskBit, merged.EntityMasks[2]);
         Assert.Equal(0x23u, merged.EntityMasks[3]);

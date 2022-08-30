@@ -8,27 +8,27 @@ using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.Surge;
 using Piot.Surge.Corrections;
-using Piot.Surge.FieldMask;
 using Piot.Surge.DatagramType;
 using Piot.Surge.DatagramType.Serialization;
+using Piot.Surge.DeltaSnapshot;
+using Piot.Surge.DeltaSnapshot.Convert;
+using Piot.Surge.DeltaSnapshot.EntityMask;
+using Piot.Surge.DeltaSnapshot.Pack;
+using Piot.Surge.DeltaSnapshot.Pack.Convert;
+using Piot.Surge.DeltaSnapshot.Scan;
+using Piot.Surge.Entities;
+using Piot.Surge.FieldMask;
+using Piot.Surge.GeneratedEntity;
 using Piot.Surge.Internal.Generated;
 using Piot.Surge.LocalPlayer;
 using Piot.Surge.LogicalInput;
 using Piot.Surge.LogicalInput.Serialization;
 using Piot.Surge.MonotonicTimeLowerBits;
 using Piot.Surge.OrderedDatagrams;
-using Piot.Surge.Tick;
-using Piot.Surge.DeltaSnapshot;
-using Piot.Surge.DeltaSnapshot.Convert;
-using Piot.Surge.DeltaSnapshot.Scan;
-using Piot.Surge.DeltaSnapshot.EntityMask;
-using Piot.Surge.DeltaSnapshot.Pack;
-using Piot.Surge.DeltaSnapshot.Pack.Convert;
-using Piot.Surge.SnapshotProtocol.ReceiveStatus;
-using Piot.Surge.Entities;
-using Piot.Surge.GeneratedEntity;
 using Piot.Surge.SnapshotDeltaPack;
 using Piot.Surge.SnapshotDeltaPack.Serialization;
+using Piot.Surge.SnapshotProtocol.ReceiveStatus;
+using Piot.Surge.Tick;
 using Piot.Surge.Types;
 using Piot.Surge.Types.Serialization;
 using Tests.ExampleGame;
@@ -382,7 +382,8 @@ public class UnitTest1
         Assert.Empty(deltaSnapshotEntityIdsAfter.createdIds);
         Assert.Single(deltaSnapshotEntityIdsAfter.updatedEntities);
 
-        Assert.Equal(AvatarLogicEntityInternal.PositionMask, deltaSnapshotEntityIdsAfter.updatedEntities[0].changeMask.mask);
+        Assert.Equal(AvatarLogicEntityInternal.PositionMask,
+            deltaSnapshotEntityIdsAfter.updatedEntities[0].changeMask.mask);
 
 
         {
@@ -401,7 +402,7 @@ public class UnitTest1
         var firstTickId = new TickId(8);
 
         var fakeIncludingCorrections =
-            new SnapshotDeltaPackIncludingCorrections(TickIdRange.FromTickId(firstTick),
+            new SnapshotDeltaPackIncludingCorrections(TickIdRange.FromTickId(firstTickId),
                 snapshotDeltaPack.payload.Span);
 
 
@@ -411,9 +412,9 @@ public class UnitTest1
         Assert.Equal(packetQueue.Peek().tickIdRange.Last, firstTickId);
 
 #if DEBUG
-        Assert.Equal(24, packetQueue.Peek().payload.Length);
+        Assert.Equal(22, packetQueue.Peek().payload.Length);
 #else
-        Assert.Equal(20, packetQueue.Peek().payload.Length);
+        Assert.Equal(18, packetQueue.Peek().payload.Length);
 #endif
 
         Assert.Equal(6, ((AvatarLogic)spawnedAvatar.Logic).position.x);

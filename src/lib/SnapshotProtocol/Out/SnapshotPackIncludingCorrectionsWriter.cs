@@ -14,8 +14,6 @@ using Piot.Surge.Tick.Serialization;
 
 namespace Piot.Surge.SnapshotProtocol.Out
 {
-
-
     public static class SnapshotPackIncludingCorrectionsWriter
     {
         public const uint PayloadOctetCountPerDatagram = 1100;

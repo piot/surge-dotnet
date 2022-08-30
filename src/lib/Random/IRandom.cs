@@ -9,6 +9,4 @@ namespace Piot.Random
     {
         int Random(int max);
     }
-
-
 }

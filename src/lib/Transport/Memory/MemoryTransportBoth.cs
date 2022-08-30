@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
-using Piot.Transport;
 
 namespace Piot.Transport.Memory
 {

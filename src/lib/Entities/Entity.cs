@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 using Piot.Flood;
-using Piot.Surge.LogicAction;
 using Piot.Surge.GeneratedEntity;
+using Piot.Surge.LogicAction;
 
 namespace Piot.Surge.Entities
 {

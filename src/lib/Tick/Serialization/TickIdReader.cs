@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 using Piot.Flood;
-using Piot.Surge.Tick;
 
 namespace Piot.Surge.Tick.Serialization
 {

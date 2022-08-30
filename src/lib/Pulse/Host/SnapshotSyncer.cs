@@ -9,15 +9,13 @@ using Piot.Clog;
 using Piot.Flood;
 using Piot.Surge.Corrections;
 using Piot.Surge.DeltaSnapshot.Cache;
-using Piot.Surge.OrderedDatagrams;
-using Piot.Surge.Tick;
 using Piot.Surge.DeltaSnapshot.EntityMask;
 using Piot.Surge.DeltaSnapshot.Pack;
-using Piot.Surge.SnapshotProtocol;
-using Piot.Surge.SnapshotProtocol.In;
-using Piot.Surge.SnapshotProtocol.Out;
 using Piot.Surge.Entities;
-using Piot.Surge.SnapshotDeltaPack;
+using Piot.Surge.OrderedDatagrams;
+using Piot.Surge.SnapshotProtocol;
+using Piot.Surge.SnapshotProtocol.Out;
+using Piot.Surge.Tick;
 using Piot.Transport;
 
 namespace Piot.Surge.Pulse.Host

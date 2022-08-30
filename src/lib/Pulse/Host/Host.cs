@@ -9,14 +9,15 @@ using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.Surge.DeltaSnapshot.Convert;
-using Piot.Surge.Tick;
-using Piot.Surge.DeltaSnapshot.Pack;
 using Piot.Surge.DeltaSnapshot.EntityMask;
+using Piot.Surge.DeltaSnapshot.Pack;
 using Piot.Surge.DeltaSnapshot.Pack.Convert;
 using Piot.Surge.DeltaSnapshot.Scan;
 using Piot.Surge.Entities;
-using Piot.Transport.Stats;
+using Piot.Surge.Tick;
+using Piot.Surge.TimeTick;
 using Piot.Transport;
+using Piot.Transport.Stats;
 
 namespace Piot.Surge.Pulse.Host
 {
@@ -26,7 +27,7 @@ namespace Piot.Surge.Pulse.Host
         private readonly Dictionary<uint, ConnectionToClient> connections = new();
         private readonly ILog log;
         private readonly List<ConnectionToClient> orderedConnections = new();
-        private readonly TimeTick.TimeTicker simulationTicker;
+        private readonly TimeTicker simulationTicker;
         private readonly SnapshotSyncer snapshotSyncer;
         private readonly ITransport transport;
         private readonly TransportStatsBoth transportWithStats;
@@ -45,7 +46,7 @@ namespace Piot.Surge.Pulse.Host
 
         public IEntityContainerWithDetectChanges AuthoritativeWorld { get; }
 
-        public Transport.Stats.TransportStats Stats => transportWithStats.Stats;
+        public TransportStats Stats => transportWithStats.Stats;
 
         private void SetInputsFromClientsToEntities()
         {

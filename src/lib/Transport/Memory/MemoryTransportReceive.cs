@@ -5,7 +5,6 @@
 
 using System;
 using System.Collections.Generic;
-using Piot.Transport;
 
 namespace Piot.Transport.Memory
 {

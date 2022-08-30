@@ -47,10 +47,8 @@ public class GameTests
             hostTransportToUse = internetSimulatedHostTransport;
         }
 
-
         var clientGame = new Game(clientTransport, false, log.SubLog("client"));
         var hostGame = new Game(hostTransport, true, log.SubLog("host"));
-
 
         //var world = host.AuthoritativeWorld;
         //var spawnedEntity = world.SpawnEntity(new AvatarLogicEntityInternal());

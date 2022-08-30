@@ -5,8 +5,8 @@
 
 using System;
 using System.Collections.Generic;
-using Piot.Surge.FieldMask;
 using Piot.Surge.DeltaSnapshot.EntityMask;
+using Piot.Surge.FieldMask;
 
 namespace Piot.Surge.DeltaSnapshot.Convert
 {

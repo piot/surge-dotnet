@@ -12,7 +12,7 @@ using Piot.Surge.LogicalInput;
 using Piot.Surge.LogicalInput.Serialization;
 using Piot.Surge.OrderedDatagrams;
 using Piot.Surge.Tick;
-using Piot.Surge.SnapshotDeltaPack.Serialization;
+using Piot.Surge.TimeTick;
 using Piot.Transport;
 
 namespace Piot.Surge.Pulse.Client
@@ -28,7 +28,7 @@ namespace Piot.Surge.Pulse.Client
         private readonly IInputPackFetch inputPackFetch;
         private readonly Dictionary<byte, AvatarPredictor> localAvatarPredictors = new();
         private readonly ILog log;
-        private readonly TimeTick.TimeTicker predictionTicker;
+        private readonly TimeTicker predictionTicker;
         private readonly ITransportClient transportClient;
         private readonly IEntityContainer world;
         private TickId predictTickId;

@@ -8,14 +8,13 @@ using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.Stats;
 using Piot.Surge.DatagramType.Serialization;
-using Piot.Surge.SnapshotProtocol;
-using Piot.Surge.SnapshotProtocol.In;
 using Piot.Surge.LogicalInput;
 using Piot.Surge.MonotonicTimeLowerBits;
 using Piot.Surge.OrderedDatagrams;
+using Piot.Surge.SnapshotProtocol.In;
 using Piot.Surge.Tick.Serialization;
-using Piot.Transport.Stats;
 using Piot.Transport;
+using Piot.Transport.Stats;
 
 namespace Piot.Surge.Pulse.Client
 {

@@ -6,7 +6,6 @@
 using System;
 using Piot.MonotonicTime;
 using Piot.Stats;
-using Piot.Transport;
 
 namespace Piot.Transport.Stats
 {

@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 using Piot.Flood;
-using Piot.Surge.FieldMask;
 
 namespace Piot.Surge.FieldMask.Serialization
 {

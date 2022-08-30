@@ -20,7 +20,7 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
         /// <param name="entityId"></param>
         /// <param name="changeMask"></param>
         /// <param name="entitySerializer"></param>
-        public static void Write(IOctetWriter writer, EntityId entityId, FieldMask.ChangedFieldsMask changeMask,
+        public static void Write(IOctetWriter writer, EntityId entityId, ChangedFieldsMask changeMask,
             IEntitySerializer entitySerializer)
         {
             EntityIdWriter.Write(writer, entityId);
