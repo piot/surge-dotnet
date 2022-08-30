@@ -23,6 +23,26 @@ namespace Piot.Surge.Tick
             this.lastTickId = lastTickId;
         }
 
+        public bool Equals(TickIdRange other)
+        {
+            return other.startTickId == startTickId && other.lastTickId == lastTickId;
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is not null && base.Equals((TickIdRange)obj);
+        }
+
+        public static bool operator !=(TickIdRange a, TickIdRange b)
+        {
+            return !a.Equals(b);
+        }
+
+        public static bool operator ==(TickIdRange a, TickIdRange b)
+        {
+            return a.Equals(b);
+        }
+
         public static TickIdRange FromTickId(TickId tickId)
         {
             return new(tickId, tickId);

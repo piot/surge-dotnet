@@ -28,6 +28,26 @@ namespace Piot.Surge.Tick
             this.tickId = tickId;
         }
 
+        public static bool operator !=(TickId a, TickId b)
+        {
+            return !a.Equals(b);
+        }
+
+        public static bool operator ==(TickId a, TickId b)
+        {
+            return a.Equals(b);
+        }
+
+        public bool Equals(TickId other)
+        {
+            return other.tickId == tickId;
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is not null && base.Equals((TickId)obj);
+        }
+
         public bool IsImmediateFollowing(TickId other)
         {
             return other.tickId + 1 == tickId;

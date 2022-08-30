@@ -8,6 +8,7 @@ using Piot.Flood;
 using Piot.Surge.DatagramType.Serialization;
 using Piot.Surge.MonotonicTimeLowerBits;
 using Piot.Surge.OrderedDatagrams;
+using Piot.Surge.SnapshotProtocol.Fragment;
 using Piot.Surge.Tick;
 using Piot.Surge.Tick.Serialization;
 
@@ -15,7 +16,7 @@ namespace Piot.Surge.SnapshotProtocol.Out
 {
     public static class SnapshotPackIncludingCorrectionsWriter
     {
-        public const uint PayloadOctetCountPerDatagram = 1100;
+        const uint PayloadOctetCountPerDatagram = 1100;
 
         public static void Write(Action<ReadOnlyMemory<byte>> send, SnapshotProtocolPack pack,
             MonotonicTimeLowerBits.MonotonicTimeLowerBits monotonicTimeLowerBits, sbyte clientInputTicksAhead,
@@ -38,7 +39,6 @@ namespace Piot.Surge.SnapshotProtocol.Out
                 TickIdWriter.Write(writer, serverTickId);
 
                 var lastOne = datagramIndex + 1 == datagramCount;
-                SnapshotPackDatagramHeaderWriter.Write(writer, pack.tickIdRange, datagramIndex, lastOne);
 
                 var sliceStart = (int)(datagramIndex * PayloadOctetCountPerDatagram);
                 var sliceLength = lastOne
@@ -47,6 +47,7 @@ namespace Piot.Surge.SnapshotProtocol.Out
 
                 var payloadSlice = payloadSpan.Slice(sliceStart, sliceLength).ToArray();
 
+                SnapshotFragmentHeaderWriter.Write(writer, pack.tickIdRange, datagramIndex, (ushort)payloadSlice.Length, lastOne);
                 writer.WriteOctets(payloadSlice);
 
                 send(fullWriter.Octets.ToArray());

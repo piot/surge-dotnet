@@ -11,6 +11,7 @@ using Piot.Surge.DatagramType.Serialization;
 using Piot.Surge.LogicalInput;
 using Piot.Surge.MonotonicTimeLowerBits;
 using Piot.Surge.OrderedDatagrams;
+using Piot.Surge.SnapshotProtocol.Fragment;
 using Piot.Surge.SnapshotProtocol.In;
 using Piot.Surge.Tick.Serialization;
 using Piot.Transport;
@@ -30,12 +31,14 @@ namespace Piot.Surge.Pulse.Client
         private readonly ITransport transportBoth;
         private readonly ITransportClient transportClient;
         private readonly TransportStatsBoth transportWithStats;
+        private readonly SnapshotFragmentReAssembler snapshotFragmentReAssembler;
 
         public Client(ILog log, Milliseconds now, Milliseconds targetDeltaTimeMs,
             IEntityContainerWithGhostCreator worldWithGhostCreator,
             ITransport assignedTransport, IInputPackFetch fetch)
         {
             this.log = log;
+            snapshotFragmentReAssembler = new(log);
             World = worldWithGhostCreator;
             transportWithStats = new(assignedTransport, now);
             transportBoth = transportWithStats;
@@ -76,12 +79,15 @@ namespace Piot.Surge.Pulse.Client
         {
             log.DebugLowLevel("receiving snapshot datagram from server");
             ReceiveSnapshotExtraData(reader, now);
-            DeltaSnapshotPackIncludingCorrectionsHeaderReader.Read(reader, out var tickIdRange, out var datagramIndex,
-                out var isLastOne);
-            log.DebugLowLevel("receive snapshot header {TickIdRange} {DatagramIndex} {IsLastOne}", tickIdRange,
-                datagramIndex, isLastOne);
-            var unionOfSnapshots = DeltaSnapshotIncludingCorrectionsReader.Read(tickIdRange, reader);
-            deltaSnapshotPlayback.FeedSnapshotDeltaPack(unionOfSnapshots);
+            var snapshotIsDone = snapshotFragmentReAssembler.Read(reader, out var tickIdRange, out var completePayload);
+            if (!snapshotIsDone)
+            {
+                return;
+            }
+
+            var snapshotReader = new OctetReader(completePayload);
+            var snapshotIncludingCorrections = DeltaSnapshotIncludingCorrectionsReader.Read(tickIdRange, snapshotReader);
+            deltaSnapshotPlayback.FeedSnapshotDeltaPack(snapshotIncludingCorrections);
         }
 
         private void ReceiveDatagramFromHost(IOctetReader reader, Milliseconds now)

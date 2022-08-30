@@ -25,7 +25,6 @@ using Piot.Surge.LogicalInput;
 using Piot.Surge.LogicalInput.Serialization;
 using Piot.Surge.MonotonicTimeLowerBits;
 using Piot.Surge.OrderedDatagrams;
-using Piot.Surge.SnapshotDeltaPack;
 using Piot.Surge.SnapshotDeltaPack.Serialization;
 using Piot.Surge.SnapshotProtocol.ReceiveStatus;
 using Piot.Surge.Tick;
@@ -433,17 +432,6 @@ public class UnitTest1
 
 
         (world as IEntityContainer).DeleteEntity(spawnedAvatar);
-
-        {
-            var snapshotDeltaAfterDelete = Scanner.Scan(scanWorld, firstTickId);
-            var (createdForPacker, updateForPacker) = SnapshotDeltaPackPrepare.Prepare(
-                snapshotDeltaAfterDelete.createdIds,
-                snapshotDeltaAfterDelete.updatedEntities, world);
-            Assert.Single(world.Deleted);
-            Assert.Empty(world.Created);
-            Assert.Empty(createdForPacker);
-            Assert.Empty(updateForPacker);
-        }
     }
 
 

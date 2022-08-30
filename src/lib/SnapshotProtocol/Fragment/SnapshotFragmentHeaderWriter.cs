@@ -7,11 +7,11 @@ using Piot.Flood;
 using Piot.Surge.Tick;
 using Piot.Surge.Tick.Serialization;
 
-namespace Piot.Surge.SnapshotProtocol.Out
+namespace Piot.Surge.SnapshotProtocol.Fragment
 {
-    public static class SnapshotPackDatagramHeaderWriter
+    public static class SnapshotFragmentHeaderWriter
     {
-        public static void Write(IOctetWriter writer, TickIdRange tickIdRange, int datagramIndex,
+        public static void Write(IOctetWriter writer, TickIdRange tickIdRange, int datagramIndex, ushort octetCount,
             bool isLastOne)
         {
             var indexMask = (byte)datagramIndex;
@@ -23,6 +23,7 @@ namespace Piot.Surge.SnapshotProtocol.Out
 
             TickIdRangeWriter.Write(writer, tickIdRange);
             writer.WriteUInt8(indexMask);
+            writer.WriteUInt16(octetCount);
         }
     }
 }
