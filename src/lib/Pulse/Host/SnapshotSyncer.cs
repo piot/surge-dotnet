@@ -7,11 +7,15 @@ using System;
 using System.Collections.Generic;
 using Piot.Clog;
 using Piot.Flood;
+using Piot.Surge.Corrections;
 using Piot.Surge.DeltaSnapshot.Cache;
 using Piot.Surge.OrderedDatagrams;
-using Piot.Surge.Snapshot;
+using Piot.Surge.Tick;
 using Piot.Surge.DeltaSnapshot.EntityMask;
 using Piot.Surge.DeltaSnapshot.Pack;
+using Piot.Surge.DeltaSnapshotProtocol;
+using Piot.Surge.DeltaSnapshotProtocol.In;
+using Piot.Surge.DeltaSnapshotProtocol.Out;
 using Piot.Surge.SnapshotDeltaPack;
 using Piot.Transport;
 
@@ -118,7 +122,7 @@ namespace Piot.Surge.Pulse.Host
             var sender = new WrappedSender(transportSend, connection.Endpoint);
 
             log.DebugLowLevel("sending datagrams {Flattened}", fetchedContainer);
-            SnapshotDeltaPackUnionToDatagramsWriter.Write(sender.Send, includingCorrections,
+            SnapshotPackIncludingCorrectionsWriter.Write(sender.Send, includingCorrections,
                 connection.lastReceivedMonotonicTimeLowerBits, connection.clientInputTickCountAheadOfServer,
                 serverTickId,
                 connection.DatagramsOutIncrease);

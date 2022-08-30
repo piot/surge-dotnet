@@ -6,10 +6,9 @@
 using System;
 using System.Collections.Generic;
 using Piot.Flood;
-using Piot.Surge.LogicalInput;
-using Piot.Surge.SnapshotSerialization;
+using Piot.Surge.Tick.Serialization;
 
-namespace Piot.Surge.LogicalInputSerialization
+namespace Piot.Surge.LogicalInput.Serialization
 {
     public static class LogicalInputDeserialize
     {
@@ -37,13 +36,13 @@ namespace Piot.Surge.LogicalInputSerialization
                     continue;
                 }
 
-                var array = new LogicalInput.LogicalInput[inputCount];
+                var array = new LogicalInput[inputCount];
 
                 var firstFrameId = TickIdReader.Read(reader);
 
                 for (var i = 0; i < inputCount; ++i)
                 {
-                    LogicalInput.LogicalInput input = new()
+                    LogicalInput input = new()
                     {
                         appliedAtTickId = new((uint)(firstFrameId.tickId + i))
                     };

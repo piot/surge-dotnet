@@ -11,7 +11,7 @@ namespace Piot.Surge.SnapshotDeltaPack
     public static class SnapshotDeltaPackPrepare
     {
         public static (IEntity[], IUpdatedEntity[]) Prepare(EntityId[] deltaCreatedEntities,
-            SnapshotDeltaChangedEntity[] deltaUpdatedEntities, IEntityContainer world)
+            ChangedEntity[] deltaUpdatedEntities, IEntityContainer world)
         {
             var createdEntities = deltaCreatedEntities.Select(world.FetchEntity).ToArray();
 

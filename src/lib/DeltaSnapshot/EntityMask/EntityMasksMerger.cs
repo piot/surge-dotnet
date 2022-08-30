@@ -5,7 +5,7 @@
 
 using System;
 using System.Linq;
-using Piot.Surge.Snapshot;
+using Piot.Surge.Tick;
 
 namespace Piot.Surge.DeltaSnapshot.EntityMask
 {

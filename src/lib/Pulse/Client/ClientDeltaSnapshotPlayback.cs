@@ -6,6 +6,7 @@
 using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
+using Piot.Surge.Corrections;
 using Piot.Surge.SnapshotDeltaPack;
 using Piot.Surge.SnapshotDeltaPack.Serialization;
 
@@ -21,7 +22,7 @@ namespace Piot.Surge.Pulse.Client
         private readonly SnapshotDeltaPackIncludingCorrectionsQueue includingCorrectionsQueue = new();
         private readonly ILog log;
         private readonly IClientPredictorCorrections predictor;
-        private readonly TimeTicker.TimeTicker snapshotPlaybackTicker;
+        private readonly TimeTick.TimeTicker snapshotPlaybackTicker;
         private readonly Milliseconds targetDeltaTimeMs;
 
         public ClientDeltaSnapshotPlayback(Milliseconds now, IEntityContainerWithGhostCreator clientWorld,

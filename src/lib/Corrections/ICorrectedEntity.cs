@@ -5,7 +5,7 @@
 
 using Piot.Surge.LocalPlayer;
 
-namespace Piot.Surge.SnapshotDeltaPack
+namespace Piot.Surge.Corrections
 {
     public interface ICorrectedEntity : IEntitySerializer, IEntityBase
     {

@@ -6,10 +6,9 @@
 using System;
 using System.Linq;
 using Piot.Flood;
-using Piot.Surge.LogicalInput;
-using Piot.Surge.SnapshotSerialization;
+using Piot.Surge.Tick.Serialization;
 
-namespace Piot.Surge.LogicalInputSerialization
+namespace Piot.Surge.LogicalInput.Serialization
 {
     public static class LogicalInputSerialize
     {

@@ -7,7 +7,7 @@ using System;
 using Piot.MonotonicTime;
 using Piot.Transport;
 
-namespace Piot.Surge.TransportStats
+namespace Piot.Transport.Stats
 {
     public class TransportStatsBoth : ITransport
     {

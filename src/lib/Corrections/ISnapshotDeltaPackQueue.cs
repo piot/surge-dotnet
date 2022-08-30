@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-namespace Piot.Surge.SnapshotDeltaPack
+namespace Piot.Surge.Corrections
 {
     /// <summary>
     ///     Holds the incoming delta snapshot received from the host to the client.

@@ -5,14 +5,14 @@
 
 using Piot.Flood;
 using Piot.MonotonicTime;
-using Piot.Surge.DatagramType;
-using Piot.Surge.LogicalInput;
+using Piot.Surge.DatagramType.Serialization;
+using Piot.Surge.DeltaSnapshotProtocol.ReceiveStatus;
 using Piot.Surge.MonotonicTimeLowerBits;
 using Piot.Surge.OrderedDatagrams;
-using Piot.Surge.Snapshot;
-using Piot.Surge.SnapshotReceiveStatus;
+using Piot.Surge.Tick;
 
-namespace Piot.Surge.LogicalInputSerialization
+
+namespace Piot.Surge.LogicalInput.Serialization
 {
     public static class LogicInputDatagramSerialize
     {

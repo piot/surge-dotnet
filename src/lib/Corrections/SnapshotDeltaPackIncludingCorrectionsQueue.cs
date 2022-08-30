@@ -5,9 +5,9 @@
 
 using System;
 using System.Collections.Generic;
-using Piot.Surge.Snapshot;
+using Piot.Surge.Tick;
 
-namespace Piot.Surge.SnapshotDeltaPack
+namespace Piot.Surge.Corrections
 {
     public class SnapshotDeltaPackIncludingCorrectionsQueue : ISnapshotDeltaPackQueue
     {

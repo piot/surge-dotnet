@@ -7,7 +7,7 @@ using Piot.Clog;
 using Piot.Hazy;
 using Piot.MonotonicTime;
 using Piot.Random;
-using Piot.Surge.MemoryTransport;
+using Piot.Transport.Memory;
 using Tests.ExampleGame;
 using Xunit.Abstractions;
 

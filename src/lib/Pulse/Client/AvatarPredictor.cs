@@ -8,7 +8,7 @@ using Piot.Clog;
 using Piot.Flood;
 using Piot.Surge.LocalPlayer;
 using Piot.Surge.LogicalInput;
-using Piot.Surge.Snapshot;
+using Piot.Surge.Tick;
 
 namespace Piot.Surge.Pulse.Client
 {

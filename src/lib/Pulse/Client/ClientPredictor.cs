@@ -7,10 +7,11 @@ using System.Collections.Generic;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
+using Piot.Surge.Corrections.Serialization;
 using Piot.Surge.LogicalInput;
-using Piot.Surge.LogicalInputSerialization;
+using Piot.Surge.LogicalInput.Serialization;
 using Piot.Surge.OrderedDatagrams;
-using Piot.Surge.Snapshot;
+using Piot.Surge.Tick;
 using Piot.Surge.SnapshotDeltaPack.Serialization;
 using Piot.Transport;
 
@@ -27,7 +28,7 @@ namespace Piot.Surge.Pulse.Client
         private readonly IInputPackFetch inputPackFetch;
         private readonly Dictionary<byte, AvatarPredictor> localAvatarPredictors = new();
         private readonly ILog log;
-        private readonly TimeTicker.TimeTicker predictionTicker;
+        private readonly TimeTick.TimeTicker predictionTicker;
         private readonly ITransportClient transportClient;
         private readonly IEntityContainer world;
         private TickId predictTickId;

@@ -18,7 +18,7 @@ namespace Piot.Surge.DeltaSnapshot.Convert
         ///     and <see cref="ChangedFieldsMask" /> for updated entities,
         ///     not the actual field values, archetypeIds, etc.
         /// </summary>
-        public static EntityMasks ConvertToEntityMasks(DeltaSnapshotEntityIds deltaSnapshotEntityIds)
+        public static EntityMasks ToEntityMasks(DeltaSnapshotEntityIds deltaSnapshotEntityIds)
         {
             var entities = new Dictionary<ushort, ulong>();
 

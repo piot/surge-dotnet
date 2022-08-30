@@ -8,13 +8,13 @@ using System.Collections.Generic;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
-using Piot.Surge.DeltaSnapshot;
 using Piot.Surge.DeltaSnapshot.Convert;
-using Piot.Surge.Snapshot;
+using Piot.Surge.Tick;
 using Piot.Surge.DeltaSnapshot.Pack;
 using Piot.Surge.DeltaSnapshot.EntityMask;
-using Piot.Surge.SnapshotDeltaPack.Serialization;
-using Piot.Surge.TransportStats;
+using Piot.Surge.DeltaSnapshot.Pack.Convert;
+using Piot.Surge.DeltaSnapshot.Scan;
+using Piot.Transport.Stats;
 using Piot.Transport;
 
 namespace Piot.Surge.Pulse.Host
@@ -25,7 +25,7 @@ namespace Piot.Surge.Pulse.Host
         private readonly Dictionary<uint, ConnectionToClient> connections = new();
         private readonly ILog log;
         private readonly List<ConnectionToClient> orderedConnections = new();
-        private readonly TimeTicker.TimeTicker simulationTicker;
+        private readonly TimeTick.TimeTicker simulationTicker;
         private readonly SnapshotSyncer snapshotSyncer;
         private readonly ITransport transport;
         private readonly TransportStatsBoth transportWithStats;
@@ -44,7 +44,7 @@ namespace Piot.Surge.Pulse.Host
 
         public IEntityContainerWithDetectChanges AuthoritativeWorld { get; }
 
-        public TransportStats.TransportStats Stats => transportWithStats.Stats;
+        public Transport.Stats.TransportStats Stats => transportWithStats.Stats;
 
         private void SetInputsFromClientsToEntities()
         {
@@ -97,14 +97,14 @@ namespace Piot.Surge.Pulse.Host
 
         private (EntityMasks, DeltaSnapshotPack) StoreWorldChangesToPackContainer()
         {
-            var snapshotDelta = DeltaSnapshot.Scan.Scanner.Scan(AuthoritativeWorld, serverTickId);
-            var deltaPackContainer =
-                SnapshotDeltaPackCreator.Create(AuthoritativeWorld, snapshotDelta);
+            var deltaSnapshotEntityIds = Scanner.Scan(AuthoritativeWorld, serverTickId);
+            var deltaSnapshotPack =
+                DeltaSnapshotToPack.ToDeltaSnapshotPack(AuthoritativeWorld, deltaSnapshotEntityIds);
 
             AuthoritativeWorld.ClearDelta();
             OverWriter.Overwrite(AuthoritativeWorld);
 
-            return (DeltaSnapshotToEntityMasks.ConvertToEntityMasks(snapshotDelta), deltaPackContainer);
+            return (DeltaSnapshotToEntityMasks.ToEntityMasks(deltaSnapshotEntityIds), deltaSnapshotPack);
         }
 
         private void ReceiveFromClients()

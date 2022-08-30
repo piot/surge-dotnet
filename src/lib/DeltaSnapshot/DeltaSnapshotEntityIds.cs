@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using Piot.Surge.Snapshot;
+using Piot.Surge.Tick;
 
 namespace Piot.Surge.DeltaSnapshot
 {
@@ -15,10 +15,10 @@ namespace Piot.Surge.DeltaSnapshot
     {
         public readonly EntityId[] createdIds;
         public readonly EntityId[] deletedIds;
-        public readonly SnapshotDeltaChangedEntity[] updatedEntities;
+        public readonly ChangedEntity[] updatedEntities;
 
         public DeltaSnapshotEntityIds(TickId tickId, EntityId[] deletedIds, EntityId[] createdIds,
-            SnapshotDeltaChangedEntity[] updatedEntities)
+            ChangedEntity[] updatedEntities)
         {
             TickId = tickId;
             this.deletedIds = deletedIds;

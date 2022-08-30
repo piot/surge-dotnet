@@ -6,7 +6,7 @@
 using Piot.Clog;
 using Piot.Surge;
 using Piot.Surge.FieldMask;
-using Piot.Surge.Snapshot;
+using Piot.Surge.Tick;
 using Piot.Surge.DeltaSnapshot.EntityMask;
 using Xunit.Abstractions;
 

@@ -7,12 +7,12 @@ using System;
 using System.Collections.Generic;
 using Piot.Clog;
 using Piot.Flood;
-using Piot.Surge.DatagramType;
-using Piot.Surge.LogicalInputSerialization;
+using Piot.Surge.DatagramType.Serialization;
+using Piot.Surge.DeltaSnapshotProtocol.ReceiveStatus;
+using Piot.Surge.LogicalInput.Serialization;
 using Piot.Surge.MonotonicTimeLowerBits;
 using Piot.Surge.OrderedDatagrams;
-using Piot.Surge.Snapshot;
-using Piot.Surge.SnapshotReceiveStatus;
+using Piot.Surge.Tick;
 using Piot.Transport;
 
 namespace Piot.Surge.Pulse.Host

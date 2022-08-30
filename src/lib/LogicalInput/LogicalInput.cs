@@ -5,7 +5,7 @@
 
 using System;
 using Piot.Surge.LocalPlayer;
-using Piot.Surge.Snapshot;
+using Piot.Surge.Tick;
 
 namespace Piot.Surge.LogicalInput
 {

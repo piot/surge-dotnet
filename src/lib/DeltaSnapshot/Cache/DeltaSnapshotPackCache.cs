@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using Piot.Clog;
 using Piot.Surge.DeltaSnapshot.Pack;
-using Piot.Surge.Snapshot;
+using Piot.Surge.Tick;
 
 namespace Piot.Surge.DeltaSnapshot.Cache
 {

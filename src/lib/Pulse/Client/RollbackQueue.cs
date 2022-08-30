@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
-using Piot.Surge.Snapshot;
+using Piot.Surge.Tick;
 
 namespace Piot.Surge.Pulse.Client
 {

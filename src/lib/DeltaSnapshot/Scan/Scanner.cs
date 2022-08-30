@@ -5,7 +5,7 @@
 
 using System.Linq;
 using Piot.Surge.FieldMask;
-using Piot.Surge.Snapshot;
+using Piot.Surge.Tick;
 using Piot.Surge.DeltaSnapshot;
 
 namespace Piot.Surge.DeltaSnapshot.Scan
@@ -27,7 +27,7 @@ namespace Piot.Surge.DeltaSnapshot.Scan
             var updatedEntities = (from entity in world.AllEntities
                 where entity.Mode == EntityMode.Normal
                 let changes = entity.GeneratedEntity.Changes()
-                select new SnapshotDeltaChangedEntity(entity.Id, new (changes))).ToArray();
+                select new ChangedEntity(entity.Id, new (changes))).ToArray();
 
             return new DeltaSnapshotEntityIds(tickId, deletedEntities, createdEntities, updatedEntities);
         }

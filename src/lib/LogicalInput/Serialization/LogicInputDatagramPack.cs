@@ -6,11 +6,12 @@
 using System;
 using Piot.Flood;
 using Piot.MonotonicTime;
+using Piot.Surge.DeltaSnapshotProtocol;
 using Piot.Surge.LogicalInput;
 using Piot.Surge.OrderedDatagrams;
-using Piot.Surge.Snapshot;
+using Piot.Surge.Tick;
 
-namespace Piot.Surge.LogicalInputSerialization
+namespace Piot.Surge.LogicalInput.Serialization
 {
     public static class LogicInputDatagramPackOut
     {

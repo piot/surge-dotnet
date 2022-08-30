@@ -5,7 +5,7 @@
 
 using Piot.Clog;
 using Piot.MonotonicTime;
-using Piot.Surge.TimeTicker;
+using Piot.Surge.TimeTick;
 using Xunit.Abstractions;
 
 namespace Tests;

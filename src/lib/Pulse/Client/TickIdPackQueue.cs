@@ -5,7 +5,7 @@
 
 using System;
 using System.Collections.Generic;
-using Piot.Surge.Snapshot;
+using Piot.Surge.Tick;
 
 namespace Piot.Surge.Pulse.Client
 {

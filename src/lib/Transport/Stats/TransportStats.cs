@@ -5,7 +5,7 @@
 
 using Piot.Stats;
 
-namespace Piot.Surge.TransportStats
+namespace Piot.Transport.Stats
 {
     public struct TransportStatsInDirection
     {

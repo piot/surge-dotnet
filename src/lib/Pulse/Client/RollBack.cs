@@ -5,7 +5,7 @@
 
 using Piot.Flood;
 using Piot.Surge.FieldMask.Serialization;
-using Piot.Surge.Snapshot;
+using Piot.Surge.Tick;
 
 namespace Piot.Surge.Pulse.Client
 {
