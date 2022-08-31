@@ -16,7 +16,7 @@ namespace Piot.Surge.SnapshotProtocol.Out
 {
     public static class SnapshotPackIncludingCorrectionsWriter
     {
-        const uint PayloadOctetCountPerDatagram = 1100;
+        private const uint PayloadOctetCountPerDatagram = 1100;
 
         public static void Write(Action<ReadOnlyMemory<byte>> send, SnapshotProtocolPack pack,
             MonotonicTimeLowerBits.MonotonicTimeLowerBits monotonicTimeLowerBits, sbyte clientInputTicksAhead,
@@ -47,7 +47,8 @@ namespace Piot.Surge.SnapshotProtocol.Out
 
                 var payloadSlice = payloadSpan.Slice(sliceStart, sliceLength).ToArray();
 
-                SnapshotFragmentHeaderWriter.Write(writer, pack.tickIdRange, datagramIndex, (ushort)payloadSlice.Length, lastOne);
+                SnapshotFragmentHeaderWriter.Write(writer, pack.tickIdRange, datagramIndex, (ushort)payloadSlice.Length,
+                    lastOne);
                 writer.WriteOctets(payloadSlice);
 
                 send(fullWriter.Octets.ToArray());

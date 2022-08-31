@@ -25,13 +25,13 @@ namespace Piot.Surge.Pulse.Client
         private readonly ILog log;
         private readonly OrderedDatagramsInChecker orderedDatagramsInChecker = new();
         private readonly ClientPredictor predictor;
+        private readonly SnapshotFragmentReAssembler snapshotFragmentReAssembler;
         private readonly StatCountThreshold statsHostInputQueueCount = new(60);
 
         private readonly StatCountThreshold statsRoundTripTime = new(20);
         private readonly ITransport transportBoth;
         private readonly ITransportClient transportClient;
         private readonly TransportStatsBoth transportWithStats;
-        private readonly SnapshotFragmentReAssembler snapshotFragmentReAssembler;
 
         public Client(ILog log, Milliseconds now, Milliseconds targetDeltaTimeMs,
             IEntityContainerWithGhostCreator worldWithGhostCreator,
@@ -86,7 +86,8 @@ namespace Piot.Surge.Pulse.Client
             }
 
             var snapshotReader = new OctetReader(completePayload);
-            var snapshotIncludingCorrections = DeltaSnapshotIncludingCorrectionsReader.Read(tickIdRange, snapshotReader);
+            var snapshotIncludingCorrections =
+                DeltaSnapshotIncludingCorrectionsReader.Read(tickIdRange, snapshotReader);
             deltaSnapshotPlayback.FeedSnapshotDeltaPack(snapshotIncludingCorrections);
         }
 

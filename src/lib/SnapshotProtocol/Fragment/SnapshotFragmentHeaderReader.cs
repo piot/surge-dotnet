@@ -11,7 +11,8 @@ namespace Piot.Surge.SnapshotProtocol.Fragment
 {
     public static class SnapshotFragmentHeaderReader
     {
-        public static void Read(IOctetReader reader, out TickIdRange tickIdRange, out int datagramIndex, out ushort octetCount,
+        public static void Read(IOctetReader reader, out TickIdRange tickIdRange, out int datagramIndex,
+            out ushort octetCount,
             out bool isLastOne)
         {
             tickIdRange = TickIdRangeReader.Read(reader);

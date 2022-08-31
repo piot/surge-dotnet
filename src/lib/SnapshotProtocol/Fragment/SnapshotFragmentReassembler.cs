@@ -13,20 +13,21 @@ namespace Piot.Surge.SnapshotProtocol.Fragment
 {
     public class SnapshotFragmentReAssembler
     {
+        private readonly ILog log;
         private readonly MemoryStream payloadAssembly = new();
-        private bool tickIdRangeSet;
         private TickIdRange assemblingTickIdRange;
         private uint nextDatagramIndex;
-        private readonly ILog log;
-        
+        private bool tickIdRangeSet;
+
         public SnapshotFragmentReAssembler(ILog log)
         {
             this.log = log;
         }
-        
+
         public bool Read(IOctetReader reader, out TickIdRange outTickIdRange, out ReadOnlySpan<byte> outPayload)
         {
-            SnapshotFragmentHeaderReader.Read(reader, out var tickIdRange, out var datagramIndex, out var octetCount, out var isLastOne);
+            SnapshotFragmentHeaderReader.Read(reader, out var tickIdRange, out var datagramIndex, out var octetCount,
+                out var isLastOne);
             log.DebugLowLevel("receive snapshot header {TickIdRange} {DatagramIndex} {IsLastOne}", tickIdRange,
                 datagramIndex, isLastOne);
 
@@ -40,15 +41,15 @@ namespace Piot.Surge.SnapshotProtocol.Fragment
                     outTickIdRange = tickIdRange;
                     return false;
                 }
-                
+
                 tickIdRangeSet = true;
                 assemblingTickIdRange = tickIdRange;
                 nextDatagramIndex = (uint)datagramIndex;
             }
-            
+
             if (datagramIndex != nextDatagramIndex)
             {
-                payloadAssembly.SetLength(0);                
+                payloadAssembly.SetLength(0);
                 tickIdRangeSet = false;
                 outPayload = ReadOnlySpan<byte>.Empty;
                 outTickIdRange = tickIdRange;
@@ -61,11 +62,12 @@ namespace Piot.Surge.SnapshotProtocol.Fragment
 
             if (isLastOne)
             {
-                log.DebugLowLevel("Snapshot fragments are assembled. total {TickIdRange} {OctetCount}", assemblingTickIdRange, fragmentPayload.Length);
+                log.DebugLowLevel("Snapshot fragments are assembled. total {TickIdRange} {OctetCount}",
+                    assemblingTickIdRange, fragmentPayload.Length);
             }
 
             nextDatagramIndex = (uint)datagramIndex + 1;
-            
+
             outPayload = fragmentPayload;
             outTickIdRange = tickIdRange;
             return isLastOne;
