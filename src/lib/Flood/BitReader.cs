@@ -42,7 +42,7 @@ namespace Piot.Flood
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public uint ReadBits(int bitCount)
+        public ulong ReadBits(int bitCount)
         {
             bitPositionInAccumulator += bitCount;
             bitPosition += bitCount;
@@ -60,7 +60,8 @@ namespace Piot.Flood
 
             // Get the bits that was left in the accumulator
             bitPositionInAccumulator -= 64;
-            var firstMask = (1ul << (bitCount - bitPositionInAccumulator)) - 1;
+            var firstMask =
+                (1ul << (bitCount - bitPositionInAccumulator)) - 1; // must check since shifting by >= 64 is undefined
             var v = (accumulator >> (bitPositionInAccumulator - bitCount)) & firstMask;
 
             // Set the accumulator with a new uint64 value
@@ -69,7 +70,10 @@ namespace Piot.Flood
 
             // Get the bits we need from the newly read uint64 value
             var secondMask = (1ul << bitPositionInAccumulator) - 1;
-            v |= (accumulator >> (64 - bitPositionInAccumulator)) & secondMask;
+            if (bitPositionInAccumulator > 0) // must check since shifting by >= 64 is undefined
+            {
+                v |= (accumulator >> (64 - bitPositionInAccumulator)) & secondMask;
+            }
 
             return (uint)v;
         }

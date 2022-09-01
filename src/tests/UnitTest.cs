@@ -200,7 +200,7 @@ public class UnitTest1
 
         var writer = new OctetWriter(64);
         (someAvatar as IEntitySerializer).SerializeAll(writer);
-        Assert.Equal(20, writer.Octets.Length);
+        Assert.Equal(22, writer.Octets.Length);
 
         var readAvatar = new AvatarLogicEntityInternal();
 
@@ -221,7 +221,7 @@ public class UnitTest1
         {
             var writer = new OctetWriter(64);
             (someAvatar as IEntitySerializer).SerializeAll(writer);
-            Assert.Equal(20, writer.Octets.Length);
+            Assert.Equal(22, writer.Octets.Length);
 
             var reader = new OctetReader(writer.Octets);
 
@@ -241,7 +241,7 @@ public class UnitTest1
             Assert.NotEqual(someAvatar.Self.ammoCount, readAvatar.Self.ammoCount);
 
             var reader = new OctetReader(writer.Octets);
-            (readAvatar as IEntityDeserializer).Deserialize(AvatarLogicEntityInternal.AmmoCountMask, reader);
+            (readAvatar as IEntityDeserializer).Deserialize(reader);
         }
 
         Assert.Equal(someAvatar.Self.ammoCount, readAvatar.Self.ammoCount);
@@ -279,8 +279,8 @@ public class UnitTest1
         var writerButtonDown = new OctetWriter(100);
         (avatarButtonDown as IEntitySerializer).Serialize(AvatarLogicEntityInternal.FireButtonIsDownMask,
             writerButtonDown);
-        Assert.Equal(1, writerButtonDown.Octets.Length);
-        Assert.Equal(1, writerButtonDown.Octets[0]);
+        Assert.Equal(3, writerButtonDown.Octets.Length);
+        Assert.Equal(1, writerButtonDown.Octets[2]);
 
         var readerButtonDown = new OctetReader(writerButtonDown.Octets);
 
@@ -289,13 +289,12 @@ public class UnitTest1
             AvatarLogicEntityInternal.FireButtonIsDownMask,
             readerButtonDown, writerButtonHistory);
 
-        Assert.Equal(1, writerButtonHistory.Octets.Length);
-        Assert.Equal(0, writerButtonHistory.Octets[0]);
+        Assert.Equal(3, writerButtonHistory.Octets.Length);
+        Assert.Equal(0, writerButtonHistory.Octets[2]);
 
         var rollbackReader = new OctetReader(writerButtonHistory.Octets);
 
-        (avatarBeforeInfo as IEntityDeserializer).Deserialize(AvatarLogicEntityInternal.FireButtonIsDownMask,
-            rollbackReader);
+        (avatarBeforeInfo as IEntityDeserializer).Deserialize(rollbackReader);
 
         Assert.False(avatarBeforeInfo.Self.fireButtonIsDown);
     }
@@ -411,9 +410,9 @@ public class UnitTest1
         Assert.Equal(packetQueue.Peek().tickIdRange.Last, firstTickId);
 
 #if DEBUG
-        Assert.Equal(22, packetQueue.Peek().payload.Length);
+        Assert.Equal(19, packetQueue.Peek().payload.Length);
 #else
-        Assert.Equal(18, packetQueue.Peek().payload.Length);
+        Assert.Equal(16, packetQueue.Peek().payload.Length);
 #endif
 
         Assert.Equal(6, ((AvatarLogic)spawnedAvatar.Logic).position.x);
@@ -634,9 +633,9 @@ public class UnitTest1
         var undoPack = new DeltaSnapshotPack(TickIdRange.FromTickId(firstTickId), undoWriter.Octets.ToArray());
 
 #if DEBUG
-        Assert.Equal(28, undoWriter.Octets.Length);
+        Assert.Equal(25, undoWriter.Octets.Length);
 #else
-        Assert.Equal(24, undoWriter.Octets.Length);
+        Assert.Equal(22, undoWriter.Octets.Length);
 #endif
         foreach (var clientCreatedEntity in created)
         {

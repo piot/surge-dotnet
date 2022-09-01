@@ -6,7 +6,6 @@
 using Piot.Flood;
 using Piot.Surge.Entities;
 using Piot.Surge.FieldMask;
-using Piot.Surge.FieldMask.Serialization;
 using Piot.Surge.Types.Serialization;
 
 namespace Piot.Surge.SnapshotDeltaPack.Serialization
@@ -24,7 +23,6 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
             IEntitySerializer entitySerializer)
         {
             EntityIdWriter.Write(writer, entityId);
-            ChangedFieldsMaskWriter.WriteChangedFieldsMask(writer, changeMask);
             entitySerializer.Serialize(changeMask.mask, writer);
         }
     }

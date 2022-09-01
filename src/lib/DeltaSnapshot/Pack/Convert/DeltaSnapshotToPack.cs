@@ -25,16 +25,17 @@ namespace Piot.Surge.DeltaSnapshot.Pack.Convert
         {
             var writer = new OctetWriter(Constants.MaxSnapshotOctetSize);
 
+#if DEBUG
             writer.WriteUInt8(Constants.SnapshotDeltaSync);
-
+#endif
             EntityCountWriter.WriteEntityCount((uint)deltaSnapshotEntityIds.deletedIds.Length, writer);
             foreach (var deletedEntityId in deltaSnapshotEntityIds.deletedIds)
             {
                 EntityIdWriter.Write(writer, deletedEntityId);
             }
-
+#if DEBUG
             writer.WriteUInt8(Constants.SnapshotDeltaCreatedSync);
-
+#endif
             var createdEntities = deltaSnapshotEntityIds.createdIds.Select(world.FetchEntity).ToArray();
             EntityCountWriter.WriteEntityCount((uint)deltaSnapshotEntityIds.createdIds.Length, writer);
 
@@ -42,8 +43,9 @@ namespace Piot.Surge.DeltaSnapshot.Pack.Convert
             {
                 PackCreatedEntity.Write(writer, createdEntity.Id, createdEntity.ArchetypeId, createdEntity);
             }
-
+#if DEBUG
             writer.WriteUInt8(Constants.SnapshotDeltaUpdatedSync);
+#endif
             var updatedEntities = deltaSnapshotEntityIds.updatedEntities.Select(x =>
                 (IUpdatedEntity)new UpdatedEntity(x.entityId, x.changeMask, world.FetchEntity(x.entityId))).ToArray();
             EntityCountWriter.WriteEntityCount((uint)deltaSnapshotEntityIds.updatedEntities.Length, writer);

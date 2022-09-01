@@ -5,8 +5,6 @@
 
 using Piot.Flood;
 using Piot.Surge.Entities;
-using Piot.Surge.FieldMask;
-using Piot.Surge.FieldMask.Serialization;
 using Piot.Surge.Tick;
 
 namespace Piot.Surge.Pulse.Client
@@ -22,9 +20,7 @@ namespace Piot.Surge.Pulse.Client
 
             var changes = predictedEntity.GeneratedEntity.Changes();
             var undoWriter = new OctetWriter(1200);
-            var changedFieldsMask = new ChangedFieldsMask(changes);
 
-            ChangedFieldsMaskWriter.WriteChangedFieldsMask(undoWriter, changedFieldsMask);
             predictedEntity.SerializePrevious(changes, undoWriter);
 
             rollbackQueue.EnqueueUndoPack(appliedAtTickId, undoWriter.Octets);

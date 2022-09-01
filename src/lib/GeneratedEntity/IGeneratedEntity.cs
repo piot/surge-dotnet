@@ -11,7 +11,8 @@ namespace Piot.Surge.GeneratedEntity
     /// <summary>
     ///     Interfaces that a source code generated entity is implementing.
     /// </summary>
-    public interface IGeneratedEntity : IEntitySerializer, IEntityDeserializer, IEntityChanges, IEntityOverwrite,
+    public interface IGeneratedEntity : IEntitySerializer, IEntityBitSerializer, IEntityDeserializer,
+        IEntityBitDeserializer, IEntityChanges, IEntityOverwrite,
         ISimpleLogic, IEntityFireChanges, IEntityActions, IEntityActionsDoUnDo
     {
         public ILogic Logic { get; }

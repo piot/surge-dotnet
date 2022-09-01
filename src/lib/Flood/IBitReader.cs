@@ -7,6 +7,6 @@ namespace Piot.Flood
 {
     public interface IBitReader
     {
-        public uint ReadBits(int bitCount);
+        public ulong ReadBits(int bitCount);
     }
 }

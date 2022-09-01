@@ -18,5 +18,15 @@ namespace Piot.Surge.Types.Serialization
                 z = reader.ReadInt16()
             };
         }
+
+        public static Velocity3 Read(IBitReader reader)
+        {
+            return new Velocity3
+            {
+                x = (short)reader.ReadBits(16),
+                y = (short)reader.ReadBits(16),
+                z = (short)reader.ReadBits(16)
+            };
+        }
     }
 }

@@ -61,9 +61,9 @@ namespace Piot.Surge.Entities
             generatedEntity.SerializeCorrectionState(writer);
         }
 
-        void IEntityDeserializer.Deserialize(ulong serializeFlags, IOctetReader reader)
+        ulong IEntityDeserializer.Deserialize(IOctetReader reader)
         {
-            generatedEntity.Deserialize(serializeFlags, reader);
+            return generatedEntity.Deserialize(reader);
         }
 
         void IEntityDeserializer.DeserializeAll(IOctetReader reader)

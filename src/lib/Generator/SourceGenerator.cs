@@ -383,6 +383,7 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
             return DeSerializeMethodForValueTypes(type);
         }
 
+
         public static string SerializeMethod(Type type, string variableName)
         {
             if (type == typeof(bool))
@@ -408,6 +409,90 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
             return SerializeMethodForValueTypes(type, variableName);
         }
 
+        public static string PrimitiveBitSerializer(uint bitCount, string variableName)
+        {
+            return $"writer.WriteBits({variableName}, {bitCount})";
+        }
+
+        public static string PrimitiveBitDeSerializer(Type type)
+        {
+            int bitCount;
+
+            if (type == typeof(byte) || type == typeof(sbyte))
+            {
+                bitCount = 8;
+            }
+            else if (type == typeof(ushort) || type == typeof(short))
+            {
+                bitCount = 16;
+            }
+            else if (type == typeof(uint) || type == typeof(int))
+            {
+                bitCount = 32;
+            }
+            else if (type == typeof(ulong) || type == typeof(long))
+            {
+                bitCount = 64;
+            }
+            else
+            {
+                throw new Exception($"unknown type {type.Name}");
+            }
+
+            return $"({type.Name})reader.ReadBits({bitCount})";
+        }
+
+        public static string BitSerializeMethod(Type type, string variableName)
+        {
+            if (type == typeof(bool))
+            {
+                return $"writer.WriteBits({variableName} ? 1lu : 0lu, 1)";
+            }
+
+            if (type == typeof(ushort))
+            {
+                return PrimitiveBitSerializer(16, variableName);
+            }
+
+            if (type == typeof(uint))
+            {
+                return PrimitiveBitSerializer(32, variableName);
+            }
+
+            if (type == typeof(ulong))
+            {
+                return PrimitiveBitSerializer(64, variableName);
+            }
+
+            return SerializeMethodForValueTypes(type, variableName);
+        }
+
+        public static string BitDeSerializeMethod(Type type)
+        {
+            if (type == typeof(bool))
+            {
+                return "reader.ReadBits(1) != 0";
+            }
+
+            if (type == typeof(ushort))
+            {
+                return PrimitiveBitDeSerializer(type);
+            }
+
+            if (type == typeof(uint))
+            {
+                return PrimitiveBitDeSerializer(type);
+            }
+
+            if (type == typeof(ulong))
+            {
+                return PrimitiveBitDeSerializer(type);
+            }
+
+            return DeSerializeMethodForValueTypes(type);
+        }
+
+
         public static void AddChangeDelegates(StringBuilder sb, LogicInfo logicInfo,
             IEnumerable<LogicFieldInfo> fieldInfos)
         {
@@ -419,10 +504,12 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
 
         public static void AddDeserialize(StringBuilder sb, IEnumerable<LogicFieldInfo> fieldInfos)
         {
-            sb.Append(@"    public void Deserialize(ulong serializeFlags, IOctetReader reader)
+            sb.Append(@"    public ulong Deserialize(IOctetReader reader)
     {
 ");
-
+            var (typeForSerializeFlagString, _) = SmallestPrimitiveForBitCount(fieldInfos.Count());
+            sb.Append($@"    var serializeFlags = (ulong) reader.Read{typeForSerializeFlagString}();
+");
             foreach (var fieldInfo in fieldInfos)
             {
                 var fieldName = fieldInfo.FieldInfo.Name;
@@ -431,7 +518,34 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
 ");
             }
 
-            sb.Append(@"    }
+            sb.Append(@"   
+            return serializeFlags;
+ }
+
+");
+        }
+
+        public static void AddFieldMaskBitDeserialize(StringBuilder sb, IEnumerable<LogicFieldInfo> fieldInfos)
+        {
+            sb.Append(@"    public ulong Deserialize(IBitReader reader)
+    {
+");
+
+            sb.Append(@$"       var serializeFlags = reader.ReadBits({fieldInfos.Count()});
+");
+
+            foreach (var fieldInfo in fieldInfos)
+            {
+                var fieldName = fieldInfo.FieldInfo.Name;
+                sb.Append(
+                    $@"        if ((serializeFlags & {MaskName(fieldInfo)}) != 0) current.{fieldName} = {BitDeSerializeMethod(fieldInfo.FieldInfo.FieldType)};
+");
+            }
+
+            sb.Append(@"
+                return serializeFlags;   
+
+ }
 
 ");
         }
@@ -455,6 +569,25 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
 ");
         }
 
+        public static void AddBitDeserializeAll(StringBuilder sb, IEnumerable<LogicFieldInfo> fieldInfos)
+        {
+            sb.Append(@"    public void DeserializeAll(IBitReader reader)
+    {
+");
+
+            foreach (var fieldInfo in fieldInfos)
+            {
+                var fieldName = fieldInfo.FieldInfo.Name;
+                sb.Append(
+                    $@"        current.{fieldName} = {BitDeSerializeMethod(fieldInfo.FieldInfo.FieldType)};
+");
+            }
+
+            sb.Append(@"    }
+
+");
+        }
+
         public static void AddTick(StringBuilder sb, LogicInfo info)
         {
             var actionsImplementationName = ActionsName(info.Type);
@@ -469,11 +602,27 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
 ");
         }
 
+        public static (string, string) SmallestPrimitiveForBitCount(int bitCount)
+        {
+            return bitCount switch
+            {
+                > 1 and <= 8 => ("UInt8", "byte"),
+                <= 16 => ("UInt16", "ushort"),
+                <= 32 => ("UInt32", "uint"),
+                _ => throw new ArgumentOutOfRangeException(nameof(bitCount),
+                    $"bitCount must be between 1-32 {bitCount}")
+            };
+        }
+
         public static void AddSerializeHelper(StringBuilder sb, IEnumerable<LogicFieldInfo> fieldInfos,
             string methodName, string targetFieldName)
         {
             sb.Append($@"    public void {methodName}(ulong serializeFlags, IOctetWriter writer)
     {{
+");
+
+            var (typeForSerializeFlagString, castTypeString) = SmallestPrimitiveForBitCount(fieldInfos.Count());
+            sb.Append($@"    writer.Write{typeForSerializeFlagString}(({castTypeString})serializeFlags);
 ");
 
             foreach (var fieldInfo in fieldInfos)
@@ -494,6 +643,41 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
         {
             AddSerializeHelper(sb, fieldInfos, "Serialize", "current");
         }
+
+
+        public static void AddFieldMaskBitSerializeHelper(StringBuilder sb, IEnumerable<LogicFieldInfo> fieldInfos,
+            string methodName, string targetFieldName)
+        {
+            sb.Append($@"    public void {methodName}(ulong serializeFlags, IBitWriter writer)
+    {{
+");
+            sb.Append($@"       writer.WriteBits(serializeFlags, {fieldInfos.Count()});
+");
+
+            foreach (var fieldInfo in fieldInfos)
+            {
+                var fieldName = fieldInfo.FieldInfo.Name;
+                var completeVariable = $"{targetFieldName}.{fieldName}";
+                sb.Append(
+                    $@"        if ((serializeFlags & {MaskName(fieldInfo)}) != 0) {BitSerializeMethod(fieldInfo.FieldInfo.FieldType, completeVariable)};
+");
+            }
+
+            sb.Append(@"    }
+
+");
+        }
+
+        public static void AddFieldMaskBitSerializePrevious(StringBuilder sb, IEnumerable<LogicFieldInfo> fieldInfos)
+        {
+            AddFieldMaskBitSerializeHelper(sb, fieldInfos, "SerializePrevious", "last");
+        }
+
+        public static void AddFieldMaskBitSerialize(StringBuilder sb, IEnumerable<LogicFieldInfo> fieldInfos)
+        {
+            AddFieldMaskBitSerializeHelper(sb, fieldInfos, "Serialize", "current");
+        }
+
 
         public static void AddSerializePrevious(StringBuilder sb, IEnumerable<LogicFieldInfo> fieldInfos)
         {
@@ -520,6 +704,26 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
 ");
         }
 
+        public static void AddBitSerializeAll(StringBuilder sb, IEnumerable<LogicFieldInfo> fieldInfos)
+        {
+            sb.Append(@"    public void SerializeAll(IBitWriter writer)
+    {
+");
+
+            foreach (var fieldInfo in fieldInfos)
+            {
+                var fieldName = fieldInfo.FieldInfo.Name;
+                var completeVariable = $"current.{fieldName}";
+                sb.Append(
+                    $@"        {BitSerializeMethod(fieldInfo.FieldInfo.FieldType, completeVariable)};
+");
+            }
+
+            sb.Append(@"    }
+
+");
+        }
+
         public static void AddSerializeCorrectionState(StringBuilder sb, IEnumerable<LogicFieldInfo> fieldInfos)
         {
             sb.Append(@"    public void SerializeCorrectionState(IOctetWriter writer)
@@ -534,6 +738,28 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
         public static void AddDeserializeCorrectionState(StringBuilder sb, IEnumerable<LogicFieldInfo> fieldInfos)
         {
             sb.Append(@"    public void DeserializeCorrectionState(IOctetReader reader)
+    {
+");
+
+            sb.Append(@"    }
+
+");
+        }
+
+        public static void AddBitSerializeCorrectionState(StringBuilder sb, IEnumerable<LogicFieldInfo> fieldInfos)
+        {
+            sb.Append(@"    public void SerializeCorrectionState(IBitWriter writer)
+    {
+");
+
+            sb.Append(@"    }
+
+");
+        }
+
+        public static void AddBitDeserializeCorrectionState(StringBuilder sb, IEnumerable<LogicFieldInfo> fieldInfos)
+        {
+            sb.Append(@"    public void DeserializeCorrectionState(IBitReader reader)
     {
 ");
 
@@ -822,9 +1048,10 @@ public class ").Append(EntityGeneratedInternal(logicInfo)).Append($" : {inherit}
 
 ");
 
+            var fieldInfos = logicInfo.FieldInfos;
             AddArchetypeId(sb, logicInfo);
 
-            AddChangeMaskConstants(sb, logicInfo.FieldInfos);
+            AddChangeMaskConstants(sb, fieldInfos);
 
 
             // ----- methods ----
@@ -839,20 +1066,34 @@ public class ").Append(EntityGeneratedInternal(logicInfo)).Append($" : {inherit}
             DoActions(sb, logicInfo.CommandInfos);
             UnDoActions(sb, logicInfo.CommandInfos);
 
-            AddSerialize(sb, logicInfo.FieldInfos);
-            AddSerializePrevious(sb, logicInfo.FieldInfos);
-            AddSerializeAll(sb, logicInfo.FieldInfos);
-            AddSerializeCorrectionState(sb, logicInfo.FieldInfos);
-            AddDeserializeCorrectionState(sb, logicInfo.FieldInfos);
+            AddSerialize(sb, fieldInfos);
+            AddFieldMaskBitSerialize(sb, fieldInfos);
 
-            AddDeserialize(sb, logicInfo.FieldInfos);
-            AddDeserializeAll(sb, logicInfo.FieldInfos);
+            AddSerializePrevious(sb, fieldInfos);
+            AddFieldMaskBitSerializePrevious(sb, fieldInfos);
+
+            AddSerializeAll(sb, fieldInfos);
+            AddBitSerializeAll(sb, fieldInfos);
+
+            AddDeserializeAll(sb, fieldInfos);
+            AddBitDeserializeAll(sb, fieldInfos);
+
+
+            AddSerializeCorrectionState(sb, fieldInfos);
+            AddBitSerializeCorrectionState(sb, fieldInfos);
+
+            AddDeserializeCorrectionState(sb, fieldInfos);
+            AddBitDeserializeCorrectionState(sb, fieldInfos);
+
+            AddDeserialize(sb, fieldInfos);
+            AddFieldMaskBitDeserialize(sb, fieldInfos);
+
 
             AddTick(sb, logicInfo);
 
-            AddChanges(sb, logicInfo.FieldInfos);
-            AddInvokeChanges(sb, logicInfo.FieldInfos);
-            AddTypeInformation(sb, logicInfo.FieldInfos);
+            AddChanges(sb, fieldInfos);
+            AddInvokeChanges(sb, fieldInfos);
+            AddTypeInformation(sb, fieldInfos);
 
             sb.Append(@"
 }

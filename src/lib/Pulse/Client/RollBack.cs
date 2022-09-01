@@ -5,7 +5,6 @@
 
 using Piot.Flood;
 using Piot.Surge.Entities;
-using Piot.Surge.FieldMask.Serialization;
 using Piot.Surge.Tick;
 
 namespace Piot.Surge.Pulse.Client
@@ -28,9 +27,7 @@ namespace Piot.Surge.Pulse.Client
 
                 var reader = new OctetReader(undoPack.payload.Span);
 
-                var flags = ChangedFieldsMaskReader.ReadChangedFieldMask(reader);
-
-                targetEntity.Deserialize(flags.mask, reader);
+                targetEntity.Deserialize(reader);
 
                 if (undoPack.tickId.tickId == correctionsForTickId.tickId)
                 {

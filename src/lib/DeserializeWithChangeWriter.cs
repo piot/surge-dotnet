@@ -14,7 +14,7 @@ namespace Piot.Surge
             IOctetReader reader, IOctetWriter writerForCurrentValues)
         {
             generatedEntity.Serialize(serializeFlags, writerForCurrentValues);
-            generatedEntity.Deserialize(serializeFlags, reader);
+            generatedEntity.Deserialize(reader);
         }
     }
 }

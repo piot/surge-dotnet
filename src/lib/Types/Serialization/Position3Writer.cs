@@ -15,5 +15,12 @@ namespace Piot.Surge.Types.Serialization
             writer.WriteInt16((short)position.y);
             writer.WriteInt16((short)position.z);
         }
+
+        public static void Write(Position3 position, IBitWriter writer)
+        {
+            writer.WriteBits((ushort)position.x, 16);
+            writer.WriteBits((ushort)position.y, 16);
+            writer.WriteBits((ushort)position.z, 16);
+        }
     }
 }

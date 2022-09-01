@@ -18,5 +18,15 @@ namespace Piot.Surge.Types.Serialization
                 z = reader.ReadInt16()
             };
         }
+
+        public static Position3 Read(IBitReader reader)
+        {
+            return new()
+            {
+                x = (int)reader.ReadBits(16),
+                y = (int)reader.ReadBits(16),
+                z = (int)reader.ReadBits(16)
+            };
+        }
     }
 }

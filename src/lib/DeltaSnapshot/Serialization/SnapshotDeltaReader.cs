@@ -8,9 +8,8 @@ using System.Collections.Generic;
 using Piot.Flood;
 using Piot.Surge.DeltaSnapshot.Pack;
 using Piot.Surge.Entities;
-using Piot.Surge.FieldMask.Serialization;
+using Piot.Surge.SnapshotProtocol;
 using Piot.Surge.Types.Serialization;
-using Constants = Piot.Surge.SnapshotProtocol.Constants;
 
 namespace Piot.Surge.SnapshotDeltaPack.Serialization
 {
@@ -72,11 +71,9 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
             for (var i = 0; i < updatedEntityCount; ++i)
             {
                 var entityId = EntityIdReader.Read(reader);
-                var serializeMask = ChangedFieldsMaskReader.ReadChangedFieldMask(reader);
-
                 var entityToDeserialize = entityGhostContainerWithCreator.FetchEntity(entityId);
-                entityToDeserialize.Deserialize(serializeMask.mask, reader);
-                updatedEntities.Add(new SnapshotDeltaReaderInfoEntity(entityToDeserialize, serializeMask.mask));
+                var serializeMask = entityToDeserialize.Deserialize(reader);
+                updatedEntities.Add(new SnapshotDeltaReaderInfoEntity(entityToDeserialize, serializeMask));
             }
 
             return (deletedEntities.ToArray(), createdEntities.ToArray(), updatedEntities.ToArray());

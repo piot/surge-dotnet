@@ -7,11 +7,11 @@ using Piot.Flood;
 
 namespace Piot.Surge.Entities
 {
-    public interface IEntityDeserializer
+    public interface IEntityBitDeserializer
     {
-        public ulong Deserialize(IOctetReader reader);
-        public void DeserializeAll(IOctetReader reader);
+        public ulong Deserialize(IBitReader reader);
+        public void DeserializeAll(IBitReader reader);
 
-        public void DeserializeCorrectionState(IOctetReader reader);
+        public void DeserializeCorrectionState(IBitReader reader);
     }
 }

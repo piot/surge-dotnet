@@ -24,6 +24,8 @@ public struct AvatarLogic : ILogic
     public ushort manaAmount;
     public ushort castCooldown;
 
+    public ushort jumpTime;
+
 
     public void SetInput(GameInput input)
     {

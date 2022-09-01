@@ -25,12 +25,12 @@ namespace Piot.Flood
         public uint BitPosition => (uint)bitPosition;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void WriteBits(uint bits, int bitCount)
+        public void WriteBits(ulong bits, int bitCount)
         {
 #if DEBUG
-            if (bitCount > 32)
+            if (bitCount > 64)
             {
-                throw new ArgumentOutOfRangeException(nameof(bitCount), "only up to 32 bit supported");
+                throw new ArgumentOutOfRangeException(nameof(bitCount), "only up to 64 bit supported");
             }
 #endif
 
