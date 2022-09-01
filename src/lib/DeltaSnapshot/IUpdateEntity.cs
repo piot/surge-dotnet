@@ -15,6 +15,6 @@ namespace Piot.Surge.DeltaSnapshot
     {
         public ChangedFieldsMask ChangeMask { get; }
 
-        public IEntitySerializer Serializer { get; }
+        public IEntityBothSerializer Serializer { get; }
     }
 }

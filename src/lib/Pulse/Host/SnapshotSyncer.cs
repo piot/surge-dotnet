@@ -94,39 +94,29 @@ namespace Piot.Surge.Pulse.Host
                 ? connection.WaitingForTickIds
                 : new TickIdRange(serverTickId, serverTickId);
 
-            var wasFound = deltaSnapshotPackCache.FetchPack(rangeToSend, out var fetchedContainer);
+            var wasFound = deltaSnapshotPackCache.FetchPack(rangeToSend, out var fetchedSnapshotPack);
             if (!wasFound)
             {
                 var combinedMasks = entityMasksHistory.Fetch(rangeToSend);
             }
 
-            SnapshotDeltaPackIncludingCorrections includingCorrections;
+            var physicsCorrectionWriter = new OctetWriter(Constants.MaxSnapshotOctetSize);
+            physicsCorrectionWriter.WriteUInt8((byte)connectionPlayers.Length);
             if (connectionPlayers.Length > 0)
             {
-                /*
-                var writer = new OctetWriter(Constants.MaxSnapshotOctetSize);
-                writer.WriteOctets(fetchedContainer.payload.Span);
-                writer.WriteUInt8((byte)connectionPlayers.Length);
-
                 foreach (var predicted in connectionPlayers)
                 {
                 }
-
-                includingCorrections = new(rangeToSend, writer.Octets);
-                */
             }
 
-            var writer = new OctetWriter(Constants.MaxSnapshotOctetSize);
-            writer.WriteOctets(fetchedContainer.payload.Span);
-            writer.WriteUInt16(0); // HACK: for now, no corrections
-
-            includingCorrections = new(rangeToSend, writer.Octets);
+            var includingCorrections = new SnapshotDeltaPackIncludingCorrections(rangeToSend,
+                fetchedSnapshotPack.payload.Span, physicsCorrectionWriter.Octets, fetchedSnapshotPack.PackType);
 
             var snapshotProtocolPack = SnapshotProtocolPacker.Pack(includingCorrections);
 
             var sender = new WrappedSender(transportSend, connection.Endpoint);
 
-            log.DebugLowLevel("sending datagrams {Flattened}", fetchedContainer);
+            log.DebugLowLevel("sending datagrams {Flattened}", includingCorrections);
             SnapshotPackIncludingCorrectionsWriter.Write(sender.Send, snapshotProtocolPack,
                 connection.lastReceivedMonotonicTimeLowerBits, connection.clientInputTickCountAheadOfServer,
                 serverTickId,

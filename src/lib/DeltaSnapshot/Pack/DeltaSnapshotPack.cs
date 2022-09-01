@@ -9,7 +9,7 @@ using Piot.Surge.Tick;
 namespace Piot.Surge.DeltaSnapshot.Pack
 {
     /// <summary>
-    ///     Holds a complete delta snapshot serialized pack payload.
+    ///     Holds a complete delta snapshot serialized pack deltaSnapshotPackPayload.
     ///     Holds reusable packs (serialized values) for all the entities that has changed from one tick to the next.
     ///     The values are stored in this container, so they can be fetched again if a delta snapshots needs to be resent.
     ///     It also serves as a small optimization for the current delta snapshot, the field values doesn't have to be
@@ -20,17 +20,20 @@ namespace Piot.Surge.DeltaSnapshot.Pack
         public ReadOnlyMemory<byte> payload;
         public TickIdRange tickIdRange;
 
-        public DeltaSnapshotPack(TickIdRange tickIdRange, ReadOnlySpan<byte> payload)
+        public DeltaSnapshotPack(TickIdRange tickIdRange, ReadOnlySpan<byte> payload, DeltaSnapshotPackType packType)
         {
             this.tickIdRange = tickIdRange;
             this.payload = payload.ToArray();
+            PackType = packType;
         }
 
         public TickIdRange TickIdRange => tickIdRange;
 
+        public DeltaSnapshotPackType PackType { get; }
+
         public override string ToString()
         {
-            return $"[snapshotDeltaPack tickId: {tickIdRange} payload length: {payload.Length}]";
+            return $"[snapshotDeltaPack tickId: {tickIdRange} deltaSnapshotPackPayload length: {payload.Length}]";
         }
     }
 }

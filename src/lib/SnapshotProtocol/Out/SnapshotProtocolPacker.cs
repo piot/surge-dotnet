@@ -14,7 +14,6 @@ namespace Piot.Surge.SnapshotProtocol.Out
         {
             var writer = new OctetWriter(Constants.MaxSnapshotOctetSize);
             SnapshotIncludingCorrectionsWriter.Write(deltaPack, writer);
-
             return new(deltaPack.tickIdRange, writer.Octets);
         }
     }

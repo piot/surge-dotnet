@@ -8,7 +8,7 @@ using Piot.Surge.Tick;
 
 namespace Piot.Surge.Pulse.Client
 {
-    public class RollbackQueue : TickIdPackQueue
+    public class RollbackQueue : SnapshotPackQueue
     {
         public void EnqueueUndoPack(TickId tickId, ReadOnlySpan<byte> payload)
         {

@@ -86,9 +86,10 @@ namespace Piot.Surge.Pulse.Client
             }
 
             var snapshotReader = new OctetReader(completePayload);
-            var snapshotIncludingCorrections =
-                DeltaSnapshotIncludingCorrectionsReader.Read(tickIdRange, snapshotReader);
-            deltaSnapshotPlayback.FeedSnapshotDeltaPack(snapshotIncludingCorrections);
+
+            var snapshotWithCorrections = DeltaSnapshotIncludingCorrectionsReader.Read(tickIdRange, snapshotReader);
+
+            deltaSnapshotPlayback.FeedSnapshotDeltaPack(snapshotWithCorrections);
         }
 
         private void ReceiveDatagramFromHost(IOctetReader reader, Milliseconds now)

@@ -20,5 +20,14 @@ namespace Piot.Surge.Corrections.Serialization
 
             return (targetEntityId, localPlayerIndexReader, octetCount);
         }
+
+        public static (EntityId, LocalPlayerIndex, ushort) Read(IBitReader reader)
+        {
+            var targetEntityId = EntityIdReader.Read(reader);
+            var localPlayerIndexReader = LocalPlayerIndexReader.Read(reader);
+            var octetCount = (ushort)reader.ReadBits(16);
+
+            return (targetEntityId, localPlayerIndexReader, octetCount);
+        }
     }
 }

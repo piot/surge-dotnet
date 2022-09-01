@@ -13,5 +13,10 @@ namespace Piot.Surge.Types.Serialization
         {
             writer.WriteUInt16(id.Value);
         }
+
+        public static void Write(IBitWriter writer, EntityId id)
+        {
+            writer.WriteBits(id.Value, 16);
+        }
     }
 }

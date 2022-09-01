@@ -10,7 +10,7 @@ namespace Piot.Surge.DeltaSnapshot.Pack.Convert
 {
     public readonly struct UpdatedEntity : IUpdatedEntity
     {
-        public UpdatedEntity(EntityId id, ChangedFieldsMask changeMask, IEntitySerializer serializer)
+        public UpdatedEntity(EntityId id, ChangedFieldsMask changeMask, IEntityBothSerializer serializer)
         {
             Id = id;
             ChangeMask = changeMask;
@@ -19,7 +19,7 @@ namespace Piot.Surge.DeltaSnapshot.Pack.Convert
 
         public EntityId Id { get; }
 
-        public IEntitySerializer Serializer { get; }
+        public IEntityBothSerializer Serializer { get; }
 
 
         public ChangedFieldsMask ChangeMask { get; }

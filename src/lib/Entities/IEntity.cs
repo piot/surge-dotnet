@@ -14,7 +14,8 @@ namespace Piot.Surge.Entities
         Deleted
     }
 
-    public interface IEntity : IEntitySerializer, IEntityDeserializer, ISimpleLogic, IEntityOverwrite,
+    public interface IEntity : IEntityBothSerializer, IEntityDeserializer, IEntityBitDeserializer, ISimpleLogic,
+        IEntityOverwrite,
         IEntityFireChanges, IEntityActions, IEntityActionsDoUnDo
     {
         public EntityMode Mode { get; set; }

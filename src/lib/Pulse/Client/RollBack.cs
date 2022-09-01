@@ -26,8 +26,8 @@ namespace Piot.Surge.Pulse.Client
                 var undoPack = rollbackQueue.Dequeue();
 
                 var reader = new OctetReader(undoPack.payload.Span);
-
-                targetEntity.Deserialize(reader);
+                var changes = targetEntity.Deserialize(reader);
+                targetEntity.FireChanges(changes);
 
                 if (undoPack.tickId.tickId == correctionsForTickId.tickId)
                 {

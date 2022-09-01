@@ -13,5 +13,10 @@ namespace Piot.Surge.LocalPlayer.Serialization
         {
             return new LocalPlayerIndex(reader.ReadUInt8());
         }
+
+        public static LocalPlayerIndex Read(IBitReader reader)
+        {
+            return new LocalPlayerIndex((byte)reader.ReadBits(4));
+        }
     }
 }

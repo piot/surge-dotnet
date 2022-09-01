@@ -27,8 +27,11 @@ namespace Piot.Surge.Pulse.Client
 
             var savePredictedStateWriter = new OctetWriter(1200);
             predictedEntity.SerializeAll(savePredictedStateWriter);
-            predictedEntity.SerializeCorrectionState(savePredictedStateWriter);
-            predictionStateHistory.Enqueue(appliedAtTickId, savePredictedStateWriter.Octets);
+
+            var savePhysicsStateWriter = new OctetWriter(1200);
+            predictedEntity.SerializeCorrectionState(savePhysicsStateWriter);
+            predictionStateHistory.Enqueue(appliedAtTickId, savePredictedStateWriter.Octets,
+                savePhysicsStateWriter.Octets);
         }
     }
 }

@@ -32,10 +32,10 @@ public class GeneratorTests
 
         var allInputs = GameInputScanner.ScanForGameInputs(log);
         var gameInputInfos = GameInputInfoCollector.Collect(allInputs, log);
-        Assert.Equal(1, gameInputInfos.Count());
+        Assert.Single(gameInputInfos);
 
         var inputFetchers = InputFetchScanner.ScanForInputFetchMethods(log);
-        Assert.Equal(1, inputFetchers.Count());
+        Assert.Single(inputFetchers);
         var inputFetchInfos = GameInputFetchInfoCollector.Collect(inputFetchers, log);
 
         var code = SourceGenerator.Generate(logicInfos, gameInputInfos.First(), inputFetchInfos.First());

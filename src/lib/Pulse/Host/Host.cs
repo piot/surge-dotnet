@@ -32,6 +32,7 @@ namespace Piot.Surge.Pulse.Host
         private readonly ITransport transport;
         private readonly TransportStatsBoth transportWithStats;
         private TickId serverTickId;
+        private readonly bool shouldUseBitStream = true;
 
         public Host(ITransport hostTransport, IEntityContainerWithDetectChanges world, Milliseconds now, ILog log)
         {
@@ -100,8 +101,9 @@ namespace Piot.Surge.Pulse.Host
         private (EntityMasks, DeltaSnapshotPack) StoreWorldChangesToPackContainer()
         {
             var deltaSnapshotEntityIds = Scanner.Scan(AuthoritativeWorld, serverTickId);
-            var deltaSnapshotPack =
-                DeltaSnapshotToPack.ToDeltaSnapshotPack(AuthoritativeWorld, deltaSnapshotEntityIds);
+            var deltaSnapshotPack = shouldUseBitStream
+                ? DeltaSnapshotToBitPack.ToDeltaSnapshotPack(AuthoritativeWorld, deltaSnapshotEntityIds)
+                : DeltaSnapshotToPack.ToDeltaSnapshotPack(AuthoritativeWorld, deltaSnapshotEntityIds);
 
             AuthoritativeWorld.ClearDelta();
             OverWriter.Overwrite(AuthoritativeWorld);

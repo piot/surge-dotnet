@@ -41,16 +41,25 @@ namespace Piot.Surge.Pulse.Client
         /// <param name="world"></param>
         /// <param name="log"></param>
         /// <exception cref="NotImplementedException"></exception>
-        public void ReadCorrection(TickId correctionForTickId, ReadOnlySpan<byte> correctionPayload)
+        public void ReadCorrection(TickId correctionForTickId, ReadOnlySpan<byte> physicsCorrectionPayload)
         {
             PredictedInputs.DiscardUpToAndExcluding(correctionForTickId);
 
             log.DebugLowLevel("CorrectionsHeader {EntityId}, {LocalPlayerIndex} {Checksum}", assignedAvatar.Id,
-                LocalPlayerIndex, correctionPayload.Length);
+                LocalPlayerIndex, physicsCorrectionPayload.Length);
+
+            var logicNowReplicateWriter = new OctetWriter(1024);
+            var changesThisSnapshot = assignedAvatar.GeneratedEntity.Changes();
+            assignedAvatar.Serialize(changesThisSnapshot, logicNowReplicateWriter);
+
+
+            var logicNowWriter = new OctetWriter(1024);
+            assignedAvatar.SerializeAll(logicNowWriter);
+
 
             var storedPredictionStateChecksum =
                 predictionStateChecksumHistory.DequeueForTickId(correctionForTickId);
-            if (storedPredictionStateChecksum.IsEqual(correctionPayload))
+            if (storedPredictionStateChecksum.IsEqual(logicNowWriter.Octets, physicsCorrectionPayload))
             {
                 log.DebugLowLevel("prediction for {TickId} was correct, continuing", correctionForTickId);
                 return;
@@ -59,11 +68,12 @@ namespace Piot.Surge.Pulse.Client
             log.Notice("Mis-predict at {TickId} for entity {EntityId}", correctionForTickId, assignedAvatar.Id);
 
             RollBacker.Rollback(assignedAvatar, rollbackQueue, correctionForTickId);
-            Replicator.Replicate(assignedAvatar, correctionPayload);
+            Replicator.Replicate(assignedAvatar, logicNowReplicateWriter.Octets, physicsCorrectionPayload);
             RollForth.Rollforth(assignedAvatar, PredictedInputs, rollbackQueue, predictionStateChecksumHistory);
 
             assignedAvatar.RollMode = EntityRollMode.Predict;
         }
+
 
         public void Predict(LogicalInput.LogicalInput logicalInput)
         {

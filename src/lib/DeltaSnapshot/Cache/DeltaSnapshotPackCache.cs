@@ -62,7 +62,7 @@ namespace Piot.Surge.DeltaSnapshot.Cache
                 }
             }
 
-            outPack = new(new(), ReadOnlySpan<byte>.Empty);
+            outPack = new(new(), ReadOnlySpan<byte>.Empty, DeltaSnapshotPackType.OctetStream);
             return false;
         }
     }

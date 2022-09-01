@@ -6,6 +6,7 @@
 using System;
 using Piot.Flood;
 using Piot.Surge.Corrections;
+using Piot.Surge.DeltaSnapshot.Pack;
 using Piot.Surge.Tick;
 
 namespace Piot.Surge.SnapshotProtocol.In
@@ -13,7 +14,7 @@ namespace Piot.Surge.SnapshotProtocol.In
     public static class DeltaSnapshotIncludingCorrectionsReader
     {
         /// <summary>
-        ///     Read on the client coming from the host.
+        ///     ReadAndApply on the client coming from the host.
         ///     In many cases the union only consists of a single delta compressed snapshot.
         ///     But in the case of previously dropped snapshots, host resends snapshots in
         ///     ascending, consecutive order.
@@ -24,15 +25,25 @@ namespace Piot.Surge.SnapshotProtocol.In
         public static SnapshotDeltaPackIncludingCorrections Read(TickIdRange tickIdRange, IOctetReader reader)
         {
 #if DEBUG
-            if (reader.ReadUInt8() != Constants.UnionSync)
+            if (reader.ReadUInt8() != Constants.DeltaSnapshotIncludingCorrectionsSync)
             {
                 throw new Exception("out of sync");
             }
 #endif
+            var snapshotMode = reader.ReadUInt8();
+            var dataType = snapshotMode switch
+            {
+                0x00 => DeltaSnapshotPackType.BitStream,
+                0x01 => DeltaSnapshotPackType.OctetStream
+            };
+
             var payloadOctetCount = reader.ReadUInt16();
             var payload = reader.ReadOctets(payloadOctetCount);
 
-            return new(tickIdRange, payload);
+            var physicsCorrectionOctetCount = reader.ReadUInt16();
+            var physicsCorrection = reader.ReadOctets(physicsCorrectionOctetCount);
+
+            return new(tickIdRange, payload, physicsCorrection, dataType);
         }
     }
 }

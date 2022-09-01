@@ -26,7 +26,7 @@ namespace Piot.Surge.SnapshotProtocol
         public override string ToString()
         {
             return
-                $"[SnapshotProtocolPack payload length: {payload.Length}]";
+                $"[SnapshotProtocolPack deltaSnapshotPackPayload length: {payload.Length}]";
         }
     }
 }

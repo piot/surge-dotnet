@@ -32,5 +32,18 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
             writer.WriteUInt16(archetypeId.id);
             entitySerializer.SerializeAll(writer);
         }
+
+        public static void Write(IBitWriter writer, EntityId entityId, ArchetypeId archetypeId,
+            IEntityBitSerializer entitySerializer)
+        {
+            EntityIdWriter.Write(writer, entityId);
+            if (archetypeId.id == 0)
+            {
+                throw new Exception("illegal archetype id");
+            }
+
+            writer.WriteBits(archetypeId.id, 10);
+            entitySerializer.SerializeAll(writer);
+        }
     }
 }

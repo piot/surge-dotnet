@@ -113,6 +113,41 @@ namespace Piot.Surge.Entities
 
         public IAction[] Actions => generatedEntity.Actions;
 
+        public void Serialize(ulong changedFieldsMask, IBitWriter writer)
+        {
+            generatedEntity.Serialize(changedFieldsMask, writer);
+        }
+
+        public void SerializeAll(IBitWriter writer)
+        {
+            generatedEntity.SerializeAll(writer);
+        }
+
+        public void SerializePrevious(ulong changedFieldsMask, IBitWriter writer)
+        {
+            generatedEntity.SerializePrevious(changedFieldsMask, writer);
+        }
+
+        public void SerializeCorrectionState(IBitWriter writer)
+        {
+            generatedEntity.SerializeCorrectionState(writer);
+        }
+
+        public ulong Deserialize(IBitReader reader)
+        {
+            return generatedEntity.Deserialize(reader);
+        }
+
+        public void DeserializeAll(IBitReader reader)
+        {
+            generatedEntity.DeserializeAll(reader);
+        }
+
+        public void DeserializeCorrectionState(IBitReader reader)
+        {
+            generatedEntity.DeserializeCorrectionState(reader);
+        }
+
         public override string ToString()
         {
             return $"[entity {Id} {generatedEntity.ArchetypeId}]";

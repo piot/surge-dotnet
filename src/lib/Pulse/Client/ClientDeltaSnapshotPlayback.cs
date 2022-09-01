@@ -4,10 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 using Piot.Clog;
-using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.Surge.Corrections;
-using Piot.Surge.SnapshotDeltaPack.Serialization;
+using Piot.Surge.DeltaSnapshot.Pack;
+using Piot.Surge.SnapshotProtocol.In;
 using Piot.Surge.TimeTick;
 
 namespace Piot.Surge.Pulse.Client
@@ -87,16 +87,21 @@ namespace Piot.Surge.Pulse.Client
 
             var deltaSnapshotIncludingCorrections = includingCorrectionsQueue.Dequeue();
             log.DebugLowLevel("dequeued snapshot {DeltaSnapshotEntityIds}", deltaSnapshotIncludingCorrections);
-            var snapshotReader = new OctetReader(deltaSnapshotIncludingCorrections.payload.Span);
-            SnapshotDeltaReader.Read(snapshotReader, clientWorld);
+
+            var deltaSnapshotPack = new DeltaSnapshotPack(deltaSnapshotIncludingCorrections.tickIdRange,
+                deltaSnapshotIncludingCorrections.deltaSnapshotPackPayload.Span,
+                deltaSnapshotIncludingCorrections.PackType);
+
+            ApplyDeltaSnapshotToWorld.Apply(deltaSnapshotPack, clientWorld);
+
+            predictor.ReadCorrections(deltaSnapshotIncludingCorrections.tickIdRange.Last,
+                deltaSnapshotIncludingCorrections.physicsCorrections.Span);
 
             // Ghosts are never predicted, corrected, nor rolled back
             // All the changed fields are set to the new values and Tick() is called to trigger the resulting effects of
             // the logic running for one tick.
             Ticker.Tick(clientWorld);
             log.DebugLowLevel("tick ghost logics {EntityCount}", clientWorld.AllEntities.Length);
-
-            predictor.ReadCorrections(deltaSnapshotIncludingCorrections.tickIdRange.Last, snapshotReader);
         }
     }
 }

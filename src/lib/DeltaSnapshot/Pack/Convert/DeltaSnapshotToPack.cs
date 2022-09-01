@@ -54,7 +54,8 @@ namespace Piot.Surge.DeltaSnapshot.Pack.Convert
                 PackUpdatedEntity.Write(writer, updateEntity.Id, updateEntity.ChangeMask, updateEntity.Serializer);
             }
 
-            return new(TickIdRange.FromTickId(deltaSnapshotEntityIds.TickId), writer.Octets);
+            return new(TickIdRange.FromTickId(deltaSnapshotEntityIds.TickId), writer.Octets,
+                DeltaSnapshotPackType.OctetStream);
         }
     }
 }

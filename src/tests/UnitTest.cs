@@ -399,9 +399,14 @@ public class UnitTest1
 
         var firstTickId = new TickId(8);
 
+        var fakeCorrectionsWriter = new OctetWriter(120);
+
+        fakeCorrectionsWriter.WriteUInt8(0);
+
+
         var fakeIncludingCorrections =
             new SnapshotDeltaPackIncludingCorrections(TickIdRange.FromTickId(firstTickId),
-                snapshotDeltaPack.payload.Span);
+                snapshotDeltaPack.payload.Span, fakeCorrectionsWriter.Octets, DeltaSnapshotPackType.OctetStream);
 
 
         packetQueue.Enqueue(fakeIncludingCorrections);
@@ -410,9 +415,9 @@ public class UnitTest1
         Assert.Equal(packetQueue.Peek().tickIdRange.Last, firstTickId);
 
 #if DEBUG
-        Assert.Equal(19, packetQueue.Peek().payload.Length);
+        Assert.Equal(19, packetQueue.Peek().deltaSnapshotPackPayload.Length);
 #else
-        Assert.Equal(16, packetQueue.Peek().payload.Length);
+        Assert.Equal(16, packetQueue.Peek().deltaSnapshotPackPayload.Length);
 #endif
 
         Assert.Equal(6, ((AvatarLogic)spawnedAvatar.Logic).position.x);
@@ -422,7 +427,7 @@ public class UnitTest1
         var firstPack = packetQueue.Dequeue();
 
         var (deletedEntities, createdEntities, updatedEntities) =
-            SnapshotDeltaUnPacker.UnPack(firstPack.payload.Span, world);
+            SnapshotDeltaUnPacker.UnPack(firstPack.deltaSnapshotPackPayload.Span, world);
 
         Assert.Single(updatedEntities);
         Assert.Empty(deletedEntities);
@@ -630,7 +635,8 @@ public class UnitTest1
         Notifier.Notify(clientUpdated);
         OverWriter.Overwrite(clientWorld);
 
-        var undoPack = new DeltaSnapshotPack(TickIdRange.FromTickId(firstTickId), undoWriter.Octets.ToArray());
+        var undoPack = new DeltaSnapshotPack(TickIdRange.FromTickId(firstTickId), undoWriter.Octets.ToArray(),
+            DeltaSnapshotPackType.OctetStream);
 
 #if DEBUG
         Assert.Equal(25, undoWriter.Octets.Length);
@@ -673,8 +679,8 @@ public class UnitTest1
         Assert.Equal(9, clientSpawnedEntity.Self.position.x);
 
         /*
-        var readBackAgain = new OctetReader(snapshotDeltaPack.payload);
-        SnapshotDeltaReader.Read(readBackAgain, clientWorld);
+        var readBackAgain = new OctetReader(snapshotDeltaPack.deltaSnapshotPackPayload);
+        SnapshotDeltaReader.ReadAndApply(readBackAgain, clientWorld);
 
         var clientSpawnedEntityAgain = clientWorld.FetchEntity<AvatarLogicEntityInternal>(spawnedAvatar.Id);
 

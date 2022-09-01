@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using System;
 using System.Collections.Generic;
 using Piot.Clog;
 using Piot.Flood;
@@ -46,11 +47,12 @@ namespace Piot.Surge.Pulse.Client
                 log.SubLog("PredictionTick"));
         }
 
-        public void ReadCorrections(TickId correctionsForTickId, IOctetReader snapshotReader)
+        public void ReadCorrections(TickId correctionsForTickId, ReadOnlySpan<byte> physicsCorrectionPayload)
         {
             log.DebugLowLevel("we have corrections for {TickId}, clear old predicted inputs", correctionsForTickId);
+            var snapshotReader = new OctetReader(physicsCorrectionPayload);
 
-            var correctionsCount = snapshotReader.ReadUInt16();
+            var correctionsCount = snapshotReader.ReadUInt8();
 
             for (var i = 0; i < correctionsCount; ++i)
             {
@@ -64,11 +66,14 @@ namespace Piot.Surge.Pulse.Client
                     localAvatarPredictors[localPlayerIndex.Value] = predictor;
                 }
 
-                var correctionPayload = snapshotReader.ReadOctets(octetCount);
+                //var changesThisSnapshot = targetEntity.GeneratedEntity.Changes();
 
-                predictor.ReadCorrection(correctionsForTickId, correctionPayload);
+                var physicsCorrectionPayloadForLocalPlayer = snapshotReader.ReadOctets(octetCount);
+
+                predictor.ReadCorrection(correctionsForTickId, physicsCorrectionPayloadForLocalPlayer);
             }
         }
+
 
         public void AdjustPredictionSpeed(TickId lastReceivedServerTickId, uint roundTripTimeMs)
         {

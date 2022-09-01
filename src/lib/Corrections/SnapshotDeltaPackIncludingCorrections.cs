@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
+using Piot.Surge.DeltaSnapshot.Pack;
 using Piot.Surge.Tick;
 
 namespace Piot.Surge.Corrections
@@ -12,19 +13,31 @@ namespace Piot.Surge.Corrections
     /// </summary>
     public class SnapshotDeltaPackIncludingCorrections
     {
-        public ReadOnlyMemory<byte> payload;
+        public ReadOnlyMemory<byte> deltaSnapshotPackPayload;
+        public ReadOnlyMemory<byte> physicsCorrections;
         public TickIdRange tickIdRange;
 
-        public SnapshotDeltaPackIncludingCorrections(TickIdRange tickIdRange, ReadOnlySpan<byte> payload)
+        public SnapshotDeltaPackIncludingCorrections(TickIdRange tickIdRange,
+            ReadOnlySpan<byte> deltaSnapshotPackPayload, ReadOnlySpan<byte> physicsCorrections,
+            DeltaSnapshotPackType packType)
         {
             this.tickIdRange = tickIdRange;
-            this.payload = payload.ToArray();
+            this.deltaSnapshotPackPayload = deltaSnapshotPackPayload.ToArray();
+            this.physicsCorrections = physicsCorrections.ToArray();
+            if (physicsCorrections.Length < 1)
+            {
+                throw new Exception("invalid physics correction");
+            }
+
+            PackType = packType;
         }
+
+        public DeltaSnapshotPackType PackType { get; }
 
         public override string ToString()
         {
             return
-                $"[snapshotDeltaPackIncludingCorrections tickIdRange: {tickIdRange} payload length: {payload.Length}]";
+                $"[snapshotDeltaPackIncludingCorrections tickIdRange: {tickIdRange} deltaSnapshotPackPayload length: {deltaSnapshotPackPayload.Length} gamePhysics: {physicsCorrections.Length}]";
         }
     }
 }

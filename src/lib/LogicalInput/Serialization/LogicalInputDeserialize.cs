@@ -50,7 +50,7 @@ namespace Piot.Surge.LogicalInput.Serialization
                     var payloadOctetCount = reader.ReadUInt8();
                     if (payloadOctetCount > 70)
                     {
-                        throw new Exception("suspicious input payload octet count");
+                        throw new Exception("suspicious input deltaSnapshotPackPayload octet count");
                     }
 
                     input.payload = reader.ReadOctets(payloadOctetCount).ToArray();

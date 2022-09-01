@@ -13,5 +13,10 @@ namespace Piot.Surge.Types.Serialization
         {
             return new EntityId(reader.ReadUInt16());
         }
+
+        public static EntityId Read(IBitReader reader)
+        {
+            return new EntityId((ushort)reader.ReadBits(16));
+        }
     }
 }

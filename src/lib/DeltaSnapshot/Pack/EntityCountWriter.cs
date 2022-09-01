@@ -13,5 +13,10 @@ namespace Piot.Surge.DeltaSnapshot.Pack
         {
             writer.WriteUInt16((ushort)count);
         }
+
+        public static void WriteEntityCount(uint count, IBitWriter writer)
+        {
+            writer.WriteBits((ushort)count, 16);
+        }
     }
 }

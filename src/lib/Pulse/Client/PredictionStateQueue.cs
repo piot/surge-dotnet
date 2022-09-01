@@ -12,7 +12,6 @@ namespace Piot.Surge.Pulse.Client
     public struct PredictionStateChecksum
     {
         public uint fnvChecksum;
-        public TickId tickId;
         public int payloadLength;
         public ReadOnlyMemory<byte> payload;
 
@@ -30,22 +29,52 @@ namespace Piot.Surge.Pulse.Client
         }
     }
 
+    public struct PredictionStateAllChecksums
+    {
+        public TickId tickId;
+
+        public PredictionStateChecksum logicChecksum;
+        public PredictionStateChecksum correctionChecksum;
+
+        public PredictionStateAllChecksums(TickId tickId, PredictionStateChecksum logicChecksum,
+            PredictionStateChecksum physicsCorrection)
+        {
+            this.tickId = tickId;
+            this.logicChecksum = logicChecksum;
+            correctionChecksum = physicsCorrection;
+        }
+
+        public bool IsEqual(ReadOnlySpan<byte> logicPayload, ReadOnlySpan<byte> correctionPayload)
+        {
+            return logicChecksum.IsEqual(logicPayload) && correctionChecksum.IsEqual(correctionPayload);
+        }
+    }
+
     public class PredictionStateChecksumQueue
     {
-        private readonly Queue<PredictionStateChecksum> queue = new();
+        private readonly Queue<PredictionStateAllChecksums> queue = new();
 
         public TickId FirstTickId => queue.Peek().tickId;
 
         public int Count => queue.Count;
 
-        public void Enqueue(TickId tickId, ReadOnlySpan<byte> payload)
+        public void Enqueue(TickId tickId, ReadOnlySpan<byte> logicPayload, ReadOnlySpan<byte> physicsCorrection)
         {
-            var fnv = Fnv.Fnv.ToFnv(payload);
-            queue.Enqueue(new()
-                { tickId = tickId, fnvChecksum = fnv, payload = payload.ToArray(), payloadLength = payload.Length });
+            var logicFnv = Fnv.Fnv.ToFnv(logicPayload);
+            var logicChecksum = new PredictionStateChecksum
+                { fnvChecksum = logicFnv, payload = logicPayload.ToArray(), payloadLength = logicPayload.Length };
+
+            var physicsCorrectionFnv = Fnv.Fnv.ToFnv(physicsCorrection);
+            var physicsCorrectionChecksum = new PredictionStateChecksum
+            {
+                fnvChecksum = physicsCorrectionFnv, payload = physicsCorrection.ToArray(),
+                payloadLength = physicsCorrection.Length
+            };
+
+            queue.Enqueue(new(tickId, logicChecksum, physicsCorrectionChecksum));
         }
 
-        public PredictionStateChecksum DequeueForTickId(TickId requiredTickId)
+        public PredictionStateAllChecksums DequeueForTickId(TickId requiredTickId)
         {
             var predictionState = queue.Dequeue();
             if (predictionState.tickId.tickId != requiredTickId.tickId)

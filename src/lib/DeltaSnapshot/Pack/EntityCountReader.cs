@@ -20,5 +20,16 @@ namespace Piot.Surge.DeltaSnapshot.Pack
 
             return count;
         }
+
+        public static uint ReadEntityCount(IBitReader reader)
+        {
+            var count = reader.ReadBits(16);
+            if (count > 128)
+            {
+                throw new Exception($"suspicious count {count}");
+            }
+
+            return (uint)count;
+        }
     }
 }
