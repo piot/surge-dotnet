@@ -9,15 +9,15 @@ using Piot.Surge.Tick;
 
 namespace Piot.Surge.Pulse.Client
 {
-    public struct TickIdPack
+    public struct SnapshotPack
     {
         public ReadOnlyMemory<byte> payload;
         public TickId tickId;
     }
 
-    public class TickIdPackQueue
+    public class SnapshotPackQueue
     {
-        private readonly Queue<TickIdPack> queue = new();
+        private readonly Queue<SnapshotPack> queue = new();
 
         public TickId FirstTickId => queue.Peek().tickId;
 
@@ -28,7 +28,7 @@ namespace Piot.Surge.Pulse.Client
             queue.Enqueue(new() { tickId = tickId, payload = payload.ToArray() });
         }
 
-        public TickIdPack Dequeue()
+        public SnapshotPack Dequeue()
         {
             return queue.Dequeue();
         }

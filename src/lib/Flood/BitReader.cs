@@ -44,6 +44,11 @@ namespace Piot.Flood
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ulong ReadBits(int bitCount)
         {
+            if (bitCount < 1 || bitCount > 64)
+            {
+                throw new Exception("must read between 1-64 bits");
+            }
+
             bitPositionInAccumulator += bitCount;
             bitPosition += bitCount;
             if (bitPosition > totalBitCount)
@@ -55,21 +60,25 @@ namespace Piot.Flood
             if (bitPositionInAccumulator < 64)
             {
                 var mask = (1ul << bitCount) - 1;
-                return (uint)((accumulator >> (64 - bitPositionInAccumulator)) & mask);
+                var valueFromAccumulator = (uint)((accumulator >> (64 - bitPositionInAccumulator)) & mask);
+                return valueFromAccumulator;
             }
 
             // Get the bits that was left in the accumulator
             bitPositionInAccumulator -= 64;
+            var leftInFirst = bitCount - bitPositionInAccumulator;
+
             var firstMask =
-                (1ul << (bitCount - bitPositionInAccumulator)) - 1; // must check since shifting by >= 64 is undefined
-            var v = (accumulator >> (bitPositionInAccumulator - bitCount)) & firstMask;
+                (1ul << leftInFirst) - 1; // must check since shifting by >= 64 is undefined
+            var v = accumulator & firstMask;
 
             // Set the accumulator with a new uint64 value
             accumulator = BinaryPrimitives.ReadUInt64BigEndian(octets.Span.Slice(uint64Position, 8));
             uint64Position += 8;
 
+            var bitCountInSecond = bitCount - leftInFirst;
             // Get the bits we need from the newly read uint64 value
-            var secondMask = (1ul << bitPositionInAccumulator) - 1;
+            var secondMask = (1ul << bitCountInSecond) - 1;
             if (bitPositionInAccumulator > 0) // must check since shifting by >= 64 is undefined
             {
                 v |= (accumulator >> (64 - bitPositionInAccumulator)) & secondMask;

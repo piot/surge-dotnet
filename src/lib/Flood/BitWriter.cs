@@ -17,7 +17,7 @@ namespace Piot.Flood
         private int bitsInAccumulator;
         private int uint64Position;
 
-        public BitWriter(int octetSize)
+        public BitWriter(uint octetSize)
         {
             array = new byte[octetSize];
         }
@@ -28,16 +28,22 @@ namespace Piot.Flood
         public void WriteBits(ulong bits, int bitCount)
         {
 #if DEBUG
-            if (bitCount > 64)
+            if (bitCount <= 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(bitCount), "only up to 64 bit supported");
+                throw new ArgumentOutOfRangeException(nameof(bitCount), "must be between 1 - 32 bits");
+            }
+
+            if (bitCount > 32)
+            {
+                throw new ArgumentOutOfRangeException(nameof(bitCount), "only up to 32 bit supported");
             }
 #endif
+
+            var mask = (1Lu << bitCount) - 1;
 
             bitPosition += bitCount;
             bitsInAccumulator += bitCount;
 
-            var mask = (1lu << bitCount) - 1;
 
 #if DEBUG
             if (bits != (bits & mask))
@@ -55,18 +61,20 @@ namespace Piot.Flood
             else
             {
                 bitsInAccumulator -= 64;
+                var bitCountThatIsLeftInAccumulator = 64 - bitsInAccumulator;
+                var bitCountIntoNextAccumulator = bitCount = bitCountThatIsLeftInAccumulator;
+
 
                 // Add parts of the bits to the existing accumulator, if needed
-                var firstMask = (1ul << (bitCount - bitsInAccumulator)) - 1;
-                accumulator |= (bits >> bitsInAccumulator) & firstMask;
+                var restBitsToAskFromBitsMask = (1ul << bitCountThatIsLeftInAccumulator) - 1;
+                accumulator |= (bits >> bitCountThatIsLeftInAccumulator) & restBitsToAskFromBitsMask;
 
                 BinaryPrimitives.WriteUInt64BigEndian(array.Span.Slice(uint64Position, 8), accumulator);
                 uint64Position += 8;
-                accumulator = 0;
 
                 // Any bits that needs to spill over to the new accumulator                
-                var secondMask = (1ul << bitsInAccumulator) - 1;
-                accumulator |= (bits & secondMask) << (64 - bitsInAccumulator);
+                var secondMask = (1ul << bitCountIntoNextAccumulator) - 1;
+                accumulator = (bits & secondMask) << (64 - bitsInAccumulator);
             }
         }
 
