@@ -446,7 +446,7 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
         {
             if (type == typeof(bool))
             {
-                return $"writer.WriteBits({variableName} ? 1lu : 0lu, 1)";
+                return $"writer.WriteBits({variableName} ? 1LU : 0LU, 1)";
             }
 
             if (type == typeof(ushort))
