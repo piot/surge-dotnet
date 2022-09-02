@@ -8,6 +8,7 @@ using Piot.Hazy;
 using Piot.MonotonicTime;
 using Piot.Random;
 using Piot.Surge;
+using Piot.Surge.Compress;
 using Piot.Surge.Internal.Generated;
 using Piot.Surge.Pulse.Client;
 using Piot.Surge.Pulse.Host;
@@ -37,6 +38,7 @@ public class ClientHostTests
         var entityContainerWithGhostCreator = new WorldWithGhostCreator(new GeneratedEntityGhostCreator(), notifyWorld);
 
         var client = new Client(log.SubLog("Client"), now, clientDeltaTime, entityContainerWithGhostCreator, transport,
+            DefaultMultiCompressor.Create(), DefaultMultiCompressor.DeflateCompressionIndex,
             inputFetch);
 
         return client;
@@ -45,7 +47,8 @@ public class ClientHostTests
     private Host CreateHost(Milliseconds now, ITransport transport)
     {
         var worldWithDetectChanges = new AuthoritativeWorld();
-        var host = new Host(transport, worldWithDetectChanges, now, log.SubLog("Host"));
+        var host = new Host(transport, DefaultMultiCompressor.Create(), DefaultMultiCompressor.DeflateCompressionIndex,
+            worldWithDetectChanges, now, log.SubLog("Host"));
         return host;
     }
 

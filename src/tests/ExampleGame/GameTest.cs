@@ -7,6 +7,7 @@ using Piot.Clog;
 using Piot.Hazy;
 using Piot.MonotonicTime;
 using Piot.Random;
+using Piot.Surge.Compress;
 using Piot.Transport.Memory;
 using Tests.ExampleGame;
 using Xunit.Abstractions;
@@ -32,6 +33,7 @@ public class GameTests
 
         var (clientTransport, hostTransport) = MemoryTransportFactory.CreateClientAndHostTransport();
 
+        var multiCompressor = DefaultMultiCompressor.Create();
         const bool useInternetSimulation = true;
 
         var hostTransportToUse = hostTransport;
@@ -47,8 +49,8 @@ public class GameTests
             hostTransportToUse = internetSimulatedHostTransport;
         }
 
-        var clientGame = new Game(clientTransport, false, log.SubLog("client"));
-        var hostGame = new Game(hostTransport, true, log.SubLog("host"));
+        var clientGame = new Game(clientTransport, multiCompressor, false, log.SubLog("client"));
+        var hostGame = new Game(hostTransport, multiCompressor, true, log.SubLog("host"));
 
         //var world = host.AuthoritativeWorld;
         //var spawnedEntity = world.SpawnEntity(new AvatarLogicEntityInternal());

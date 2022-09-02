@@ -4,16 +4,18 @@
  *--------------------------------------------------------------------------------------------*/
 
 using Piot.Flood;
+using Piot.Surge.Compress;
 using Piot.Surge.Corrections;
 
 namespace Piot.Surge.SnapshotProtocol.Out
 {
     public static class SnapshotProtocolPacker
     {
-        public static SnapshotProtocolPack Pack(SnapshotDeltaPackIncludingCorrections deltaPack)
+        public static SnapshotProtocolPack Pack(SnapshotDeltaPackIncludingCorrections deltaPack,
+            IMultiCompressor multiCompressor, CompressorIndex compressorIndex)
         {
             var writer = new OctetWriter(Constants.MaxSnapshotOctetSize);
-            SnapshotIncludingCorrectionsWriter.Write(deltaPack, writer);
+            SnapshotIncludingCorrectionsWriter.Write(deltaPack, multiCompressor, compressorIndex, writer);
             return new(deltaPack.tickIdRange, writer.Octets);
         }
     }

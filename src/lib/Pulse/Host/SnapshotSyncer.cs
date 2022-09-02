@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using Piot.Clog;
 using Piot.Flood;
+using Piot.Surge.Compress;
 using Piot.Surge.Corrections;
 using Piot.Surge.DeltaSnapshot.Cache;
 using Piot.Surge.DeltaSnapshot.EntityMask;
@@ -48,11 +49,13 @@ namespace Piot.Surge.Pulse.Host
 
     public class WrappedSender
     {
+        private readonly IMultiCompressor compress;
         private readonly RemoteEndpointId id;
         private readonly ITransportSend sender;
 
-        public WrappedSender(ITransportSend sender, RemoteEndpointId id)
+        public WrappedSender(ITransportSend sender, IMultiCompressor compress, RemoteEndpointId id)
         {
+            this.compress = compress;
             this.sender = sender;
             this.id = id;
         }
@@ -65,14 +68,19 @@ namespace Piot.Surge.Pulse.Host
 
     public class SnapshotSyncer
     {
+        private readonly IMultiCompressor compression;
+        private readonly CompressorIndex compressorIndex;
         private readonly DeltaSnapshotPackCache deltaSnapshotPackCache;
         private readonly EntityMasksHistory entityMasksHistory = new();
         private readonly ILog log;
         private readonly List<SnapshotSyncerClient> syncClients = new();
         private readonly ITransportSend transportSend;
 
-        public SnapshotSyncer(ITransportSend transportSend, ILog log)
+        public SnapshotSyncer(ITransportSend transportSend, IMultiCompressor compression,
+            CompressorIndex compressorIndex, ILog log)
         {
+            this.compression = compression;
+            this.compressorIndex = compressorIndex;
             deltaSnapshotPackCache = new(log);
             this.transportSend = transportSend;
             this.log = log;
@@ -112,9 +120,9 @@ namespace Piot.Surge.Pulse.Host
             var includingCorrections = new SnapshotDeltaPackIncludingCorrections(rangeToSend,
                 fetchedSnapshotPack.payload.Span, physicsCorrectionWriter.Octets, fetchedSnapshotPack.PackType);
 
-            var snapshotProtocolPack = SnapshotProtocolPacker.Pack(includingCorrections);
+            var snapshotProtocolPack = SnapshotProtocolPacker.Pack(includingCorrections, compression, compressorIndex);
 
-            var sender = new WrappedSender(transportSend, connection.Endpoint);
+            var sender = new WrappedSender(transportSend, compression, connection.Endpoint);
 
             log.DebugLowLevel("sending datagrams {Flattened}", includingCorrections);
             SnapshotPackIncludingCorrectionsWriter.Write(sender.Send, snapshotProtocolPack,

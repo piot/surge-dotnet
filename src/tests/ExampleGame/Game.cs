@@ -6,6 +6,7 @@
 using Piot.Clog;
 using Piot.MonotonicTime;
 using Piot.Surge;
+using Piot.Surge.Compress;
 using Piot.Surge.Internal.Generated;
 using Piot.Surge.Pulse.Client;
 using Piot.Surge.Pulse.Host;
@@ -19,10 +20,12 @@ public class Game
     private readonly Client? client;
     private readonly Host? host;
     private readonly ILog log;
+    private IMultiCompressor compression;
 
-    public Game(ITransport transport, bool isHosting, ILog log)
+    public Game(ITransport transport, IMultiCompressor compression, bool isHosting, ILog log)
     {
         this.log = log;
+        this.compression = compression;
         var now = new Milliseconds(0);
         var delta = new Milliseconds(16);
 
@@ -32,12 +35,13 @@ public class Game
 
         if (isHosting)
         {
-            host = new Host(transport, worldWithGhostCreator, now, log);
+            host = new Host(transport, compression, DefaultMultiCompressor.DeflateCompressionIndex,
+                worldWithGhostCreator, now, log);
         }
         else
         {
             client = new(log, now, delta, worldWithGhostCreator,
-                transport, new GeneratedInputFetch());
+                transport, compression, DefaultMultiCompressor.DeflateCompressionIndex, new GeneratedInputFetch());
         }
 
         var generatedSpawner = new GeneratedEngineSpawner(worldWithGhostCreator);

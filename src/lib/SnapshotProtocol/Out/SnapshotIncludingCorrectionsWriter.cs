@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using Piot.Flood;
+using Piot.Surge.Compress;
 using Piot.Surge.Corrections;
 using Piot.Surge.DeltaSnapshot.Pack.Serialization;
 
@@ -12,20 +13,27 @@ namespace Piot.Surge.SnapshotProtocol.Out
     public static class SnapshotIncludingCorrectionsWriter
     {
         public static void Write(SnapshotDeltaPackIncludingCorrections deltaSnapshotIncludingCorrectionsPack,
-            IOctetWriter writer)
+            IMultiCompressor multiCompressor, CompressorIndex compressorIndex, IOctetWriter writer)
         {
 #if DEBUG
             writer.WriteUInt8(Constants.DeltaSnapshotIncludingCorrectionsSync);
 #endif
             var snapshotMode =
                 DeltaSnapshotPackTypeConverter.ToSnapshotMode(deltaSnapshotIncludingCorrectionsPack.PackType);
+
+            snapshotMode |= (byte)(compressorIndex.Index << 2);
+
             writer.WriteUInt8(snapshotMode);
 
-            writer.WriteUInt16((ushort)deltaSnapshotIncludingCorrectionsPack.deltaSnapshotPackPayload.Length);
-            writer.WriteOctets(deltaSnapshotIncludingCorrectionsPack.deltaSnapshotPackPayload.Span);
+            var subWriter = new OctetWriter(Constants.MaxSnapshotOctetSize);
+            subWriter.WriteUInt16((ushort)deltaSnapshotIncludingCorrectionsPack.deltaSnapshotPackPayload.Length);
+            subWriter.WriteOctets(deltaSnapshotIncludingCorrectionsPack.deltaSnapshotPackPayload.Span);
 
-            writer.WriteUInt16((ushort)deltaSnapshotIncludingCorrectionsPack.physicsCorrections.Length);
-            writer.WriteOctets(deltaSnapshotIncludingCorrectionsPack.physicsCorrections.Span);
+            subWriter.WriteUInt16((ushort)deltaSnapshotIncludingCorrectionsPack.physicsCorrections.Length);
+            subWriter.WriteOctets(deltaSnapshotIncludingCorrectionsPack.physicsCorrections.Span);
+
+            var subPack = multiCompressor.Compress(compressorIndex.Index, subWriter.Octets);
+            writer.WriteOctets(subPack);
         }
     }
 }

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
+using Piot.Surge.Compress;
 using Piot.Surge.Corrections.Serialization;
 using Piot.Surge.LogicalInput;
 using Piot.Surge.LogicalInput.Serialization;
@@ -32,12 +33,15 @@ namespace Piot.Surge.Pulse.Client
         private readonly TimeTicker predictionTicker;
         private readonly ITransportClient transportClient;
         private readonly IEntityContainer world;
+        private IMultiCompressor compression;
         private TickId predictTickId;
 
-        public ClientPredictor(IInputPackFetch inputPackFetch, ITransportClient transportClient, Milliseconds now,
+        public ClientPredictor(IInputPackFetch inputPackFetch, ITransportClient transportClient,
+            IMultiCompressor compression, Milliseconds now,
             Milliseconds targetDeltaTimeMs, IEntityContainer world,
             ILog log)
         {
+            this.compression = compression;
             this.log = log;
             this.world = world;
             this.transportClient = transportClient;

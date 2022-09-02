@@ -7,6 +7,7 @@ using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.Stats;
+using Piot.Surge.Compress;
 using Piot.Surge.DatagramType.Serialization;
 using Piot.Surge.LogicalInput;
 using Piot.Surge.MonotonicTimeLowerBits;
@@ -21,6 +22,7 @@ namespace Piot.Surge.Pulse.Client
 {
     public class Client
     {
+        private readonly IMultiCompressor compression;
         private readonly ClientDeltaSnapshotPlayback deltaSnapshotPlayback;
         private readonly ILog log;
         private readonly OrderedDatagramsInChecker orderedDatagramsInChecker = new();
@@ -35,15 +37,18 @@ namespace Piot.Surge.Pulse.Client
 
         public Client(ILog log, Milliseconds now, Milliseconds targetDeltaTimeMs,
             IEntityContainerWithGhostCreator worldWithGhostCreator,
-            ITransport assignedTransport, IInputPackFetch fetch)
+            ITransport assignedTransport, IMultiCompressor compression, CompressorIndex compressorIndex,
+            IInputPackFetch fetch)
         {
             this.log = log;
+            this.compression = compression;
             snapshotFragmentReAssembler = new(log);
             World = worldWithGhostCreator;
             transportWithStats = new(assignedTransport, now);
             transportBoth = transportWithStats;
             transportClient = new TransportClient(transportBoth);
-            predictor = new ClientPredictor(fetch, transportClient, now, targetDeltaTimeMs, worldWithGhostCreator,
+            predictor = new ClientPredictor(fetch, transportClient, compression, now, targetDeltaTimeMs,
+                worldWithGhostCreator,
                 log.SubLog("Predictor"));
             deltaSnapshotPlayback =
                 new ClientDeltaSnapshotPlayback(now, worldWithGhostCreator, predictor, targetDeltaTimeMs,
@@ -85,9 +90,8 @@ namespace Piot.Surge.Pulse.Client
                 return;
             }
 
-            var snapshotReader = new OctetReader(completePayload);
-
-            var snapshotWithCorrections = DeltaSnapshotIncludingCorrectionsReader.Read(tickIdRange, snapshotReader);
+            var snapshotWithCorrections =
+                DeltaSnapshotIncludingCorrectionsReader.Read(tickIdRange, completePayload, compression);
 
             deltaSnapshotPlayback.FeedSnapshotDeltaPack(snapshotWithCorrections);
         }

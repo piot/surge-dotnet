@@ -5,6 +5,7 @@
 
 using System;
 using Piot.Flood;
+using Piot.Surge.Compress;
 using Piot.Surge.Corrections;
 using Piot.Surge.DeltaSnapshot.Pack;
 using Piot.Surge.Tick;
@@ -22,20 +23,31 @@ namespace Piot.Surge.SnapshotProtocol.In
         /// <param name="reader"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public static SnapshotDeltaPackIncludingCorrections Read(TickIdRange tickIdRange, IOctetReader reader)
+        public static SnapshotDeltaPackIncludingCorrections Read(TickIdRange tickIdRange,
+            ReadOnlySpan<byte> datagramOctets, IMultiCompressor multiCompressor)
         {
+            var headerSize = 1;
 #if DEBUG
-            if (reader.ReadUInt8() != Constants.DeltaSnapshotIncludingCorrectionsSync)
+            headerSize++;
+#endif
+            var headerReader = new OctetReader(datagramOctets.Slice(0, headerSize));
+#if DEBUG
+            if (headerReader.ReadUInt8() != Constants.DeltaSnapshotIncludingCorrectionsSync)
             {
                 throw new Exception("out of sync");
             }
 #endif
-            var snapshotMode = reader.ReadUInt8();
-            var dataType = snapshotMode switch
+            var snapshotMode = headerReader.ReadUInt8();
+            var dataType = (snapshotMode & 0x03) switch
             {
                 0x00 => DeltaSnapshotPackType.BitStream,
                 0x01 => DeltaSnapshotPackType.OctetStream
             };
+
+            var compressionIndex = (uint)(snapshotMode >> 2);
+            var rest = datagramOctets[headerSize..];
+
+            var reader = new OctetReader(multiCompressor.Decompress(compressionIndex, rest));
 
             var payloadOctetCount = reader.ReadUInt16();
             var payload = reader.ReadOctets(payloadOctetCount);

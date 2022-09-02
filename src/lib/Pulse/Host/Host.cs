@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
+using Piot.Surge.Compress;
 using Piot.Surge.DeltaSnapshot.Convert;
 using Piot.Surge.DeltaSnapshot.EntityMask;
 using Piot.Surge.DeltaSnapshot.Pack;
@@ -23,22 +24,26 @@ namespace Piot.Surge.Pulse.Host
 {
     public class Host
     {
+        private readonly IMultiCompressor compression;
+
         //private readonly AuthoritativeWorld authoritativeWorld;
         private readonly Dictionary<uint, ConnectionToClient> connections = new();
         private readonly ILog log;
         private readonly List<ConnectionToClient> orderedConnections = new();
+        private readonly bool shouldUseBitStream = true;
         private readonly TimeTicker simulationTicker;
         private readonly SnapshotSyncer snapshotSyncer;
         private readonly ITransport transport;
         private readonly TransportStatsBoth transportWithStats;
         private TickId serverTickId;
-        private readonly bool shouldUseBitStream = true;
 
-        public Host(ITransport hostTransport, IEntityContainerWithDetectChanges world, Milliseconds now, ILog log)
+        public Host(ITransport hostTransport, IMultiCompressor compression, CompressorIndex compressorIndex,
+            IEntityContainerWithDetectChanges world, Milliseconds now, ILog log)
         {
+            this.compression = compression;
             transportWithStats = new TransportStatsBoth(hostTransport, now);
             transport = transportWithStats;
-            snapshotSyncer = new SnapshotSyncer(transport, log.SubLog("Syncer"));
+            snapshotSyncer = new SnapshotSyncer(transport, compression, compressorIndex, log.SubLog("Syncer"));
             AuthoritativeWorld = world;
             this.log = log;
             simulationTicker = new(new Milliseconds(0), SimulationTick, new Milliseconds(16),
@@ -70,8 +75,7 @@ namespace Piot.Surge.Pulse.Host
                     }
 
                     var targetEntity = AuthoritativeWorld.FetchEntity(connection.ControllingEntityId);
-                    var inputDeserialize = targetEntity.GeneratedEntity as IInputDeserialize;
-                    if (inputDeserialize is null)
+                    if (targetEntity.GeneratedEntity is not IInputDeserialize inputDeserialize)
                     {
                         throw new Exception(
                             $"It is not possible to control Entity {connection.ControllingEntityId}, it has no IDeserializeInput interface");
@@ -121,6 +125,7 @@ namespace Piot.Surge.Pulse.Host
                     return;
                 }
 
+
                 if (!connections.TryGetValue(clientId.Value, out var connectionToClient))
                 {
                     var syncer = snapshotSyncer.Create(clientId);
@@ -129,6 +134,7 @@ namespace Piot.Surge.Pulse.Host
                     orderedConnections.Add(connectionToClient);
                     connections.Add(clientId.Value, connectionToClient);
                 }
+
 
                 var datagramReader = new OctetReader(datagram.ToArray());
                 connectionToClient.Receive(datagramReader, serverTickId);

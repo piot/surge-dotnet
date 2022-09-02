@@ -3,8 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using Piot.Surge.Compress;
-
 namespace Piot.Transport.Memory
 {
     public static class MemoryTransportFactory
@@ -15,12 +13,10 @@ namespace Piot.Transport.Memory
             var host = new MemoryTransportBoth();
 
             host.SetEnqueueTarget(client, new RemoteEndpointId(0));
-            var hostCompressed = new DeflateTransport(host);
 
             client.SetEnqueueTarget(host, new RemoteEndpointId(2));
-            var clientCompressed = new DeflateTransport(client);
 
-            return (clientCompressed, hostCompressed);
+            return (client, host);
         }
     }
 }

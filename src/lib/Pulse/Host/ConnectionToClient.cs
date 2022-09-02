@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System;
 using System.Collections.Generic;
 using Piot.Clog;
 using Piot.Flood;
@@ -105,7 +104,7 @@ namespace Piot.Surge.Pulse.Host
                     ReceivePredictedInputs(reader, serverIsAtTickId);
                     break;
                 default:
-                    throw new Exception($"illegal datagram type {datagramType} from client ${Id}");
+                    throw new DeserializeException($"illegal datagram type {datagramType} from client ${Id}");
             }
         }
     }
