@@ -42,6 +42,7 @@ namespace Piot.Flood
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public uint ReadBits(int bitCount)
         {
+#if DEBUG
             if (bitCount is < 1 or > 32)
             {
                 throw new Exception("must read between 1-32 bits");
@@ -51,6 +52,7 @@ namespace Piot.Flood
             {
                 throw new Exception("tried to read longer than buffer bit count");
             }
+#endif
 
             if (bitsInAccumulator < bitCount)
             {
