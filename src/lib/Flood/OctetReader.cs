@@ -53,6 +53,19 @@ namespace Piot.Flood
         }
 
 
+        public ulong ReadUInt64()
+        {
+            pos += 8;
+            return BinaryPrimitives.ReadUInt64BigEndian(array.Span.Slice(pos - 8, 8));
+        }
+
+        public long ReadInt64()
+        {
+            pos += 8;
+            return BinaryPrimitives.ReadInt64BigEndian(array.Span.Slice(pos - 8, 8));
+        }
+
+
         public ReadOnlySpan<byte> ReadOctets(int octetCount)
         {
             pos += octetCount;

@@ -16,6 +16,9 @@ namespace Piot.Flood
         public uint ReadUInt32();
         public int ReadInt32();
 
+        public ulong ReadUInt64();
+        public long ReadInt64();
+
         public ReadOnlySpan<byte> ReadOctets(int octetCount);
     }
 }

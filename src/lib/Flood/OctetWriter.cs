@@ -55,6 +55,18 @@ namespace Piot.Flood
             BinaryPrimitives.WriteInt32BigEndian(array.Span.Slice(pos - 4, 4), value);
         }
 
+        public void WriteUInt64(ulong value)
+        {
+            pos += 8;
+            BinaryPrimitives.WriteUInt64BigEndian(array.Span.Slice(pos - 8, 8), value);
+        }
+
+        public void WriteInt64(long value)
+        {
+            pos += 8;
+            BinaryPrimitives.WriteInt64BigEndian(array.Span.Slice(pos - 8, 8), value);
+        }
+
         public void WriteOctets(ReadOnlySpan<byte> readOnlySpan)
         {
             readOnlySpan.CopyTo(array.Span.Slice(pos, readOnlySpan.Length));

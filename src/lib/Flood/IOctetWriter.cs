@@ -15,6 +15,8 @@ namespace Piot.Flood
         public void WriteInt16(short value);
         public void WriteUInt32(uint value);
         public void WriteInt32(int value);
+        public void WriteUInt64(ulong value);
+        public void WriteInt64(long value);
         public void WriteOctets(ReadOnlySpan<byte> value);
     }
 }
