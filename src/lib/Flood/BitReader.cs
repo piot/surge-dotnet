@@ -56,7 +56,12 @@ namespace Piot.Flood
 
             if (bitsInAccumulator < bitCount)
             {
-                accumulator |= BinaryPrimitives.ReadUInt32BigEndian(octets.Span.Slice(octetPosition, 4)) <<
+                if (bitsInAccumulator is > 63 or < 0)
+                {
+                    throw new Exception("internal shift error in bitstream");
+                }
+
+                accumulator |= (ulong)BinaryPrimitives.ReadUInt32BigEndian(octets.Span.Slice(octetPosition, 4)) <<
                                bitsInAccumulator;
                 octetPosition += 4;
                 bitsInAccumulator += 32;

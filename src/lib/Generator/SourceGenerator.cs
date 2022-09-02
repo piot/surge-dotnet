@@ -118,12 +118,13 @@ namespace Piot.Surge.Generator
             {
                 var logicName = FullName(info.Type);
                 sb.Append(@$"
-    public IEntity Spawn{ShortName(info.Type)}({logicName} logic)
+    public (IEntity, {EntityGeneratedInternal(info)}) Spawn{ShortName(info.Type)}({logicName} logic)
     {{ 
-        return container.SpawnEntity(new {EntityGeneratedInternal(info)}
+        var internalEntity = new {EntityGeneratedInternal(info)}
         {{
             Current = logic
-        }});
+        }};
+        return (container.SpawnEntity(internalEntity), internalEntity);
      }}
 ");
             }

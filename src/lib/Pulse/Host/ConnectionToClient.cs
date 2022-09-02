@@ -31,6 +31,7 @@ namespace Piot.Surge.Pulse.Host
             this.syncer = syncer;
         }
 
+
         public Dictionary<uint, ConnectionPlayer> ConnectionPlayers { get; } = new();
 
         public RemoteEndpointId Id { get; }

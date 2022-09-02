@@ -32,7 +32,7 @@ namespace Piot.Stats
 
         public override string ToString()
         {
-            return $"[{formatter(average)} min:{formatter(min)}, max:{formatter(max)} ({count})]";
+            return $"[{formatter(average)} min:{formatter(min)}, max:{formatter(max)}]";
         }
     }
 }

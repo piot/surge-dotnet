@@ -26,7 +26,6 @@ namespace Piot.Surge.Pulse.Host
     {
         private readonly IMultiCompressor compression;
 
-        //private readonly AuthoritativeWorld authoritativeWorld;
         private readonly Dictionary<uint, ConnectionToClient> connections = new();
         private readonly ILog log;
         private readonly List<ConnectionToClient> orderedConnections = new();
@@ -98,7 +97,7 @@ namespace Piot.Surge.Pulse.Host
             SetInputsFromClientsToEntities();
             TickWorld();
             var (masks, deltaSnapshotPack) = StoreWorldChangesToPackContainer();
-            snapshotSyncer.SendSnapshot(masks, Array.Empty<ConnectionPlayer>(), deltaSnapshotPack);
+            snapshotSyncer.SendSnapshot(masks, deltaSnapshotPack);
             serverTickId = new TickId(serverTickId.tickId + 1);
         }
 

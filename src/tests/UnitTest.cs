@@ -312,7 +312,7 @@ public class UnitTest1
         Assert.Equal(0u, (avatar as IEntityChanges).Changes());
         (avatar as ISimpleLogic).Tick();
 
-        Assert.Equal(3, avatar.Self.position.x);
+        Assert.Equal(300, avatar.Self.position.x);
         Assert.Equal(AvatarLogicEntityInternal.PositionMask, (avatar as IEntityChanges).Changes());
     }
 
@@ -362,7 +362,7 @@ public class UnitTest1
         var scanWorld = (IEntityContainerWithDetectChanges)world;
         var allEntities = (world as IEntityContainer).AllEntities;
         Ticker.Tick(allEntities);
-        Assert.Equal(3, ((AvatarLogic)spawnedAvatar.Logic).position.x);
+        Assert.Equal(300, ((AvatarLogic)spawnedAvatar.Logic).position.x);
 
         var firstTick = new TickId(0);
         var snapshotDelta = Scanner.Scan(scanWorld, firstTick);
@@ -420,7 +420,7 @@ public class UnitTest1
         Assert.Equal(16, packetQueue.Peek().deltaSnapshotPackPayload.Length);
 #endif
 
-        Assert.Equal(6, ((AvatarLogic)spawnedAvatar.Logic).position.x);
+        Assert.Equal(600, ((AvatarLogic)spawnedAvatar.Logic).position.x);
         Assert.Equal(AvatarLogicEntityInternal.PositionMask,
             ((AvatarLogicEntityInternal)spawnedAvatar.GeneratedEntity as IEntityChanges).Changes());
 
@@ -482,7 +482,7 @@ public class UnitTest1
         Ticker.Tick(world);
 
         var serverSpawnedAvatarForAssert = world.FetchEntity<AvatarLogicEntityInternal>(spawnedAvatar.Id);
-        Assert.Equal(3, serverSpawnedAvatarForAssert.Self.position.x);
+        Assert.Equal(300, serverSpawnedAvatarForAssert.Self.position.x);
 
 
         /* SECOND Snapshot */
@@ -518,7 +518,7 @@ public class UnitTest1
         Ticker.Tick(world);
 
 
-        Assert.Equal(9, serverSpawnedAvatarForAssertAtThree.Self.position.x);
+        Assert.Equal(900, serverSpawnedAvatarForAssertAtThree.Self.position.x);
         Assert.IsType<FireChainLightning>((serverSpawnedAvatar as IEntityActions).Actions[0]);
 
         Assert.Equal(
@@ -604,7 +604,7 @@ public class UnitTest1
         Assert.Equal(0, clientSpawnedEntity.Self.fireCooldown);
         Assert.False(clientSpawnedEntity.Self.fireButtonIsDown);
         Assert.Equal(100, clientSpawnedEntity.Self.ammoCount);
-        Assert.Equal(6, clientSpawnedEntity.Self.position.x);
+        Assert.Equal(600, clientSpawnedEntity.Self.position.x);
 
         var secondToLastPack = allSerializedSnapshots[^2];
         var secondToLastReader = new OctetReader(secondToLastPack.payload.Span);
@@ -648,7 +648,7 @@ public class UnitTest1
             clientCreatedEntity.FireCreated();
         }
 
-        Assert.Equal(12, clientSpawnedEntity.Self.position.x);
+        Assert.Equal(1200, clientSpawnedEntity.Self.position.x);
         Assert.Equal(99, clientSpawnedEntity.Self.ammoCount);
         Assert.True(clientSpawnedEntity.Self.fireButtonIsDown);
         Assert.Equal(spawnedAvatarId.Value, clientAvatar.Id.Value);
@@ -676,7 +676,7 @@ public class UnitTest1
         Assert.Single(updatedUnpack);
         Assert.Empty(deletedUnpack);
         Assert.True(clientAvatar.IsAlive);
-        Assert.Equal(9, clientSpawnedEntity.Self.position.x);
+        Assert.Equal(900, clientSpawnedEntity.Self.position.x);
 
         /*
         var readBackAgain = new OctetReader(snapshotDeltaPack.deltaSnapshotPackPayload);

@@ -45,6 +45,11 @@ namespace Piot.Flood
                 throw new ArgumentOutOfRangeException(nameof(bits),
                     $"there are bits set above the bit count {bits} {bitCount}");
             }
+
+            if (bitsInAccumulator is > 63 or < 0)
+            {
+                throw new Exception("internal error, shift is too high");
+            }
 #endif
 
             accumulator |= (bits & mask) << bitsInAccumulator;

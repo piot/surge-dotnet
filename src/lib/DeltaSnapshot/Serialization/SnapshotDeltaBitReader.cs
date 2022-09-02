@@ -55,6 +55,7 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
                 var entityArchetype = new ArchetypeId((ushort)reader.ReadBits(10));
                 var entityToDeserialize = entityGhostContainerWithCreator.CreateGhostEntity(entityArchetype, entityId);
                 entityToDeserialize.DeserializeAll(reader);
+                entityToDeserialize.FireCreated();
                 createdEntities.Add(entityToDeserialize);
             }
 

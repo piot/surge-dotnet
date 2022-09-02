@@ -45,11 +45,15 @@ namespace Piot.Surge.Pulse.Client
         {
             if (!pack.tickIdRange.Contains(includingCorrectionsQueue.WantsTickId))
             {
+                log.Notice("unexpected incoming delta pack encountered {TickIdRange}, expected {TickId}",
+                    pack.tickIdRange, includingCorrectionsQueue.WantsTickId);
                 return;
             }
 
             if (pack.tickIdRange.Last.tickId < includingCorrectionsQueue.WantsTickId.tickId)
             {
+                log.Notice("old incoming delta pack encountered {TickIdRange}, expected {TickId}", pack.tickIdRange,
+                    includingCorrectionsQueue.WantsTickId);
                 return;
             }
 

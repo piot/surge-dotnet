@@ -14,7 +14,9 @@ namespace Piot.Surge.Corrections
         private readonly Queue<SnapshotDeltaPackIncludingCorrections> packs = new();
         private TickIdRange lastInsertedTickIdRange;
 
-        public TickId WantsTickId => new(lastInsertedTickIdRange.Last.tickId + 1);
+        private uint wantsTickIdValue;
+
+        public TickId WantsTickId => new(wantsTickIdValue);
 
         public void Enqueue(SnapshotDeltaPackIncludingCorrections pack)
         {
@@ -25,6 +27,7 @@ namespace Piot.Surge.Corrections
 
             packs.Enqueue(pack);
             lastInsertedTickIdRange = pack.tickIdRange;
+            wantsTickIdValue = lastInsertedTickIdRange.Last.tickId;
         }
 
         public SnapshotDeltaPackIncludingCorrections Dequeue()

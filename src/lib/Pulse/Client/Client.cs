@@ -37,8 +37,7 @@ namespace Piot.Surge.Pulse.Client
 
         public Client(ILog log, Milliseconds now, Milliseconds targetDeltaTimeMs,
             IEntityContainerWithGhostCreator worldWithGhostCreator,
-            ITransport assignedTransport, IMultiCompressor compression, CompressorIndex compressorIndex,
-            IInputPackFetch fetch)
+            ITransport assignedTransport, IMultiCompressor compression, IInputPackFetch fetch)
         {
             this.log = log;
             this.compression = compression;
@@ -47,7 +46,7 @@ namespace Piot.Surge.Pulse.Client
             transportWithStats = new(assignedTransport, now);
             transportBoth = transportWithStats;
             transportClient = new TransportClient(transportBoth);
-            predictor = new ClientPredictor(fetch, transportClient, compression, now, targetDeltaTimeMs,
+            predictor = new ClientPredictor(fetch, transportClient, now, targetDeltaTimeMs,
                 worldWithGhostCreator,
                 log.SubLog("Predictor"));
             deltaSnapshotPlayback =
@@ -90,10 +89,16 @@ namespace Piot.Surge.Pulse.Client
                 return;
             }
 
+            predictor.LastSeenSnapshotTickId = tickIdRange.Last;
+
+            // Check if it is a snapshot that we want
+
+
             var snapshotWithCorrections =
                 DeltaSnapshotIncludingCorrectionsReader.Read(tickIdRange, completePayload, compression);
 
             deltaSnapshotPlayback.FeedSnapshotDeltaPack(snapshotWithCorrections);
+            predictor.LastAcceptedSnapshotTickId = snapshotWithCorrections.tickIdRange.lastTickId;
         }
 
         private void ReceiveDatagramFromHost(IOctetReader reader, Milliseconds now)

@@ -38,8 +38,7 @@ public class ClientHostTests
         var entityContainerWithGhostCreator = new WorldWithGhostCreator(new GeneratedEntityGhostCreator(), notifyWorld);
 
         var client = new Client(log.SubLog("Client"), now, clientDeltaTime, entityContainerWithGhostCreator, transport,
-            DefaultMultiCompressor.Create(), DefaultMultiCompressor.DeflateCompressionIndex,
-            inputFetch);
+            DefaultMultiCompressor.Create(), inputFetch);
 
         return client;
     }

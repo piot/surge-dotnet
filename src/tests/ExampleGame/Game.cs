@@ -20,33 +20,32 @@ public class Game
     private readonly Client? client;
     private readonly Host? host;
     private readonly ILog log;
-    private IMultiCompressor compression;
+    private readonly WorldWithGhostCreator world;
 
     public Game(ITransport transport, IMultiCompressor compression, bool isHosting, ILog log)
     {
         this.log = log;
-        this.compression = compression;
         var now = new Milliseconds(0);
         var delta = new Milliseconds(16);
 
         var entityCreation = new GeneratedEntityGhostCreator();
-        var generatedWorld = new GeneratedEngineWorld();
-        var worldWithGhostCreator = new WorldWithGhostCreator(entityCreation, generatedWorld);
+        GeneratedNotifyWorld = new GeneratedEngineWorld();
+        world = new(entityCreation, GeneratedNotifyWorld);
 
         if (isHosting)
         {
             host = new Host(transport, compression, DefaultMultiCompressor.DeflateCompressionIndex,
-                worldWithGhostCreator, now, log);
+                world, now, log);
         }
         else
         {
-            client = new(log, now, delta, worldWithGhostCreator,
-                transport, compression, DefaultMultiCompressor.DeflateCompressionIndex, new GeneratedInputFetch());
+            client = new(log, now, delta, world,
+                transport, compression, new GeneratedInputFetch());
         }
 
-        var generatedSpawner = new GeneratedEngineSpawner(worldWithGhostCreator);
+        GeneratedEngineSpawner = new GeneratedEngineSpawner(world);
 
-        generatedWorld.OnSpawnAvatarLogic += avatar =>
+        GeneratedNotifyWorld.OnSpawnAvatarLogic += avatar =>
         {
             log.Debug("Avatar {Avatar} was spawned", avatar);
 
@@ -56,7 +55,7 @@ public class Game
             avatar.DoCastFireball += (position, direction) =>
             {
                 log.Debug("Play cast effect!");
-                if (!worldWithGhostCreator.IsAuthoritative)
+                if (!world.IsAuthoritative)
                 {
                     return;
                 }
@@ -66,7 +65,7 @@ public class Game
                     position = position,
                     velocity = new Velocity3((int)direction.X, (int)direction.Y, (int)direction.Z)
                 };
-                generatedSpawner.SpawnFireballLogic(fireballLogic);
+                GeneratedEngineSpawner.SpawnFireballLogic(fireballLogic);
             };
 
             avatar.OnPostUpdate += () =>
@@ -78,6 +77,11 @@ public class Game
             };
         };
     }
+
+    public IEntityContainer EntityContainer => world;
+    public GeneratedEngineSpawner GeneratedEngineSpawner { get; }
+
+    public GeneratedEngineWorld GeneratedNotifyWorld { get; }
 
     public void Update(Milliseconds now)
     {

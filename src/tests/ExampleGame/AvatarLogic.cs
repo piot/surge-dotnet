@@ -36,7 +36,7 @@ public struct AvatarLogic : ILogic
 
     public override string ToString()
     {
-        return $"AvatarLogic {ammoCount}";
+        return $"AvatarLogic ammo:{ammoCount} fireIsDown:{fireButtonIsDown} pos:{position}";
     }
 
     public interface IAvatarLogicActions : ILogicActions
@@ -88,7 +88,7 @@ public struct AvatarLogic : ILogic
 
     private void AlwaysMoveRight()
     {
-        position += new Position3(3, 0, 0);
+        position += new Position3(300, 0, 0);
     }
 
     private void TickDownCoolDowns()

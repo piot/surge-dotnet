@@ -95,8 +95,7 @@ namespace Piot.Surge.Pulse.Host
             return client;
         }
 
-        private void SendUsingContainers(SnapshotSyncerClient connection, ConnectionPlayer[] connectionPlayers,
-            TickId serverTickId)
+        private void SendUsingContainers(SnapshotSyncerClient connection, TickId serverTickId)
         {
             var rangeToSend = connection.WantsResend
                 ? connection.WaitingForTickIds
@@ -109,13 +108,12 @@ namespace Piot.Surge.Pulse.Host
             }
 
             var physicsCorrectionWriter = new OctetWriter(Constants.MaxSnapshotOctetSize);
-            physicsCorrectionWriter.WriteUInt8((byte)connectionPlayers.Length);
-            if (connectionPlayers.Length > 0)
+            physicsCorrectionWriter.WriteUInt8(0); // connection.localPlayerAssignedPredictedEntities
+            /*
+            foreach (var predicted in connection.localPlayerAssignedPredictedEntities)
             {
-                foreach (var predicted in connectionPlayers)
-                {
-                }
             }
+            */
 
             var includingCorrections = new SnapshotDeltaPackIncludingCorrections(rangeToSend,
                 fetchedSnapshotPack.payload.Span, physicsCorrectionWriter.Octets, fetchedSnapshotPack.PackType);
@@ -136,14 +134,13 @@ namespace Piot.Surge.Pulse.Host
             var maskUnion = entityMasksHistory.Fetch(connection.WaitingForTickIds);
         }
 
-        public void SendSnapshot(EntityMasks masks, ConnectionPlayer[] connectionPlayers,
-            DeltaSnapshotPack deltaSnapshotPack)
+        public void SendSnapshot(EntityMasks masks, DeltaSnapshotPack deltaSnapshotPack)
         {
             deltaSnapshotPackCache.Add(deltaSnapshotPack);
             entityMasksHistory.Enqueue(masks);
             foreach (var syncClient in syncClients)
             {
-                SendUsingContainers(syncClient, connectionPlayers, deltaSnapshotPack.tickIdRange.Last);
+                SendUsingContainers(syncClient, deltaSnapshotPack.tickIdRange.Last);
             }
         }
     }

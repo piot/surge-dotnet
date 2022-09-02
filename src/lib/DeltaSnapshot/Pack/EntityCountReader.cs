@@ -29,7 +29,7 @@ namespace Piot.Surge.DeltaSnapshot.Pack
                 throw new Exception($"suspicious count {count}");
             }
 
-            return (uint)count;
+            return count;
         }
     }
 }

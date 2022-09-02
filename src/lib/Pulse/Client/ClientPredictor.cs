@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
-using Piot.Surge.Compress;
 using Piot.Surge.Corrections.Serialization;
 using Piot.Surge.LogicalInput;
 using Piot.Surge.LogicalInput.Serialization;
@@ -33,15 +32,15 @@ namespace Piot.Surge.Pulse.Client
         private readonly TimeTicker predictionTicker;
         private readonly ITransportClient transportClient;
         private readonly IEntityContainer world;
-        private IMultiCompressor compression;
+
+        private TickId lastAcceptedSnapshotTickId;
+        private TickId lastSeenSnapshotTickId;
         private TickId predictTickId;
 
         public ClientPredictor(IInputPackFetch inputPackFetch, ITransportClient transportClient,
-            IMultiCompressor compression, Milliseconds now,
-            Milliseconds targetDeltaTimeMs, IEntityContainer world,
+            Milliseconds now, Milliseconds targetDeltaTimeMs, IEntityContainer world,
             ILog log)
         {
-            this.compression = compression;
             this.log = log;
             this.world = world;
             this.transportClient = transportClient;
@@ -50,6 +49,17 @@ namespace Piot.Surge.Pulse.Client
             predictionTicker = new(now, PredictionTick, targetDeltaTimeMs,
                 log.SubLog("PredictionTick"));
         }
+
+        public TickId LastSeenSnapshotTickId
+        {
+            set => lastSeenSnapshotTickId = value;
+        }
+
+        public TickId LastAcceptedSnapshotTickId
+        {
+            set => lastAcceptedSnapshotTickId = value;
+        }
+
 
         public void ReadCorrections(TickId correctionsForTickId, ReadOnlySpan<byte> physicsCorrectionPayload)
         {
@@ -136,13 +146,17 @@ namespace Piot.Surge.Pulse.Client
                 index++;
             }
 
+            var droppedSnapshotCount = lastSeenSnapshotTickId > lastAcceptedSnapshotTickId
+                ? (byte)(lastSeenSnapshotTickId - lastAcceptedSnapshotTickId).tickId
+                : (byte)0;
             var outDatagram =
-                LogicInputDatagramPackOut.CreateInputDatagram(datagramsOut, new TickId(42), 0,
+                LogicInputDatagramPackOut.CreateInputDatagram(datagramsOut, lastAcceptedSnapshotTickId,
+                    droppedSnapshotCount,
                     now, new LogicalInputsForAllLocalPlayers(inputForAllPlayers));
             log.DebugLowLevel("Sending inputs to host");
             transportClient.SendToHost(outDatagram);
 
-            predictTickId = new TickId(predictTickId.tickId + 1);
+            predictTickId = new(predictTickId.tickId + 1);
         }
     }
 }
