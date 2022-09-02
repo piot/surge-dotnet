@@ -7,6 +7,6 @@ namespace Piot.Flood
 {
     public interface IBitWriter
     {
-        public void WriteBits(ulong bits, int bitCount);
+        public void WriteBits(uint bits, int bitCount);
     }
 }

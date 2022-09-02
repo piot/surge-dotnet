@@ -446,7 +446,7 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
         {
             if (type == typeof(bool))
             {
-                return $"writer.WriteBits({variableName} ? 1LU : 0LU, 1)";
+                return $"writer.WriteBits({variableName} ? 1U : 0U, 1)";
             }
 
             if (type == typeof(ushort))
@@ -651,7 +651,7 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
             sb.Append($@"    public void {methodName}(ulong serializeFlags, IBitWriter writer)
     {{
 ");
-            sb.Append($@"       writer.WriteBits(serializeFlags, {fieldInfos.Count()});
+            sb.Append($@"       writer.WriteBits((uint)serializeFlags, {fieldInfos.Count()});
 ");
 
             foreach (var fieldInfo in fieldInfos)

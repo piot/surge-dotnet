@@ -15,74 +15,57 @@ namespace Piot.Flood
         private readonly int totalBitCount;
         private ulong accumulator;
         private int bitPosition;
-        private int bitPositionInAccumulator;
-        private int uint64Position;
+        private int bitsInAccumulator;
+        private int octetPosition;
 
         public BitReader(ReadOnlySpan<byte> octets, int totalBitCount)
         {
             this.totalBitCount = totalBitCount;
             this.octets = octets.ToArray();
-            if (octets.Length % 8 != 0)
+            if (octets.Length % 4 != 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(octets),
                     $"must have buffer in multiples of eight octets {octets.Length}");
             }
 
             var estimatedOctetCount = (totalBitCount + 7) / 8;
-            var estimated64BitCount = (estimatedOctetCount + 7) / 8;
-            var minimalOctetCount = estimated64BitCount * 8;
+            var estimated32BitCount = (estimatedOctetCount + 3) / 4;
+            var minimalOctetCount = estimated32BitCount * 4;
 
             if (octets.Length < minimalOctetCount)
             {
                 throw new Exception(
                     $"wrong octets count compared to bit count, expected {minimalOctetCount} but received {octets.Length}");
             }
-
-            bitPositionInAccumulator = 64;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ulong ReadBits(int bitCount)
+        public uint ReadBits(int bitCount)
         {
-            if (bitCount < 1 || bitCount > 64)
+            if (bitCount is < 1 or > 32)
             {
-                throw new Exception("must read between 1-64 bits");
+                throw new Exception("must read between 1-32 bits");
             }
 
-            bitPositionInAccumulator += bitCount;
+            if (bitPosition + bitCount > totalBitCount)
+            {
+                throw new Exception("tried to read longer than buffer bit count");
+            }
+
+            if (bitsInAccumulator < bitCount)
+            {
+                accumulator |= BinaryPrimitives.ReadUInt32BigEndian(octets.Span.Slice(octetPosition, 4)) <<
+                               bitsInAccumulator;
+                octetPosition += 4;
+                bitsInAccumulator += 32;
+            }
+
+            var mask = (1Lu << bitCount) - 1;
+            var v = accumulator & mask;
+
+            accumulator >>= bitCount;
+            bitsInAccumulator -= bitCount;
             bitPosition += bitCount;
-            if (bitPosition > totalBitCount)
-            {
-                throw new Exception($"reading more bits than is in buffer {bitCount} {bitPosition}/{totalBitCount}");
-            }
-
-            // Do we have all the bits requested in the accumulator?
-            if (bitPositionInAccumulator < 64)
-            {
-                var mask = (1ul << bitCount) - 1;
-                var valueFromAccumulator = (uint)((accumulator >> (64 - bitPositionInAccumulator)) & mask);
-                return valueFromAccumulator;
-            }
-
-            // Get the bits that was left in the accumulator
-            bitPositionInAccumulator -= 64;
-            var leftInFirst = bitCount - bitPositionInAccumulator;
-
-            var firstMask =
-                (1ul << leftInFirst) - 1; // must check since shifting by >= 64 is undefined
-            var v = accumulator & firstMask;
-
-            // Set the accumulator with a new uint64 value
-            accumulator = BinaryPrimitives.ReadUInt64BigEndian(octets.Span.Slice(uint64Position, 8));
-            uint64Position += 8;
-
-            var bitCountInSecond = bitCount - leftInFirst;
-            // Get the bits we need from the newly read uint64 value
-            var secondMask = (1ul << bitCountInSecond) - 1;
-            if (bitPositionInAccumulator > 0) // must check since shifting by >= 64 is undefined
-            {
-                v |= (accumulator >> (64 - bitPositionInAccumulator)) & secondMask;
-            }
 
             return (uint)v;
         }

@@ -15,7 +15,7 @@ namespace Piot.Flood
         private ulong accumulator;
         private int bitPosition;
         private int bitsInAccumulator;
-        private int uint64Position;
+        private int octetPosition;
 
         public BitWriter(uint octetSize)
         {
@@ -25,7 +25,7 @@ namespace Piot.Flood
         public uint BitPosition => (uint)bitPosition;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void WriteBits(ulong bits, int bitCount)
+        public void WriteBits(uint bits, int bitCount)
         {
 #if DEBUG
             if (bitCount <= 0)
@@ -38,13 +38,7 @@ namespace Piot.Flood
                 throw new ArgumentOutOfRangeException(nameof(bitCount), "only up to 32 bit supported");
             }
 #endif
-
             var mask = (1Lu << bitCount) - 1;
-
-            bitPosition += bitCount;
-            bitsInAccumulator += bitCount;
-
-
 #if DEBUG
             if (bits != (bits & mask))
             {
@@ -53,41 +47,32 @@ namespace Piot.Flood
             }
 #endif
 
-            // Can we fit all bits into the accumulator?
-            if (bitsInAccumulator < 64)
+            accumulator |= (bits & mask) << bitsInAccumulator;
+
+            bitsInAccumulator += bitCount;
+            if (bitsInAccumulator > 32)
             {
-                accumulator |= (bits & mask) << (64 - bitsInAccumulator);
+                BinaryPrimitives.WriteUInt32BigEndian(array.Span.Slice(octetPosition, 4),
+                    (uint)(accumulator & 0xffffffff));
+                octetPosition += 4;
+                accumulator >>= 32;
+                bitsInAccumulator -= 32;
             }
-            else
-            {
-                bitsInAccumulator -= 64;
-                var bitCountThatIsLeftInAccumulator = 64 - bitsInAccumulator;
-                var bitCountIntoNextAccumulator = bitCount = bitCountThatIsLeftInAccumulator;
 
-
-                // Add parts of the bits to the existing accumulator, if needed
-                var restBitsToAskFromBitsMask = (1ul << bitCountThatIsLeftInAccumulator) - 1;
-                accumulator |= (bits >> bitCountThatIsLeftInAccumulator) & restBitsToAskFromBitsMask;
-
-                BinaryPrimitives.WriteUInt64BigEndian(array.Span.Slice(uint64Position, 8), accumulator);
-                uint64Position += 8;
-
-                // Any bits that needs to spill over to the new accumulator                
-                var secondMask = (1ul << bitCountIntoNextAccumulator) - 1;
-                accumulator = (bits & secondMask) << (64 - bitsInAccumulator);
-            }
+            bitPosition += bitCount;
         }
 
         public ReadOnlySpan<byte> Close(out int outBitPosition)
         {
             if (bitsInAccumulator > 0)
             {
-                BinaryPrimitives.WriteUInt64BigEndian(array.Span.Slice(uint64Position, 8), accumulator);
-                uint64Position += 8;
+                BinaryPrimitives.WriteUInt32BigEndian(array.Span.Slice(octetPosition, 4),
+                    (uint)(accumulator & 0xffffffff));
+                octetPosition += 4;
             }
 
             outBitPosition = bitPosition;
-            return array.Span[..uint64Position];
+            return array.Span[..octetPosition];
         }
     }
 }
