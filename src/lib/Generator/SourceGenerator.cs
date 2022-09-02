@@ -508,7 +508,8 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
     {
 ");
             var (typeForSerializeFlagString, _) = SmallestPrimitiveForBitCount(fieldInfos.Count());
-            sb.Append($@"    var serializeFlags = (ulong) reader.Read{typeForSerializeFlagString}();
+            var castString = typeForSerializeFlagString == "UInt64" ? "" : "(ulong)";
+            sb.Append($@"    var serializeFlags = {castString} reader.Read{typeForSerializeFlagString}();
 ");
             foreach (var fieldInfo in fieldInfos)
             {
@@ -531,8 +532,18 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
     {
 ");
 
-            sb.Append(@$"       var serializeFlags = reader.ReadBits({fieldInfos.Count()});
+            var fieldCount = fieldInfos.Count();
+            var firstCount = fieldCount > 32 ? 32 : fieldCount;
+            var secondCount = fieldCount > 32 ? fieldCount - 32 : 0;
+            sb.Append(@$"       var serializeFlags = (ulong)reader.ReadBits({firstCount});
 ");
+
+            if (secondCount > 0)
+            {
+                sb.Append(@$"       serializeFlags |= (ulong)reader.ReadBits({secondCount}) << 32;
+");
+            }
+
 
             foreach (var fieldInfo in fieldInfos)
             {
@@ -609,6 +620,7 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
                 > 1 and <= 8 => ("UInt8", "byte"),
                 <= 16 => ("UInt16", "ushort"),
                 <= 32 => ("UInt32", "uint"),
+                <= 64 => ("UInt64", ""),
                 _ => throw new ArgumentOutOfRangeException(nameof(bitCount),
                     $"bitCount must be between 1-32 {bitCount}")
             };
@@ -622,7 +634,12 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
 ");
 
             var (typeForSerializeFlagString, castTypeString) = SmallestPrimitiveForBitCount(fieldInfos.Count());
-            sb.Append($@"    writer.Write{typeForSerializeFlagString}(({castTypeString})serializeFlags);
+            if (castTypeString != "")
+            {
+                castTypeString = $"({castTypeString})";
+            }
+
+            sb.Append($@"    writer.Write{typeForSerializeFlagString}({castTypeString}serializeFlags);
 ");
 
             foreach (var fieldInfo in fieldInfos)
@@ -651,8 +668,17 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
             sb.Append($@"    public void {methodName}(ulong serializeFlags, IBitWriter writer)
     {{
 ");
-            sb.Append($@"       writer.WriteBits((uint)serializeFlags, {fieldInfos.Count()});
+            var fieldCount = fieldInfos.Count();
+            var firstCount = fieldCount > 32 ? 32 : fieldCount;
+            var secondCount = fieldCount > 32 ? fieldCount - 32 : 0;
+
+            sb.Append($@"       writer.WriteBits((uint)serializeFlags, {firstCount});
 ");
+            if (secondCount > 0)
+            {
+                sb.Append($@"       writer.WriteBits((uint)(serializeFlags >> 32), {secondCount});
+");
+            }
 
             foreach (var fieldInfo in fieldInfos)
             {
