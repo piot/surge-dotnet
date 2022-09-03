@@ -77,6 +77,11 @@ namespace Piot.Surge.Tick
             return other.lastTickId.tickId + 1 == startTickId.tickId;
         }
 
+        public bool CanAppend(TickIdRange other)
+        {
+            return other.Last > Last && other.startTickId <= Last.Next();
+        }
+
         public override string ToString()
         {
             return $"[tickIdRange {startTickId} {lastTickId}]";

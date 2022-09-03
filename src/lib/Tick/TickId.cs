@@ -28,6 +28,11 @@ namespace Piot.Surge.Tick
             this.tickId = tickId;
         }
 
+        public TickId Next()
+        {
+            return new(tickId + 1);
+        }
+
         public static bool operator !=(TickId a, TickId b)
         {
             return !a.Equals(b);
