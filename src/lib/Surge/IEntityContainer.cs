@@ -12,6 +12,7 @@ namespace Piot.Surge
         IEntity[] AllEntities { get; }
         public IEntity FetchEntity(EntityId entityId);
         public T? FindEntity<T>(EntityId entityId);
+        public IEntity? FindEntity(EntityId entityId);
         public T FetchEntity<T>(EntityId entityId);
 
         void DeleteEntity(EntityId entityId);

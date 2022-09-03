@@ -8,6 +8,7 @@ using Piot.MonotonicTime;
 using Piot.Surge.Corrections;
 using Piot.Surge.DeltaSnapshot.Pack;
 using Piot.Surge.SnapshotProtocol.In;
+using Piot.Surge.Tick;
 using Piot.Surge.TimeTick;
 
 namespace Piot.Surge.Pulse.Client
@@ -41,6 +42,11 @@ namespace Piot.Surge.Pulse.Client
             snapshotPlaybackTicker.Update(now);
         }
 
+        public bool WantsSnapshotWithTickIdRange(TickIdRange tickIdRange)
+        {
+            return includingCorrectionsQueue.IsValidPackToInsert(tickIdRange.Last);
+        }
+
         public void FeedSnapshotDeltaPack(SnapshotDeltaPackIncludingCorrections pack)
         {
             if (!pack.tickIdRange.Contains(includingCorrectionsQueue.WantsTickId))
@@ -63,6 +69,11 @@ namespace Piot.Surge.Pulse.Client
             }
 
             includingCorrectionsQueue.Enqueue(pack);
+
+            if (includingCorrectionsQueue.LastInsertedIsMergedSnapshot)
+            {
+                log.Notice("Receiving merged snapshots {Range}", includingCorrectionsQueue.LastInsertedTickIdRange);
+            }
         }
 
         private void NextSnapshotTick()
@@ -89,14 +100,17 @@ namespace Piot.Surge.Pulse.Client
                 return;
             }
 
-            var deltaSnapshotIncludingCorrections = includingCorrectionsQueue.Dequeue();
+            var deltaSnapshotIncludingCorrectionsItem = includingCorrectionsQueue.Dequeue();
+            var deltaSnapshotIncludingCorrections = deltaSnapshotIncludingCorrectionsItem.Pack;
             log.DebugLowLevel("dequeued snapshot {DeltaSnapshotEntityIds}", deltaSnapshotIncludingCorrections);
 
             var deltaSnapshotPack = new DeltaSnapshotPack(deltaSnapshotIncludingCorrections.tickIdRange,
                 deltaSnapshotIncludingCorrections.deltaSnapshotPackPayload.Span,
                 deltaSnapshotIncludingCorrections.PackType);
 
-            ApplyDeltaSnapshotToWorld.Apply(deltaSnapshotPack, clientWorld);
+
+            ApplyDeltaSnapshotToWorld.Apply(deltaSnapshotPack, clientWorld,
+                deltaSnapshotIncludingCorrectionsItem.IsMergedAndOverlapping);
 
             predictor.ReadCorrections(deltaSnapshotIncludingCorrections.tickIdRange.Last,
                 deltaSnapshotIncludingCorrections.physicsCorrections.Span);

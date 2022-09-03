@@ -11,7 +11,8 @@ namespace Piot.Surge.SnapshotProtocol.In
 {
     public static class ApplyDeltaSnapshotToWorld
     {
-        public static void Apply(DeltaSnapshotPack pack, IEntityContainerWithGhostCreator world)
+        public static void Apply(DeltaSnapshotPack pack, IEntityContainerWithGhostCreator world,
+            bool isOverlappingMergedSnapshot)
         {
             switch (pack.PackType)
             {
@@ -27,7 +28,7 @@ namespace Piot.Surge.SnapshotProtocol.In
                     var bitSnapshotReader =
                         new BitReader(pack.payload.Span, pack.payload.Length * 8);
 
-                    SnapshotDeltaBitReader.ReadAndApply(bitSnapshotReader, world);
+                    SnapshotDeltaBitReader.ReadAndApply(bitSnapshotReader, world, isOverlappingMergedSnapshot);
                 }
                     break;
             }

@@ -12,6 +12,6 @@ namespace Piot.Surge.Corrections
     {
         public int Count { get; }
         public void Enqueue(SnapshotDeltaPackIncludingCorrections pack);
-        public SnapshotDeltaPackIncludingCorrections Dequeue();
+        public SnapshotDeltaPackIncludingCorrectionsItem Dequeue();
     }
 }

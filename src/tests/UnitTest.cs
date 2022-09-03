@@ -412,10 +412,10 @@ public class UnitTest1
         packetQueue.Enqueue(fakeIncludingCorrections);
 
         Assert.Equal(1, packetQueue.Count);
-        Assert.Equal(packetQueue.Peek().tickIdRange.Last, firstTickId);
+        Assert.Equal(packetQueue.Peek().Pack.tickIdRange.Last, firstTickId);
 
 #if DEBUG
-        Assert.Equal(19, packetQueue.Peek().deltaSnapshotPackPayload.Length);
+        Assert.Equal(19, packetQueue.Peek().Pack.deltaSnapshotPackPayload.Length);
 #else
         Assert.Equal(16, packetQueue.Peek().deltaSnapshotPackPayload.Length);
 #endif
@@ -427,7 +427,7 @@ public class UnitTest1
         var firstPack = packetQueue.Dequeue();
 
         var (deletedEntities, createdEntities, updatedEntities) =
-            SnapshotDeltaUnPacker.UnPack(firstPack.deltaSnapshotPackPayload.Span, world);
+            SnapshotDeltaUnPacker.UnPack(firstPack.Pack.deltaSnapshotPackPayload.Span, world);
 
         Assert.Single(updatedEntities);
         Assert.Empty(deletedEntities);

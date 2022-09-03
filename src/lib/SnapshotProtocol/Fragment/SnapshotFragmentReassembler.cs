@@ -30,6 +30,7 @@ namespace Piot.Surge.SnapshotProtocol.Fragment
                 out var isLastOne);
             log.DebugLowLevel("receive snapshot header {TickIdRange} {DatagramIndex} {IsLastOne}", tickIdRange,
                 datagramIndex, isLastOne);
+            outTickIdRange = tickIdRange;
 
             if (!tickIdRangeSet || assemblingTickIdRange != tickIdRange)
             {
@@ -38,7 +39,7 @@ namespace Piot.Surge.SnapshotProtocol.Fragment
                 {
                     tickIdRangeSet = false;
                     outPayload = ReadOnlySpan<byte>.Empty;
-                    outTickIdRange = tickIdRange;
+
                     return false;
                 }
 
@@ -52,7 +53,6 @@ namespace Piot.Surge.SnapshotProtocol.Fragment
                 payloadAssembly.SetLength(0);
                 tickIdRangeSet = false;
                 outPayload = ReadOnlySpan<byte>.Empty;
-                outTickIdRange = tickIdRange;
                 return false;
             }
 
@@ -69,7 +69,7 @@ namespace Piot.Surge.SnapshotProtocol.Fragment
             nextDatagramIndex = (uint)datagramIndex + 1;
 
             outPayload = fragmentPayload;
-            outTickIdRange = tickIdRange;
+
             return isLastOne;
         }
     }

@@ -27,7 +27,11 @@ namespace Piot.Surge
         {
             var freeEntityId = FindFreeEntityId();
 
-            return AddEntity(new EntityId(freeEntityId), generatedEntity);
+            var createdEntity = AddEntity(new EntityId(freeEntityId), generatedEntity);
+
+            createdEntity.FireCreated();
+
+            return createdEntity;
         }
 
         public IEntity[] Created => created.ToArray();
@@ -44,6 +48,12 @@ namespace Piot.Surge
             }
 
             return (T)entity.GeneratedEntity;
+        }
+
+        public IEntity? FindEntity(EntityId entityId)
+        {
+            Entities.TryGetValue(entityId.Value, out var entity);
+            return entity;
         }
 
         public T FetchEntity<T>(EntityId entityId)
@@ -100,11 +110,6 @@ namespace Piot.Surge
             deleted.Clear();
         }
 
-        internal IEntity? FindEntity(EntityId entityId)
-        {
-            Entities.TryGetValue(entityId.Value, out var entity);
-            return entity;
-        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEntity AddEntity(EntityId id, IGeneratedEntity generatedEntity)

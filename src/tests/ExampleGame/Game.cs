@@ -44,7 +44,13 @@ public class Game
 
         GeneratedEngineSpawner = new GeneratedEngineSpawner(world, GeneratedNotifyWorld);
 
-        GeneratedNotifyWorld.OnSpawnFireballLogic += fireball => { log.Debug("a fireball has been spawned"); };
+        GeneratedNotifyWorld.OnSpawnFireballLogic += fireball =>
+        {
+            fireball.OnSpawned += () => { log.Debug($"a fireball has been spawned {fireball.Self}"); };
+
+            fireball.OnPositionChanged +=
+                () => log.Debug("Fireball position changed {Position}", fireball.Self.position);
+        };
 
         GeneratedNotifyWorld.OnSpawnAvatarLogic += avatar =>
         {
@@ -55,18 +61,19 @@ public class Game
                 log.Debug("Mana has changed {Mana} in {RollMode}", avatar.Self.manaAmount, avatar.RollMode);
             avatar.DoCastFireball += (position, direction) =>
             {
-                log.Debug("Play fireball effect!");
+                log.Debug("Play effect for avatar casting a fireball");
                 if (!world.IsAuthoritative)
                 {
                     return;
                 }
 
-                log.Debug("Spawn fireball on host");
+                log.Debug("We are on the host, spawn fireball");
                 var fireballLogic = new FireballLogic
                 {
                     position = position,
-                    velocity = new Velocity3((int)direction.X, (int)direction.Y, (int)direction.Z)
+                    velocity = new Velocity3(200, 300, 400)
                 };
+
                 GeneratedEngineSpawner.SpawnFireballLogic(fireballLogic);
             };
 

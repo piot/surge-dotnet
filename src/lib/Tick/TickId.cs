@@ -48,6 +48,16 @@ namespace Piot.Surge.Tick
             return a.tickId < b.tickId;
         }
 
+        public static bool operator >=(TickId a, TickId b)
+        {
+            return a.tickId >= b.tickId;
+        }
+
+        public static bool operator <=(TickId a, TickId b)
+        {
+            return a.tickId <= b.tickId;
+        }
+
         public static TickId operator -(TickId a, TickId b)
         {
             return new(a.tickId - b.tickId);

@@ -27,4 +27,9 @@ public struct FireballLogic : ILogic
             commands.Explode();
         }
     }
+
+    public override string ToString()
+    {
+        return $"[fireball {position} vel:{velocity}]";
+    }
 }

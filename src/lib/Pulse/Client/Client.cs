@@ -84,15 +84,17 @@ namespace Piot.Surge.Pulse.Client
             log.DebugLowLevel("receiving snapshot datagram from server");
             ReceiveSnapshotExtraData(reader, now);
             var snapshotIsDone = snapshotFragmentReAssembler.Read(reader, out var tickIdRange, out var completePayload);
+            predictor.LastSeenSnapshotTickId = tickIdRange.Last;
+
             if (!snapshotIsDone)
             {
                 return;
             }
 
-            predictor.LastSeenSnapshotTickId = tickIdRange.Last;
-
-            // Check if it is a snapshot that we want
-
+            if (!deltaSnapshotPlayback.WantsSnapshotWithTickIdRange(tickIdRange))
+            {
+                return;
+            }
 
             var snapshotWithCorrections =
                 DeltaSnapshotIncludingCorrectionsReader.Read(tickIdRange, completePayload, compression);

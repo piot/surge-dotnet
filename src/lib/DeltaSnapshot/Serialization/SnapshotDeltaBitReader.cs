@@ -22,7 +22,7 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
         /// <param name="entityContainer"></param>
         /// <returns></returns>
         public static (IEntity[], IEntity[], SnapshotDeltaReaderInfoEntity[]) ReadAndApply(IBitReader reader,
-            IEntityContainerWithGhostCreator entityGhostContainerWithCreator)
+            IEntityContainerWithGhostCreator entityGhostContainerWithCreator, bool isOverlappingMergedSnapshot)
         {
 #if DEBUG
             if (reader.ReadBits(8) != Constants.SnapshotDeltaSync)
@@ -35,6 +35,16 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
             for (var i = 0; i < deletedEntityCount; ++i)
             {
                 var entityId = EntityIdReader.Read(reader);
+                if (isOverlappingMergedSnapshot)
+                {
+                    var alreadyDeletedEntity = entityGhostContainerWithCreator.FindEntity(entityId);
+                    if (alreadyDeletedEntity is null || !alreadyDeletedEntity.IsAlive)
+                    {
+                        // It has already been deleted
+                        continue;
+                    }
+                }
+
                 var deletedEntity = entityGhostContainerWithCreator.FetchEntity(entityId);
                 deletedEntities.Add(deletedEntity);
                 entityGhostContainerWithCreator.DeleteEntity(entityId);
@@ -53,7 +63,18 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
             {
                 var entityId = EntityIdReader.Read(reader);
                 var entityArchetype = new ArchetypeId((ushort)reader.ReadBits(10));
-                var entityToDeserialize = entityGhostContainerWithCreator.CreateGhostEntity(entityArchetype, entityId);
+                if (isOverlappingMergedSnapshot)
+                {
+                    var alreadyExistingEntity = entityGhostContainerWithCreator.FindEntity(entityId);
+                    if (alreadyExistingEntity is not null)
+                    {
+                        alreadyExistingEntity.DeserializeAll(reader);
+                        continue;
+                    }
+                }
+
+                var entityToDeserialize =
+                    entityGhostContainerWithCreator.CreateGhostEntity(entityArchetype, entityId);
                 entityToDeserialize.DeserializeAll(reader);
                 entityToDeserialize.FireCreated();
                 createdEntities.Add(entityToDeserialize);
