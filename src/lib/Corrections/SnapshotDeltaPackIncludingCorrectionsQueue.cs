@@ -34,6 +34,19 @@ namespace Piot.Surge.Corrections
                 return Pack.tickIdRange.Length > 1 && Pack.tickIdRange.Contains((TickId)previousTickId);
             }
         }
+
+        public bool IsSkippedAheadSnapshot
+        {
+            get
+            {
+                if (!previousTickId.HasValue)
+                {
+                    return false;
+                }
+
+                return !Pack.tickIdRange.Last.IsImmediateFollowing(previousTickId.Value);
+            }
+        }
     }
 
     public class SnapshotDeltaPackIncludingCorrectionsQueue : ISnapshotDeltaPackQueue
@@ -47,7 +60,7 @@ namespace Piot.Surge.Corrections
 
         public TickId WantsTickId => new(wantsTickIdValue);
 
-        public bool LastInsertedIsMergedSnapshot => packs.Count > 0 && lastInsertedTickIdRange.Length > 1;
+        public bool LastInsertedIsMergedSnapshot => hasBeenInitialized && lastInsertedTickIdRange.Length > 1;
         public TickIdRange LastInsertedTickIdRange => lastInsertedTickIdRange;
 
         public void Enqueue(SnapshotDeltaPackIncludingCorrections pack)
@@ -56,6 +69,7 @@ namespace Piot.Surge.Corrections
             {
                 throw new Exception($"pack can not inserted {pack} {lastInsertedTickIdRange}");
             }
+
 
             hasBeenInitialized = true;
 

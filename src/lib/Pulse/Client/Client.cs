@@ -24,16 +24,18 @@ namespace Piot.Surge.Pulse.Client
     {
         private readonly IMultiCompressor compression;
         private readonly ClientDeltaSnapshotPlayback deltaSnapshotPlayback;
+        private readonly HoldPositive isReceivingMergedSnapshots = new(20);
         private readonly ILog log;
         private readonly OrderedDatagramsInChecker orderedDatagramsInChecker = new();
         private readonly ClientPredictor predictor;
         private readonly SnapshotFragmentReAssembler snapshotFragmentReAssembler;
         private readonly StatCountThreshold statsHostInputQueueCount = new(60);
-
         private readonly StatCountThreshold statsRoundTripTime = new(20);
         private readonly ITransport transportBoth;
         private readonly ITransportClient transportClient;
         private readonly TransportStatsBoth transportWithStats;
+
+        private readonly HoldPositive weAreSkippingAhead = new(25);
 
         public Client(ILog log, Milliseconds now, Milliseconds targetDeltaTimeMs,
             IEntityContainerWithGhostCreator worldWithGhostCreator,
@@ -55,6 +57,15 @@ namespace Piot.Surge.Pulse.Client
         }
 
         public IEntityContainerWithGhostCreator World { get; }
+
+        public ClientNetworkQuality NetworkQuality =>
+            new()
+            {
+                isSkippingSnapshots = weAreSkippingAhead.IsOrWasTrue,
+                isReceivingMergedSnapshots = isReceivingMergedSnapshots.IsOrWasTrue,
+                isIncomingSnapshotPlaybackBufferStarving = deltaSnapshotPlayback.IsIncomingBufferStarving,
+                averageRoundTripTimeMs = (uint)statsRoundTripTime.Stat.average
+            };
 
         private void ReceiveSnapshotExtraData(IOctetReader reader, Milliseconds now)
         {
@@ -100,6 +111,19 @@ namespace Piot.Surge.Pulse.Client
                 DeltaSnapshotIncludingCorrectionsReader.Read(tickIdRange, completePayload, compression);
 
             deltaSnapshotPlayback.FeedSnapshotDeltaPack(snapshotWithCorrections);
+
+            weAreSkippingAhead.Value = deltaSnapshotPlayback.LastPlaybackSnapshotWasSkipAhead;
+            if (weAreSkippingAhead.IsOrWasTrue)
+            {
+                log.Notice("we are or have been skipping ahead!");
+            }
+
+            isReceivingMergedSnapshots.Value = deltaSnapshotPlayback.LastPlaybackSnapshotWasMerged;
+            if (isReceivingMergedSnapshots.Value)
+            {
+                log.Notice("we are receiving merged snapshots");
+            }
+
             predictor.LastAcceptedSnapshotTickId = snapshotWithCorrections.tickIdRange.lastTickId;
         }
 
@@ -146,6 +170,7 @@ namespace Piot.Surge.Pulse.Client
             deltaSnapshotPlayback.Update(now);
             var readStats = transportWithStats.Stats;
             log.DebugLowLevel("stats: {Stats}", readStats);
+            log.DebugLowLevel("netStats: {Stats}", NetworkQuality);
         }
     }
 }

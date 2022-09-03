@@ -26,18 +26,18 @@ namespace Piot.Surge.DeltaSnapshot.Cache
             this.log = log;
         }
 
-        public void Add(DeltaSnapshotPack container)
+        public void Add(DeltaSnapshotPack snapshotPack)
         {
-            var tickId = container.TickIdRange.Last;
+            var tickId = snapshotPack.TickIdRange.Last;
             if (queue.Count > 0 && !tickId.IsImmediateFollowing(tickIdRange.Last))
             {
                 throw new ArgumentOutOfRangeException(nameof(tickId),
-                    $"was expecting snapshot pack container following {tickIdRange.Last}, but was {tickId}");
+                    $"was expecting snapshotPack following {tickIdRange.Last}, but was {tickId}");
             }
 
-            log.DebugLowLevel("Adding snapshot container {Container}", container);
+            log.DebugLowLevel("Adding snapshotPack {SnapshotPack}", snapshotPack);
 
-            queue.Enqueue(container);
+            queue.Enqueue(snapshotPack);
             tickIdRange = new TickIdRange(tickIdRange.Last, tickId);
         }
 

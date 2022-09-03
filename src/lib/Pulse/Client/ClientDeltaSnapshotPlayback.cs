@@ -5,6 +5,7 @@
 
 using Piot.Clog;
 using Piot.MonotonicTime;
+using Piot.Stats;
 using Piot.Surge.Corrections;
 using Piot.Surge.DeltaSnapshot.Pack;
 using Piot.Surge.SnapshotProtocol.In;
@@ -21,6 +22,8 @@ namespace Piot.Surge.Pulse.Client
     {
         private readonly IEntityContainerWithGhostCreator clientWorld;
         private readonly SnapshotDeltaPackIncludingCorrectionsQueue includingCorrectionsQueue = new();
+
+        private readonly HoldPositive lastBufferWasStarved = new(14);
         private readonly ILog log;
         private readonly IClientPredictorCorrections predictor;
         private readonly TimeTicker snapshotPlaybackTicker;
@@ -37,6 +40,12 @@ namespace Piot.Surge.Pulse.Client
             snapshotPlaybackTicker = new(now, NextSnapshotTick, targetDeltaTimeMs,
                 log.SubLog("NextSnapshotTick"));
         }
+
+        public bool LastPlaybackSnapshotWasSkipAhead { get; private set; }
+        public bool LastPlaybackSnapshotWasMerged { get; private set; }
+        public bool LastBufferWasStarved => lastBufferWasStarved.Value;
+
+        public bool IsIncomingBufferStarving => lastBufferWasStarved.IsOrWasTrue;
 
         public void Update(Milliseconds now)
         {
@@ -82,7 +91,8 @@ namespace Piot.Surge.Pulse.Client
             var targetDeltaTimeMsValue = targetDeltaTimeMs.ms;
             // Our goal is to have just two snapshots in the includingCorrectionsQueue.
             // So adjust the playback speed using the playback delta time.
-            var deltaTimeMs = includingCorrectionsQueue.TicksAheadOf(playbackTick) switch
+            var bufferAheadCount = includingCorrectionsQueue.TicksAheadOf(playbackTick);
+            var deltaTimeMs = bufferAheadCount switch
             {
                 < 2 => targetDeltaTimeMsValue * 10 / 8,
                 > 4 => targetDeltaTimeMsValue * 10 / 15,
@@ -93,6 +103,8 @@ namespace Piot.Surge.Pulse.Client
                 deltaTimeMs);
 
             snapshotPlaybackTicker.DeltaTime = new(deltaTimeMs);
+
+            lastBufferWasStarved.Value = bufferAheadCount < 2;
 
             if (includingCorrectionsQueue.Count == 0)
             {
@@ -119,6 +131,8 @@ namespace Piot.Surge.Pulse.Client
                 deltaSnapshotIncludingCorrections.deltaSnapshotPackPayload.Span,
                 deltaSnapshotIncludingCorrections.PackType);
 
+            LastPlaybackSnapshotWasSkipAhead = deltaSnapshotIncludingCorrectionsItem.IsSkippedAheadSnapshot;
+            LastPlaybackSnapshotWasMerged = deltaSnapshotIncludingCorrectionsItem.IsMergedAndOverlapping;
 
             ApplyDeltaSnapshotToWorld.Apply(deltaSnapshotPack, clientWorld,
                 deltaSnapshotIncludingCorrectionsItem.IsMergedAndOverlapping);
