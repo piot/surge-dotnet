@@ -14,7 +14,7 @@ namespace Piot.Surge.Corrections
         private readonly Queue<SnapshotDeltaPackIncludingCorrections> packs = new();
         private TickIdRange lastInsertedTickIdRange;
 
-        private uint wantsTickIdValue;
+        private uint wantsTickIdValue = 1;
 
         public TickId WantsTickId => new(wantsTickIdValue);
 

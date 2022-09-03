@@ -108,10 +108,12 @@ namespace Piot.Surge.Generator
             AddClassDeclaration(sb, "GeneratedEngineSpawner");
             sb.Append(@"
     private readonly IAuthoritativeEntityContainer container;
+    private readonly INotifyWorld notifyWorld;
 
-    public GeneratedEngineSpawner(IAuthoritativeEntityContainer container)
+    public GeneratedEngineSpawner(IAuthoritativeEntityContainer container, INotifyWorld notifyWorld)
     {
         this.container = container;
+        this.notifyWorld = notifyWorld;
     }
 ");
             foreach (var info in infos)
@@ -124,6 +126,7 @@ namespace Piot.Surge.Generator
         {{
             Current = logic
         }};
+        notifyWorld.NotifyCreation(internalEntity);
         return (container.SpawnEntity(internalEntity), internalEntity);
      }}
 ");

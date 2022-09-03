@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using Piot.Surge.Entities;
 using Piot.Surge.SnapshotDeltaPack.Serialization;
 
 namespace Piot.Surge
@@ -27,6 +28,20 @@ namespace Piot.Surge
                 }
 
                 notifyEntity.entity.Overwrite();
+            }
+        }
+
+        public static void Notify(IEntity[] entities)
+        {
+            foreach (var notifyEntity in entities)
+            {
+                notifyEntity.FireChanges(notifyEntity.GeneratedEntity.Changes());
+                foreach (var action in notifyEntity.Actions)
+                {
+                    notifyEntity.DoAction(action);
+                }
+
+                notifyEntity.Overwrite();
             }
         }
     }

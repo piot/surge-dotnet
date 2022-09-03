@@ -105,6 +105,8 @@ namespace Piot.Surge.Pulse.Client
             // All the changed fields are set to the new values and Tick() is called to trigger the resulting effects of
             // the logic running for one tick.
             Ticker.Tick(clientWorld);
+            Notifier.Notify(clientWorld.AllEntities);
+
             log.DebugLowLevel("tick ghost logics {EntityCount}", clientWorld.AllEntities.Length);
         }
     }

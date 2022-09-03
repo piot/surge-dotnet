@@ -34,6 +34,8 @@ namespace Piot.Surge.Pulse.Host
         private readonly SnapshotSyncer snapshotSyncer;
         private readonly ITransport transport;
         private readonly TransportStatsBoth transportWithStats;
+
+        public Action<TickId>? OnPostSimulation;
         private TickId serverTickId;
 
         public Host(ITransport hostTransport, IMultiCompressor compression, CompressorIndex compressorIndex,
@@ -52,6 +54,17 @@ namespace Piot.Surge.Pulse.Host
         public IEntityContainerWithDetectChanges AuthoritativeWorld { get; }
 
         public TransportStats Stats => transportWithStats.Stats;
+
+        public void AssignPredictEntityId(RemoteEndpointId connectionId, IEntity entity)
+        {
+            if (!connections.ContainsKey(connectionId.Value))
+            {
+                connections[connectionId.Value] = new(connectionId, new(connectionId),
+                    log.SubLog($"connection{connectionId.Value}"));
+            }
+
+            connections[connectionId.Value].ControllingEntityId = entity.Id;
+        }
 
         private void SetInputsFromClientsToEntities()
         {
@@ -89,16 +102,22 @@ namespace Piot.Surge.Pulse.Host
         private void TickWorld()
         {
             Ticker.Tick(AuthoritativeWorld);
+            Notifier.Notify(AuthoritativeWorld.AllEntities);
         }
 
         private void SimulationTick()
         {
             log.Debug("== Simulation Tick! {TickId}", serverTickId);
-            SetInputsFromClientsToEntities();
             TickWorld();
+            SetInputsFromClientsToEntities();
+            var nextTickId = new TickId(serverTickId.tickId + 1);
+            OnPostSimulation?.Invoke(nextTickId);
+            // Exactly after Tick() and the input has been set in preparation for the next tick, we mark this as the new tick
+            serverTickId = nextTickId;
+            log.Debug("== Simulation Tick post! {TickId}", serverTickId);
+
             var (masks, deltaSnapshotPack) = StoreWorldChangesToPackContainer();
             snapshotSyncer.SendSnapshot(masks, deltaSnapshotPack);
-            serverTickId = new TickId(serverTickId.tickId + 1);
         }
 
         private (EntityMasks, DeltaSnapshotPack) StoreWorldChangesToPackContainer()

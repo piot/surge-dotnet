@@ -18,7 +18,6 @@ namespace Tests.ExampleGame;
 public class Game
 {
     private readonly Client? client;
-    private readonly Host? host;
     private readonly ILog log;
     private readonly WorldWithGhostCreator world;
 
@@ -30,11 +29,11 @@ public class Game
 
         var entityCreation = new GeneratedEntityGhostCreator();
         GeneratedNotifyWorld = new GeneratedEngineWorld();
-        world = new(entityCreation, GeneratedNotifyWorld);
+        world = new(entityCreation, GeneratedNotifyWorld, isHosting);
 
         if (isHosting)
         {
-            host = new Host(transport, compression, DefaultMultiCompressor.DeflateCompressionIndex,
+            Host = new Host(transport, compression, DefaultMultiCompressor.DeflateCompressionIndex,
                 world, now, log);
         }
         else
@@ -43,23 +42,26 @@ public class Game
                 transport, compression, new GeneratedInputFetch());
         }
 
-        GeneratedEngineSpawner = new GeneratedEngineSpawner(world);
+        GeneratedEngineSpawner = new GeneratedEngineSpawner(world, GeneratedNotifyWorld);
+
+        GeneratedNotifyWorld.OnSpawnFireballLogic += fireball => { log.Debug("a fireball has been spawned"); };
 
         GeneratedNotifyWorld.OnSpawnAvatarLogic += avatar =>
         {
             log.Debug("Avatar {Avatar} was spawned", avatar);
 
-            avatar.OnPositionChanged += () => log.Debug("Avatar position changed");
+            avatar.OnPositionChanged += () => log.Debug("Avatar position changed {Position}", avatar.Self.position);
             avatar.OnManaAmountChanged += () =>
                 log.Debug("Mana has changed {Mana} in {RollMode}", avatar.Self.manaAmount, avatar.RollMode);
             avatar.DoCastFireball += (position, direction) =>
             {
-                log.Debug("Play cast effect!");
+                log.Debug("Play fireball effect!");
                 if (!world.IsAuthoritative)
                 {
                     return;
                 }
 
+                log.Debug("Spawn fireball on host");
                 var fireballLogic = new FireballLogic
                 {
                     position = position,
@@ -67,6 +69,7 @@ public class Game
                 };
                 GeneratedEngineSpawner.SpawnFireballLogic(fireballLogic);
             };
+
 
             avatar.OnPostUpdate += () =>
             {
@@ -78,6 +81,8 @@ public class Game
         };
     }
 
+    public Host? Host { get; }
+
     public IEntityContainer EntityContainer => world;
     public GeneratedEngineSpawner GeneratedEngineSpawner { get; }
 
@@ -87,6 +92,6 @@ public class Game
     {
         log.Debug("Update");
         client?.Update(now);
-        host?.Update(now);
+        Host?.Update(now);
     }
 }

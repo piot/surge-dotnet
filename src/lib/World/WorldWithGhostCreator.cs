@@ -15,13 +15,14 @@ namespace Piot.Surge
 
         private ulong lastEntityId;
 
-        public WorldWithGhostCreator(IEntityGhostCreator creator, INotifyWorld notifyWorld)
+        public WorldWithGhostCreator(IEntityGhostCreator creator, INotifyWorld notifyWorld, bool isAuthoritative)
         {
+            IsAuthoritative = isAuthoritative;
             this.creator = creator;
             this.notifyWorld = notifyWorld;
         }
 
-        public bool IsAuthoritative => false;
+        public bool IsAuthoritative { get; }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         IEntity IEntityGhostCreator.CreateGhostEntity(ArchetypeId archetypeId, EntityId entityId)
