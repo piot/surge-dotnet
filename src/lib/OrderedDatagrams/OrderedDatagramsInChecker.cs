@@ -13,7 +13,6 @@ namespace Piot.Surge.OrderedDatagrams
     public class OrderedDatagramsInChecker
     {
         private bool hasReceivedInitialValue;
-        private OrderedDatagramsIn lastValue = new(0xff);
 
         public OrderedDatagramsInChecker()
         {
@@ -22,23 +21,25 @@ namespace Piot.Surge.OrderedDatagrams
         public OrderedDatagramsInChecker(OrderedDatagramsIn specificValue)
         {
             hasReceivedInitialValue = true;
-            lastValue = specificValue;
+            LastValue = specificValue;
         }
+
+        public OrderedDatagramsIn LastValue { get; private set; } = new(0xff);
 
         public bool ReadAndCheck(IOctetReader reader)
         {
             var readValue = OrderedDatagramsInReader.Read(reader);
             if (!hasReceivedInitialValue)
             {
-                lastValue = readValue;
+                LastValue = readValue;
                 hasReceivedInitialValue = true;
                 return true;
             }
 
-            var wasOk = readValue.IsValidSuccessor(lastValue);
+            var wasOk = readValue.IsValidSuccessor(LastValue);
             if (wasOk)
             {
-                lastValue = readValue;
+                LastValue = readValue;
             }
 
             return wasOk;

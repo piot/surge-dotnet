@@ -24,7 +24,7 @@ namespace Piot.Surge.Pulse.Client
     /// </summary>
     public class ClientPredictor : IClientPredictorCorrections
     {
-        private readonly OrderedDatagramsOut datagramsOut;
+        private readonly OrderedDatagramsOutIncrease datagramsOut = new();
         private readonly Milliseconds fixedSimulationDeltaTimeMs;
         private readonly IInputPackFetch inputPackFetch;
         private readonly Dictionary<byte, AvatarPredictor> localAvatarPredictors = new();
@@ -150,11 +150,12 @@ namespace Piot.Surge.Pulse.Client
                 ? (byte)(lastSeenSnapshotTickId - lastAcceptedSnapshotTickId).tickId
                 : (byte)0;
             var outDatagram =
-                LogicInputDatagramPackOut.CreateInputDatagram(datagramsOut, lastAcceptedSnapshotTickId,
+                LogicInputDatagramPackOut.CreateInputDatagram(datagramsOut.Value, lastAcceptedSnapshotTickId,
                     droppedSnapshotCount,
                     now, new LogicalInputsForAllLocalPlayers(inputForAllPlayers));
             log.DebugLowLevel("Sending inputs to host");
             transportClient.SendToHost(outDatagram);
+            datagramsOut.Increase();
 
             predictTickId = new(predictTickId.tickId + 1);
         }

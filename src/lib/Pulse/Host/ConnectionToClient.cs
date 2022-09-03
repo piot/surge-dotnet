@@ -21,7 +21,7 @@ namespace Piot.Surge.Pulse.Host
         private readonly ILog log;
         private readonly SnapshotSyncerClient syncer;
         public EntityId ControllingEntityId;
-        private OrderedDatagramsIn orderedDatagramsIn;
+        private readonly OrderedDatagramsInChecker orderedDatagramsIn = new();
 
 
         public ConnectionToClient(RemoteEndpointId id, SnapshotSyncerClient syncer, ILog log)
@@ -92,10 +92,11 @@ namespace Piot.Surge.Pulse.Host
 
         public void Receive(IOctetReader reader, TickId serverIsAtTickId)
         {
-            var sequenceIn = OrderedDatagramsInReader.Read(reader);
-            if (orderedDatagramsIn.IsValidSuccessor(sequenceIn))
+            var shouldBeReceived = orderedDatagramsIn.ReadAndCheck(reader);
+            if (!shouldBeReceived)
             {
-                orderedDatagramsIn = new OrderedDatagramsIn(sequenceIn.Value);
+                log.Notice("skipping datagram {OrderedDatagramsIn}", orderedDatagramsIn.LastValue);
+                return;
             }
 
             var datagramType = DatagramTypeReader.Read(reader);
