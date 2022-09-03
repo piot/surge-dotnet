@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using Piot.Surge.Entities;
 using Piot.Surge.LocalPlayer;
 using Piot.Surge.LogicalInput;
 using Piot.Transport;
@@ -15,6 +16,7 @@ namespace Piot.Surge.Pulse.Host
     /// </summary>
     public class ConnectionPlayer
     {
+        public IEntity? AssignedPredictEntity;
         private RemoteEndpointId connectionId;
         private LocalPlayerIndex localPlayerIndex;
 

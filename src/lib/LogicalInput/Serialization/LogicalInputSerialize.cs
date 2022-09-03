@@ -23,7 +23,7 @@ namespace Piot.Surge.LogicalInput.Serialization
 
             foreach (var inputsForPlayer in inputsForLocalPlayers.inputForEachPlayerInSequence)
             {
-                var tickCount = inputsForPlayer.inputForEachPlayerInSequence.Length;
+                var tickCount = inputsForPlayer.inputs.Length;
                 if (tickCount > 255)
                 {
                     throw new Exception("too many inputs to serialize");
@@ -35,11 +35,11 @@ namespace Piot.Surge.LogicalInput.Serialization
                     continue;
                 }
 
-                var first = inputsForPlayer.inputForEachPlayerInSequence.First();
+                var first = inputsForPlayer.inputs.First();
                 TickIdWriter.Write(writer, first.appliedAtTickId);
 
                 var expectedTickIdValue = first.appliedAtTickId.tickId;
-                foreach (var logicalInput in inputsForPlayer.inputForEachPlayerInSequence)
+                foreach (var logicalInput in inputsForPlayer.inputs)
                 {
                     if (logicalInput.appliedAtTickId.tickId != expectedTickIdValue)
                     {

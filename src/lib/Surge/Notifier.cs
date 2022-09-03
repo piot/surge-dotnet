@@ -21,27 +21,26 @@ namespace Piot.Surge
         {
             foreach (var notifyEntity in entities)
             {
-                notifyEntity.entity.FireChanges(notifyEntity.changeMask);
-                foreach (var action in notifyEntity.entity.Actions)
-                {
-                    notifyEntity.entity.DoAction(action);
-                }
-
-                notifyEntity.entity.Overwrite();
+                Notify(notifyEntity.entity);
             }
+        }
+
+        public static void Notify(IEntity notifyEntity)
+        {
+            notifyEntity.FireChanges(notifyEntity.GeneratedEntity.Changes());
+            foreach (var action in notifyEntity.Actions)
+            {
+                notifyEntity.DoAction(action);
+            }
+
+            notifyEntity.Overwrite();
         }
 
         public static void Notify(IEntity[] entities)
         {
             foreach (var notifyEntity in entities)
             {
-                notifyEntity.FireChanges(notifyEntity.GeneratedEntity.Changes());
-                foreach (var action in notifyEntity.Actions)
-                {
-                    notifyEntity.DoAction(action);
-                }
-
-                notifyEntity.Overwrite();
+                Notify(notifyEntity);
             }
         }
     }

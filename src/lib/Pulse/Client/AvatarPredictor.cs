@@ -20,8 +20,8 @@ namespace Piot.Surge.Pulse.Client
 
         private readonly PredictionStateChecksumQueue predictionStateChecksumHistory = new();
         private readonly RollbackQueue rollbackQueue = new();
-        private bool shouldPredict = true;
         private readonly bool shouldPredictGoingForward = true;
+        private bool shouldPredict = true;
 
         public AvatarPredictor(LocalPlayerIndex localPlayerIndex, IEntity assignedAvatar, ILog log)
         {
@@ -55,9 +55,9 @@ namespace Piot.Surge.Pulse.Client
             assignedAvatar.Serialize(changesThisSnapshot, logicNowReplicateWriter);
 
 
+#if LATER
             var logicNowWriter = new OctetWriter(1024);
             assignedAvatar.SerializeAll(logicNowWriter);
-
 
             var storedPredictionStateChecksum =
                 predictionStateChecksumHistory.DequeueForTickId(correctionForTickId);
@@ -82,6 +82,7 @@ namespace Piot.Surge.Pulse.Client
             }
 
             assignedAvatar.RollMode = EntityRollMode.Predict;
+#endif
         }
 
 

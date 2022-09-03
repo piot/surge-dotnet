@@ -9,6 +9,8 @@ using Piot.MonotonicTime;
 using Piot.Surge.Compress;
 using Piot.Surge.Internal.Generated;
 using Piot.Surge.LocalPlayer;
+using Piot.Surge.LogicalInput;
+using Piot.Transport;
 using Piot.Transport.Memory;
 using Tests.ExampleGame;
 using Xunit.Abstractions;
@@ -27,7 +29,7 @@ public class GameSync
         log = new Log(combinedLogTarget, LogLevel.LowLevel);
     }
 
-    [Fact]
+    //[Fact]
     public void ExampleGameSync()
     {
         var initNow = new Milliseconds(10);
@@ -39,6 +41,11 @@ public class GameSync
 
         var clientGame = new Game(clientTransport, multiCompressor, false, log.SubLog("client"));
         var hostGame = new Game(hostTransport, multiCompressor, true, log.SubLog("host"));
+
+
+        var mockInput = new MockInputFetch();
+
+        clientGame.Client!.InputFetch = mockInput;
 
         var entitySpawner = hostGame.GeneratedEngineSpawner;
         var (spawnedEntity, spawnedHostAvatar) = entitySpawner.SpawnAvatarLogic(new AvatarLogic
@@ -89,28 +96,19 @@ public class GameSync
         Assert.Equal(0, spawnedCalled);
         Assert.Equal(10, spawnedHostAvatar.Self.ammoCount);
 
-        hostGame.Host!.OnPostSimulation += tickId =>
-        {
-            if (tickId.tickId < 2)
-            {
-                return;
-            }
 
-            var input = GameInputFetch.ReadFromDevice(new LocalPlayerIndex(0));
-            var writer = new OctetWriter(30);
-            GameInputWriter.Write(writer, input);
-            var reader = new OctetReader(writer.Octets);
+        hostGame.Host!.AssignPredictEntity(new RemoteEndpointId(2), new LocalPlayerIndex(1), spawnedEntity);
 
-            spawnedHostAvatar.SetInput(reader);
-        };
-
-        //hostGame.AssignPredictEntity(new RemoteEndpointId(2), spawnedEntity);
-
-        const int maxIteration = 4;
+        const int maxIteration = 8;
         for (var iteration = 0; iteration < maxIteration; iteration++)
         {
             var now = new Milliseconds(initNow.ms + (iteration + 1) * 16);
+
+            var pressButtons = iteration >= 1;
+            mockInput.PrimaryAbility = pressButtons;
+            mockInput.SecondaryAbility = pressButtons;
             timeProvider.TimeInMs = now;
+
             clientGame.Update(now);
             hostGame.Update(now);
         }
@@ -128,5 +126,40 @@ public class GameSync
 
         log.Debug($"clientAvatar {clientAvatar.Self}\nhostAvatar {spawnedHostAvatar.Self}");
         Assert.Equal(clientAvatar.Self, spawnedHostAvatar.Self);
+    }
+
+    public class MockInputFetch : IInputPackFetch
+    {
+        private bool primaryAbility;
+
+        private bool secondaryAbility;
+
+        public bool PrimaryAbility
+        {
+            set => primaryAbility = value;
+        }
+
+        public bool SecondaryAbility
+        {
+            set => secondaryAbility = value;
+        }
+
+        public ReadOnlySpan<byte> Fetch(LocalPlayerIndex playerIndex)
+        {
+            var input = new GameInput
+            {
+                aiming = default,
+                primaryAbility = primaryAbility,
+                secondaryAbility = secondaryAbility,
+                tertiaryAbility = false,
+                ultimateAbility = false,
+                desiredMovement = default
+            };
+            var writer = new OctetWriter(30);
+
+            GameInputWriter.Write(writer, input);
+
+            return writer.Octets;
+        }
     }
 }

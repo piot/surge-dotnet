@@ -56,6 +56,11 @@ namespace Piot.Surge.Pulse.Client
                     log.SubLog("GhostPlayback"));
         }
 
+        public IInputPackFetch InputFetch
+        {
+            set => predictor.InputFetch = value;
+        }
+
         public IEntityContainerWithGhostCreator World { get; }
 
         public ClientNetworkQuality NetworkQuality =>

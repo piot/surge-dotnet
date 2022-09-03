@@ -44,5 +44,10 @@ namespace Piot.Surge.OrderedDatagrams
 
             return wasOk;
         }
+
+        public override string ToString()
+        {
+            return $"[OrderedDatagramsInCheck {LastValue} ({hasReceivedInitialValue})]";
+        }
     }
 }

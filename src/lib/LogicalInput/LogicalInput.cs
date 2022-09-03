@@ -30,14 +30,14 @@ namespace Piot.Surge.LogicalInput
 
     public struct LogicalInputArrayForPlayer
     {
-        public LogicalInput[] inputForEachPlayerInSequence;
+        public LogicalInput[] inputs;
         public LocalPlayerIndex localPlayerIndex;
 
         public LogicalInputArrayForPlayer(LocalPlayerIndex localPlayerIndex,
-            LogicalInput[] inputForEachPlayerInSequence)
+            LogicalInput[] inputs)
         {
             this.localPlayerIndex = localPlayerIndex;
-            this.inputForEachPlayerInSequence = inputForEachPlayerInSequence;
+            this.inputs = inputs;
         }
     }
 

@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.Surge.DatagramType.Serialization;
+using Piot.Surge.Entities;
+using Piot.Surge.LocalPlayer;
 using Piot.Surge.LogicalInput.Serialization;
 using Piot.Surge.MonotonicTimeLowerBits;
 using Piot.Surge.OrderedDatagrams;
@@ -19,10 +21,8 @@ namespace Piot.Surge.Pulse.Host
     public class ConnectionToClient
     {
         private readonly ILog log;
-        private readonly SnapshotSyncerClient syncer;
-        public EntityId ControllingEntityId;
         private readonly OrderedDatagramsInChecker orderedDatagramsIn = new();
-
+        private readonly SnapshotSyncerClient syncer;
 
         public ConnectionToClient(RemoteEndpointId id, SnapshotSyncerClient syncer, ILog log)
         {
@@ -31,18 +31,37 @@ namespace Piot.Surge.Pulse.Host
             this.syncer = syncer;
         }
 
-
         public Dictionary<uint, ConnectionPlayer> ConnectionPlayers { get; } = new();
 
         public RemoteEndpointId Id { get; }
 
         public bool HasAssignedEntity => false;
 
+        public void AssignPredictEntityToPlayer(LocalPlayerIndex localPlayerIndex, IEntity entity)
+        {
+            ConnectionPlayer connectionPlayer;
+
+            if (!ConnectionPlayers.ContainsKey(localPlayerIndex.Value))
+            {
+                connectionPlayer = new(Id, localPlayerIndex);
+                ConnectionPlayers[localPlayerIndex.Value] = connectionPlayer;
+            }
+            else
+            {
+                connectionPlayer = ConnectionPlayers[localPlayerIndex.Value];
+            }
+
+            connectionPlayer.AssignedPredictEntity = entity;
+            syncer.SetAssignedPredictedEntity(localPlayerIndex, entity);
+        }
+
         private void ReceivePredictedInputs(IOctetReader reader, TickId serverIsAtTickId)
         {
             log.DebugLowLevel("received predicted inputs");
             syncer.lastReceivedMonotonicTimeLowerBits = MonotonicTimeLowerBitsReader.Read(reader);
             SnapshotReceiveStatusReader.Read(reader, out var tickId, out var droppedFrames);
+
+            syncer.SetLastRemotelyProcessedTickId(tickId, droppedFrames);
 
             var logicalInputs = LogicalInputDeserialize.Deserialize(reader);
 
@@ -53,22 +72,23 @@ namespace Piot.Surge.Pulse.Host
                 if (connectionPlayer is null)
                 {
                     log.Notice("got input for a connection player that isn't created yet");
-                    connectionPlayer = new ConnectionPlayer(Id, logicalInputArrayForPlayer.localPlayerIndex);
+                    connectionPlayer = new(Id, logicalInputArrayForPlayer.localPlayerIndex);
                 }
 
                 var logicalInputQueue = connectionPlayer.LogicalInputQueue;
 
-                var first = logicalInputArrayForPlayer.inputForEachPlayerInSequence[0];
+                var first = logicalInputArrayForPlayer.inputs[0];
 
-                if (first.appliedAtTickId.tickId > logicalInputQueue.WaitingForTickId.tickId &&
-                    logicalInputQueue.IsInitialized)
+                if ((first.appliedAtTickId > logicalInputQueue.WaitingForTickId &&
+                     logicalInputQueue.IsInitialized) || (serverIsAtTickId > logicalInputQueue.WaitingForTickId &&
+                                                          logicalInputQueue.IsInitialized))
                 {
                     log.Notice(
                         $"there is a gap in the input queue. Input queue is waiting for {logicalInputQueue.WaitingForTickId} but first received in this datagram {first.appliedAtTickId}");
                     logicalInputQueue.Reset();
                 }
 
-                foreach (var logicalInput in logicalInputArrayForPlayer.inputForEachPlayerInSequence)
+                foreach (var logicalInput in logicalInputArrayForPlayer.inputs)
                 {
                     if (logicalInput.appliedAtTickId.tickId < serverIsAtTickId.tickId)
                     {
@@ -77,7 +97,7 @@ namespace Piot.Surge.Pulse.Host
 
                     if (logicalInput.appliedAtTickId.tickId > logicalInputQueue.WaitingForTickId.tickId)
                     {
-                        //
+                        continue;
                     }
 
                     logicalInputQueue.AddLogicalInput(logicalInput);

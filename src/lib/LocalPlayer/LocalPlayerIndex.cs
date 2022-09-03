@@ -13,5 +13,10 @@ namespace Piot.Surge.LocalPlayer
         {
             Value = v;
         }
+
+        public override string ToString()
+        {
+            return $"[LocalPlayerIndex {Value}]";
+        }
     }
 }

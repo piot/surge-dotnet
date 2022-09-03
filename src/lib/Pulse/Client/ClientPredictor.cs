@@ -26,12 +26,12 @@ namespace Piot.Surge.Pulse.Client
     {
         private readonly OrderedDatagramsOutIncrease datagramsOut = new();
         private readonly Milliseconds fixedSimulationDeltaTimeMs;
-        private readonly IInputPackFetch inputPackFetch;
         private readonly Dictionary<byte, AvatarPredictor> localAvatarPredictors = new();
         private readonly ILog log;
         private readonly TimeTicker predictionTicker;
         private readonly ITransportClient transportClient;
         private readonly IEntityContainer world;
+        private IInputPackFetch inputPackFetch;
 
         private TickId lastAcceptedSnapshotTickId;
         private TickId lastSeenSnapshotTickId;
@@ -60,6 +60,10 @@ namespace Piot.Surge.Pulse.Client
             set => lastAcceptedSnapshotTickId = value;
         }
 
+        public IInputPackFetch InputFetch
+        {
+            set => inputPackFetch = value;
+        }
 
         public void ReadCorrections(TickId correctionsForTickId, ReadOnlySpan<byte> physicsCorrectionPayload)
         {
@@ -75,6 +79,7 @@ namespace Piot.Surge.Pulse.Client
                 var wasFound = localAvatarPredictors.TryGetValue(localPlayerIndex.Value, out var predictor);
                 if (!wasFound || predictor is null)
                 {
+                    log.Debug("assigned an avatar to {LocalPlayer} {EntityId}", localPlayerIndex, targetEntityId);
                     predictor = new AvatarPredictor(localPlayerIndex, targetEntity,
                         log.SubLog($"AvatarPredictor/{localPlayerIndex}"));
                     localAvatarPredictors[localPlayerIndex.Value] = predictor;
@@ -122,9 +127,13 @@ namespace Piot.Surge.Pulse.Client
         {
             var now = predictionTicker.Now;
 
+            log.Debug("--- Prediction Tick {TickId}", predictTickId);
+
+            var usePrediction = false;
+
+
             foreach (var localAvatarPredictor in localAvatarPredictors.Values)
             {
-                log.Debug("--- Prediction Tick {TickId}", predictTickId);
                 var inputOctets = inputPackFetch.Fetch(localAvatarPredictor.LocalPlayerIndex);
                 var logicalInput = new LogicalInput.LogicalInput
                 {
@@ -132,9 +141,13 @@ namespace Piot.Surge.Pulse.Client
                     payload = inputOctets.ToArray()
                 };
 
-                log.DebugLowLevel("Adding logical input {LogicalInput}", logicalInput);
+                log.DebugLowLevel("Adding logical input {LogicalInput} for {LocalPredictor}", logicalInput,
+                    localAvatarPredictor);
                 localAvatarPredictor.PredictedInputs.AddLogicalInput(logicalInput);
-                localAvatarPredictor.Predict(logicalInput);
+                if (usePrediction)
+                {
+                    localAvatarPredictor.Predict(logicalInput);
+                }
             }
 
             var inputForAllPlayers = new LogicalInputArrayForPlayer[localAvatarPredictors.Count];
@@ -142,7 +155,7 @@ namespace Piot.Surge.Pulse.Client
             foreach (var localAvatarPredictor in localAvatarPredictors.Values)
             {
                 var inputForLocal = localAvatarPredictor.PredictedInputs.Collection;
-                inputForAllPlayers[index].inputForEachPlayerInSequence = inputForLocal;
+                inputForAllPlayers[index].inputs = inputForLocal;
                 index++;
             }
 

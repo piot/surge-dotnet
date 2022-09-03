@@ -17,6 +17,7 @@ namespace Piot.Surge.Pulse.Client
             predictedEntity.Overwrite();
 
             predictedEntity.Tick();
+            Notifier.Notify(predictedEntity);
 
             var changes = predictedEntity.GeneratedEntity.Changes();
             var undoWriter = new OctetWriter(1200);

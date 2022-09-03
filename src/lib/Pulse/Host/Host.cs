@@ -15,6 +15,7 @@ using Piot.Surge.DeltaSnapshot.Pack;
 using Piot.Surge.DeltaSnapshot.Pack.Convert;
 using Piot.Surge.DeltaSnapshot.Scan;
 using Piot.Surge.Entities;
+using Piot.Surge.LocalPlayer;
 using Piot.Surge.Tick;
 using Piot.Surge.TimeTick;
 using Piot.Transport;
@@ -34,8 +35,6 @@ namespace Piot.Surge.Pulse.Host
         private readonly SnapshotSyncer snapshotSyncer;
         private readonly ITransport transport;
         private readonly TransportStatsBoth transportWithStats;
-
-        public Action<TickId>? OnPostSimulation;
         private TickId serverTickId;
 
         public Host(ITransport hostTransport, IMultiCompressor compression, CompressorIndex compressorIndex,
@@ -55,15 +54,19 @@ namespace Piot.Surge.Pulse.Host
 
         public TransportStats Stats => transportWithStats.Stats;
 
-        public void AssignPredictEntityId(RemoteEndpointId connectionId, IEntity entity)
+        public void AssignPredictEntity(RemoteEndpointId connectionId, LocalPlayerIndex localPlayerIndex,
+            IEntity entity)
         {
             if (!connections.ContainsKey(connectionId.Value))
             {
-                connections[connectionId.Value] = new(connectionId, new(connectionId),
+                var snapshotSyncerClient = snapshotSyncer.Create(connectionId);
+                var preparedConnection = new ConnectionToClient(connectionId, snapshotSyncerClient,
                     log.SubLog($"connection{connectionId.Value}"));
+                //preparedConnection.AssignPredictEntityToPlayer(new LocalPlayerIndex(1), entity);
+                connections[connectionId.Value] = preparedConnection;
             }
 
-            connections[connectionId.Value].ControllingEntityId = entity.Id;
+            connections[connectionId.Value].AssignPredictEntityToPlayer(localPlayerIndex, entity);
         }
 
         private void SetInputsFromClientsToEntities()
@@ -86,15 +89,24 @@ namespace Piot.Surge.Pulse.Host
                         continue;
                     }
 
-                    var targetEntity = AuthoritativeWorld.FetchEntity(connection.ControllingEntityId);
-                    if (targetEntity.GeneratedEntity is not IInputDeserialize inputDeserialize)
                     {
-                        throw new Exception(
-                            $"It is not possible to control Entity {connection.ControllingEntityId}, it has no IDeserializeInput interface");
-                    }
+                        var targetEntity =
+                            connectionPlayer
+                                .AssignedPredictEntity; // AuthoritativeWorld.FetchEntity(connectionPlayer.AssignedPredictEntity.Id.ControllingEntityId);
+                        if (targetEntity is null)
+                        {
+                            continue;
+                        }
 
-                    var inputReader = new OctetReader(input.payload.Span);
-                    inputDeserialize.SetInput(inputReader);
+                        if (targetEntity.GeneratedEntity is not IInputDeserialize inputDeserialize)
+                        {
+                            throw new Exception(
+                                $"It is not possible to control Entity {targetEntity}, it has no IDeserializeInput interface");
+                        }
+
+                        var inputReader = new OctetReader(input.payload.Span);
+                        inputDeserialize.SetInput(inputReader);
+                    }
                 }
             }
         }
@@ -111,7 +123,6 @@ namespace Piot.Surge.Pulse.Host
             TickWorld();
             SetInputsFromClientsToEntities();
             var nextTickId = new TickId(serverTickId.tickId + 1);
-            OnPostSimulation?.Invoke(nextTickId);
             // Exactly after Tick() and the input has been set in preparation for the next tick, we mark this as the new tick
             serverTickId = nextTickId;
             log.Debug("== Simulation Tick post! {TickId}", serverTickId);

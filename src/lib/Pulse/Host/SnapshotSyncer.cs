@@ -9,10 +9,12 @@ using Piot.Clog;
 using Piot.Flood;
 using Piot.Surge.Compress;
 using Piot.Surge.Corrections;
+using Piot.Surge.Corrections.Serialization;
 using Piot.Surge.DeltaSnapshot.Cache;
 using Piot.Surge.DeltaSnapshot.EntityMask;
 using Piot.Surge.DeltaSnapshot.Pack;
 using Piot.Surge.Entities;
+using Piot.Surge.LocalPlayer;
 using Piot.Surge.OrderedDatagrams;
 using Piot.Surge.SnapshotProtocol;
 using Piot.Surge.SnapshotProtocol.Out;
@@ -33,18 +35,30 @@ namespace Piot.Surge.Pulse.Host
         public MonotonicTimeLowerBits.MonotonicTimeLowerBits lastReceivedMonotonicTimeLowerBits;
         private SnapshotSyncerClientState state = SnapshotSyncerClientState.Normal;
 
-        public TickIdRange WaitingForTickIds;
-
         public SnapshotSyncerClient(RemoteEndpointId id)
         {
             Endpoint = id;
         }
 
-        public Entity? AssignedPredictEntity { get; set; }
+        public TickId LastRemotelyProcessedTickId { private set; get; }
+
+        public Dictionary<uint, IEntity> AssignedPredictedEntityForLocalPlayers { get; } = new();
+
+        public bool WantsResend { get; private set; }
 
         public RemoteEndpointId Endpoint { get; }
         public OrderedDatagramsOutIncrease DatagramsOutIncrease { get; } = new();
-        public bool WantsResend => false;
+
+        public void SetAssignedPredictedEntity(LocalPlayerIndex localPlayerIndex, IEntity entity)
+        {
+            AssignedPredictedEntityForLocalPlayers[localPlayerIndex.Value] = entity;
+        }
+
+        public void SetLastRemotelyProcessedTickId(TickId tickId, uint droppedCount)
+        {
+            LastRemotelyProcessedTickId = tickId;
+            WantsResend = droppedCount > 0;
+        }
     }
 
     public class WrappedSender
@@ -98,7 +112,7 @@ namespace Piot.Surge.Pulse.Host
         private void SendUsingContainers(SnapshotSyncerClient connection, TickId serverTickId)
         {
             var rangeToSend = connection.WantsResend
-                ? connection.WaitingForTickIds
+                ? new TickIdRange(connection.LastRemotelyProcessedTickId, serverTickId)
                 : new TickIdRange(serverTickId, serverTickId);
 
             var wasFound = deltaSnapshotPackCache.FetchPack(rangeToSend, out var fetchedSnapshotPack);
@@ -108,12 +122,19 @@ namespace Piot.Surge.Pulse.Host
             }
 
             var physicsCorrectionWriter = new OctetWriter(Constants.MaxSnapshotOctetSize);
-            physicsCorrectionWriter.WriteUInt8(0); // connection.localPlayerAssignedPredictedEntities
-            /*
-            foreach (var predicted in connection.localPlayerAssignedPredictedEntities)
+            physicsCorrectionWriter.WriteUInt8((byte)connection.AssignedPredictedEntityForLocalPlayers.Keys.Count);
+
+            foreach (var localPlayerAssignedPredictedEntity in connection.AssignedPredictedEntityForLocalPlayers)
             {
+                var correctionsWrite = new OctetWriter(1024);
+                var correctionEntity = localPlayerAssignedPredictedEntity.Value;
+                correctionEntity.SerializeCorrectionState(correctionsWrite);
+
+                CorrectionsHeaderWriter.Write(correctionEntity.Id,
+                    new((byte)localPlayerAssignedPredictedEntity.Key), (ushort)correctionsWrite.Octets.Length,
+                    physicsCorrectionWriter);
+                physicsCorrectionWriter.WriteOctets(correctionsWrite.Octets);
             }
-            */
 
             var includingCorrections = new SnapshotDeltaPackIncludingCorrections(rangeToSend,
                 fetchedSnapshotPack.payload.Span, physicsCorrectionWriter.Octets, fetchedSnapshotPack.PackType);
@@ -129,10 +150,6 @@ namespace Piot.Surge.Pulse.Host
                 connection.DatagramsOutIncrease);
         }
 
-        private void SendUsingMask(SnapshotSyncerClient connection)
-        {
-            var maskUnion = entityMasksHistory.Fetch(connection.WaitingForTickIds);
-        }
 
         public void SendSnapshot(EntityMasks masks, DeltaSnapshotPack deltaSnapshotPack)
         {

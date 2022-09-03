@@ -17,7 +17,6 @@ namespace Tests.ExampleGame;
 
 public class Game
 {
-    private readonly Client? client;
     private readonly ILog log;
     private readonly WorldWithGhostCreator world;
 
@@ -38,7 +37,7 @@ public class Game
         }
         else
         {
-            client = new(log, now, delta, world,
+            Client = new(log, now, delta, world,
                 transport, compression, new GeneratedInputFetch());
         }
 
@@ -88,7 +87,9 @@ public class Game
         };
     }
 
+
     public Host? Host { get; }
+    public Client? Client { get; }
 
     public IEntityContainer EntityContainer => world;
     public GeneratedEngineSpawner GeneratedEngineSpawner { get; }
@@ -98,7 +99,7 @@ public class Game
     public void Update(Milliseconds now)
     {
         log.Debug("Update");
-        client?.Update(now);
+        Client?.Update(now);
         Host?.Update(now);
     }
 }

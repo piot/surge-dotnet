@@ -124,7 +124,7 @@ public class UnitTest1
         var encounteredLogicalPositions = LogicalInputDeserialize.Deserialize(reader);
 
         Assert.Equal(logicalInputQueue.Collection,
-            encounteredLogicalPositions.inputForEachPlayerInSequence[0].inputForEachPlayerInSequence,
+            encounteredLogicalPositions.inputForEachPlayerInSequence[0].inputs,
             new CompareLogicalInputCollections());
     }
 
@@ -157,7 +157,7 @@ public class UnitTest1
         var encounteredLogicalPositions = LogicalInputDeserialize.Deserialize(reader);
 
         Assert.Equal(logicalInputQueue.Collection,
-            encounteredLogicalPositions.inputForEachPlayerInSequence[0].inputForEachPlayerInSequence,
+            encounteredLogicalPositions.inputForEachPlayerInSequence[0].inputs,
             new CompareLogicalInputCollections());
     }
 
