@@ -23,6 +23,11 @@ namespace Piot.Raff.Stream
             return DeSerialize.ReadChunkHeader(reader, out icon, out name);
         }
 
+        public ChunkHeader ReadChunkHeader()
+        {
+            return DeSerialize.ReadChunkHeader(reader);
+        }
+
         public uint ReadExpectedChunkHeader(FourCC icon, FourCC name)
         {
             return DeSerialize.ReadExpectedChunkHeader(reader, icon, name);

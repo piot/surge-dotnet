@@ -5,7 +5,7 @@
 
 using Piot.Raff;
 
-namespace Piot.Surge.Replay
+namespace Piot.Surge.Replay.Serialization
 {
     public static class Constants
     {

@@ -37,6 +37,13 @@ namespace Piot.Raff
             return reader.ReadUInt32();
         }
 
+        public static ChunkHeader ReadChunkHeader(IOctetReader reader)
+        {
+            var octetLength = ReadChunkHeader(reader, out var icon, out var name);
+
+            return new(icon, name, octetLength);
+        }
+
         public static uint ReadExpectedChunkHeader(IOctetReader reader, FourCC expectedIcon, FourCC expectedName)
         {
             var octetCount = ReadChunkHeader(reader, out var readIcon, out var readName);

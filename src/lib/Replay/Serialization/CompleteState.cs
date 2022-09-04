@@ -6,7 +6,7 @@
 using System;
 using Piot.Surge.Tick;
 
-namespace Piot.Surge.Replay
+namespace Piot.Surge.Replay.Serialization
 {
     public class CompleteState
     {

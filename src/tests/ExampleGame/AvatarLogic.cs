@@ -36,7 +36,8 @@ public struct AvatarLogic : ILogic
 
     public override string ToString()
     {
-        return $"AvatarLogic ammo:{ammoCount} fireIsDown:{fireButtonIsDown} cast: {castButtonIsDown} pos:{position}";
+        return
+            $"[AvatarLogic pos:{position} ammo:{ammoCount} fireButton:{fireButtonIsDown} castButton:{castButtonIsDown}]";
     }
 
     public interface IAvatarLogicActions : ILogicActions
