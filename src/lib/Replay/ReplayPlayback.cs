@@ -65,10 +65,11 @@ namespace Piot.Surge.Replay
                 log.Notice("not time yet to read next tickId");
             }
 
-            log.Debug("===Playback Tick()=== Applying {TickId}", playbackTickId);
-            ApplyDeltaState(nextDeltaState);
             Ticker.Tick(world);
             Notifier.Notify(world.AllEntities);
+            OverWriter.Overwrite(world);
+            log.Debug("===Playback Tick()=== Applying {TickId}", playbackTickId);
+            ApplyDeltaState(nextDeltaState);
             playbackTickId = playbackTickId.Next();
             nextDeltaState = replayReader.ReadDeltaState();
         }

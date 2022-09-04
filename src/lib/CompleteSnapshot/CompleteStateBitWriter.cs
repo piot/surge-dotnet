@@ -6,7 +6,6 @@
 using System;
 using Piot.Flood;
 using Piot.Surge.DeltaSnapshot.Pack;
-using Piot.Surge.SnapshotProtocol;
 using Piot.Surge.Types.Serialization;
 
 namespace Piot.Surge.CompleteSnapshot
@@ -15,11 +14,10 @@ namespace Piot.Surge.CompleteSnapshot
     {
         public static ReadOnlySpan<byte> CaptureCompleteSnapshotPack(IEntityContainer world)
         {
-            var writer = new BitWriter(Constants.MaxDatagramOctetSize);
+            var writer = new BitWriter(SnapshotProtocol.Constants.MaxDatagramOctetSize);
 #if DEBUG
-            writer.WriteBits(Constants.SnapshotDeltaCreatedSync, 8);
+            BitMarker.WriteMarker(writer, Constants.CompleteSnapshotStartMarker);
 #endif
-
             EntityCountWriter.WriteEntityCount((uint)world.AllEntities.Length, writer);
             foreach (var entityToSerialize in world.AllEntities)
             {

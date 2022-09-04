@@ -35,6 +35,7 @@ public class ReplayRecorderTests
     {
         OverWriter.Overwrite(authoritativeWorld);
         Ticker.Tick(authoritativeWorld);
+        Notifier.Notify(authoritativeWorld.AllEntities);
         var deltaSnapshotEntityIds = Scanner.Scan(authoritativeWorld, hostTickId);
         return DeltaSnapshotToBitPack.ToDeltaSnapshotPack(authoritativeWorld, deltaSnapshotEntityIds);
     }
@@ -65,11 +66,9 @@ public class ReplayRecorderTests
             });
 
             var replayRecorder = new ReplayRecorder(authoritative, new(32), outputStream, log.SubLog("replayRecorder"));
-            TickId incomingPackTickId = new(33);
-            var deltaSnapshotPack = TickHost(authoritative, incomingPackTickId);
-            TickId hostTickId = new(32);
+            TickId hostTickId = new(33);
+            var deltaSnapshotPack = TickHost(authoritative, hostTickId);
             replayRecorder.AddPack(deltaSnapshotPack, hostTickId);
-            Ticker.Tick(authoritative);
             replayRecorder.Close();
         }
 
@@ -82,7 +81,12 @@ public class ReplayRecorderTests
             var now = new Milliseconds(10);
             var replayPlayback = new ReplayPlayback(clientWorld, now, fileStream, log.SubLog("replayPlayback"));
             var clientAvatar = clientWorld.FetchEntity<AvatarLogicEntityInternal>(spawnedAvatarEntityOnHost.Id);
+
+            var chainLightningCount = 0;
+            clientAvatar.OutFacing.DoFireChainLightning += direction => { chainLightningCount++; };
+
             Assert.Equal(10, clientAvatar.Self.ammoCount);
+            Assert.Equal(0, chainLightningCount);
 
             for (var i = 30; i < 300; i += 20)
             {
@@ -91,6 +95,7 @@ public class ReplayRecorderTests
 
             log.Info("compare {Expected} {Encountered}", spawnedAvatarInternalOnHost.Self, clientAvatar.Self);
             Assert.Equal(spawnedAvatarInternalOnHost.Self, clientAvatar.Self);
+            Assert.Equal(1, chainLightningCount);
         }
     }
 }

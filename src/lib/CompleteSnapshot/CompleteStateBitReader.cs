@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using Piot.Flood;
 using Piot.Surge.DeltaSnapshot.Pack;
 using Piot.Surge.Entities;
-using Piot.Surge.SnapshotProtocol;
 using Piot.Surge.Types.Serialization;
 
 namespace Piot.Surge.CompleteSnapshot
@@ -19,12 +18,8 @@ namespace Piot.Surge.CompleteSnapshot
             IEntityContainerWithGhostCreator entityGhostContainerWithCreator)
         {
 #if DEBUG
-            if (reader.ReadBits(8) != Constants.SnapshotDeltaCreatedSync)
-            {
-                throw new Exception("out of sync");
-            }
+            BitMarker.AssertMarker(reader, Constants.CompleteSnapshotStartMarker);
 #endif
-
             if (entityGhostContainerWithCreator.AllEntities.Length != 0)
             {
                 throw new Exception("can not read complete state unless world is completely empty");

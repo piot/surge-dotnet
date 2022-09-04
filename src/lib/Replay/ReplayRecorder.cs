@@ -38,20 +38,20 @@ namespace Piot.Surge.Replay
 
         public void AddPack(DeltaSnapshotPack pack, TickId worldTickIdNow)
         {
-            if (pack.TickIdRange.Last <= worldTickIdNow)
+            if (pack.TickIdRange.Last != worldTickIdNow)
             {
                 throw new Exception($"wrong order for complete state {pack.TickIdRange} {worldTickIdNow}");
             }
+
+            log.Info("Add delta state {TickIdRange}", pack.tickIdRange);
+            var deltaState = new DeltaState(pack.tickIdRange, pack.payload.Span);
+            replayWriter.AddDeltaState(deltaState);
 
             if (replayWriter.NeedsCompleteState)
             {
                 log.Info("Time to capture complete state {TickIdNow}", worldTickIdNow);
                 replayWriter.AddCompleteState(CaptureCompleteState(worldTickIdNow));
             }
-
-            log.Info("Add delta state {TickIdRange}", pack.tickIdRange);
-            var deltaState = new DeltaState(pack.tickIdRange, pack.payload.Span);
-            replayWriter.AddDeltaState(deltaState);
         }
 
         public void Close()
