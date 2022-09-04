@@ -3,26 +3,15 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using Piot.Flood;
+
 namespace Piot.Surge.OrderedDatagrams
 {
-    public class OrderedDatagramsOutIncrease
+    public static class OrderedDatagramsSequenceIdWriter
     {
-        private OrderedDatagramsOut value;
-
-        public OrderedDatagramsOutIncrease()
+        public static void Write(IOctetWriter writer, OrderedDatagramsSequenceId datagramsOut)
         {
-        }
-
-        public OrderedDatagramsOutIncrease(OrderedDatagramsOut startValue)
-        {
-            value = startValue;
-        }
-
-        public OrderedDatagramsOut Value => value;
-
-        public void Increase()
-        {
-            value = value.Next();
+            writer.WriteUInt8(datagramsOut.Value);
         }
     }
 }

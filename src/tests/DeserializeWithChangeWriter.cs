@@ -6,15 +6,14 @@
 using Piot.Flood;
 using Piot.Surge.GeneratedEntity;
 
-namespace Piot.Surge
+namespace Tests;
+
+public static class DeserializeWithChangeWriter
 {
-    public static class DeserializeWithChangeWriter
+    public static void DeserializeWithChange(IGeneratedEntity generatedEntity, ulong serializeFlags,
+        IOctetReader reader, IOctetWriter writerForCurrentValues)
     {
-        public static void DeserializeWithChange(IGeneratedEntity generatedEntity, ulong serializeFlags,
-            IOctetReader reader, IOctetWriter writerForCurrentValues)
-        {
-            generatedEntity.Serialize(serializeFlags, writerForCurrentValues);
-            generatedEntity.Deserialize(reader);
-        }
+        generatedEntity.Serialize(serializeFlags, writerForCurrentValues);
+        generatedEntity.Deserialize(reader);
     }
 }

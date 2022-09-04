@@ -10,16 +10,21 @@ namespace Piot.Surge.OrderedDatagrams
     /// <summary>
     ///     Very simple protocol to detect out of order and dropped datagrams.
     /// </summary>
-    public readonly struct OrderedDatagramsIn
+    public readonly struct OrderedDatagramsSequenceId
     {
-        public OrderedDatagramsIn(byte sequenceId)
+        public OrderedDatagramsSequenceId(byte sequenceId)
         {
             Value = sequenceId;
         }
 
+        public OrderedDatagramsSequenceId Next()
+        {
+            return new OrderedDatagramsSequenceId((byte)(Value + 1));
+        }
+
         public byte Value { get; }
 
-        public bool IsValidSuccessor(OrderedDatagramsIn value)
+        public bool IsValidSuccessor(OrderedDatagramsSequenceId value)
         {
             int diff;
 
@@ -43,7 +48,7 @@ namespace Piot.Surge.OrderedDatagrams
 
         public override string ToString()
         {
-            return $"[OrderedDatagramsIn {Value}]";
+            return $"[OrderedDatagramsSequenceId {Value}]";
         }
     }
 }

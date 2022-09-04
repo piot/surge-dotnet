@@ -18,17 +18,17 @@ namespace Piot.Surge.OrderedDatagrams
         {
         }
 
-        public OrderedDatagramsInChecker(OrderedDatagramsIn specificValue)
+        public OrderedDatagramsInChecker(OrderedDatagramsSequenceId specificValue)
         {
             hasReceivedInitialValue = true;
             LastValue = specificValue;
         }
 
-        public OrderedDatagramsIn LastValue { get; private set; } = new(0xff);
+        public OrderedDatagramsSequenceId LastValue { get; private set; } = new(0xff);
 
         public bool ReadAndCheck(IOctetReader reader)
         {
-            var readValue = OrderedDatagramsInReader.Read(reader);
+            var readValue = OrderedDatagramsSequenceIdReader.Read(reader);
             if (!hasReceivedInitialValue)
             {
                 LastValue = readValue;

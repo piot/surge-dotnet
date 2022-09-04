@@ -21,11 +21,11 @@ namespace Piot.Surge.LogicalInput.Serialization
         /// </summary>
         /// <param name="writer"></param>
         /// <param name="inputs"></param>
-        public static void Serialize(IOctetWriter writer, OrderedDatagramsOut sequenceOut,
+        public static void Serialize(IOctetWriter writer, OrderedDatagramsSequenceId sequenceOut,
             TickId lastReceivedSnapshot, byte droppedSnapshotCount, Milliseconds now,
             LogicalInputsForAllLocalPlayers inputs)
         {
-            OrderedDatagramsOutWriter.Write(writer, sequenceOut);
+            OrderedDatagramsSequenceIdWriter.Write(writer, sequenceOut);
             DatagramTypeWriter.Write(writer, DatagramType.DatagramType.PredictedInputs);
             MonotonicTimeLowerBitsWriter.Write(
                 new MonotonicTimeLowerBits.MonotonicTimeLowerBits((ushort)(now.ms & 0xffff)), writer);

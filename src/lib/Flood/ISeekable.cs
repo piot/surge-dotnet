@@ -3,15 +3,10 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using Piot.Flood;
-
-namespace Piot.Surge.OrderedDatagrams
+namespace Piot.Flood
 {
-    public static class OrderedDatagramsOutWriter
+    public interface ISeekable
     {
-        public static void Write(IOctetWriter writer, OrderedDatagramsOut datagramsOut)
-        {
-            writer.WriteUInt8(datagramsOut.Value);
-        }
+        public void Seek(ulong position);
     }
 }

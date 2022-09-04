@@ -3,13 +3,13 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-namespace Piot.Surge
+namespace Piot.Flood
 {
-    public enum EntityRollMode
+    public interface IOctetReaderWithSkip : IOctetReader, ISkip
     {
-        Rollback,
-        Rollforth,
-        Replicate,
-        Predict
+    }
+
+    public interface IOctetReaderWithSeekAndSkip : IOctetReader, ISkip, ISeekable
+    {
     }
 }

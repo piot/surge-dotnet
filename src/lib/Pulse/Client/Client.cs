@@ -136,7 +136,7 @@ namespace Piot.Surge.Pulse.Client
         {
             if (!orderedDatagramsInChecker.ReadAndCheck(reader))
             {
-                log.Notice("ordered datagram in wrong order, discarding datagram {OrderedDatagramsIn}",
+                log.Notice("ordered datagram in wrong order, discarding datagram {OrderedDatagramsSequenceId}",
                     orderedDatagramsInChecker);
                 return;
             }

@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System;
 using System.Collections.Generic;
 using Piot.Clog;
 using Piot.Flood;
@@ -13,9 +12,6 @@ using Piot.Surge.Corrections.Serialization;
 using Piot.Surge.DeltaSnapshot.Cache;
 using Piot.Surge.DeltaSnapshot.EntityMask;
 using Piot.Surge.DeltaSnapshot.Pack;
-using Piot.Surge.Entities;
-using Piot.Surge.LocalPlayer;
-using Piot.Surge.OrderedDatagrams;
 using Piot.Surge.SnapshotProtocol;
 using Piot.Surge.SnapshotProtocol.Out;
 using Piot.Surge.Tick;
@@ -27,57 +23,6 @@ namespace Piot.Surge.Pulse.Host
     {
         Normal,
         Resend
-    }
-
-    public class SnapshotSyncerClient
-    {
-        public sbyte clientInputTickCountAheadOfServer;
-        public MonotonicTimeLowerBits.MonotonicTimeLowerBits lastReceivedMonotonicTimeLowerBits;
-        private SnapshotSyncerClientState state = SnapshotSyncerClientState.Normal;
-
-        public SnapshotSyncerClient(RemoteEndpointId id)
-        {
-            Endpoint = id;
-        }
-
-        public TickId LastRemotelyProcessedTickId { private set; get; }
-
-        public Dictionary<uint, IEntity> AssignedPredictedEntityForLocalPlayers { get; } = new();
-
-        public bool WantsResend { get; private set; }
-
-        public RemoteEndpointId Endpoint { get; }
-        public OrderedDatagramsOutIncrease DatagramsOutIncrease { get; } = new();
-
-        public void SetAssignedPredictedEntity(LocalPlayerIndex localPlayerIndex, IEntity entity)
-        {
-            AssignedPredictedEntityForLocalPlayers[localPlayerIndex.Value] = entity;
-        }
-
-        public void SetLastRemotelyProcessedTickId(TickId tickId, uint droppedCount)
-        {
-            LastRemotelyProcessedTickId = tickId;
-            WantsResend = droppedCount > 0;
-        }
-    }
-
-    public class WrappedSender
-    {
-        private readonly IMultiCompressor compress;
-        private readonly RemoteEndpointId id;
-        private readonly ITransportSend sender;
-
-        public WrappedSender(ITransportSend sender, IMultiCompressor compress, RemoteEndpointId id)
-        {
-            this.compress = compress;
-            this.sender = sender;
-            this.id = id;
-        }
-
-        public void Send(ReadOnlyMemory<byte> datagram)
-        {
-            sender.SendToEndpoint(id, datagram.Span);
-        }
     }
 
     public class SnapshotSyncer
@@ -141,15 +86,14 @@ namespace Piot.Surge.Pulse.Host
 
             var snapshotProtocolPack = SnapshotProtocolPacker.Pack(includingCorrections, compression, compressorIndex);
 
-            var sender = new WrappedSender(transportSend, compression, connection.Endpoint);
+            var sender = new WrappedSender(transportSend, connection.Endpoint);
 
             log.DebugLowLevel("sending datagrams {Flattened}", includingCorrections);
             SnapshotPackIncludingCorrectionsWriter.Write(sender.Send, snapshotProtocolPack,
                 connection.lastReceivedMonotonicTimeLowerBits, connection.clientInputTickCountAheadOfServer,
                 serverTickId,
-                connection.DatagramsOutIncrease);
+                connection.DatagramsSequenceIdIncrease);
         }
-
 
         public void SendSnapshot(EntityMasks masks, DeltaSnapshotPack deltaSnapshotPack)
         {

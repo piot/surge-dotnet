@@ -24,7 +24,7 @@ namespace Piot.Surge.Pulse.Client
     /// </summary>
     public class ClientPredictor : IClientPredictorCorrections
     {
-        private readonly OrderedDatagramsOutIncrease datagramsOut = new();
+        private readonly OrderedDatagramsSequenceIdIncrease datagramsOut = new();
         private readonly Milliseconds fixedSimulationDeltaTimeMs;
         private readonly Dictionary<byte, AvatarPredictor> localAvatarPredictors = new();
         private readonly ILog log;

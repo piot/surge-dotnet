@@ -30,6 +30,7 @@ using Piot.Surge.SnapshotProtocol.ReceiveStatus;
 using Piot.Surge.Tick;
 using Piot.Surge.Types;
 using Piot.Surge.Types.Serialization;
+using Tests;
 using Tests.ExampleGame;
 using Xunit.Abstractions;
 
@@ -137,7 +138,7 @@ public class UnitTest1
 
         var now = new Milliseconds(0x954299);
 
-        var datagramsOut = new OrderedDatagramsOut();
+        var datagramsOut = new OrderedDatagramsSequenceId();
         var outDatagram =
             LogicInputDatagramPackOut.CreateInputDatagram(datagramsOut, new TickId(42), 0,
                 now,
@@ -145,7 +146,7 @@ public class UnitTest1
                     { new(new LocalPlayerIndex(0), logicalInputQueue.Collection) }));
 
         var reader = new OctetReader(outDatagram.ToArray());
-        var datagramsSequenceIn = OrderedDatagramsInReader.Read(reader);
+        var datagramsSequenceIn = OrderedDatagramsSequenceIdReader.Read(reader);
         Assert.Equal(datagramsOut.Value, datagramsSequenceIn.Value);
         var typeOfDatagram = DatagramTypeReader.Read(reader);
         Assert.Equal(DatagramType.PredictedInputs, typeOfDatagram);

@@ -50,7 +50,7 @@ public class GameTests
         }
 
         var clientGame = new Game(clientTransport, multiCompressor, false, log.SubLog("client"));
-        var hostGame = new Game(hostTransport, multiCompressor, true, log.SubLog("host"));
+        var hostGame = new Game(hostTransportToUse, multiCompressor, true, log.SubLog("host"));
 
         //var world = host.AuthoritativeWorld;
         //var spawnedEntity = world.SpawnEntity(new AvatarLogicEntityInternal());

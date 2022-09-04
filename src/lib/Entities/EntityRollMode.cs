@@ -3,20 +3,13 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-namespace Piot.Surge.OrderedDatagrams
+namespace Piot.Surge.Entities
 {
-    public readonly struct OrderedDatagramsOut
+    public enum EntityRollMode
     {
-        public OrderedDatagramsOut(byte initialValue)
-        {
-            Value = initialValue;
-        }
-
-        public OrderedDatagramsOut Next()
-        {
-            return new OrderedDatagramsOut((byte)(Value + 1));
-        }
-
-        public byte Value { get; }
+        Rollback,
+        Rollforth,
+        Replicate,
+        Predict
     }
 }

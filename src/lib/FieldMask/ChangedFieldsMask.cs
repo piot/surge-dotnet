@@ -8,9 +8,9 @@ namespace Piot.Surge.FieldMask
     /// <summary>
     ///     Holds a bit mask with a bit for each field in an Entity.
     /// </summary>
-    public struct ChangedFieldsMask
+    public readonly struct ChangedFieldsMask
     {
-        public ulong mask;
+        public readonly ulong mask;
 
         public const ulong DeletedMaskBit = 0x8000000000000000;
         public const ulong AllFieldChangedMaskBits = 0x7fffffffffffffff;

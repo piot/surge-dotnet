@@ -24,7 +24,7 @@ namespace Piot.Surge.LogicalInput.Serialization
         /// <param name="Milliseconds"></param>
         /// <param name="inputs"></param>
         /// <returns></returns>
-        public static ReadOnlySpan<byte> CreateInputDatagram(OrderedDatagramsOut sequenceOut,
+        public static ReadOnlySpan<byte> CreateInputDatagram(OrderedDatagramsSequenceId sequenceOut,
             TickId lastReceivedSnapshot, byte droppedSnapshotCount, Milliseconds now,
             LogicalInputsForAllLocalPlayers inputs)
         {

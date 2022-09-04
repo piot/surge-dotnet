@@ -3,17 +3,10 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using Piot.Flood;
-
-namespace Piot.Surge.OrderedDatagrams
+namespace Piot.Flood
 {
-    public static class OrderedDatagramsInReader
+    public interface ISkip
     {
-        public static OrderedDatagramsIn Read(IOctetReader reader)
-        {
-            var encounteredId = reader.ReadUInt8();
-
-            return new OrderedDatagramsIn(encounteredId);
-        }
+        public void Skip(int octetCount);
     }
 }

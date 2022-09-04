@@ -13,7 +13,7 @@ public class OrderedDatagramsTests
     [Fact]
     public void OrderedDatagrams()
     {
-        OrderedDatagramsInChecker sequence = new(new OrderedDatagramsIn(0));
+        OrderedDatagramsInChecker sequence = new(new OrderedDatagramsSequenceId(0));
         {
             OctetWriter writer = new(1);
             writer.WriteUInt8(128);
@@ -70,13 +70,13 @@ public class OrderedDatagramsTests
     [Fact]
     public void OrderedDatagramsWrite()
     {
-        OrderedDatagramsOutIncrease sequence = new();
+        OrderedDatagramsSequenceIdIncrease sequence = new();
         Assert.Equal(0, sequence.Value.Value);
 
         for (var i = 0; i < 256; ++i)
         {
             OctetWriter writer = new(1);
-            OrderedDatagramsOutWriter.Write(writer, sequence.Value);
+            OrderedDatagramsSequenceIdWriter.Write(writer, sequence.Value);
             OctetReader reader = new(writer.Octets);
             Assert.Equal(i, reader.ReadUInt8());
             sequence.Increase();
@@ -84,7 +84,7 @@ public class OrderedDatagramsTests
 
         Assert.Equal(0, sequence.Value.Value);
         OctetWriter writer2 = new(1);
-        OrderedDatagramsOutWriter.Write(writer2, sequence.Value);
+        OrderedDatagramsSequenceIdWriter.Write(writer2, sequence.Value);
         sequence.Increase();
         Assert.Equal(1, sequence.Value.Value);
     }

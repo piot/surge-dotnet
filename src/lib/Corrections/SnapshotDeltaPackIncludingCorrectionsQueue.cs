@@ -9,46 +9,6 @@ using Piot.Surge.Tick;
 
 namespace Piot.Surge.Corrections
 {
-    public class SnapshotDeltaPackIncludingCorrectionsItem
-    {
-        private readonly TickId? previousTickId;
-
-        public SnapshotDeltaPackIncludingCorrectionsItem(SnapshotDeltaPackIncludingCorrections pack,
-            TickId? previousTickId)
-        {
-            this.previousTickId = previousTickId;
-            Pack = pack;
-        }
-
-        public SnapshotDeltaPackIncludingCorrections Pack { get; }
-
-        public bool IsMergedAndOverlapping
-        {
-            get
-            {
-                if (!previousTickId.HasValue)
-                {
-                    return false;
-                }
-
-                return Pack.tickIdRange.Length > 1 && Pack.tickIdRange.Contains((TickId)previousTickId);
-            }
-        }
-
-        public bool IsSkippedAheadSnapshot
-        {
-            get
-            {
-                if (!previousTickId.HasValue)
-                {
-                    return false;
-                }
-
-                return !Pack.tickIdRange.Last.IsImmediateFollowing(previousTickId.Value);
-            }
-        }
-    }
-
     public class SnapshotDeltaPackIncludingCorrectionsQueue : ISnapshotDeltaPackQueue
     {
         private readonly Queue<SnapshotDeltaPackIncludingCorrectionsItem> packs = new();
