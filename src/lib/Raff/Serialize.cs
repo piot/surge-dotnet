@@ -22,8 +22,8 @@ namespace Piot.Raff
 
         public static void WriteChunk(IOctetWriter writer, FourCC icon, FourCC name, ReadOnlySpan<byte> octets)
         {
-            writer.WriteOctets(icon.Value);
-            writer.WriteOctets(name.Value);
+            writer.WriteUInt32(icon.Value);
+            writer.WriteUInt32(name.Value);
             writer.WriteUInt32((uint)octets.Length);
             writer.WriteOctets(octets);
         }
@@ -31,7 +31,7 @@ namespace Piot.Raff
         // WriteIntraChunkMarker writes a octet slice to file with an extended header.
         public static void WriteIntraChunkMarker(IOctetWriter writer, FourCC icon)
         {
-            writer.WriteOctets(icon.Value);
+            writer.WriteUInt32(icon.Value);
         }
     }
 }

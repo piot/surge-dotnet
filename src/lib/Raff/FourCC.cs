@@ -13,6 +13,8 @@ namespace Piot.Raff
     /// </summary>
     public readonly struct FourCC
     {
+        public uint Value { get; }
+
         public FourCC(byte[] x)
         {
             if (x.Length != 4)
@@ -20,10 +22,13 @@ namespace Piot.Raff
                 throw new Exception("FourCC must have exactly four octets");
             }
 
-            Value = x;
+            Value = ((uint)x[0] << 24) | ((uint)x[1] << 16) | ((uint)x[2] << 8) | x[3];
         }
 
-        public byte[] Value { get; }
+        public FourCC(uint v)
+        {
+            Value = v;
+        }
 
         public static FourCC Make(string s)
         {
@@ -32,7 +37,7 @@ namespace Piot.Raff
                 throw new Exception("FourCC must have exactly four octets");
             }
 
-            var octets = Encoding.UTF8.GetBytes(s);
+            var octets = Encoding.ASCII.GetBytes(s);
             if (octets.Length != 4)
             {
                 throw new Exception("FourCC must have exactly four octets");

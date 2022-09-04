@@ -84,5 +84,7 @@ namespace Piot.Flood
         {
             stream.Seek((long)position, SeekOrigin.Begin);
         }
+
+        public ulong Position => (ulong)stream.Position;
     }
 }

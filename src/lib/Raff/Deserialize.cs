@@ -37,6 +37,22 @@ namespace Piot.Raff
             return reader.ReadUInt32();
         }
 
+        public static uint ReadExpectedChunkHeader(IOctetReader reader, FourCC expectedIcon, FourCC expectedName)
+        {
+            var octetCount = ReadChunkHeader(reader, out var readIcon, out var readName);
+            if (!readIcon.Value.Equals(expectedIcon.Value))
+            {
+                throw new Exception("not equal");
+            }
+
+            if (!readName.Value.Equals(expectedName.Value))
+            {
+                throw new Exception("not equal");
+            }
+
+            return octetCount;
+        }
+
         public static ReadOnlySpan<byte> ReadChunk(IOctetReader reader, out FourCC icon, out FourCC name)
         {
             var octetLength = ReadChunkHeader(reader, out icon, out name);

@@ -7,6 +7,7 @@ namespace Piot.Flood
 {
     public interface ISeekable
     {
+        public ulong Position { get; }
         public void Seek(ulong position);
     }
 }
