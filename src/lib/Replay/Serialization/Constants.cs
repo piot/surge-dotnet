@@ -9,6 +9,9 @@ namespace Piot.Surge.Replay.Serialization
 {
     public static class Constants
     {
+        public static FourCC ReplayName = FourCC.Make("rps1");
+        public static FourCC ReplayIcon = new(0xF09F8E9E); // Film frames
+
         public static FourCC CompleteStateName = FourCC.Make("rst1");
         public static FourCC CompleteStateIcon = new(0xF09F96BC); // Picture Frame
 

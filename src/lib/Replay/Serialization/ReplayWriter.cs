@@ -6,6 +6,7 @@
 using System;
 using Piot.Flood;
 using Piot.Raff.Stream;
+using Piot.SerializableVersion.Serialization;
 using Piot.Surge.Tick;
 using Piot.Surge.Tick.Serialization;
 
@@ -18,15 +19,24 @@ namespace Piot.Surge.Replay.Serialization
         private TickIdRange lastInsertedDeltaStateRange;
         private uint packCountSinceCompleteState;
 
-        public ReplayWriter(CompleteState completeState, IOctetWriter writer)
+        public ReplayWriter(CompleteState completeState, ReplayVersionInfo replayVersionInfo, IOctetWriter writer)
         {
             raffWriter = new RaffWriter(writer);
+            WriteVersionChunk(replayVersionInfo);
             packCountSinceCompleteState = 60;
             lastInsertedDeltaStateRange = TickIdRange.FromTickId(completeState.TickId);
             AddCompleteState(completeState);
         }
 
         public bool NeedsCompleteState => packCountSinceCompleteState >= 60;
+
+        private void WriteVersionChunk(ReplayVersionInfo replayVersionInfo)
+        {
+            var writer = new OctetWriter(100);
+            VersionWriter.Write(writer, replayVersionInfo.applicationSemanticVersion);
+            VersionWriter.Write(writer, replayVersionInfo.surgeProtocolSemanticVersion);
+            raffWriter.WriteChunk(Constants.ReplayIcon, Constants.ReplayName, writer.Octets);
+        }
 
         private static void WriteCompleteStateHeader(IOctetWriter writer, TickId tickId)
         {

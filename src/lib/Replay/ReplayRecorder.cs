@@ -6,6 +6,7 @@
 using System;
 using Piot.Clog;
 using Piot.Flood;
+using Piot.SerializableVersion;
 using Piot.Surge.CompleteSnapshot;
 using Piot.Surge.DeltaSnapshot.Pack;
 using Piot.Surge.Replay.Serialization;
@@ -20,12 +21,13 @@ namespace Piot.Surge.Replay
         private readonly IEntityContainer world;
 
         public ReplayRecorder(IEntityContainer world, TickId nowTickId,
-            IOctetWriter writer, ILog log)
+            SemanticVersion applicationVersion, IOctetWriter writer, ILog log)
         {
             this.log = log.SubLog("ReplayRecorder");
             this.world = world;
             var completeState = CaptureCompleteState(nowTickId);
-            replayWriter = new(completeState, writer);
+            var versionInfo = new ReplayVersionInfo(applicationVersion, SurgeConstants.SnapshotSerializationVersion);
+            replayWriter = new(completeState, versionInfo, writer);
         }
 
         private CompleteState CaptureCompleteState(TickId tickId)

@@ -6,6 +6,7 @@
 using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
+using Piot.SerializableVersion;
 using Piot.Surge;
 using Piot.Surge.DeltaSnapshot.Pack;
 using Piot.Surge.DeltaSnapshot.Pack.Convert;
@@ -45,12 +46,16 @@ public class ReplayRecorderTests
     {
         IEntity spawnedAvatarEntityOnHost;
         AvatarLogicEntityInternal spawnedAvatarInternalOnHost;
+
+        var applicationVersion = new SemanticVersion(1, 2, 3, "-testing");
+
         {
             var authoritative = new AuthoritativeWorld();
             var notify = new GeneratedEngineWorld();
             var entitySpawner = new GeneratedEngineSpawner(authoritative, notify);
 
             using var outputStream = FileStreamCreator.Create("replay.temp");
+
 
             (spawnedAvatarEntityOnHost, spawnedAvatarInternalOnHost) = entitySpawner.SpawnAvatarLogic(new AvatarLogic
             {
@@ -65,7 +70,9 @@ public class ReplayRecorderTests
                 jumpTime = 0
             });
 
-            var replayRecorder = new ReplayRecorder(authoritative, new(32), outputStream, log.SubLog("replayRecorder"));
+
+            var replayRecorder = new ReplayRecorder(authoritative, new(32), applicationVersion, outputStream,
+                log.SubLog("replayRecorder"));
             TickId hostTickId = new(33);
             var deltaSnapshotPack = TickHost(authoritative, hostTickId);
             replayRecorder.AddPack(deltaSnapshotPack, hostTickId);
@@ -79,7 +86,8 @@ public class ReplayRecorderTests
 
             var fileStream = FileStreamCreator.OpenWithSeek("replay.temp");
             var now = new Milliseconds(10);
-            var replayPlayback = new ReplayPlayback(clientWorld, now, fileStream, log.SubLog("replayPlayback"));
+            var replayPlayback = new ReplayPlayback(clientWorld, now, applicationVersion, fileStream,
+                log.SubLog("replayPlayback"));
             var clientAvatar = clientWorld.FetchEntity<AvatarLogicEntityInternal>(spawnedAvatarEntityOnHost.Id);
 
             var chainLightningCount = 0;

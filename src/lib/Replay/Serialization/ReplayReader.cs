@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using Piot.Flood;
 using Piot.Raff.Stream;
+using Piot.SerializableVersion;
+using Piot.SerializableVersion.Serialization;
 using Piot.Surge.Tick;
 using Piot.Surge.Tick.Serialization;
 
@@ -33,18 +35,32 @@ namespace Piot.Surge.Replay.Serialization
         public ReplayReader(IOctetReaderWithSeekAndSkip readerWithSeek)
         {
             this.readerWithSeek = readerWithSeek;
+            raffReader = new(readerWithSeek);
+            ReadVersionInfo();
 
+            var positionBefore = readerWithSeek.Position;
             ScanForAllCompleteStatePositions();
 
-            readerWithSeek.Seek(0);
-            raffReader = new(readerWithSeek);
+            readerWithSeek.Seek(positionBefore);
         }
+
+        public SemanticVersion ApplicationVersion { get; private set; }
+
+        public SemanticVersion StateSerializationVersion { get; private set; }
 
         public TickId FirstCompleteStateTickId => new(completeStateEntries[0].tickId);
 
+        private void ReadVersionInfo()
+        {
+            var versionPack = raffReader.ReadExpectedChunk(Constants.ReplayIcon, Constants.ReplayName);
+            var reader = new OctetReader(versionPack);
+            ApplicationVersion = VersionReader.Read(reader);
+            StateSerializationVersion = VersionReader.Read(reader);
+        }
+
         private void ScanForAllCompleteStatePositions()
         {
-            var tempRaffReader = new RaffReader(readerWithSeek);
+            var tempRaffReader = raffReader;
 
             List<CompleteStateEntry> entries = new();
 

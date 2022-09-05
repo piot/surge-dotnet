@@ -5,7 +5,7 @@
 
 namespace Piot.Surge.SnapshotProtocol
 {
-    public class Constants
+    public static class Constants
     {
         public const byte SnapshotReceiveStatusSync = 0x18;
         public const byte DeltaSnapshotIncludingCorrectionsSync = 0xba;
