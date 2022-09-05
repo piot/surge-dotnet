@@ -26,9 +26,7 @@ public class GameSync
     {
         logTarget = new TestOutputLogger(output);
 
-        var consoleLogger = new ConsoleOutputLogger();
-        consoleLogger.WriteColorChart();
-        var combinedLogTarget = new CombinedLogTarget(new ILogTarget[] { logTarget, consoleLogger });
+        var combinedLogTarget = new CombinedLogTarget(new ILogTarget[] { logTarget, new ConsoleOutputLogger() });
         log = new Log(combinedLogTarget, LogLevel.LowLevel);
     }
 
