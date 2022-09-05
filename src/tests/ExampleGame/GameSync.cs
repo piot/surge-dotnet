@@ -99,12 +99,12 @@ public class GameSync
 
         hostGame.Host!.AssignPredictEntity(new RemoteEndpointId(2), new LocalPlayerIndex(0), spawnedEntity);
 
-        const int maxIteration = 8;
+        const int maxIteration = 9;
         for (var iteration = 0; iteration < maxIteration; iteration++)
         {
             var now = new Milliseconds(initNow.ms + (iteration + 1) * 16);
 
-            var pressButtons = iteration >= 3;
+            var pressButtons = iteration >= 2;
             mockInput.PrimaryAbility = pressButtons;
             mockInput.SecondaryAbility = pressButtons;
             timeProvider.TimeInMs = now;
@@ -113,6 +113,9 @@ public class GameSync
             hostGame.Update(now);
         }
 
+        // Since snapshot queue has been starved on the client, the client playback is intentionally delayed
+        // using a delta time of 19 ms instead of the normal 16 ms.
+        // We add two ticks for the client to catch up.
         for (var clientIteration = 0; clientIteration < 2; clientIteration++)
         {
             var nowAfter = new Milliseconds(initNow.ms + (maxIteration + 1 + clientIteration) * 16);
@@ -128,7 +131,7 @@ public class GameSync
         var clientAvatar = clientGame.EntityContainer.FetchEntity<AvatarLogicEntityInternal>(spawnedEntity.Id);
 
         log.Debug($"clientAvatar {clientAvatar.Self}\nhostAvatar {spawnedHostAvatar.Self}");
-        Assert.Equal(clientAvatar.Self, spawnedHostAvatar.Self);
+        Assert.Equal(spawnedHostAvatar.Self, clientAvatar.Self);
     }
 
     public class MockInputFetch : IInputPackFetch

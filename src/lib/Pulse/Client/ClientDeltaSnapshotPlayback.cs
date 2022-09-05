@@ -94,8 +94,8 @@ namespace Piot.Surge.Pulse.Client
             var bufferAheadCount = includingCorrectionsQueue.TicksAheadOf(playbackTick);
             var deltaTimeMs = bufferAheadCount switch
             {
-                < 2 => targetDeltaTimeMsValue * 10 / 8,
-                > 4 => targetDeltaTimeMsValue * 10 / 15,
+                < 2 => targetDeltaTimeMsValue * 12 / 10,
+                > 4 => targetDeltaTimeMsValue * 8 / 10,
                 _ => targetDeltaTimeMsValue
             };
 
