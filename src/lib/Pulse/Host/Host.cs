@@ -74,7 +74,7 @@ namespace Piot.Surge.Pulse.Host
         {
             foreach (var connection in orderedConnections)
             {
-                log.Info("checking inputs from connection {Connection}", connection);
+                log.DebugLowLevel("checking inputs from connection {Connection}", connection);
                 foreach (var connectionPlayer in connection.ConnectionPlayers.Values)
                 {
                     var logicalInputQueue = connectionPlayer.LogicalInputQueue;

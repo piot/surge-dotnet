@@ -35,6 +35,11 @@ namespace Piot.Surge.Pulse.Host
 
         public RemoteEndpointId Id { get; }
 
+        public override string ToString()
+        {
+            return $"[ConnectionToClient {Id} playerCount:{ConnectionPlayers.Count}]";
+        }
+
         public void AssignPredictEntityToPlayer(LocalPlayerIndex localPlayerIndex, IEntity entity)
         {
             ConnectionPlayer connectionPlayer;

@@ -25,7 +25,7 @@ public class ReplayTests
     [Fact]
     public void WriteReplayWithGapFail()
     {
-        var fileStream = FileStreamCreator.Create("replay.temp");
+        var fileStream = FileStreamCreator.Create("write_replay_with_gap_fail.temp");
         var versionInfo = new ReplayVersionInfo(new(0, 1, 2), new(3, 4, 5));
         var replayRecorder =
             new ReplayWriter(new CompleteState(new(42), new byte[] { 0xca, 0xba }), versionInfo, fileStream);
@@ -36,7 +36,7 @@ public class ReplayTests
     [Fact]
     public void WriteReplayWithEarlierDeltaFail()
     {
-        var fileStream = FileStreamCreator.Create("replay.temp");
+        var fileStream = FileStreamCreator.Create("write_replay_with_earlier_delta_fail.temp");
         var versionInfo = new ReplayVersionInfo(new(0, 1, 2), new(3, 4, 5));
 
         var replayRecorder =
@@ -48,7 +48,7 @@ public class ReplayTests
     [Fact]
     public void WriteReplayWithDelta()
     {
-        var fileStream = FileStreamCreator.Create("replay.temp");
+        var fileStream = FileStreamCreator.Create("write_replay_with_delta.temp");
         var versionInfo = new ReplayVersionInfo(new(0, 1, 2), new(3, 4, 5));
 
         var replayRecorder =
@@ -60,8 +60,9 @@ public class ReplayTests
     [Fact]
     public void WriteAndReadReplay()
     {
+        const string filename = "write_and_read_replay.temp";
         {
-            using var fileStream = FileStreamCreator.Create("replay.temp");
+            using var fileStream = FileStreamCreator.Create(filename);
             var versionInfo = new ReplayVersionInfo(new(0, 1, 2), new(3, 4, 5));
 
             var replayRecorder = new ReplayWriter(new CompleteState(new(42), new byte[] { 0xca, 0xba }), versionInfo,
@@ -71,7 +72,7 @@ public class ReplayTests
         }
 
         {
-            var fileStream = FileStreamCreator.OpenWithSeek("replay.temp");
+            var fileStream = FileStreamCreator.OpenWithSeek(filename);
             var replayPlayback = new ReplayReader(fileStream);
             Assert.Equal(42u, replayPlayback.FirstCompleteStateTickId.tickId);
             Assert.Equal(1, replayPlayback.ApplicationVersion.minor);
