@@ -11,7 +11,7 @@ namespace Piot.Surge.Types
         public int y;
         public int z;
 
-        internal const int MeterResolution = 512;
+        internal const int MeterResolution = 512; // About 2 mm in precision and 4 million meters
 
         public Position3(int x, int y, int z)
         {

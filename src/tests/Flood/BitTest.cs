@@ -73,7 +73,10 @@ public class TestBits
         Assert.Equal(0x31Af34BBu, r.ReadBits(30));
         Assert.Equal(0x3u, r.ReadBits(5));
         Assert.Equal(0x07Af34BBu, r.ReadBits(29));
-
+#if DEBUG
         Assert.Throws<Exception>(() => r.ReadBits(1));
+#else
+        Assert.Throws<ArgumentOutOfRangeException>(() => r.ReadBits(1));
+#endif
     }
 }

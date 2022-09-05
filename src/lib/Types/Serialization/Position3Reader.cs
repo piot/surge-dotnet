@@ -13,9 +13,9 @@ namespace Piot.Surge.Types.Serialization
         {
             return new()
             {
-                x = reader.ReadInt16(),
-                y = reader.ReadInt16(),
-                z = reader.ReadInt16()
+                x = reader.ReadInt32(),
+                y = reader.ReadInt32(),
+                z = reader.ReadInt32()
             };
         }
 
@@ -23,9 +23,9 @@ namespace Piot.Surge.Types.Serialization
         {
             return new()
             {
-                x = (int)reader.ReadBits(16),
-                y = (int)reader.ReadBits(16),
-                z = (int)reader.ReadBits(16)
+                x = (int)reader.ReadBits(20),
+                y = (int)reader.ReadBits(20),
+                z = (int)reader.ReadBits(20)
             };
         }
     }

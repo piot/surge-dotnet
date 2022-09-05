@@ -13,8 +13,8 @@ namespace Piot.Surge.Types.Serialization
         {
             return new()
             {
-                x = reader.ReadInt16(),
-                y = reader.ReadInt16()
+                x = reader.ReadInt32(),
+                y = reader.ReadInt32()
             };
         }
     }

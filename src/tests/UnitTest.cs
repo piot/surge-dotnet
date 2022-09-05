@@ -199,7 +199,7 @@ public class UnitTest1
 
         var writer = new OctetWriter(64);
         (someAvatar as IEntitySerializer).SerializeAll(writer);
-        Assert.Equal(22, writer.Octets.Length);
+        Assert.Equal(28, writer.Octets.Length);
 
         var readAvatar = new AvatarLogicEntityInternal();
 
@@ -220,7 +220,7 @@ public class UnitTest1
         {
             var writer = new OctetWriter(64);
             (someAvatar as IEntitySerializer).SerializeAll(writer);
-            Assert.Equal(22, writer.Octets.Length);
+            Assert.Equal(28, writer.Octets.Length);
 
             var reader = new OctetReader(writer.Octets);
 
@@ -415,9 +415,9 @@ public class UnitTest1
         Assert.Equal(packetQueue.Peek().Pack.tickIdRange.Last, firstTickId);
 
 #if DEBUG
-        Assert.Equal(19, packetQueue.Peek().Pack.deltaSnapshotPackPayload.Length);
+        Assert.Equal(25, packetQueue.Peek().Pack.deltaSnapshotPackPayload.Length);
 #else
-        Assert.Equal(16, packetQueue.Peek().deltaSnapshotPackPayload.Length);
+        Assert.Equal(16, packetQueue.Peek().Pack.deltaSnapshotPackPayload.Length);
 #endif
 
         Assert.Equal(600, ((AvatarLogic)spawnedAvatar.Logic).position.x);
@@ -639,7 +639,7 @@ public class UnitTest1
             SnapshotStreamType.OctetStream, SnapshotType.DeltaSnapshot);
 
 #if DEBUG
-        Assert.Equal(25, undoWriter.Octets.Length);
+        Assert.Equal(31, undoWriter.Octets.Length);
 #else
         Assert.Equal(22, undoWriter.Octets.Length);
 #endif
