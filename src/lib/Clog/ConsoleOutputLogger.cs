@@ -23,22 +23,27 @@ namespace Piot.Clog
             Console.WriteLine(line);
         }
 
-        private static (bool, int) ColorValuesFromLogLevel(LogLevel level)
+        private static (bool, Color) ColorValuesFromLogLevel(LogLevel level)
         {
             return level switch
             {
-                LogLevel.LowLevel => (false, 4),
-                LogLevel.Debug => (true, 6),
-                LogLevel.Info => (true, 2),
-                LogLevel.Notice => (true, 5),
-                LogLevel.Warning => (true, 3),
-                LogLevel.Error => (false, 1),
+                LogLevel.LowLevel => (false, Color.Default),
+                LogLevel.Debug => (false, Color.Blue),
+                LogLevel.Info => (false, Color.Cyan),
+                LogLevel.Notice => (true, Color.Magenta),
+                LogLevel.Warning => (true, Color.Yellow),
+                LogLevel.Error => (true, Color.Red),
                 _ => throw new Exception("illegal LogLevel")
             };
         }
 
-        private static string ForegroundColorString(bool bright, int foregroundColor)
+        private static string ForegroundColorString(bool bright, Color foregroundColor)
         {
+            if (foregroundColor == Color.Default)
+            {
+                return resetColor;
+            }
+
             var prefix = bright ? "1" : "0";
             return "\x1b" + $"[{prefix};{30 + foregroundColor}m";
         }
@@ -50,8 +55,8 @@ namespace Piot.Clog
             for (var i = 0; i < 8; ++i)
             {
                 var colorName = colorStrings[i];
-                Console.WriteLine($"{i} {ForegroundColorString(false, i)}{colorName}{resetColor}");
-                Console.WriteLine($"{i} {ForegroundColorString(true, i)}bright {colorName}{resetColor}");
+                Console.WriteLine($"{i} {ForegroundColorString(false, (Color)i)}{colorName}{resetColor}");
+                Console.WriteLine($"{i} {ForegroundColorString(true, (Color)i)}bright {colorName}{resetColor}");
             }
         }
 
@@ -59,6 +64,19 @@ namespace Piot.Clog
         {
             var (prefix, foregroundColor) = ColorValuesFromLogLevel(level);
             return ForegroundColorString(prefix, foregroundColor);
+        }
+
+        private enum Color
+        {
+            Default = -1,
+            Black = 0,
+            Red = 1,
+            Green = 2,
+            Yellow = 3,
+            Blue = 4,
+            Magenta = 5,
+            Cyan = 6,
+            White = 7
         }
     }
 }
