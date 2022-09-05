@@ -3,19 +3,22 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using System;
 using System.Collections.Generic;
 using Piot.Clog;
 using Piot.Flood;
+using Piot.Surge.CompleteSnapshot;
 using Piot.Surge.Compress;
 using Piot.Surge.Corrections;
 using Piot.Surge.Corrections.Serialization;
-using Piot.Surge.DeltaSnapshot.Cache;
+using Piot.Surge.DeltaSnapshot.Convert;
 using Piot.Surge.DeltaSnapshot.EntityMask;
 using Piot.Surge.DeltaSnapshot.Pack;
-using Piot.Surge.SnapshotProtocol;
+using Piot.Surge.DeltaSnapshot.Pack.Convert;
 using Piot.Surge.SnapshotProtocol.Out;
 using Piot.Surge.Tick;
 using Piot.Transport;
+using Constants = Piot.Surge.SnapshotProtocol.Constants;
 
 namespace Piot.Surge.Pulse.Host
 {
@@ -29,7 +32,6 @@ namespace Piot.Surge.Pulse.Host
     {
         private readonly IMultiCompressor compression;
         private readonly CompressorIndex compressorIndex;
-        private readonly DeltaSnapshotPackCache deltaSnapshotPackCache;
         private readonly EntityMasksHistory entityMasksHistory = new();
         private readonly ILog log;
         private readonly List<SnapshotSyncerClient> syncClients = new();
@@ -40,7 +42,6 @@ namespace Piot.Surge.Pulse.Host
         {
             this.compression = compression;
             this.compressorIndex = compressorIndex;
-            deltaSnapshotPackCache = new(log);
             this.transportSend = transportSend;
             this.log = log;
         }
@@ -54,17 +55,42 @@ namespace Piot.Surge.Pulse.Host
             return client;
         }
 
-        private void SendUsingContainers(SnapshotSyncerClient connection, TickId serverTickId)
+        private DeltaSnapshotPack FindBestPack(SnapshotSyncerClient connection,
+            DeltaSnapshotPack precalculatedPackForThisTick, IEntityContainer world, TickId serverTickId)
         {
-            var rangeToSend = connection.WantsResend
-                ? new TickIdRange(connection.LastRemotelyProcessedTickId, serverTickId)
-                : new TickIdRange(serverTickId, serverTickId);
-
-            var wasFound = deltaSnapshotPackCache.FetchPack(rangeToSend, out var fetchedSnapshotPack);
-            if (!wasFound)
+            if (connection.WantsResend)
             {
+                var rangeToSend = new TickIdRange(connection.RemoteIsExpectingTickId, serverTickId);
                 var combinedMasks = entityMasksHistory.Fetch(rangeToSend);
+
+                var snapshotEntityIds = EntityMasksToDeltaSnapshotIds.ToEntityIds(combinedMasks);
+
+                return DeltaSnapshotToBitPack.ToDeltaSnapshotPack(world, snapshotEntityIds, rangeToSend);
             }
+
+            if (!connection.HasReceivedInitialState)
+            {
+                // Send Complete State
+                var octets = CompleteStateBitWriter.CaptureCompleteSnapshotPack(world);
+                return new(new(new(0), serverTickId), octets, SnapshotStreamType.BitStream, SnapshotType.CompleteState);
+            }
+
+            if (precalculatedPackForThisTick.tickIdRange.Last == serverTickId &&
+                precalculatedPackForThisTick.tickIdRange.Length == 1)
+            {
+                return precalculatedPackForThisTick;
+            }
+
+            throw new Exception("internal error when finding best pack");
+        }
+
+        private void SendUsingContainers(SnapshotSyncerClient connection,
+            DeltaSnapshotPack precalculatedPackForThisTick, IEntityContainer world, TickId hostTickId)
+        {
+            TickIdRange rangeToSend;
+            ReadOnlySpan<byte> fetchedSnapshotPack;
+
+            var bestPack = FindBestPack(connection, precalculatedPackForThisTick, world, hostTickId);
 
             var physicsCorrectionWriter = new OctetWriter(Constants.MaxSnapshotOctetSize);
             physicsCorrectionWriter.WriteUInt8((byte)connection.AssignedPredictedEntityForLocalPlayers.Keys.Count);
@@ -81,8 +107,8 @@ namespace Piot.Surge.Pulse.Host
                 physicsCorrectionWriter.WriteOctets(correctionsWrite.Octets);
             }
 
-            var includingCorrections = new SnapshotDeltaPackIncludingCorrections(rangeToSend,
-                fetchedSnapshotPack.payload.Span, physicsCorrectionWriter.Octets, fetchedSnapshotPack.PackType);
+            var includingCorrections = new SnapshotDeltaPackIncludingCorrections(bestPack.tickIdRange,
+                bestPack.payload.Span, physicsCorrectionWriter.Octets, bestPack.StreamType, bestPack.SnapshotType);
 
             var snapshotProtocolPack = SnapshotProtocolPacker.Pack(includingCorrections, compression, compressorIndex);
 
@@ -91,17 +117,16 @@ namespace Piot.Surge.Pulse.Host
             log.DebugLowLevel("sending datagrams {Flattened}", includingCorrections);
             SnapshotPackIncludingCorrectionsWriter.Write(sender.Send, snapshotProtocolPack,
                 connection.lastReceivedMonotonicTimeLowerBits, connection.clientInputTickCountAheadOfServer,
-                serverTickId,
+                hostTickId,
                 connection.DatagramsSequenceIdIncrease);
         }
 
-        public void SendSnapshot(EntityMasks masks, DeltaSnapshotPack deltaSnapshotPack)
+        public void SendSnapshot(EntityMasks masks, DeltaSnapshotPack deltaSnapshotPack, IEntityContainer world)
         {
-            deltaSnapshotPackCache.Add(deltaSnapshotPack);
             entityMasksHistory.Enqueue(masks);
             foreach (var syncClient in syncClients)
             {
-                SendUsingContainers(syncClient, deltaSnapshotPack.tickIdRange.Last);
+                SendUsingContainers(syncClient, deltaSnapshotPack, world, deltaSnapshotPack.tickIdRange.Last);
             }
         }
     }

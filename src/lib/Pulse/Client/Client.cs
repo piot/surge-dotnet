@@ -129,7 +129,7 @@ namespace Piot.Surge.Pulse.Client
                 log.Notice("we are receiving merged snapshots");
             }
 
-            predictor.LastAcceptedSnapshotTickId = snapshotWithCorrections.tickIdRange.lastTickId;
+            predictor.NextExpectedSnapshotTickId = snapshotWithCorrections.tickIdRange.lastTickId.Next();
         }
 
         private void ReceiveDatagramFromHost(IOctetReader reader, Milliseconds now)

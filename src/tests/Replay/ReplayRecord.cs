@@ -38,7 +38,8 @@ public class ReplayRecorderTests
         Ticker.Tick(authoritativeWorld);
         Notifier.Notify(authoritativeWorld.AllEntities);
         var deltaSnapshotEntityIds = Scanner.Scan(authoritativeWorld, hostTickId);
-        return DeltaSnapshotToBitPack.ToDeltaSnapshotPack(authoritativeWorld, deltaSnapshotEntityIds);
+        return DeltaSnapshotToBitPack.ToDeltaSnapshotPack(authoritativeWorld, deltaSnapshotEntityIds,
+            TickIdRange.FromTickId(hostTickId));
     }
 
     [Fact]

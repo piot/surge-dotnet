@@ -96,8 +96,7 @@ namespace Piot.Surge.Pulse.Client
         {
             assignedAvatar.RollMode = EntityRollMode.Predict;
 
-            var inputDeserialize = assignedAvatar.GeneratedEntity as IInputDeserialize;
-            if (inputDeserialize is null)
+            if (assignedAvatar.GeneratedEntity is not IInputDeserialize inputDeserialize)
             {
                 throw new Exception(
                     $"It is not possible to control Entity {assignedAvatar.Id}, it has no IDeserializeInput interface");

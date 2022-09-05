@@ -7,12 +7,12 @@ namespace Piot.Surge.DeltaSnapshot.Pack.Serialization
 {
     public static class DeltaSnapshotPackTypeConverter
     {
-        public static byte ToSnapshotMode(DeltaSnapshotPackType packType)
+        public static byte ToSnapshotMode(SnapshotStreamType streamType)
         {
-            return packType switch
+            return streamType switch
             {
-                DeltaSnapshotPackType.BitStream => 0x00,
-                DeltaSnapshotPackType.OctetStream => 0x01
+                SnapshotStreamType.BitStream => 0x00,
+                SnapshotStreamType.OctetStream => 0x01
             };
         }
     }

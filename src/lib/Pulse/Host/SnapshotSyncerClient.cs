@@ -23,7 +23,9 @@ namespace Piot.Surge.Pulse.Host
             Endpoint = id;
         }
 
-        public TickId LastRemotelyProcessedTickId { private set; get; }
+        public bool HasReceivedInitialState => RemoteIsExpectingTickId.tickId != 0;
+
+        public TickId RemoteIsExpectingTickId { private set; get; }
 
         public Dictionary<uint, IEntity> AssignedPredictedEntityForLocalPlayers { get; } = new();
 
@@ -37,9 +39,9 @@ namespace Piot.Surge.Pulse.Host
             AssignedPredictedEntityForLocalPlayers[localPlayerIndex.Value] = entity;
         }
 
-        public void SetLastRemotelyProcessedTickId(TickId tickId, uint droppedCount)
+        public void SetExpectedTickIdByRemote(TickId tickId, uint droppedCount)
         {
-            LastRemotelyProcessedTickId = tickId;
+            RemoteIsExpectingTickId = tickId;
             WantsResend = droppedCount > 0;
         }
     }

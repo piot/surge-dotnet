@@ -131,14 +131,15 @@ namespace Piot.Surge.Pulse.Host
             log.Debug("== Simulation Tick post! {TickId}", serverTickId);
 
             var (masks, deltaSnapshotPack) = StoreWorldChangesToPackContainer();
-            snapshotSyncer.SendSnapshot(masks, deltaSnapshotPack);
+            snapshotSyncer.SendSnapshot(masks, deltaSnapshotPack, AuthoritativeWorld);
         }
 
         private (EntityMasks, DeltaSnapshotPack) StoreWorldChangesToPackContainer()
         {
             var deltaSnapshotEntityIds = Scanner.Scan(AuthoritativeWorld, serverTickId);
             var deltaSnapshotPack = shouldUseBitStream
-                ? DeltaSnapshotToBitPack.ToDeltaSnapshotPack(AuthoritativeWorld, deltaSnapshotEntityIds)
+                ? DeltaSnapshotToBitPack.ToDeltaSnapshotPack(AuthoritativeWorld, deltaSnapshotEntityIds,
+                    TickIdRange.FromTickId(deltaSnapshotEntityIds.TickId))
                 : DeltaSnapshotToPack.ToDeltaSnapshotPack(AuthoritativeWorld, deltaSnapshotEntityIds);
 
             AuthoritativeWorld.ClearDelta();

@@ -20,16 +20,19 @@ namespace Piot.Surge.DeltaSnapshot.Pack
         public ReadOnlyMemory<byte> payload;
         public TickIdRange tickIdRange;
 
-        public DeltaSnapshotPack(TickIdRange tickIdRange, ReadOnlySpan<byte> payload, DeltaSnapshotPackType packType)
+        public DeltaSnapshotPack(TickIdRange tickIdRange, ReadOnlySpan<byte> payload, SnapshotStreamType streamType,
+            SnapshotType snapshotType)
         {
             this.tickIdRange = tickIdRange;
             this.payload = payload.ToArray();
-            PackType = packType;
+            StreamType = streamType;
+            SnapshotType = snapshotType;
         }
 
         public TickIdRange TickIdRange => tickIdRange;
 
-        public DeltaSnapshotPackType PackType { get; }
+        public SnapshotStreamType StreamType { get; }
+        public SnapshotType SnapshotType { get; }
 
         public override string ToString()
         {

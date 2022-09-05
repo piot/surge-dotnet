@@ -21,7 +21,7 @@ namespace Piot.Surge.DeltaSnapshot.Pack.Convert
         /// <param name="deltaSnapshotEntityIds"></param>
         /// <returns></returns>
         public static DeltaSnapshotPack ToDeltaSnapshotPack(IEntityContainer world,
-            DeltaSnapshotEntityIds deltaSnapshotEntityIds)
+            DeltaSnapshotEntityIds deltaSnapshotEntityIds, TickIdRange tickIdRange)
         {
             var writer = new BitWriter(Constants.MaxSnapshotOctetSize);
 
@@ -54,8 +54,8 @@ namespace Piot.Surge.DeltaSnapshot.Pack.Convert
                 PackUpdatedEntity.Write(writer, updateEntity.Id, updateEntity.ChangeMask, updateEntity.Serializer);
             }
 
-            return new(TickIdRange.FromTickId(deltaSnapshotEntityIds.TickId), writer.Close(out _),
-                DeltaSnapshotPackType.BitStream);
+            return new(tickIdRange, writer.Close(out _),
+                SnapshotStreamType.BitStream, SnapshotType.DeltaSnapshot);
         }
     }
 }

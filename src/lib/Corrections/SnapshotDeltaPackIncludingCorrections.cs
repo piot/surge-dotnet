@@ -19,7 +19,7 @@ namespace Piot.Surge.Corrections
 
         public SnapshotDeltaPackIncludingCorrections(TickIdRange tickIdRange,
             ReadOnlySpan<byte> deltaSnapshotPackPayload, ReadOnlySpan<byte> physicsCorrections,
-            DeltaSnapshotPackType packType)
+            SnapshotStreamType streamType, SnapshotType snapshotType)
         {
             this.tickIdRange = tickIdRange;
             this.deltaSnapshotPackPayload = deltaSnapshotPackPayload.ToArray();
@@ -29,15 +29,17 @@ namespace Piot.Surge.Corrections
                 throw new Exception("invalid physics correction");
             }
 
-            PackType = packType;
+            StreamType = streamType;
+            SnapshotType = snapshotType;
         }
 
-        public DeltaSnapshotPackType PackType { get; }
+        public SnapshotStreamType StreamType { get; }
+        public SnapshotType SnapshotType { get; }
 
         public override string ToString()
         {
             return
-                $"[snapshotDeltaPackIncludingCorrections tickIdRange: {tickIdRange} deltaSnapshotPackPayload length: {deltaSnapshotPackPayload.Length} gamePhysics: {physicsCorrections.Length}]";
+                $"[snapshotDeltaPackIncludingCorrections tickIdRange: {tickIdRange} deltaSnapshotPackPayload length: {deltaSnapshotPackPayload.Length} gamePhysics: {physicsCorrections.Length} type:{SnapshotType} stream:{StreamType}]";
         }
     }
 }

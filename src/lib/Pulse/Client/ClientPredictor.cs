@@ -32,9 +32,9 @@ namespace Piot.Surge.Pulse.Client
         private readonly ITransportClient transportClient;
         private readonly IEntityContainer world;
         private IInputPackFetch inputPackFetch;
-
-        private TickId lastAcceptedSnapshotTickId;
         private TickId lastSeenSnapshotTickId;
+
+        private TickId nextExpectedSnapshotTickId;
         private TickId predictTickId;
 
         public ClientPredictor(IInputPackFetch inputPackFetch, ITransportClient transportClient,
@@ -55,9 +55,9 @@ namespace Piot.Surge.Pulse.Client
             set => lastSeenSnapshotTickId = value;
         }
 
-        public TickId LastAcceptedSnapshotTickId
+        public TickId NextExpectedSnapshotTickId
         {
-            set => lastAcceptedSnapshotTickId = value;
+            set => nextExpectedSnapshotTickId = value;
         }
 
         public IInputPackFetch InputFetch
@@ -168,11 +168,11 @@ namespace Piot.Surge.Pulse.Client
                 debugLastTickId = inputForAllPlayers[0].inputs[^1].appliedAtTickId;
             }
 
-            var droppedSnapshotCount = lastSeenSnapshotTickId > lastAcceptedSnapshotTickId
-                ? (byte)(lastSeenSnapshotTickId - lastAcceptedSnapshotTickId).tickId
+            var droppedSnapshotCount = lastSeenSnapshotTickId > nextExpectedSnapshotTickId
+                ? (byte)(lastSeenSnapshotTickId - nextExpectedSnapshotTickId).tickId
                 : (byte)0;
             var outDatagram =
-                LogicInputDatagramPackOut.CreateInputDatagram(datagramsOut.Value, lastAcceptedSnapshotTickId,
+                LogicInputDatagramPackOut.CreateInputDatagram(datagramsOut.Value, nextExpectedSnapshotTickId,
                     droppedSnapshotCount,
                     now, new LogicalInputsForAllLocalPlayers(inputForAllPlayers));
             log.DebugLowLevel("Sending inputs to host {FirstTickId} {LastTickId}",

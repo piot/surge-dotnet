@@ -129,7 +129,7 @@ namespace Piot.Surge.Pulse.Client
 
             var deltaSnapshotPack = new DeltaSnapshotPack(deltaSnapshotIncludingCorrections.tickIdRange,
                 deltaSnapshotIncludingCorrections.deltaSnapshotPackPayload.Span,
-                deltaSnapshotIncludingCorrections.PackType);
+                deltaSnapshotIncludingCorrections.StreamType, deltaSnapshotIncludingCorrections.SnapshotType);
 
             LastPlaybackSnapshotWasSkipAhead = deltaSnapshotIncludingCorrectionsItem.IsSkippedAheadSnapshot;
             LastPlaybackSnapshotWasMerged = deltaSnapshotIncludingCorrectionsItem.IsMergedAndOverlapping;

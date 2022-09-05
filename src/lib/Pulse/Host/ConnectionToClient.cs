@@ -62,9 +62,9 @@ namespace Piot.Surge.Pulse.Host
         {
             log.DebugLowLevel("received predicted inputs");
             syncer.lastReceivedMonotonicTimeLowerBits = MonotonicTimeLowerBitsReader.Read(reader);
-            SnapshotReceiveStatusReader.Read(reader, out var tickId, out var droppedFrames);
+            SnapshotReceiveStatusReader.Read(reader, out var expectingTickId, out var droppedFrames);
 
-            syncer.SetLastRemotelyProcessedTickId(tickId, droppedFrames);
+            syncer.SetExpectedTickIdByRemote(expectingTickId, droppedFrames);
 
             var logicalInputs = LogicalInputDeserialize.Deserialize(reader);
 

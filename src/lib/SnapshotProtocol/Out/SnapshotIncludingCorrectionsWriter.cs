@@ -19,9 +19,12 @@ namespace Piot.Surge.SnapshotProtocol.Out
             writer.WriteUInt8(Constants.DeltaSnapshotIncludingCorrectionsSync);
 #endif
             var snapshotMode =
-                DeltaSnapshotPackTypeConverter.ToSnapshotMode(deltaSnapshotIncludingCorrectionsPack.PackType);
+                DeltaSnapshotPackTypeConverter.ToSnapshotMode(deltaSnapshotIncludingCorrectionsPack.StreamType);
 
-            snapshotMode |= (byte)(compressorIndex.Index << 2);
+            snapshotMode |= (byte)((compressorIndex.Index & 0x03) << 2);
+
+            snapshotMode |=
+                (byte)(SnapshotTypeWriter.ToSnapshotMode(deltaSnapshotIncludingCorrectionsPack.SnapshotType) << 4);
 
             writer.WriteUInt8(snapshotMode);
 

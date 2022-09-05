@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System.Collections.Generic;
+using System.Linq;
 using Piot.Surge.Tick;
 
 namespace Piot.Surge.DeltaSnapshot.EntityMask
@@ -14,7 +15,7 @@ namespace Piot.Surge.DeltaSnapshot.EntityMask
 
         public EntityMasksUnion Fetch(TickIdRange range)
         {
-            return new(range, new());
+            return EntityMasksMerger.Merge(masksQueue.Where(mask => range.Contains(mask.TickId)).ToArray());
         }
 
         public void DiscardUpTo(TickId tickId)

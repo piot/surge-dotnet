@@ -407,7 +407,8 @@ public class UnitTest1
 
         var fakeIncludingCorrections =
             new SnapshotDeltaPackIncludingCorrections(TickIdRange.FromTickId(firstTickId),
-                snapshotDeltaPack.payload.Span, fakeCorrectionsWriter.Octets, DeltaSnapshotPackType.OctetStream);
+                snapshotDeltaPack.payload.Span, fakeCorrectionsWriter.Octets, SnapshotStreamType.OctetStream,
+                SnapshotType.DeltaSnapshot);
 
 
         packetQueue.Enqueue(fakeIncludingCorrections);
@@ -637,7 +638,7 @@ public class UnitTest1
         OverWriter.Overwrite(clientWorld);
 
         var undoPack = new DeltaSnapshotPack(TickIdRange.FromTickId(firstTickId), undoWriter.Octets.ToArray(),
-            DeltaSnapshotPackType.OctetStream);
+            SnapshotStreamType.OctetStream, SnapshotType.DeltaSnapshot);
 
 #if DEBUG
         Assert.Equal(25, undoWriter.Octets.Length);

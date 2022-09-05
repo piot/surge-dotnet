@@ -18,9 +18,9 @@ namespace Piot.Surge.SnapshotProtocol.ReceiveStatus
         ///     detected as dropped after that.
         /// </summary>
         /// <param name="reader"></param>
-        /// <param name="lastReceivedTickId"></param>
+        /// <param name="expectingTickId"></param>
         /// <param name="droppedFramesAfterThat"></param>
-        public static void Read(IOctetReader reader, out TickId lastReceivedTickId,
+        public static void Read(IOctetReader reader, out TickId expectingTickId,
             out byte droppedFramesAfterThat)
         {
 #if DEBUG
@@ -29,7 +29,7 @@ namespace Piot.Surge.SnapshotProtocol.ReceiveStatus
                 throw new Exception("desync");
             }
 #endif
-            lastReceivedTickId = TickIdReader.Read(reader);
+            expectingTickId = TickIdReader.Read(reader);
             droppedFramesAfterThat = reader.ReadUInt8();
         }
     }

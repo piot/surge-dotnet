@@ -38,13 +38,22 @@ namespace Piot.Surge.SnapshotProtocol.In
             }
 #endif
             var snapshotMode = headerReader.ReadUInt8();
-            var dataType = (snapshotMode & 0x03) switch
+            var streamType = (snapshotMode & 0x03) switch
             {
-                0x00 => DeltaSnapshotPackType.BitStream,
-                0x01 => DeltaSnapshotPackType.OctetStream
+                0x00 => SnapshotStreamType.BitStream,
+                0x01 => SnapshotStreamType.OctetStream
             };
 
-            var compressionIndex = (uint)(snapshotMode >> 2);
+            var compressionIndex = (uint)((snapshotMode >> 2) & 0x03);
+            var snapshotTypeValue = (uint)((snapshotMode >> 4) & 0x03);
+
+            var snapshotType = snapshotTypeValue switch
+            {
+                0x00 => SnapshotType.CompleteState,
+                0x01 => SnapshotType.DeltaSnapshot
+            };
+
+
             var rest = datagramOctets[headerSize..];
 
             var reader = new OctetReader(multiCompressor.Decompress(compressionIndex, rest));
@@ -55,7 +64,7 @@ namespace Piot.Surge.SnapshotProtocol.In
             var physicsCorrectionOctetCount = reader.ReadUInt16();
             var physicsCorrection = reader.ReadOctets(physicsCorrectionOctetCount);
 
-            return new(tickIdRange, payload, physicsCorrection, dataType);
+            return new(tickIdRange, payload, physicsCorrection, streamType, snapshotType);
         }
     }
 }

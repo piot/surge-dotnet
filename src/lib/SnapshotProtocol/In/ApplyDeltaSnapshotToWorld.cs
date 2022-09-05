@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using Piot.Flood;
+using Piot.Surge.CompleteSnapshot;
 using Piot.Surge.DeltaSnapshot.Pack;
 using Piot.Surge.SnapshotDeltaPack.Serialization;
 
@@ -14,21 +15,28 @@ namespace Piot.Surge.SnapshotProtocol.In
         public static void Apply(DeltaSnapshotPack pack, IEntityContainerWithGhostCreator world,
             bool isOverlappingMergedSnapshot)
         {
-            switch (pack.PackType)
+            switch (pack.StreamType)
             {
-                case DeltaSnapshotPackType.OctetStream:
+                case SnapshotStreamType.OctetStream:
                 {
                     var snapshotReader = new OctetReader(pack.payload.Span);
                     SnapshotDeltaReader.Read(snapshotReader, world);
                 }
                     break;
-                case DeltaSnapshotPackType.BitStream:
+                case SnapshotStreamType.BitStream:
                 {
                     // TODO: Serialize exact bit count
                     var bitSnapshotReader =
                         new BitReader(pack.payload.Span, pack.payload.Length * 8);
 
-                    SnapshotDeltaBitReader.ReadAndApply(bitSnapshotReader, world, isOverlappingMergedSnapshot);
+                    if (pack.SnapshotType == SnapshotType.DeltaSnapshot)
+                    {
+                        SnapshotDeltaBitReader.ReadAndApply(bitSnapshotReader, world, isOverlappingMergedSnapshot);
+                    }
+                    else
+                    {
+                        CompleteStateBitReader.ReadAndApply(bitSnapshotReader, world);
+                    }
                 }
                     break;
             }
