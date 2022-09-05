@@ -29,7 +29,7 @@ public class GameSync
         log = new Log(combinedLogTarget, LogLevel.LowLevel);
     }
 
-    //[Fact]
+    [Fact]
     public void ExampleGameSync()
     {
         var initNow = new Milliseconds(10);
@@ -97,14 +97,14 @@ public class GameSync
         Assert.Equal(10, spawnedHostAvatar.Self.ammoCount);
 
 
-        hostGame.Host!.AssignPredictEntity(new RemoteEndpointId(2), new LocalPlayerIndex(1), spawnedEntity);
+        hostGame.Host!.AssignPredictEntity(new RemoteEndpointId(2), new LocalPlayerIndex(0), spawnedEntity);
 
         const int maxIteration = 8;
         for (var iteration = 0; iteration < maxIteration; iteration++)
         {
             var now = new Milliseconds(initNow.ms + (iteration + 1) * 16);
 
-            var pressButtons = iteration >= 1;
+            var pressButtons = iteration >= 3;
             mockInput.PrimaryAbility = pressButtons;
             mockInput.SecondaryAbility = pressButtons;
             timeProvider.TimeInMs = now;
@@ -113,8 +113,11 @@ public class GameSync
             hostGame.Update(now);
         }
 
-        var nowAfter = new Milliseconds(initNow.ms + (maxIteration + 1) * 16);
-        clientGame.Update(nowAfter);
+        for (var clientIteration = 0; clientIteration < 2; clientIteration++)
+        {
+            var nowAfter = new Milliseconds(initNow.ms + (maxIteration + 1 + clientIteration) * 16);
+            clientGame.Update(nowAfter);
+        }
 
         Assert.Equal(1, spawnedCalled);
         Assert.Equal(9, spawnedHostAvatar.Self.ammoCount);

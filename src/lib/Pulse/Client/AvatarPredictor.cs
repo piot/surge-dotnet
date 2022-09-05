@@ -34,6 +34,12 @@ namespace Piot.Surge.Pulse.Client
 
         public LocalPlayerIndex LocalPlayerIndex { get; }
 
+        public override string ToString()
+        {
+            return
+                $"[AvatarPredictor localPlayer:{LocalPlayerIndex} entity:{assignedAvatar.Id} predictedInputs:{PredictedInputs.Count}]";
+        }
+
         /// <summary>
         ///     Handles incoming correction state
         ///     If checksum is not the same, it rollbacks, replicate, and rollforth.

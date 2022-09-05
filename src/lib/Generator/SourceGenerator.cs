@@ -1010,6 +1010,11 @@ public class ").Append(outFacingClassName).Append($@"
         this.internalEntity = internalEntity;
     }}
 
+    public override string ToString()
+    {{
+        return $""[{outFacingClassName} logic:{{Self}}]"";  
+    }}
+
     public {FullName(logicInfo.Type)} Self => internalEntity.Self;
 
     public Action? OnDestroyed;
@@ -1071,6 +1076,13 @@ public class ").Append(EntityGeneratedInternal(logicInfo)).Append($" : {inherit}
             {
                 set => current = value;
             }
+");
+
+            sb.Append($@"
+        public override string ToString()
+        {{
+            return $""[{EntityGeneratedInternal(logicInfo)} logic={{Self}}]"";
+        }}
 ");
 
             sb.Append($"     {Suffix(logicInfo.Type.Name, "Entity")} outFacing;").Append(@"

@@ -64,6 +64,7 @@ namespace Piot.Surge.Pulse.Host
                     log.SubLog($"connection{connectionId.Value}"));
                 //preparedConnection.AssignPredictEntityToPlayer(new LocalPlayerIndex(1), entity);
                 connections[connectionId.Value] = preparedConnection;
+                orderedConnections.Add(preparedConnection);
             }
 
             connections[connectionId.Value].AssignPredictEntityToPlayer(localPlayerIndex, entity);
@@ -73,6 +74,7 @@ namespace Piot.Surge.Pulse.Host
         {
             foreach (var connection in orderedConnections)
             {
+                log.Info("checking inputs from connection {Connection}", connection);
                 foreach (var connectionPlayer in connection.ConnectionPlayers.Values)
                 {
                     var logicalInputQueue = connectionPlayer.LogicalInputQueue;
@@ -84,17 +86,15 @@ namespace Piot.Surge.Pulse.Host
                     }
 
                     var input = logicalInputQueue.Dequeue();
-                    if (!connection.HasAssignedEntity)
-                    {
-                        continue;
-                    }
+                    log.DebugLowLevel("dequeued logical input {ConnectionPlayer} {Input}", connectionPlayer, input);
 
                     {
                         var targetEntity =
                             connectionPlayer
-                                .AssignedPredictEntity; // AuthoritativeWorld.FetchEntity(connectionPlayer.AssignedPredictEntity.Id.ControllingEntityId);
+                                .AssignedPredictEntity;
                         if (targetEntity is null)
                         {
+                            log.Notice("target entity is null, can not apply input");
                             continue;
                         }
 
@@ -105,6 +105,7 @@ namespace Piot.Surge.Pulse.Host
                         }
 
                         var inputReader = new OctetReader(input.payload.Span);
+                        log.DebugLowLevel("setting input for {Entity}", targetEntity);
                         inputDeserialize.SetInput(inputReader);
                     }
                 }
@@ -120,8 +121,10 @@ namespace Piot.Surge.Pulse.Host
         private void SimulationTick()
         {
             log.Debug("== Simulation Tick! {TickId}", serverTickId);
+
             TickWorld();
             SetInputsFromClientsToEntities();
+
             var nextTickId = new TickId(serverTickId.tickId + 1);
             // Exactly after Tick() and the input has been set in preparation for the next tick, we mark this as the new tick
             serverTickId = nextTickId;

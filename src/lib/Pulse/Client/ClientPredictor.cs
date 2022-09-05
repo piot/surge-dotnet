@@ -159,6 +159,15 @@ namespace Piot.Surge.Pulse.Client
                 index++;
             }
 
+            TickId debugFirstTickId = new();
+            TickId debugLastTickId = new();
+
+            if (inputForAllPlayers.Length > 0)
+            {
+                debugFirstTickId = inputForAllPlayers[0].inputs[0].appliedAtTickId;
+                debugLastTickId = inputForAllPlayers[0].inputs[^1].appliedAtTickId;
+            }
+
             var droppedSnapshotCount = lastSeenSnapshotTickId > lastAcceptedSnapshotTickId
                 ? (byte)(lastSeenSnapshotTickId - lastAcceptedSnapshotTickId).tickId
                 : (byte)0;
@@ -166,7 +175,9 @@ namespace Piot.Surge.Pulse.Client
                 LogicInputDatagramPackOut.CreateInputDatagram(datagramsOut.Value, lastAcceptedSnapshotTickId,
                     droppedSnapshotCount,
                     now, new LogicalInputsForAllLocalPlayers(inputForAllPlayers));
-            log.DebugLowLevel("Sending inputs to host");
+            log.DebugLowLevel("Sending inputs to host {FirstTickId} {LastTickId}",
+                debugFirstTickId, debugLastTickId);
+
             transportClient.SendToHost(outDatagram);
             datagramsOut.Increase();
 

@@ -35,8 +35,6 @@ namespace Piot.Surge.Pulse.Host
 
         public RemoteEndpointId Id { get; }
 
-        public bool HasAssignedEntity => false;
-
         public void AssignPredictEntityToPlayer(LocalPlayerIndex localPlayerIndex, IEntity entity)
         {
             ConnectionPlayer connectionPlayer;
@@ -71,7 +69,9 @@ namespace Piot.Surge.Pulse.Host
                     out var connectionPlayer);
                 if (connectionPlayer is null)
                 {
-                    log.Notice("got input for a connection player that isn't created yet");
+                    log.Notice(
+                        "got input for a connection player that isn't created yet. creating a new one {PlayerIndex}",
+                        logicalInputArrayForPlayer.localPlayerIndex);
                     connectionPlayer = new(Id, logicalInputArrayForPlayer.localPlayerIndex);
                 }
 
@@ -92,15 +92,21 @@ namespace Piot.Surge.Pulse.Host
                 {
                     if (logicalInput.appliedAtTickId.tickId < serverIsAtTickId.tickId)
                     {
+                        log.Notice("Host has passed this tickId already, skipping input {TickId} {HostTickId}",
+                            logicalInput.appliedAtTickId, serverIsAtTickId);
                         continue;
                     }
 
                     if (logicalInput.appliedAtTickId.tickId > logicalInputQueue.WaitingForTickId.tickId)
                     {
-                        continue;
+                        log.Notice("Input is in future of the queue, must reset queue {InputTickId} {QueueTickId}",
+                            logicalInput.appliedAtTickId, logicalInputQueue.WaitingForTickId.tickId);
+                        logicalInputQueue.Reset();
                     }
 
                     logicalInputQueue.AddLogicalInput(logicalInput);
+                    log.DebugLowLevel("added input for {LocalPlayerIndex} tickId {TickId}",
+                        logicalInput.localPlayerIndex, logicalInput.appliedAtTickId);
                 }
 
                 log.DebugLowLevel("input Queue on server for connection {ConnectionId} is {Count}", Id,
