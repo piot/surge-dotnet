@@ -16,7 +16,6 @@ namespace Piot.Surge.Pulse.Host
     {
         public sbyte clientInputTickCountAheadOfServer;
         public MonotonicTimeLowerBits.MonotonicTimeLowerBits lastReceivedMonotonicTimeLowerBits;
-        private SnapshotSyncerClientState state = SnapshotSyncerClientState.Normal;
 
         public SnapshotSyncerClient(RemoteEndpointId id)
         {

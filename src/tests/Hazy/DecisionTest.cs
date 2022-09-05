@@ -13,11 +13,10 @@ namespace Tests.Hazy;
 public class DecisionTests
 {
     private readonly ILog log;
-    private readonly TestOutputLogger logTarget;
 
     public DecisionTests(ITestOutputHelper output)
     {
-        logTarget = new TestOutputLogger(output);
+        var logTarget = new TestOutputLogger(output);
         log = new Log(logTarget, LogLevel.LowLevel);
     }
 

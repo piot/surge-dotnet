@@ -6,7 +6,7 @@
 using Piot.Flood;
 using Piot.Surge.OrderedDatagrams;
 
-namespace OrderedDatagramTests;
+namespace Tests;
 
 public class OrderedDatagramsTests
 {

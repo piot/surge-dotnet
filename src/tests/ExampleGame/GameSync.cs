@@ -12,19 +12,17 @@ using Piot.Surge.LocalPlayer;
 using Piot.Surge.LogicalInput;
 using Piot.Transport;
 using Piot.Transport.Memory;
-using Tests.ExampleGame;
 using Xunit.Abstractions;
 
-namespace Tests.Pulse;
+namespace Tests.ExampleGame;
 
 public class GameSync
 {
     private readonly ILog log;
-    private readonly TestOutputLogger logTarget;
 
     public GameSync(ITestOutputHelper output)
     {
-        logTarget = new TestOutputLogger(output);
+        var logTarget = new TestOutputLogger(output);
 
         var combinedLogTarget = new CombinedLogTarget(new ILogTarget[] { logTarget, new ConsoleOutputLogger() });
         log = new Log(combinedLogTarget, LogLevel.LowLevel);
@@ -51,15 +49,8 @@ public class GameSync
         var entitySpawner = hostGame.GeneratedEngineSpawner;
         var (spawnedEntity, spawnedHostAvatar) = entitySpawner.SpawnAvatarLogic(new AvatarLogic
         {
-            fireButtonIsDown = false,
-            castButtonIsDown = false,
-            aiming = default,
-            position = default,
             ammoCount = 10,
-            fireCooldown = 0,
-            manaAmount = 16,
-            castCooldown = 0,
-            jumpTime = 0
+            manaAmount = 16
         });
         log.Info("Spawned entity {Entity}", spawnedHostAvatar);
 
@@ -96,7 +87,6 @@ public class GameSync
 
         Assert.Equal(0, spawnedCalled);
         Assert.Equal(10, spawnedHostAvatar.Self.ammoCount);
-
 
         hostGame.Host!.AssignPredictEntity(new RemoteEndpointId(2), new LocalPlayerIndex(0), spawnedEntity);
 

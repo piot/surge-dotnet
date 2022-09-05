@@ -31,7 +31,6 @@ namespace Piot.Surge.Pulse.Client
         private readonly SnapshotFragmentReAssembler snapshotFragmentReAssembler;
         private readonly StatCountThreshold statsHostInputQueueCount = new(60);
         private readonly StatCountThreshold statsRoundTripTime = new(20);
-        private readonly ITransport transportBoth;
         private readonly ITransportClient transportClient;
         private readonly TransportStatsBoth transportWithStats;
 
@@ -46,8 +45,7 @@ namespace Piot.Surge.Pulse.Client
             snapshotFragmentReAssembler = new(log);
             World = worldWithGhostCreator;
             transportWithStats = new(assignedTransport, now);
-            transportBoth = transportWithStats;
-            transportClient = new TransportClient(transportBoth);
+            transportClient = new TransportClient(transportWithStats);
             predictor = new ClientPredictor(fetch, transportClient, now, targetDeltaTimeMs,
                 worldWithGhostCreator,
                 log.SubLog("Predictor"));

@@ -30,7 +30,7 @@ namespace Piot.Clog
                 LogLevel.LowLevel => (false, Color.Default),
                 LogLevel.Debug => (false, Color.Blue),
                 LogLevel.Info => (false, Color.Cyan),
-                LogLevel.Notice => (true, Color.Magenta),
+                LogLevel.Notice => (false, Color.Magenta),
                 LogLevel.Warning => (true, Color.Yellow),
                 LogLevel.Error => (true, Color.Red),
                 _ => throw new Exception("illegal LogLevel")

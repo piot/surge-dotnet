@@ -12,11 +12,10 @@ namespace Tests;
 public class ScannerTests
 {
     private readonly ILog log;
-    private readonly TestOutputLogger logTarget;
 
     public ScannerTests(ITestOutputHelper output)
     {
-        logTarget = new TestOutputLogger(output);
+        var logTarget = new TestOutputLogger(output);
         log = new Log(logTarget);
     }
 

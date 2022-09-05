@@ -12,11 +12,10 @@ namespace Tests;
 public class SnapshotDeltaEntityMaskMergeBits
 {
     private readonly ILog log;
-    private readonly TestOutputLogger logTarget;
 
     public SnapshotDeltaEntityMaskMergeBits(ITestOutputHelper output)
     {
-        logTarget = new TestOutputLogger(output);
+        var logTarget = new TestOutputLogger(output);
         var combinedLogTarget = new CombinedLogTarget(new ILogTarget[] { logTarget, new ConsoleOutputLogger() });
         log = new Log(combinedLogTarget, LogLevel.LowLevel);
     }

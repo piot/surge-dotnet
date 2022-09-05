@@ -12,11 +12,10 @@ namespace Tests.Flood;
 public class TestBits
 {
     private readonly ILog log;
-    private readonly TestOutputLogger logTarget;
 
     public TestBits(ITestOutputHelper output)
     {
-        logTarget = new TestOutputLogger(output);
+        var logTarget = new TestOutputLogger(output);
         var combinedLogTarget = new CombinedLogTarget(new ILogTarget[] { logTarget, new ConsoleOutputLogger() });
         log = new Log(combinedLogTarget, LogLevel.LowLevel);
     }

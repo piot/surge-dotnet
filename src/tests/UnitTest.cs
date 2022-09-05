@@ -30,11 +30,10 @@ using Piot.Surge.SnapshotProtocol.ReceiveStatus;
 using Piot.Surge.Tick;
 using Piot.Surge.Types;
 using Piot.Surge.Types.Serialization;
-using Tests;
 using Tests.ExampleGame;
 using Xunit.Abstractions;
 
-namespace GeneralTests;
+namespace Tests;
 
 public class CompareLogicalInputCollections : IEqualityComparer<ICollection<LogicalInput>>
 {
@@ -72,11 +71,10 @@ public class CompareLogicalInputCollections : IEqualityComparer<ICollection<Logi
 public class UnitTest1
 {
     private readonly ILog log;
-    private readonly TestOutputLogger logTarget;
 
     public UnitTest1(ITestOutputHelper output)
     {
-        logTarget = new TestOutputLogger(output);
+        var logTarget = new TestOutputLogger(output);
         var combinedLogTarget = new CombinedLogTarget(new ILogTarget[] { logTarget, new ConsoleOutputLogger() });
 
         log = new Log(combinedLogTarget);

@@ -18,16 +18,15 @@ using Piot.Surge.Tick;
 using Tests.ExampleGame;
 using Xunit.Abstractions;
 
-namespace Tests.Pulse;
+namespace Tests.Replay;
 
 public class ReplayRecorderTests
 {
     private readonly ILog log;
-    private readonly TestOutputLogger logTarget;
 
     public ReplayRecorderTests(ITestOutputHelper output)
     {
-        logTarget = new TestOutputLogger(output);
+        var logTarget = new TestOutputLogger(output);
         var combinedLogTarget = new CombinedLogTarget(new ILogTarget[] { logTarget, new ConsoleOutputLogger() });
         log = new Log(combinedLogTarget, LogLevel.LowLevel);
     }

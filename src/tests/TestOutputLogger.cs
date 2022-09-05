@@ -3,9 +3,10 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using Piot.Clog;
 using Xunit.Abstractions;
 
-namespace Piot.Clog;
+namespace Tests;
 
 public class TestOutputLogger : ILogTarget
 {

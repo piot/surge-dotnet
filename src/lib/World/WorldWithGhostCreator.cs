@@ -13,8 +13,6 @@ namespace Piot.Surge
         private readonly IEntityGhostCreator creator;
         private readonly INotifyWorld notifyWorld;
 
-        private ulong lastEntityId;
-
         public WorldWithGhostCreator(IEntityGhostCreator creator, INotifyWorld notifyWorld, bool isAuthoritative)
         {
             IsAuthoritative = isAuthoritative;

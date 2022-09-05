@@ -14,11 +14,10 @@ namespace Tests.Hazy;
 public class LatencySimulationTests
 {
     private readonly ILog log;
-    private readonly TestOutputLogger logTarget;
 
     public LatencySimulationTests(ITestOutputHelper output)
     {
-        logTarget = new TestOutputLogger(output);
+        var logTarget = new TestOutputLogger(output);
         log = new Log(logTarget, LogLevel.LowLevel);
     }
 

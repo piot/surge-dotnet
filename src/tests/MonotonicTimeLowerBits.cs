@@ -13,11 +13,10 @@ namespace Tests;
 public class MonotonicTimeLowerBitsTests
 {
     private readonly ILog log;
-    private readonly TestOutputLogger logTarget;
 
     public MonotonicTimeLowerBitsTests(ITestOutputHelper output)
     {
-        logTarget = new TestOutputLogger(output);
+        var logTarget = new TestOutputLogger(output);
         log = new Log(logTarget);
     }
 

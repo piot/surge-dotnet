@@ -22,12 +22,6 @@ using Constants = Piot.Surge.SnapshotProtocol.Constants;
 
 namespace Piot.Surge.Pulse.Host
 {
-    public enum SnapshotSyncerClientState
-    {
-        Normal,
-        Resend
-    }
-
     public class SnapshotSyncer
     {
         private readonly IMultiCompressor compression;
@@ -87,9 +81,6 @@ namespace Piot.Surge.Pulse.Host
         private void SendUsingContainers(SnapshotSyncerClient connection,
             DeltaSnapshotPack precalculatedPackForThisTick, IEntityContainer world, TickId hostTickId)
         {
-            TickIdRange rangeToSend;
-            ReadOnlySpan<byte> fetchedSnapshotPack;
-
             var bestPack = FindBestPack(connection, precalculatedPackForThisTick, world, hostTickId);
 
             var physicsCorrectionWriter = new OctetWriter(Constants.MaxSnapshotOctetSize);

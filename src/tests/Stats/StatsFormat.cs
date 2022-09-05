@@ -7,16 +7,15 @@ using Piot.Clog;
 using Piot.Stats;
 using Xunit.Abstractions;
 
-namespace Tests.Hazy;
+namespace Tests.Stats;
 
 public class StatsFormatTest
 {
     private readonly ILog log;
-    private readonly TestOutputLogger logTarget;
 
     public StatsFormatTest(ITestOutputHelper output)
     {
-        logTarget = new TestOutputLogger(output);
+        var logTarget = new TestOutputLogger(output);
         log = new Log(logTarget, LogLevel.LowLevel);
     }
 

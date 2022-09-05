@@ -15,7 +15,6 @@ namespace Piot.Surge.Replay.Serialization
     public class ReplayWriter
     {
         private readonly RaffWriter raffWriter;
-        private bool isInitialized;
         private TickIdRange lastInsertedDeltaStateRange;
         private uint packCountSinceCompleteState;
 

@@ -196,7 +196,7 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
          */
 
 
-        public static void AddChangeDelegate(StringBuilder sb, LogicInfo logicInfo, LogicFieldInfo fieldInfo)
+        public static void AddChangeDelegate(StringBuilder sb, LogicFieldInfo fieldInfo)
         {
             var titledField = TitleCase(fieldInfo.FieldInfo.Name);
             sb.Append(@$"    public Action? On{titledField}Changed;
@@ -502,7 +502,7 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
         {
             foreach (var fieldInfo in fieldInfos)
             {
-                AddChangeDelegate(sb, logicInfo, fieldInfo);
+                AddChangeDelegate(sb, fieldInfo);
             }
         }
 
@@ -754,7 +754,7 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
 ");
         }
 
-        public static void AddSerializeCorrectionState(StringBuilder sb, IEnumerable<LogicFieldInfo> fieldInfos)
+        public static void AddSerializeCorrectionState(StringBuilder sb)
         {
             sb.Append(@"    public void SerializeCorrectionState(IOctetWriter writer)
     {
@@ -765,7 +765,7 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
 ");
         }
 
-        public static void AddDeserializeCorrectionState(StringBuilder sb, IEnumerable<LogicFieldInfo> fieldInfos)
+        public static void AddDeserializeCorrectionState(StringBuilder sb)
         {
             sb.Append(@"    public void DeserializeCorrectionState(IOctetReader reader)
     {
@@ -776,7 +776,7 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
 ");
         }
 
-        public static void AddBitSerializeCorrectionState(StringBuilder sb, IEnumerable<LogicFieldInfo> fieldInfos)
+        public static void AddBitSerializeCorrectionState(StringBuilder sb)
         {
             sb.Append(@"    public void SerializeCorrectionState(IBitWriter writer)
     {
@@ -787,7 +787,7 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
 ");
         }
 
-        public static void AddBitDeserializeCorrectionState(StringBuilder sb, IEnumerable<LogicFieldInfo> fieldInfos)
+        public static void AddBitDeserializeCorrectionState(StringBuilder sb)
         {
             sb.Append(@"    public void DeserializeCorrectionState(IBitReader reader)
     {
@@ -1121,11 +1121,11 @@ public class ").Append(EntityGeneratedInternal(logicInfo)).Append($" : {inherit}
             AddBitDeserializeAll(sb, fieldInfos);
 
 
-            AddSerializeCorrectionState(sb, fieldInfos);
-            AddBitSerializeCorrectionState(sb, fieldInfos);
+            AddSerializeCorrectionState(sb);
+            AddBitSerializeCorrectionState(sb);
 
-            AddDeserializeCorrectionState(sb, fieldInfos);
-            AddBitDeserializeCorrectionState(sb, fieldInfos);
+            AddDeserializeCorrectionState(sb);
+            AddBitDeserializeCorrectionState(sb);
 
             AddDeserialize(sb, fieldInfos);
             AddFieldMaskBitDeserialize(sb, fieldInfos);

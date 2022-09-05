@@ -19,10 +19,6 @@ namespace Piot.Surge.Pulse.Client
     {
         private readonly Queue<SnapshotPack> queue = new();
 
-        public TickId FirstTickId => queue.Peek().tickId;
-
-        public int Count => queue.Count;
-
         protected void Enqueue(TickId tickId, ReadOnlySpan<byte> payload)
         {
             queue.Enqueue(new() { tickId = tickId, payload = payload.ToArray() });
