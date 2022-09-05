@@ -147,7 +147,7 @@ namespace Piot.Surge.Pulse.Client
             Notifier.Notify(clientWorld.AllEntities);
 
             log.DebugLowLevel("tick ghost logics {EntityCount} we are now at state with {TickId}",
-                clientWorld.AllEntities.Length, playbackTick);
+                clientWorld.EntityCount, playbackTick);
         }
     }
 }

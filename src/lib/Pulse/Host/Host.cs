@@ -61,7 +61,7 @@ namespace Piot.Surge.Pulse.Host
             {
                 var snapshotSyncerClient = snapshotSyncer.Create(connectionId);
                 var preparedConnection = new ConnectionToClient(connectionId, snapshotSyncerClient,
-                    log.SubLog($"connection{connectionId.Value}"));
+                    log.SubLog($"Connection{connectionId.Value}"));
                 //preparedConnection.AssignPredictEntityToPlayer(new LocalPlayerIndex(1), entity);
                 connections[connectionId.Value] = preparedConnection;
                 orderedConnections.Add(preparedConnection);

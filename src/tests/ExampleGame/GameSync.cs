@@ -40,8 +40,8 @@ public class GameSync
         var multiCompressor = DefaultMultiCompressor.Create();
         var timeProvider = new MonotonicTimeMockMs(initNow);
 
-        var clientGame = new Game(clientTransport, multiCompressor, false, log.SubLog("client"));
-        var hostGame = new Game(hostTransport, multiCompressor, true, log.SubLog("host"));
+        var clientGame = new Game(clientTransport, multiCompressor, false, log.SubLog("GameClient"));
+        var hostGame = new Game(hostTransport, multiCompressor, true, log.SubLog("GameHost"));
 
 
         var mockInput = new MockInputFetch();

@@ -20,7 +20,7 @@ namespace Piot.Surge.CompleteSnapshot
 #if DEBUG
             BitMarker.AssertMarker(reader, Constants.CompleteSnapshotStartMarker);
 #endif
-            if (entityGhostContainerWithCreator.AllEntities.Length != 0)
+            if (entityGhostContainerWithCreator.EntityCount != 0)
             {
                 throw new Exception("can not read complete state unless world is completely empty");
             }

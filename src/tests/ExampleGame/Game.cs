@@ -33,11 +33,11 @@ public class Game
         if (isHosting)
         {
             Host = new Host(transport, compression, DefaultMultiCompressor.DeflateCompressionIndex,
-                world, now, log);
+                world, now, log.SubLog("Host"));
         }
         else
         {
-            Client = new(log, now, delta, world,
+            Client = new(log.SubLog("Client"), now, delta, world,
                 transport, compression, new GeneratedInputFetch());
         }
 

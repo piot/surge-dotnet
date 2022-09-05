@@ -16,7 +16,7 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
         {
             var writer = new OctetWriter(Constants.MaxSnapshotOctetSize);
             writer.WriteUInt8(0);
-            EntityCountWriter.WriteEntityCount((uint)world.AllEntities.Length, writer);
+            EntityCountWriter.WriteEntityCount(world.EntityCount, writer);
             foreach (var entity in world.AllEntities)
             {
                 PackCreatedEntity.Write(writer, entity.Id, entity.ArchetypeId, entity);

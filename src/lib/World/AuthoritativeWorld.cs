@@ -5,7 +5,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using Piot.Surge.Entities;
 using Piot.Surge.GeneratedEntity;
@@ -14,13 +13,12 @@ namespace Piot.Surge
 {
     public class AuthoritativeWorld : IEntityContainerWithDetectChanges, IAuthoritativeEntityContainer
     {
+        public readonly List<IEntity> allEntities = new();
         protected readonly List<IEntity> created = new();
         private readonly List<IEntity> deleted = new();
 
         private ushort lastEntityId;
-
         public Dictionary<ulong, IEntity> Entities { get; } = new();
-
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEntity SpawnEntity(IGeneratedEntity generatedEntity)
@@ -37,7 +35,8 @@ namespace Piot.Surge
         public IEntity[] Created => created.ToArray();
         public IEntity[] Deleted => deleted.ToArray();
 
-        IEntity[] IEntityContainer.AllEntities => Entities.Values.ToArray();
+        IEntity[] IEntityContainer.AllEntities => allEntities.ToArray();
+        public uint EntityCount => (uint)allEntities.Count;
 
         public T? FindEntity<T>(EntityId entityId)
         {
@@ -97,6 +96,7 @@ namespace Piot.Surge
             existingEntity.Mode = EntityMode.Deleted;
             deleted.Add(existingEntity);
             Entities.Remove(existingEntity.Id.Value);
+            allEntities.Remove(existingEntity);
         }
 
         public void ClearDelta()
@@ -117,6 +117,7 @@ namespace Piot.Surge
             var entity = new Entity(id, generatedEntity);
             created.Add(entity);
             Entities.Add(id.Value, entity);
+            allEntities.Add(entity);
             return entity;
         }
 

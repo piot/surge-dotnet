@@ -31,6 +31,7 @@ namespace Piot.Surge
 
             created.Add(newEntity);
             Entities.Add(entityId.Value, newEntity);
+            allEntities.Add(newEntity);
             notifyWorld.NotifyCreation(newEntity.GeneratedEntity);
 
             return newEntity;

@@ -18,7 +18,7 @@ namespace Piot.Surge.CompleteSnapshot
 #if DEBUG
             BitMarker.WriteMarker(writer, Constants.CompleteSnapshotStartMarker);
 #endif
-            EntityCountWriter.WriteEntityCount((uint)world.AllEntities.Length, writer);
+            EntityCountWriter.WriteEntityCount(world.EntityCount, writer);
             foreach (var entityToSerialize in world.AllEntities)
             {
                 EntityIdWriter.Write(writer, entityToSerialize.Id);

@@ -10,6 +10,7 @@ namespace Piot.Surge
     public interface IEntityContainer
     {
         IEntity[] AllEntities { get; }
+        uint EntityCount { get; }
         public IEntity FetchEntity(EntityId entityId);
         public T? FindEntity<T>(EntityId entityId);
         public IEntity? FindEntity(EntityId entityId);
