@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
-using System.Collections.Generic;
 using Piot.Flood;
 using Piot.Raff.Stream;
 using Piot.SerializableVersion;
@@ -14,23 +13,11 @@ using Piot.Surge.Tick.Serialization;
 
 namespace Piot.Surge.Replay.Serialization
 {
-    public readonly struct CompleteStateEntry
-    {
-        public readonly uint tickId;
-        public readonly ulong streamPosition;
-
-        public CompleteStateEntry(uint tickId, ulong streamPosition)
-        {
-            this.tickId = tickId;
-            this.streamPosition = streamPosition;
-        }
-    }
-
     public class ReplayReader
     {
+        private readonly CompleteStateEntry[] completeStateEntries;
         private readonly RaffReader raffReader;
         private readonly IOctetReaderWithSeekAndSkip readerWithSeek;
-        private CompleteStateEntry[] completeStateEntries = Array.Empty<CompleteStateEntry>();
 
         public ReplayReader(IOctetReaderWithSeekAndSkip readerWithSeek)
         {
@@ -39,7 +26,8 @@ namespace Piot.Surge.Replay.Serialization
             ReadVersionInfo();
 
             var positionBefore = readerWithSeek.Position;
-            ScanForAllCompleteStatePositions();
+
+            completeStateEntries = CompleteStateScanner.ScanForAllCompleteStatePositions(raffReader, readerWithSeek);
 
             readerWithSeek.Seek(positionBefore);
         }
@@ -58,39 +46,6 @@ namespace Piot.Surge.Replay.Serialization
             StateSerializationVersion = VersionReader.Read(reader);
         }
 
-        private void ScanForAllCompleteStatePositions()
-        {
-            var tempRaffReader = raffReader;
-
-            List<CompleteStateEntry> entries = new();
-
-            while (true)
-            {
-                var positionBefore = readerWithSeek.Position;
-                var octetLength = tempRaffReader.ReadChunkHeader(out var icon, out var name);
-                if (octetLength == 0)
-                {
-                    break;
-                }
-
-                var positionAfterHeader = readerWithSeek.Position;
-                if (icon.Value == Constants.CompleteStateIcon.Value)
-                {
-                    var packType = readerWithSeek.ReadUInt8();
-                    if (packType != 0x02)
-                    {
-                        throw new Exception("wrong");
-                    }
-
-                    var tickId = TickIdReader.Read(readerWithSeek);
-                    entries.Add(new(tickId.tickId, positionBefore));
-                }
-
-                readerWithSeek.Seek(positionAfterHeader + octetLength);
-            }
-
-            completeStateEntries = entries.ToArray();
-        }
 
         private CompleteStateEntry FindClosestEntry(TickId tickId)
         {
