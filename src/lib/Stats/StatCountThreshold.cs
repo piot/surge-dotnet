@@ -23,6 +23,7 @@ namespace Piot.Stats
             Reset();
         }
 
+
         public Stat Stat => stat;
 
         public bool IsReady { get; private set; }
@@ -42,6 +43,14 @@ namespace Piot.Stats
             {
                 max = a;
             }
+
+            if (!IsReady)
+            {
+                stat.average = (int)(total / count);
+                stat.min = min;
+                stat.max = max;
+            }
+
 
             if (count < countThreshold)
             {

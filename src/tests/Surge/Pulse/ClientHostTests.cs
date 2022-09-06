@@ -33,7 +33,7 @@ public class ClientHostTests
     {
         var clientDeltaTime = new Milliseconds(16);
         var inputFetch = new GeneratedInputFetch();
-        var notifyWorld = new GeneratedEngineWorld();
+        var notifyWorld = new GeneratedNotifyEntityCreation();
         var entityContainerWithGhostCreator =
             new WorldWithGhostCreator(new GeneratedEntityGhostCreator(), notifyWorld, false);
 

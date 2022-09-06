@@ -143,6 +143,7 @@ namespace Piot.Surge.Pulse.Client
             // Ghosts are never predicted, corrected, nor rolled back
             // All the changed fields are set to the new values and Tick() is called to trigger the resulting effects of
             // the logic running for one tick.
+            OverWriter.Overwrite(clientWorld);
             Ticker.Tick(clientWorld);
             Notifier.Notify(clientWorld.AllEntities);
 

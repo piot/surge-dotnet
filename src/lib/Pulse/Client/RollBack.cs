@@ -15,21 +15,23 @@ namespace Piot.Surge.Pulse.Client
         ///     Rolling back predicted changes, since a mis-predict has been detected.
         /// </summary>
         /// <param name="targetEntity"></param>
-        /// <param name="rollbackQueue"></param>
-        /// <param name="correctionsForTickId"></param>
-        public static void Rollback(IEntity targetEntity, RollbackQueue rollbackQueue, TickId correctionsForTickId)
+        /// <param name="rollbackStack"></param>
+        /// <param name="tickId"></param>
+        public static void Rollback(IEntity targetEntity, RollbackStack rollbackStack, TickId tickId)
         {
             targetEntity.RollMode = EntityRollMode.Rollback;
 
             for (;;)
             {
-                var undoPack = rollbackQueue.Dequeue();
+                var undoPack = rollbackStack.Pop();
 
                 var reader = new OctetReader(undoPack.payload.Span);
+
+                targetEntity.Overwrite();
                 var changes = targetEntity.Deserialize(reader);
                 targetEntity.FireChanges(changes);
 
-                if (undoPack.tickId.tickId == correctionsForTickId.tickId)
+                if (undoPack.tickId.tickId == tickId.tickId)
                 {
                     break;
                 }

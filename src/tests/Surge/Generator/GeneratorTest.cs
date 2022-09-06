@@ -7,7 +7,7 @@ using Piot.Clog;
 using Piot.Surge.Generator;
 using Xunit.Abstractions;
 
-namespace Tests;
+namespace Tests.Generator;
 
 public class GeneratorTests
 {
@@ -39,7 +39,7 @@ public class GeneratorTests
 
         var code = SourceGenerator.Generate(logicInfos, gameInputInfos.First(), inputFetchInfos.First());
 
-        const string target = "../../../../tests/ExampleGame/_Generated.cs";
+        const string target = "../../../../tests/Surge/ExampleGame/_Generated.cs";
         File.Delete(target);
         File.WriteAllText(target, code);
     }

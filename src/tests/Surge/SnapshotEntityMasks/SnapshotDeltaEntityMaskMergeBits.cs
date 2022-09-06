@@ -7,7 +7,7 @@ using Piot.Clog;
 using Piot.Surge.FieldMask;
 using Xunit.Abstractions;
 
-namespace Tests;
+namespace Tests.Pulse.SnapshotEntityMasks;
 
 public class SnapshotDeltaEntityMaskMergeBits
 {

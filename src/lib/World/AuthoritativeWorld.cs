@@ -27,8 +27,6 @@ namespace Piot.Surge
 
             var createdEntity = AddEntity(new EntityId(freeEntityId), generatedEntity);
 
-            createdEntity.FireCreated();
-
             return createdEntity;
         }
 
@@ -110,9 +108,7 @@ namespace Piot.Surge
             deleted.Clear();
         }
 
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEntity AddEntity(EntityId id, IGeneratedEntity generatedEntity)
+        public virtual IEntity AddEntity(EntityId id, IGeneratedEntity generatedEntity)
         {
             var entity = new Entity(id, generatedEntity);
             created.Add(entity);

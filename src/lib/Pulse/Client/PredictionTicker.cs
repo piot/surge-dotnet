@@ -11,28 +11,21 @@ namespace Piot.Surge.Pulse.Client
 {
     public static class PredictionTicker
     {
-        public static void Predict(IEntity predictedEntity, TickId appliedAtTickId, RollbackQueue rollbackQueue,
-            PredictionStateChecksumQueue predictionStateHistory)
+        public static void Predict(IEntity predictedEntity, TickId tickIdBeforePredictTick, RollbackStack rollbackStack)
         {
+            predictedEntity.RollMode = EntityRollMode.Predict;
             predictedEntity.Overwrite();
-
             predictedEntity.Tick();
-            Notifier.Notify(predictedEntity);
 
             var changes = predictedEntity.GeneratedEntity.Changes();
+
             var undoWriter = new OctetWriter(1200);
 
             predictedEntity.SerializePrevious(changes, undoWriter);
 
-            rollbackQueue.EnqueueUndoPack(appliedAtTickId, undoWriter.Octets);
+            Notifier.Notify(predictedEntity); // Notify also overwrites
 
-            var savePredictedStateWriter = new OctetWriter(1200);
-            predictedEntity.SerializeAll(savePredictedStateWriter);
-
-            var savePhysicsStateWriter = new OctetWriter(1200);
-            predictedEntity.SerializeCorrectionState(savePhysicsStateWriter);
-            predictionStateHistory.Enqueue(appliedAtTickId, savePredictedStateWriter.Octets,
-                savePhysicsStateWriter.Octets);
+            rollbackStack.PushUndoPack(tickIdBeforePredictTick, undoWriter.Octets);
         }
     }
 }

@@ -51,11 +51,10 @@ public class ReplayRecorderTests
 
         {
             var authoritative = new AuthoritativeWorld();
-            var notify = new GeneratedEngineWorld();
-            var entitySpawner = new GeneratedEngineSpawner(authoritative, notify);
+            var notify = new GeneratedNotifyEntityCreation();
+            var entitySpawner = new GeneratedHostEntitySpawner(authoritative, notify);
 
             using var outputStream = FileStreamCreator.Create("replay.temp");
-
 
             (spawnedAvatarEntityOnHost, spawnedAvatarInternalOnHost) = entitySpawner.SpawnAvatarLogic(new AvatarLogic
             {
@@ -70,7 +69,6 @@ public class ReplayRecorderTests
                 jumpTime = 0
             });
 
-
             var replayRecorder = new ReplayRecorder(authoritative, new(32), applicationVersion, outputStream,
                 log.SubLog("replayRecorder"));
             TickId hostTickId = new(33);
@@ -81,7 +79,7 @@ public class ReplayRecorderTests
 
         {
             var ghostCreator = new GeneratedEntityGhostCreator();
-            var notifyWorld = new GeneratedEngineWorld();
+            var notifyWorld = new GeneratedNotifyEntityCreation();
             var clientWorld = new WorldWithGhostCreator(ghostCreator, notifyWorld, false);
 
             var fileStream = FileStreamCreator.OpenWithSeek("replay.temp");

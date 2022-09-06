@@ -352,7 +352,7 @@ public class UnitTest1
         Assert.Equal(0u, (avatarInfo as IEntityChanges).Changes());
 
         var packetQueue = new SnapshotDeltaPackIncludingCorrectionsQueue();
-        var notifyWorld = new GeneratedEngineWorld();
+        var notifyWorld = new GeneratedNotifyEntityCreation();
 
         var world = new WorldWithGhostCreator(new GeneratedEntityGhostCreator(), notifyWorld, false);
 
@@ -551,7 +551,7 @@ public class UnitTest1
     public void BasicUndo()
     {
         var (allSerializedSnapshots, spawnedAvatarId) = PrepareThreeServerSnapshotDeltas();
-        var notifyWorld = new GeneratedEngineWorld();
+        var notifyWorld = new GeneratedNotifyEntityCreation();
         var clientWorld =
             new WorldWithGhostCreator(new GeneratedEntityGhostCreator(), notifyWorld, false) as
                 IEntityContainerWithGhostCreator;
@@ -576,13 +576,13 @@ public class UnitTest1
         Assert.Equal(0, clientSpawnedEntity.Self.fireCooldown);
         Notifier.Notify(updateEntitiesInFirst);
 
+        notifyWorld.OnSpawnAvatarLogic += avatar => { log.Info("SPAWNED {Avatar}", clientSpawnedEntity); };
 
         clientSpawnedEntity.OutFacing.OnAmmoCountChanged += () =>
         {
             log.Info("ammo count is {AmmoCount}", clientSpawnedEntity.Self.ammoCount);
         };
 
-        clientSpawnedEntity.OutFacing.OnSpawned += () => { log.Info("SPAWNED {Avatar}", clientSpawnedEntity); };
 
         clientSpawnedEntity.OutFacing.DoFireChainLightning += position =>
         {
@@ -643,10 +643,6 @@ public class UnitTest1
 #else
         Assert.Equal(22, undoWriter.Octets.Length);
 #endif
-        foreach (var clientCreatedEntity in created)
-        {
-            clientCreatedEntity.FireCreated();
-        }
 
         Assert.Equal(1200, clientSpawnedEntity.Self.position.x);
         Assert.Equal(99, clientSpawnedEntity.Self.ammoCount);

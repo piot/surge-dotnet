@@ -3,12 +3,18 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using Piot.Surge.GeneratedEntity;
+using System;
+using Piot.Surge.Tick;
 
-namespace Piot.Surge
+namespace Piot.Surge.Pulse.Client
 {
-    public interface INotifyWorld
+    public class RollbackStack : SnapshotPackStack
     {
-        public void NotifyCreation(IGeneratedEntity entity);
+        public int Count => base.Count;
+
+        public void PushUndoPack(TickId tickId, ReadOnlySpan<byte> payload)
+        {
+            Push(tickId, payload);
+        }
     }
 }

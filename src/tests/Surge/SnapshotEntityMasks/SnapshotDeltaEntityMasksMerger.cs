@@ -10,7 +10,7 @@ using Piot.Surge.FieldMask;
 using Piot.Surge.Tick;
 using Xunit.Abstractions;
 
-namespace Tests;
+namespace Tests.Pulse.SnapshotEntityMasks;
 
 public class SnapshotDeltaEntityMasksMerger
 {

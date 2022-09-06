@@ -46,7 +46,7 @@ public class GameSync
 
         clientGame.Client!.InputFetch = mockInput;
 
-        var entitySpawner = hostGame.GeneratedEngineSpawner;
+        var entitySpawner = hostGame.GeneratedHostEntitySpawner;
         var (spawnedEntity, spawnedHostAvatar) = entitySpawner.SpawnAvatarLogic(new AvatarLogic
         {
             ammoCount = 10,
@@ -60,25 +60,26 @@ public class GameSync
         var ammoCountChanged = 0;
         var chainLightningCount = 0;
 
-        clientGame.GeneratedNotifyWorld.OnSpawnAvatarLogic += avatar =>
+        clientGame.GeneratedNotifyEntityCreation.OnSpawnAvatarLogic += avatar =>
         {
             log.Debug("Created an avatar! {Avatar}", avatar.Self);
             avatar.OnAmmoCountChanged += () =>
             {
-                log.Debug("Ammo Count changed {AmmoCount}", avatar.Self.ammoCount);
+                log.Debug("Ammo Count changed to {AmmoCount}", avatar.Self.ammoCount);
                 ammoCountChanged++;
 
-                Assert.Equal(11 - ammoCountChanged, avatar.Self.ammoCount);
+                Assert.Equal(10 - ammoCountChanged, avatar.Self.ammoCount);
             };
 
-            avatar.OnSpawned += () =>
+            spawnedCalled++;
+            log.Debug("Spawn Complete {Avatar}", avatar.Self);
+            Assert.Equal(10, avatar.Self.ammoCount);
+
+            avatar.OnFireButtonIsDownChanged += () =>
             {
-                spawnedCalled++;
-                log.Debug("Spawn Complete {Avatar}", avatar.Self);
-                Assert.Equal(10, avatar.Self.ammoCount);
+                fireButtonChanged++;
+                log.Debug("FireButton changed {Count} {State}", fireButtonChanged, avatar.Self.fireButtonIsDown);
             };
-
-            avatar.OnFireButtonIsDownChanged += () => { fireButtonChanged++; };
 
             avatar.DoCastFireball += (position, direction) => { fireballFireCount++; };
 
@@ -95,7 +96,7 @@ public class GameSync
         {
             var now = new Milliseconds(initNow.ms + (iteration + 1) * 16);
 
-            var pressButtons = iteration >= 2;
+            var pressButtons = iteration >= 4;
             mockInput.PrimaryAbility = pressButtons;
             mockInput.SecondaryAbility = pressButtons;
             timeProvider.TimeInMs = now;

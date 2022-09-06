@@ -35,7 +35,7 @@ namespace Piot.Surge.Pulse.Client
         private TickId lastSeenSnapshotTickId;
 
         private TickId nextExpectedSnapshotTickId;
-        private TickId predictTickId;
+        private TickId predictTickId = new(1); // HACK: We need it to start ahead of the host
 
         public ClientPredictor(IInputPackFetch inputPackFetch, ITransportClient transportClient,
             Milliseconds now, Milliseconds targetDeltaTimeMs, IEntityContainer world,

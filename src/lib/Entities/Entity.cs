@@ -91,10 +91,6 @@ namespace Piot.Surge.Entities
             generatedEntity.FireChanges(mask);
         }
 
-        public void FireCreated()
-        {
-            generatedEntity.FireCreated();
-        }
 
         public void FireDestroyed()
         {

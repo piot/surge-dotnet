@@ -3,16 +3,12 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System;
-using Piot.Surge.Tick;
+using Piot.Surge.GeneratedEntity;
 
-namespace Piot.Surge.Pulse.Client
+namespace Piot.Surge
 {
-    public class RollbackQueue : SnapshotPackQueue
+    public interface INotifyEntityCreation
     {
-        public void EnqueueUndoPack(TickId tickId, ReadOnlySpan<byte> payload)
-        {
-            Enqueue(tickId, payload);
-        }
+        public void NotifyCreation(IGeneratedEntity entity);
     }
 }

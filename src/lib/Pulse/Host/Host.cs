@@ -123,12 +123,10 @@ namespace Piot.Surge.Pulse.Host
             log.Debug("== Simulation Tick! {TickId}", serverTickId);
 
             TickWorld();
-            SetInputsFromClientsToEntities();
-
-            var nextTickId = new TickId(serverTickId.tickId + 1);
             // Exactly after Tick() and the input has been set in preparation for the next tick, we mark this as the new tick
-            serverTickId = nextTickId;
+            serverTickId = serverTickId.Next();
             log.Debug("== Simulation Tick post! {TickId}", serverTickId);
+            SetInputsFromClientsToEntities();
 
             var (masks, deltaSnapshotPack) = StoreWorldChangesToPackContainer();
             snapshotSyncer.SendSnapshot(masks, deltaSnapshotPack, AuthoritativeWorld);

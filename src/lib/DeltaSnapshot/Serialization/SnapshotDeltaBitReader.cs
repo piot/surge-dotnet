@@ -76,8 +76,8 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
                 var entityToDeserialize =
                     entityGhostContainerWithCreator.CreateGhostEntity(entityArchetype, entityId);
                 entityToDeserialize.DeserializeAll(reader);
-                entityToDeserialize.FireCreated();
                 createdEntities.Add(entityToDeserialize);
+                entityGhostContainerWithCreator.AddGhostEntity(entityToDeserialize);
             }
 
 
@@ -96,6 +96,7 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
                 var entityToDeserialize = entityGhostContainerWithCreator.FetchEntity(entityId);
                 var serializeMask = entityToDeserialize.Deserialize(reader);
                 updatedEntities.Add(new SnapshotDeltaReaderInfoEntity(entityToDeserialize, serializeMask));
+                entityToDeserialize.FireChanges(serializeMask);
             }
 
             return (deletedEntities.ToArray(), createdEntities.ToArray(), updatedEntities.ToArray());

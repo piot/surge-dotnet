@@ -19,7 +19,7 @@ namespace Piot.Surge.Pulse.Client
         private readonly ILog log;
 
         private readonly PredictionStateChecksumQueue predictionStateChecksumHistory = new();
-        private readonly RollbackQueue rollbackQueue = new();
+        private readonly RollbackStack rollbackStack = new();
         private readonly bool shouldPredictGoingForward = true;
         private bool shouldPredict = true;
 
@@ -75,7 +75,7 @@ namespace Piot.Surge.Pulse.Client
 
             log.Notice("Mis-predict at {TickId} for entity {EntityId}", correctionForTickId, assignedAvatar.Id);
 
-            RollBacker.Rollback(assignedAvatar, rollbackQueue, correctionForTickId);
+            RollBacker.Rollback(assignedAvatar, rollbackStack, correctionForTickId);
             Replicator.Replicate(assignedAvatar, logicNowReplicateWriter.Octets, physicsCorrectionPayload);
 
             if (!shouldPredictGoingForward)
@@ -84,7 +84,7 @@ namespace Piot.Surge.Pulse.Client
             }
             else
             {
-                RollForth.Rollforth(assignedAvatar, PredictedInputs, rollbackQueue, predictionStateChecksumHistory);
+                RollForth.Rollforth(assignedAvatar, PredictedInputs, rollbackStack, predictionStateChecksumHistory);
             }
 
             assignedAvatar.RollMode = EntityRollMode.Predict;
@@ -104,7 +104,7 @@ namespace Piot.Surge.Pulse.Client
 
             var inputReader = new OctetReader(logicalInput.payload.Span);
             inputDeserialize.SetInput(inputReader);
-            PredictionTicker.Predict(assignedAvatar, logicalInput.appliedAtTickId, rollbackQueue,
+            PredictionTickAndStateSave.PredictAndStateSave(assignedAvatar, logicalInput.appliedAtTickId, rollbackStack,
                 predictionStateChecksumHistory);
         }
     }

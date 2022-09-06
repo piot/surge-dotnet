@@ -54,12 +54,21 @@ namespace Piot.Surge.Pulse.Client
     {
         private readonly Queue<PredictionStateAllChecksums> queue = new();
 
+        private bool isInitialized;
+
+        private TickId lastInsertedTickId;
+
         public TickId FirstTickId => queue.Peek().tickId;
 
         public int Count => queue.Count;
 
         public void Enqueue(TickId tickId, ReadOnlySpan<byte> logicPayload, ReadOnlySpan<byte> physicsCorrection)
         {
+            if (isInitialized && !tickId.IsImmediateFollowing(lastInsertedTickId))
+            {
+                throw new Exception("must have PredictionStateChecksumQueue without gaps");
+            }
+
             var logicFnv = Fnv.Fnv.ToFnv(logicPayload);
             var logicChecksum = new PredictionStateChecksum
                 { fnvChecksum = logicFnv, payload = logicPayload.ToArray(), payloadLength = logicPayload.Length };
@@ -72,6 +81,8 @@ namespace Piot.Surge.Pulse.Client
             };
 
             queue.Enqueue(new(tickId, logicChecksum, physicsCorrectionChecksum));
+            isInitialized = true;
+            lastInsertedTickId = tickId;
         }
 
         public PredictionStateAllChecksums DequeueForTickId(TickId requiredTickId)

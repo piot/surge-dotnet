@@ -7,7 +7,7 @@ using Piot.Clog;
 using Piot.Surge.Generator;
 using Xunit.Abstractions;
 
-namespace Tests;
+namespace Tests.Pulse.Generator;
 
 public class ScannerTests
 {

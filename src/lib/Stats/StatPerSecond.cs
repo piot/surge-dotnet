@@ -52,6 +52,7 @@ namespace Piot.Stats
         private readonly Milliseconds minimumAverageTime;
         private uint averageCount;
         private uint count;
+        private bool isInitialized;
         private Milliseconds lastTime;
         private int max;
         private int min;
@@ -85,7 +86,7 @@ namespace Piot.Stats
 
         public void Update(Milliseconds now)
         {
-            if (now.ms < lastTime.ms + minimumAverageTime.ms)
+            if (isInitialized && now.ms < lastTime.ms + minimumAverageTime.ms)
             {
                 return;
             }
@@ -114,6 +115,7 @@ namespace Piot.Stats
                 min = int.MaxValue;
                 max = int.MinValue;
                 averageCount = 0;
+                isInitialized = true;
             }
 
             Reset(now);

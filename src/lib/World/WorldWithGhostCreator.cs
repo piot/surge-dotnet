@@ -5,19 +5,21 @@
 
 using System.Runtime.CompilerServices;
 using Piot.Surge.Entities;
+using Piot.Surge.GeneratedEntity;
 
 namespace Piot.Surge
 {
     public class WorldWithGhostCreator : AuthoritativeWorld, IEntityContainerWithGhostCreator
     {
         private readonly IEntityGhostCreator creator;
-        private readonly INotifyWorld notifyWorld;
+        private readonly INotifyEntityCreation notifyEntityCreation;
 
-        public WorldWithGhostCreator(IEntityGhostCreator creator, INotifyWorld notifyWorld, bool isAuthoritative)
+        public WorldWithGhostCreator(IEntityGhostCreator creator, INotifyEntityCreation notifyEntityCreation,
+            bool isAuthoritative)
         {
             IsAuthoritative = isAuthoritative;
             this.creator = creator;
-            this.notifyWorld = notifyWorld;
+            this.notifyEntityCreation = notifyEntityCreation;
         }
 
         public bool IsAuthoritative { get; }
@@ -30,9 +32,19 @@ namespace Piot.Surge
             created.Add(newEntity);
             Entities.Add(entityId.Value, newEntity);
             allEntities.Add(newEntity);
-            notifyWorld.NotifyCreation(newEntity.GeneratedEntity);
 
             return newEntity;
+        }
+
+        public void AddGhostEntity(IEntity entity)
+        {
+            notifyEntityCreation.NotifyCreation(entity.GeneratedEntity);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override IEntity AddEntity(EntityId id, IGeneratedEntity generatedEntity)
+        {
+            return base.AddEntity(id, generatedEntity);
         }
     }
 }

@@ -9,8 +9,6 @@ namespace Piot.Surge.Entities
     {
         public void FireChanges(ulong changeMask);
 
-        public void FireCreated();
-
         public void FireDestroyed();
     }
 }

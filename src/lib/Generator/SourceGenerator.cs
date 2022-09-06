@@ -105,16 +105,17 @@ namespace Piot.Surge.Generator
 
         public static void AddEngineSpawner(StringBuilder sb, IEnumerable<LogicInfo> infos)
         {
-            AddClassDeclaration(sb, "GeneratedEngineSpawner");
-            sb.Append(@"
+            const string className = "GeneratedHostEntitySpawner";
+            AddClassDeclaration(sb, className);
+            sb.Append($@"
     private readonly IAuthoritativeEntityContainer container;
-    private readonly INotifyWorld notifyWorld;
+    private readonly INotifyEntityCreation notifyWorld;
 
-    public GeneratedEngineSpawner(IAuthoritativeEntityContainer container, INotifyWorld notifyWorld)
-    {
+    public {className}(IAuthoritativeEntityContainer container, INotifyEntityCreation notifyWorld)
+    {{
         this.container = container;
         this.notifyWorld = notifyWorld;
-    }
+    }}
 ");
             foreach (var info in infos)
             {
@@ -137,7 +138,7 @@ namespace Piot.Surge.Generator
 
         public static void AddEngineWorld(StringBuilder sb, IEnumerable<LogicInfo> infos)
         {
-            AddClassDeclaration(sb, "GeneratedEngineWorld", "INotifyWorld");
+            AddClassDeclaration(sb, "GeneratedNotifyEntityCreation", "INotifyEntityCreation");
 
             foreach (var info in infos)
             {
@@ -147,7 +148,7 @@ namespace Piot.Surge.Generator
 
 
             sb.Append(@"
-        void INotifyWorld.NotifyCreation(IGeneratedEntity entity)
+        void INotifyEntityCreation.NotifyCreation(IGeneratedEntity entity)
         {
             switch (entity)
             {
@@ -819,11 +820,6 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
         actionsContainer.Clear();
     }
 
-    public void FireCreated()
-    {
-        outFacing.OnSpawned?.Invoke();
-    }
-
     public void FireDestroyed()
     {
         outFacing.OnDestroyed?.Invoke();
@@ -1018,8 +1014,6 @@ public class ").Append(outFacingClassName).Append($@"
     public {FullName(logicInfo.Type)} Self => internalEntity.Self;
 
     public Action? OnDestroyed;
-    public Action? OnSpawned;
-
     public Action? OnPostUpdate;
 ");
 

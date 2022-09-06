@@ -27,8 +27,8 @@ public class Game
         var delta = new Milliseconds(16);
 
         var entityCreation = new GeneratedEntityGhostCreator();
-        GeneratedNotifyWorld = new GeneratedEngineWorld();
-        world = new(entityCreation, GeneratedNotifyWorld, isHosting);
+        GeneratedNotifyEntityCreation = new GeneratedNotifyEntityCreation();
+        world = new(entityCreation, GeneratedNotifyEntityCreation, isHosting);
 
         if (isHosting)
         {
@@ -41,17 +41,17 @@ public class Game
                 transport, compression, new GeneratedInputFetch());
         }
 
-        GeneratedEngineSpawner = new GeneratedEngineSpawner(world, GeneratedNotifyWorld);
+        GeneratedHostEntitySpawner = new GeneratedHostEntitySpawner(world, GeneratedNotifyEntityCreation);
 
-        GeneratedNotifyWorld.OnSpawnFireballLogic += fireball =>
+        GeneratedNotifyEntityCreation.OnSpawnFireballLogic += fireball =>
         {
-            fireball.OnSpawned += () => { log.Debug($"a fireball has been spawned {fireball.Self}"); };
+            log.Debug($"a fireball has been spawned {fireball.Self}");
 
             fireball.OnPositionChanged +=
                 () => log.Debug("Fireball position changed {Position}", fireball.Self.position);
         };
 
-        GeneratedNotifyWorld.OnSpawnAvatarLogic += avatar =>
+        GeneratedNotifyEntityCreation.OnSpawnAvatarLogic += avatar =>
         {
             log.Debug("Avatar {Avatar} was spawned", avatar);
 
@@ -73,7 +73,7 @@ public class Game
                     velocity = new Velocity3(200, 300, 400)
                 };
 
-                GeneratedEngineSpawner.SpawnFireballLogic(fireballLogic);
+                GeneratedHostEntitySpawner.SpawnFireballLogic(fireballLogic);
             };
 
 
@@ -92,9 +92,9 @@ public class Game
     public Client? Client { get; }
 
     public IEntityContainer EntityContainer => world;
-    public GeneratedEngineSpawner GeneratedEngineSpawner { get; }
+    public GeneratedHostEntitySpawner GeneratedHostEntitySpawner { get; }
 
-    public GeneratedEngineWorld GeneratedNotifyWorld { get; }
+    public GeneratedNotifyEntityCreation GeneratedNotifyEntityCreation { get; }
 
     public void Update(Milliseconds now)
     {
