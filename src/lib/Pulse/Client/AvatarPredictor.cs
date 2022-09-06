@@ -40,6 +40,20 @@ namespace Piot.Surge.Pulse.Client
                 $"[AvatarPredictor localPlayer:{LocalPlayerIndex} entity:{assignedAvatar.Id} predictedInputs:{PredictedInputs.Count}]";
         }
 
+        public bool WeDidPredictTheFutureCorrectly(TickId correctionForTickId, ReadOnlySpan<byte> logicPayload,
+            ReadOnlySpan<byte> physicsCorrectionPayload)
+        {
+            if (predictionStateChecksumHistory.Count == 0)
+            {
+                // We have nothing to compare with, so lets assume it was correct
+                return true;
+            }
+
+            var storedPredictionStateChecksum =
+                predictionStateChecksumHistory.DequeueForTickId(correctionForTickId);
+            return storedPredictionStateChecksum.IsEqual(logicPayload, physicsCorrectionPayload);
+        }
+
         /// <summary>
         ///     Handles incoming correction state
         ///     If checksum is not the same, it rollbacks, replicate, and rollforth.
@@ -60,16 +74,16 @@ namespace Piot.Surge.Pulse.Client
             var changesThisSnapshot = assignedAvatar.GeneratedEntity.Changes();
             assignedAvatar.Serialize(changesThisSnapshot, logicNowReplicateWriter);
 
+            if (!shouldPredictGoingForward)
+            {
+                shouldPredict = false;
+            }
 
-#if LATER
             var logicNowWriter = new OctetWriter(1024);
             assignedAvatar.SerializeAll(logicNowWriter);
 
-            var storedPredictionStateChecksum =
-                predictionStateChecksumHistory.DequeueForTickId(correctionForTickId);
-            if (storedPredictionStateChecksum.IsEqual(logicNowWriter.Octets, physicsCorrectionPayload))
+            if (WeDidPredictTheFutureCorrectly(correctionForTickId, logicNowWriter.Octets, physicsCorrectionPayload))
             {
-                log.DebugLowLevel("prediction for {TickId} was correct, continuing", correctionForTickId);
                 return;
             }
 
@@ -78,17 +92,12 @@ namespace Piot.Surge.Pulse.Client
             RollBacker.Rollback(assignedAvatar, rollbackStack, correctionForTickId);
             Replicator.Replicate(assignedAvatar, logicNowReplicateWriter.Octets, physicsCorrectionPayload);
 
-            if (!shouldPredictGoingForward)
-            {
-                shouldPredict = false;
-            }
-            else
+            if (shouldPredict)
             {
                 RollForth.Rollforth(assignedAvatar, PredictedInputs, rollbackStack, predictionStateChecksumHistory);
             }
 
             assignedAvatar.RollMode = EntityRollMode.Predict;
-#endif
         }
 
 
@@ -105,7 +114,7 @@ namespace Piot.Surge.Pulse.Client
             var inputReader = new OctetReader(logicalInput.payload.Span);
             inputDeserialize.SetInput(inputReader);
             PredictionTickAndStateSave.PredictAndStateSave(assignedAvatar, logicalInput.appliedAtTickId, rollbackStack,
-                predictionStateChecksumHistory);
+                predictionStateChecksumHistory, PredictMode.Predicting);
         }
     }
 }

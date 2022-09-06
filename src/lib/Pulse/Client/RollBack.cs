@@ -21,7 +21,7 @@ namespace Piot.Surge.Pulse.Client
         {
             targetEntity.RollMode = EntityRollMode.Rollback;
 
-            for (;;)
+            while (rollbackStack.PeekTickId() >= tickId)
             {
                 var undoPack = rollbackStack.Pop();
 

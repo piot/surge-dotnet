@@ -33,6 +33,16 @@ namespace Piot.Surge.Tick
             return new(tickId + 1);
         }
 
+        public TickId Previous()
+        {
+            if (tickId == 0)
+            {
+                throw new Exception("can not go back from zero");
+            }
+
+            return new(tickId - 1);
+        }
+
         public static bool operator !=(TickId a, TickId b)
         {
             return !a.Equals(b);

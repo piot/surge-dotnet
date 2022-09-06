@@ -4,12 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 using Piot.Clog;
-using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.Surge.Compress;
 using Piot.Surge.Internal.Generated;
 using Piot.Surge.LocalPlayer;
-using Piot.Surge.LogicalInput;
 using Piot.Transport;
 using Piot.Transport.Memory;
 using Xunit.Abstractions;
@@ -124,40 +122,5 @@ public class GameSync
 
         log.Debug($"clientAvatar {clientAvatar.Self}\nhostAvatar {spawnedHostAvatar.Self}");
         Assert.Equal(spawnedHostAvatar.Self, clientAvatar.Self);
-    }
-
-    public class MockInputFetch : IInputPackFetch
-    {
-        private bool primaryAbility;
-
-        private bool secondaryAbility;
-
-        public bool PrimaryAbility
-        {
-            set => primaryAbility = value;
-        }
-
-        public bool SecondaryAbility
-        {
-            set => secondaryAbility = value;
-        }
-
-        public ReadOnlySpan<byte> Fetch(LocalPlayerIndex playerIndex)
-        {
-            var input = new GameInput
-            {
-                aiming = default,
-                primaryAbility = primaryAbility,
-                secondaryAbility = secondaryAbility,
-                tertiaryAbility = false,
-                ultimateAbility = false,
-                desiredMovement = default
-            };
-            var writer = new OctetWriter(30);
-
-            GameInputWriter.Write(writer, input);
-
-            return writer.Octets;
-        }
     }
 }

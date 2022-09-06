@@ -4,8 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 using Piot.Clog;
+using Piot.Flood;
 using Piot.Surge.Entities;
 using Piot.Surge.Internal.Generated;
+using Piot.Surge.LocalPlayer;
+using Piot.Surge.LogicalInput;
 using Piot.Surge.Pulse.Client;
 using Piot.Surge.Tick;
 using Piot.Surge.Types;
@@ -13,11 +16,11 @@ using Xunit.Abstractions;
 
 namespace Tests.ExampleGame;
 
-public class Prediction
+public class Rollforth
 {
     private readonly ILog log;
 
-    public Prediction(ITestOutputHelper output)
+    public Rollforth(ITestOutputHelper output)
     {
         var logTarget = new TestOutputLogger(output);
 
@@ -26,35 +29,7 @@ public class Prediction
     }
 
     [Fact]
-    public void PredictEntity()
-    {
-        var internalEntity = new AvatarLogicEntityInternal
-        {
-            Current = new()
-            {
-                fireButtonIsDown = true
-            }
-        };
-
-        var positionChangedCount = 0;
-        internalEntity.OutFacing.OnPositionChanged += () =>
-        {
-            Assert.Equal(EntityRollMode.Predict, internalEntity.RollMode);
-            positionChangedCount++;
-        };
-
-        var spawnedEntity = new Entity(new(99), internalEntity);
-
-        var rollbackQueue = new RollbackStack();
-        var now = new TickId(23);
-
-        PredictionTicker.Predict(spawnedEntity, now, rollbackQueue, PredictMode.Predicting);
-        Assert.Equal(1, rollbackQueue.Count);
-        Assert.Equal(1, positionChangedCount);
-    }
-
-    [Fact]
-    public void PredictAndRollbackEntity()
+    public void PredictRollbackAndRollforthEntity()
     {
         var internalEntity = new AvatarLogicEntityInternal
         {
@@ -92,6 +67,9 @@ public class Prediction
 
         var spawnedEntity = new Entity(new(99), internalEntity);
         var rollbackStack = new RollbackStack();
+        var predictedInputs = new LogicalInputQueue();
+        var mockInputFetch = new MockInputFetch();
+
         var now = new TickId(23);
 
         var positionBefore = internalEntity.Self.position;
@@ -102,7 +80,7 @@ public class Prediction
         {
             if (i == 4)
             {
-                internalEntity.Current = internalEntity.Self with { fireButtonIsDown = true };
+                mockInputFetch.PrimaryAbility = true;
             }
 
             if (i == 3)
@@ -110,6 +88,15 @@ public class Prediction
                 positionAt26 = internalEntity.Self.position;
                 ammoAt26 = internalEntity.Self.ammoCount;
             }
+
+            var localPlayerIndex = new LocalPlayerIndex(1);
+
+            var inputPack = mockInputFetch.Fetch(localPlayerIndex);
+
+            internalEntity.SetInput(new OctetReader(inputPack));
+
+            var logicalInputPack = new LogicalInput(localPlayerIndex, now, inputPack);
+            predictedInputs.AddLogicalInput(logicalInputPack);
 
             PredictionTicker.Predict(spawnedEntity, now, rollbackStack, PredictMode.Predicting);
             now = now.Next();
@@ -135,5 +122,17 @@ public class Prediction
         Assert.Equal(expectedPredictCount + expectedRollbackCount, positionChangedCount);
         Assert.Equal(expectedRollbackCount, rollbackPositionChangedCount);
         Assert.Equal(2, ammoChangedCount);
+        predictedInputs.DiscardUpToAndExcluding(rollbackTargetTickId);
+
+        expectedRollMode = EntityRollMode.Rollforth;
+        const int expectedRollforthCount = 7;
+        var predictionStateHistory = new PredictionStateChecksumQueue();
+        Assert.Equal(20, internalEntity.Self.ammoCount);
+        RollForth.Rollforth(spawnedEntity, predictedInputs, rollbackStack, predictionStateHistory);
+        Assert.Equal(positionAfter, internalEntity.Self.position);
+        Assert.Equal(19, internalEntity.Self.ammoCount);
+        Assert.Equal(expectedRollforthCount, predictionStateHistory.Count);
+        Assert.Equal(27u, predictionStateHistory.FirstTickId.tickId);
+        Assert.Equal(expectedPredictCount + expectedRollbackCount + expectedRollforthCount, positionChangedCount);
     }
 }

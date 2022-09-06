@@ -17,28 +17,34 @@ namespace Piot.Surge.Pulse.Client
 
     public class SnapshotPackStack
     {
-        private readonly Stack<SnapshotPack> queue = new();
+        private readonly Stack<SnapshotPack> stack = new();
 
         private bool isInitialized;
         private TickId lastInsertedTickId;
 
-        protected int Count => queue.Count;
+        protected int Count => stack.Count;
 
         protected void Push(TickId tickId, ReadOnlySpan<byte> payload)
         {
             if (isInitialized && !tickId.IsImmediateFollowing(lastInsertedTickId))
             {
-                throw new Exception("must have queue without gaps");
+                throw new Exception($"must have stack without gaps last:{lastInsertedTickId} want to add: {tickId}");
             }
 
-            queue.Push(new() { tickId = tickId, payload = payload.ToArray() });
+            stack.Push(new() { tickId = tickId, payload = payload.ToArray() });
             lastInsertedTickId = tickId;
             isInitialized = true;
         }
 
         public SnapshotPack Pop()
         {
-            return queue.Pop();
+            lastInsertedTickId = lastInsertedTickId.Previous();
+            return stack.Pop();
+        }
+
+        public TickId PeekTickId()
+        {
+            return stack.Peek().tickId;
         }
     }
 }

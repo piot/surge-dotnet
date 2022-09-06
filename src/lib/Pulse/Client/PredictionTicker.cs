@@ -11,9 +11,15 @@ namespace Piot.Surge.Pulse.Client
 {
     public static class PredictionTicker
     {
-        public static void Predict(IEntity predictedEntity, TickId tickIdBeforePredictTick, RollbackStack rollbackStack)
+        public static void Predict(IEntity predictedEntity, TickId tickIdBeforePredictTick, RollbackStack rollbackStack,
+            PredictMode predictMode)
         {
-            predictedEntity.RollMode = EntityRollMode.Predict;
+            predictedEntity.RollMode = predictMode switch
+            {
+                PredictMode.RollingForth => EntityRollMode.Rollforth,
+                PredictMode.Predicting => EntityRollMode.Predict
+            };
+
             predictedEntity.Overwrite();
             predictedEntity.Tick();
 

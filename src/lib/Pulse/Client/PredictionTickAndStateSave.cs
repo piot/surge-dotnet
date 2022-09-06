@@ -11,9 +11,9 @@ namespace Piot.Surge.Pulse.Client
     public static class PredictionTickAndStateSave
     {
         public static void PredictAndStateSave(IEntity predictedEntity, TickId tickIdBeforePredictTick,
-            RollbackStack rollbackStack, PredictionStateChecksumQueue predictionStateHistory)
+            RollbackStack rollbackStack, PredictionStateChecksumQueue predictionStateHistory, PredictMode isRollforth)
         {
-            PredictionTicker.Predict(predictedEntity, tickIdBeforePredictTick, rollbackStack);
+            PredictionTicker.Predict(predictedEntity, tickIdBeforePredictTick, rollbackStack, isRollforth);
             var tickIdAfterPredict = tickIdBeforePredictTick.Next();
             PredictStateSerializer.SavePredictedState(predictedEntity, tickIdAfterPredict, predictionStateHistory);
         }

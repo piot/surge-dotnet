@@ -30,7 +30,7 @@ namespace Piot.Surge.Pulse.Client
 
                 PredictionTickAndStateSave.PredictAndStateSave(predictedEntity, predictedInput.appliedAtTickId,
                     rollbackStack,
-                    predictionStateHistory);
+                    predictionStateHistory, PredictMode.RollingForth);
             }
         }
     }

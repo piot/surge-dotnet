@@ -51,6 +51,13 @@ namespace Piot.Surge.LogicalInput
         public TickId appliedAtTickId;
         public ReadOnlyMemory<byte> payload;
 
+        public LogicalInput(LocalPlayerIndex localPlayerIndex, TickId appliedAtTickId, ReadOnlySpan<byte> payload)
+        {
+            this.localPlayerIndex = localPlayerIndex;
+            this.appliedAtTickId = appliedAtTickId;
+            this.payload = payload.ToArray();
+        }
+
         public override bool Equals(object? obj)
         {
             if (obj is null)
