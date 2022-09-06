@@ -48,7 +48,7 @@ public class Rollforth
 
         avatarLogicEntity.OnPositionChanged += () =>
         {
-            log.Debug("Position Changed! {RollMode}", internalEntity.RollMode);
+            log.Debug("Position Changed! {RollMode} {Position}", internalEntity.RollMode, internalEntity.Self.position);
             Assert.Equal(expectedRollMode, internalEntity.RollMode);
             if (expectedRollMode == EntityRollMode.Rollback)
             {

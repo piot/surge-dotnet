@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
@@ -131,42 +132,13 @@ namespace Piot.Surge.Pulse.Client
 
             var usePrediction = false;
 
+            var localAvatarPredictorsArray = localAvatarPredictors.Values.ToArray();
 
-            foreach (var localAvatarPredictor in localAvatarPredictors.Values)
-            {
-                var inputOctets = inputPackFetch.Fetch(localAvatarPredictor.LocalPlayerIndex);
-                var logicalInput = new LogicalInput.LogicalInput
-                {
-                    appliedAtTickId = predictTickId,
-                    payload = inputOctets.ToArray()
-                };
+            PredictLocalAvatars.PredictLocalPlayers(predictTickId, inputPackFetch, localAvatarPredictorsArray,
+                usePrediction, log);
 
-                log.DebugLowLevel("Adding logical input {LogicalInput} for {LocalPredictor}", logicalInput,
-                    localAvatarPredictor);
-                localAvatarPredictor.PredictedInputs.AddLogicalInput(logicalInput);
-                if (usePrediction)
-                {
-                    localAvatarPredictor.Predict(logicalInput);
-                }
-            }
-
-            var inputForAllPlayers = new LogicalInputArrayForPlayer[localAvatarPredictors.Count];
-            var index = 0;
-            foreach (var localAvatarPredictor in localAvatarPredictors.Values)
-            {
-                var inputForLocal = localAvatarPredictor.PredictedInputs.Collection;
-                inputForAllPlayers[index].inputs = inputForLocal;
-                index++;
-            }
-
-            TickId debugFirstTickId = new();
-            TickId debugLastTickId = new();
-
-            if (inputForAllPlayers.Length > 0)
-            {
-                debugFirstTickId = inputForAllPlayers[0].inputs[0].appliedAtTickId;
-                debugLastTickId = inputForAllPlayers[0].inputs[^1].appliedAtTickId;
-            }
+            var logicalInputForAllPlayers =
+                LocalPlayerLogicalInputBundler.BundleInputForAllLocalPlayers(localAvatarPredictorsArray);
 
             var droppedSnapshotCount = lastSeenSnapshotTickId > nextExpectedSnapshotTickId
                 ? (byte)(lastSeenSnapshotTickId - nextExpectedSnapshotTickId).tickId
@@ -174,14 +146,15 @@ namespace Piot.Surge.Pulse.Client
             var outDatagram =
                 LogicInputDatagramPackOut.CreateInputDatagram(datagramsOut.Value, nextExpectedSnapshotTickId,
                     droppedSnapshotCount,
-                    now, new LogicalInputsForAllLocalPlayers(inputForAllPlayers));
+                    now, logicalInputForAllPlayers);
+
             log.DebugLowLevel("Sending inputs to host {FirstTickId} {LastTickId}",
-                debugFirstTickId, debugLastTickId);
+                logicalInputForAllPlayers.debugFirstId, logicalInputForAllPlayers.debugLastId);
 
             transportClient.SendToHost(outDatagram);
-            datagramsOut.Increase();
 
-            predictTickId = new(predictTickId.tickId + 1);
+            datagramsOut.Increase();
+            predictTickId = predictTickId.Next();
         }
     }
 }

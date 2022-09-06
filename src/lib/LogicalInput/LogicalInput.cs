@@ -22,6 +22,16 @@ namespace Piot.Surge.LogicalInput
     {
         public readonly LogicalInputArrayForPlayer[] inputForEachPlayerInSequence;
 
+        public readonly TickId debugFirstId => inputForEachPlayerInSequence.Length == 0 ||
+                                               inputForEachPlayerInSequence[0].inputs.Length == 0
+            ? new()
+            : inputForEachPlayerInSequence[0].inputs[0].appliedAtTickId;
+
+        public readonly TickId debugLastId => inputForEachPlayerInSequence.Length == 0 ||
+                                              inputForEachPlayerInSequence[0].inputs.Length == 0
+            ? new()
+            : inputForEachPlayerInSequence[0].inputs[^1].appliedAtTickId;
+
         public LogicalInputsForAllLocalPlayers(LogicalInputArrayForPlayer[] inputForEachPlayerInSequence)
         {
             this.inputForEachPlayerInSequence = inputForEachPlayerInSequence;

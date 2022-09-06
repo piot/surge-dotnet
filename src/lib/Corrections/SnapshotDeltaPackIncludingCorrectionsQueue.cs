@@ -37,7 +37,7 @@ namespace Piot.Surge.Corrections
 
             packs.Enqueue(new(pack, lastInsertedTickId));
             lastInsertedTickIdRange = pack.tickIdRange;
-            wantsTickIdValue = lastInsertedTickIdRange.Last.tickId + 1;
+            wantsTickIdValue = lastInsertedTickIdRange.Last.Next().tickId;
         }
 
         public SnapshotDeltaPackIncludingCorrectionsItem Dequeue()
