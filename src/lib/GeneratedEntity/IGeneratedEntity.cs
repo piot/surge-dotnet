@@ -13,7 +13,7 @@ namespace Piot.Surge.GeneratedEntity
     /// </summary>
     public interface IGeneratedEntity : IEntitySerializer, IEntityBitSerializer, IEntityDeserializer,
         IEntityBitDeserializer, IEntityChanges, IEntityOverwrite,
-        ISimpleLogic, IEntityFireChanges, IEntityActions, IEntityActionsDoUnDo
+        ISimpleLogic, IEntityFireChanges, IEntityActions, IEntityActionsDoUnDo, IAuthoritativeEntityCaptureSnapshot
     {
         public ILogic Logic { get; }
 

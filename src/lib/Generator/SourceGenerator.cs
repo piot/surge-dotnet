@@ -261,7 +261,7 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
         {
             AddSection(sb, "Internal Action Implementation");
             var actionsImplementationName = Suffix(info.Type.Name, "Actions");
-            var actionInterface = FullName(info.CommandsInterface);
+            var actionInterface = FullName(info.CommandsInterface!);
 
             sb.Append($"public class {actionsImplementationName} : {actionInterface}").Append(@"
 {
@@ -607,7 +607,21 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
         public static void AddTick(StringBuilder sb, LogicInfo info)
         {
             var actionsImplementationName = ActionsName(info.Type);
-            sb.Append(@"
+
+            if (info.TickMethod.GetParameters().Length == 0)
+            {
+                sb.Append(@"
+
+    public void Tick()
+    {
+        current.Tick();
+    }
+
+");
+            }
+            else
+            {
+                sb.Append(@"
 
     public void Tick()
     {
@@ -616,6 +630,7 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
     }
 
 ");
+            }
         }
 
         public static (string, string) SmallestPrimitiveForBitCount(int bitCount)
@@ -801,7 +816,8 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
 
         public static void AddInternalMembers(StringBuilder sb)
         {
-            sb.Append(@"    private readonly ActionsContainer actionsContainer = new();
+            sb.Append(@"
+private readonly ActionsContainer actionsContainer = new();
 
 
 ");
@@ -810,7 +826,7 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
         public static void AddInternalMethods(StringBuilder sb)
         {
             sb.Append(@"
-    public IAction[] Actions => actionsContainer.Actions.ToArray();
+    public IAction[] Actions => actionsContainer.Actions;
     
     public ILogic Logic => current;
 
@@ -1011,11 +1027,25 @@ public class ").Append(outFacingClassName).Append($@"
         return $""[{outFacingClassName} logic:{{Self}}]"";  
     }}
 
+    public void Destroy()
+    {{
+        internalEntity.Destroy();
+    }}
+
     public {FullName(logicInfo.Type)} Self => internalEntity.Self;
 
     public Action? OnDestroyed;
     public Action? OnPostUpdate;
 ");
+            if (logicInfo.SimulationFieldInfos.Any())
+            {
+                sb.Append($@"
+    public Func<{EntityGeneratedInternal(logicInfo)}SimulationInfo> OnSnapshot
+    {{
+            set => internalEntity.OnSnapshot = value;
+    }}
+");
+            }
 
             AddChangeDelegates(sb, logicInfo, logicInfo.FieldInfos);
             AddActionDelegates(sb, logicInfo.CommandInfos);
@@ -1033,6 +1063,59 @@ public class ").Append(outFacingClassName).Append($@"
             public void SetInput(IOctetReader reader)
             {
                 current.SetInput(GameInputReader.Read(reader));
+            }
+");
+        }
+
+        public static void SimulationCaptureInfo(StringBuilder sb, LogicInfo logicInfo)
+        {
+            sb.Append(@$"
+public struct {EntityGeneratedInternal(logicInfo)}SimulationInfo
+{{
+
+
+");
+            foreach (var fieldInfo in logicInfo.SimulationFieldInfos)
+            {
+                sb.Append($@"public {FullName(fieldInfo.FieldInfo.FieldType)} {fieldInfo.FieldInfo.Name};
+");
+            }
+
+            sb.Append(@"
+}
+");
+        }
+
+        public static void CaptureSnapshot(StringBuilder sb, LogicInfo logicInfo)
+        {
+            sb.Append($@"             
+
+            public Func<{EntityGeneratedInternal(logicInfo)}SimulationInfo> OnSnapshot;
+
+            void IAuthoritativeEntityCaptureSnapshot.CaptureSnapshot()
+            {{
+                var capturedState = OnSnapshot();
+            ");
+
+            foreach (var fieldInfo in logicInfo.SimulationFieldInfos)
+            {
+                sb.Append($@"        current.{fieldInfo.FieldInfo.Name} = capturedState.{fieldInfo.FieldInfo.Name};
+");
+            }
+
+            sb.Append(@"
+
+            }
+
+");
+        }
+
+        public static void AddEmptyCaptureSnapshot(StringBuilder sb)
+        {
+            sb.Append(@"
+            void IAuthoritativeEntityCaptureSnapshot.CaptureSnapshot()
+            {
+                throw new NotImplementedException();
             }
 ");
         }
@@ -1066,6 +1149,13 @@ public class ").Append(EntityGeneratedInternal(logicInfo)).Append($" : {inherit}
 
         public EntityRollMode RollMode { get; set; }
 
+        public void Destroy()
+        {
+            // TODO: Add implementation
+        }
+
+
+
 ").Append($" internal {FullName(logicInfo.Type)} Current").Append(@"
             {
                 set => current = value;
@@ -1097,6 +1187,15 @@ public class ").Append(EntityGeneratedInternal(logicInfo)).Append($" : {inherit}
             if (logicInfo.CanTakeInput)
             {
                 AddSetInputMethod(sb);
+            }
+
+            if (logicInfo.SimulationFieldInfos.Any())
+            {
+                CaptureSnapshot(sb, logicInfo);
+            }
+            else
+            {
+                AddEmptyCaptureSnapshot(sb);
             }
 
             DoActions(sb, logicInfo.CommandInfos);
@@ -1232,6 +1331,7 @@ public class GeneratedInputFetch : IInputPackFetch
 
             sb.Append(@"
 
+using System;
 using Piot.Surge.FastTypeInformation;
 using Piot.Flood;
 using Piot.Surge.Types.Serialization;
@@ -1257,7 +1357,19 @@ namespace Piot.Surge.Internal.Generated
 
             foreach (var logicInfo in infos)
             {
-                AddActions(sb, logicInfo);
+                if (logicInfo.SimulationFieldInfos.Any())
+                {
+                    SimulationCaptureInfo(sb, logicInfo);
+                }
+            }
+
+
+            foreach (var logicInfo in infos)
+            {
+                if (logicInfo.CommandsInterface is not null)
+                {
+                    AddActions(sb, logicInfo);
+                }
 
                 AddOutFacingEntity(sb, logicInfo);
                 AddInternalEntity(sb, logicInfo);

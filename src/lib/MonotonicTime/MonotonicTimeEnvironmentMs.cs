@@ -7,6 +7,7 @@ using System;
 
 namespace Piot.MonotonicTime
 {
+#if !UNITY_STANDALONE
     public class MonotonicTimeEnvironmentMs : IMonotonicTimeMs
     {
         /// <summary>
@@ -14,4 +15,5 @@ namespace Piot.MonotonicTime
         /// </summary>
         public Milliseconds TimeInMs => new(Environment.TickCount64);
     }
+#endif
 }

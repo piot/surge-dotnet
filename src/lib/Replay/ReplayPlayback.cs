@@ -83,7 +83,6 @@ namespace Piot.Surge.Replay
 
             Ticker.Tick(world);
             Notifier.Notify(world.AllEntities);
-            OverWriter.Overwrite(world);
             log.Debug("===Playback Tick()=== Applying {TickId}", playbackTickId);
             ApplyDeltaState(nextDeltaState);
             playbackTickId = playbackTickId.Next();

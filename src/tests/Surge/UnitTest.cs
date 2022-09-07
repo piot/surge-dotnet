@@ -417,7 +417,7 @@ public class UnitTest1
 #if DEBUG
         Assert.Equal(25, packetQueue.Peek().Pack.deltaSnapshotPackPayload.Length);
 #else
-        Assert.Equal(16, packetQueue.Peek().Pack.deltaSnapshotPackPayload.Length);
+        Assert.Equal(22, packetQueue.Peek().Pack.deltaSnapshotPackPayload.Length);
 #endif
 
         Assert.Equal(600, ((AvatarLogic)spawnedAvatar.Logic).position.x);
@@ -641,7 +641,7 @@ public class UnitTest1
 #if DEBUG
         Assert.Equal(31, undoWriter.Octets.Length);
 #else
-        Assert.Equal(22, undoWriter.Octets.Length);
+        Assert.Equal(28, undoWriter.Octets.Length);
 #endif
 
         Assert.Equal(1200, clientSpawnedEntity.Self.position.x);

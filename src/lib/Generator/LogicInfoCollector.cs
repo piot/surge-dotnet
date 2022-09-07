@@ -50,17 +50,26 @@ namespace Piot.Surge.Generator
         }
     }
 
+
+    public enum FieldSource
+    {
+        Logic,
+        Simulation
+    }
+
     public class LogicFieldInfo
     {
-        public LogicFieldInfo(FieldInfo fieldInfo, ulong mask)
+        public LogicFieldInfo(FieldInfo fieldInfo, ulong mask, FieldSource source)
         {
             FieldInfo = fieldInfo;
             Mask = mask;
+            FieldSource = source;
         }
 
         public ulong Mask { get; }
 
         public FieldInfo FieldInfo { get; }
+        public FieldSource FieldSource { get; }
 
         public override string ToString()
         {
@@ -76,45 +85,67 @@ namespace Piot.Surge.Generator
             TickMethod = tickMethod;
             SetInputMethod = setInputMethod;
             var parameters = tickMethod.GetParameters();
-            if (parameters.Length != 1)
+            if (parameters.Length > 1)
             {
                 throw new Exception(
-                    "we can only allow one parameter to Tick(). The game specific actions container");
+                    "we can only allow zero or one parameter to Tick(). The game specific actions container");
             }
 
-
-            var commandsInterface = parameters.First().ParameterType;
-            if (!commandsInterface.IsInterface)
+            if (parameters.Length == 1)
             {
-                throw new Exception("Tick() must take an interface as a single parameter");
-            }
+                var commandsInterface = parameters.First().ParameterType;
+                if (!commandsInterface.IsInterface)
+                {
+                    throw new Exception("Tick() must take an interface as a single parameter");
+                }
 
-            /*
+/*
             if (!commandsInterface.IsAssignableTo(typeof(ILogicActions)))
                 throw new Exception($"Interface in Tick {type.Name} must inherit from {nameof(ILogicActions)}");
 */
-            var methodsInInterface = commandsInterface.GetMethods();
-            CommandInfos = methodsInInterface.Select(method => new CommandInfo(method)).ToList();
-            CommandsInterface = commandsInterface;
+                var methodsInInterface = commandsInterface.GetMethods();
+                CommandInfos = methodsInInterface.Select(method => new CommandInfo(method)).ToList();
+                CommandsInterface = commandsInterface;
+            }
+            else
+            {
+                CommandInfos = ArraySegment<CommandInfo>.Empty;
+                CommandsInterface = null;
+            }
+
             var fieldsInLogic = type.GetFields();
 
             ulong mask = 1;
 
             var tempList = new List<LogicFieldInfo>();
+            var simulationFields = new List<LogicFieldInfo>();
             foreach (var fieldInLogic in fieldsInLogic)
             {
-                tempList.Add(new LogicFieldInfo(fieldInLogic, mask));
+                var source = ScannerHelper.HasAttribute<SimulatedAttribute>(fieldInLogic)
+                    ? FieldSource.Simulation
+                    : FieldSource.Logic;
+
+                var fieldInfo = new LogicFieldInfo(fieldInLogic, mask, source);
+                if (source == FieldSource.Simulation)
+                {
+                    simulationFields.Add(fieldInfo);
+                }
+
+                tempList.Add(fieldInfo);
+
                 mask <<= 1;
             }
 
             FieldInfos = tempList.ToList();
+            SimulationFieldInfos = simulationFields.ToList();
         }
 
         public IEnumerable<CommandInfo> CommandInfos { get; }
 
         public IEnumerable<LogicFieldInfo> FieldInfos { get; }
+        public IEnumerable<LogicFieldInfo> SimulationFieldInfos { get; }
 
-        public Type CommandsInterface { get; }
+        public Type? CommandsInterface { get; }
 
         public MethodInfo TickMethod { get; }
         public MethodInfo? SetInputMethod { get; }
@@ -125,7 +156,7 @@ namespace Piot.Surge.Generator
 
         public override string ToString()
         {
-            var commandInfosString = CommandInfos.Aggregate("\n ", (current, command) => current + "\n " + command);
+            var commandInfosString = CommandInfos?.Aggregate("\n ", (current, command) => current + "\n " + command);
             var fieldInfosString = FieldInfos.Aggregate("\n ", (current, command) => current + "\n " + command);
 
             return $"[logicInfo {Type} {TickMethod}  {fieldInfosString} {commandInfosString}]";

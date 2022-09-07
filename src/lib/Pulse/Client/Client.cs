@@ -33,7 +33,6 @@ namespace Piot.Surge.Pulse.Client
         private readonly StatCountThreshold statsRoundTripTime = new(20);
         private readonly ITransportClient transportClient;
         private readonly TransportStatsBoth transportWithStats;
-
         private readonly HoldPositive weAreSkippingAhead = new(25);
 
         public Client(ILog log, Milliseconds now, Milliseconds targetDeltaTimeMs,

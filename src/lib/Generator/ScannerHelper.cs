@@ -20,6 +20,12 @@ namespace Piot.Surge.Generator
             return methodInfo.GetCustomAttribute<T>() != null;
         }
 
+        public static bool HasAttribute<T>(FieldInfo fieldInfo) where T : Attribute
+        {
+            return fieldInfo.GetCustomAttribute<T>() != null;
+        }
+
+
         public static bool IsStruct(Type t)
         {
             return t.IsValueType && !t.IsEnum;

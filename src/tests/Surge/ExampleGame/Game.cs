@@ -76,7 +76,6 @@ public class Game
                 GeneratedHostEntitySpawner.SpawnFireballLogic(fireballLogic);
             };
 
-
             avatar.OnPostUpdate += () =>
             {
                 var self = avatar.Self;

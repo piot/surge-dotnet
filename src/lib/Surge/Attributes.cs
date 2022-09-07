@@ -23,4 +23,9 @@ namespace Piot.Surge
     public class InputFetchAttribute : Attribute
     {
     }
+
+    [AttributeUsage(AttributeTargets.Field)]
+    public class SimulatedAttribute : Attribute
+    {
+    }
 }

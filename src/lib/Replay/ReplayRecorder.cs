@@ -49,11 +49,13 @@ namespace Piot.Surge.Replay
             var deltaState = new DeltaState(pack.tickIdRange, pack.payload.Span);
             replayWriter.AddDeltaState(deltaState);
 
-            if (replayWriter.NeedsCompleteState)
+            if (!replayWriter.NeedsCompleteState)
             {
-                log.Info("Time to capture complete state {TickIdNow}", worldTickIdNow);
-                replayWriter.AddCompleteState(CaptureCompleteState(worldTickIdNow));
+                return;
             }
+
+            log.Info("Time to capture complete state {TickIdNow}", worldTickIdNow);
+            replayWriter.AddCompleteState(CaptureCompleteState(worldTickIdNow));
         }
 
         public void Close()
