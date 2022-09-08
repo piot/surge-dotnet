@@ -40,5 +40,10 @@ namespace Piot.Surge.Event
         }
 
         public EventArchetypeId ArchetypeId => EventWithArchetype.ArchetypeId;
+
+        public override string ToString()
+        {
+            return EventWithArchetype.ToString()!;
+        }
     }
 }

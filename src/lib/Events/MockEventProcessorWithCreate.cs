@@ -11,6 +11,8 @@ namespace Piot.Surge.Event
 {
     public class MockEventWithArchetype : IEventWithArchetype
     {
+        private byte lastDeserializedValue;
+
         public MockEventWithArchetype(EventArchetypeId archetypeId)
         {
             ArchetypeId = archetypeId;
@@ -25,7 +27,8 @@ namespace Piot.Surge.Event
 
         public void DeSerialize(IBitReader bitReader)
         {
-            if (bitReader.ReadBits(5) != 0x1d)
+            lastDeserializedValue = (byte)bitReader.ReadBits(5);
+            if (lastDeserializedValue != 0x1d)
             {
                 throw new Exception("wrong bits read");
             }
@@ -38,10 +41,16 @@ namespace Piot.Surge.Event
 
         public void DeSerialize(IOctetReader octetReader)
         {
-            if (octetReader.ReadUInt8() != 0x1d)
+            lastDeserializedValue = octetReader.ReadUInt8();
+            if (lastDeserializedValue != 0x1d)
             {
                 throw new Exception("wrong bits read");
             }
+        }
+
+        public override string ToString()
+        {
+            return $"[MockEvent {ArchetypeId} value:{lastDeserializedValue}";
         }
     }
 
@@ -59,7 +68,8 @@ namespace Piot.Surge.Event
         {
             foreach (var shortLivedEvent in shortLivedEvents)
             {
-                log.DebugLowLevel("performing event of {ArchetypeId}", shortLivedEvent.ArchetypeId);
+                log.DebugLowLevel("performing event of {ArchetypeId} {Event}", shortLivedEvent.ArchetypeId,
+                    shortLivedEvent);
             }
         }
 

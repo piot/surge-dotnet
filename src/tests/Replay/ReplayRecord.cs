@@ -37,9 +37,15 @@ public class ReplayRecorderTests
         OverWriter.Overwrite(authoritativeWorld);
         Ticker.Tick(authoritativeWorld);
         Notifier.Notify(authoritativeWorld.AllEntities);
+        var shortLivedEvents = Array.Empty<IEventWithArchetypeAndSequenceId>();
+        if (hostTickId.tickId == 33)
+        {
+            shortLivedEvents = new[] { new EventWithSequenceId(new(412), new MockEventWithArchetype(new(23))) };
+        }
+
         var deltaSnapshotEntityIds = Scanner.Scan(authoritativeWorld, hostTickId);
         return DeltaSnapshotToBitPack.ToDeltaSnapshotPack(authoritativeWorld,
-            Array.Empty<IEventWithArchetypeAndSequenceId>(), deltaSnapshotEntityIds,
+            shortLivedEvents, deltaSnapshotEntityIds,
             TickIdRange.FromTickId(hostTickId));
     }
 
@@ -55,6 +61,7 @@ public class ReplayRecorderTests
             var authoritative = new AuthoritativeWorld();
             var notify = new GeneratedNotifyEntityCreation();
             var entitySpawner = new GeneratedHostEntitySpawner(authoritative, notify);
+
 
             using var outputStream = FileStreamCreator.Create("replay.temp");
 
