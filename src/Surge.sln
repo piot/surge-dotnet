@@ -6,8 +6,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "tests\Tests.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jump", "examples\jump\Jump.csproj", "{605BE7C7-79F0-4A97-A388-CF744519A46A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tools", "tools\Tools.csproj", "{4FC86255-F40E-4FC2-B2DF-9A15A51FFD85}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,9 +24,5 @@ Global
 		{605BE7C7-79F0-4A97-A388-CF744519A46A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{605BE7C7-79F0-4A97-A388-CF744519A46A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{605BE7C7-79F0-4A97-A388-CF744519A46A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4FC86255-F40E-4FC2-B2DF-9A15A51FFD85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4FC86255-F40E-4FC2-B2DF-9A15A51FFD85}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4FC86255-F40E-4FC2-B2DF-9A15A51FFD85}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4FC86255-F40E-4FC2-B2DF-9A15A51FFD85}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
