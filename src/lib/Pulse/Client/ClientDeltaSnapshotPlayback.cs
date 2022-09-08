@@ -30,6 +30,7 @@ namespace Piot.Surge.Pulse.Client
         private readonly IClientPredictorCorrections predictor;
         private readonly TimeTicker snapshotPlaybackTicker;
         private readonly Milliseconds targetDeltaTimeMs;
+        private EventSequenceId expectedEventSequenceId;
         private TickId playbackTick = new(1);
 
         public ClientDeltaSnapshotPlayback(Milliseconds now, IEntityContainerWithGhostCreator clientWorld,
@@ -138,7 +139,8 @@ namespace Piot.Surge.Pulse.Client
             LastPlaybackSnapshotWasSkipAhead = deltaSnapshotIncludingCorrectionsItem.IsSkippedAheadSnapshot;
             LastPlaybackSnapshotWasMerged = deltaSnapshotIncludingCorrectionsItem.IsMergedAndOverlapping;
 
-            ApplyDeltaSnapshotToWorld.Apply(deltaSnapshotPack, clientWorld, eventProcessorWithCreate,
+            expectedEventSequenceId = ApplyDeltaSnapshotToWorld.Apply(deltaSnapshotPack, clientWorld,
+                eventProcessorWithCreate, expectedEventSequenceId,
                 deltaSnapshotIncludingCorrectionsItem.IsMergedAndOverlapping);
 
             predictor.ReadCorrections(deltaSnapshotIncludingCorrections.tickIdRange.Last,

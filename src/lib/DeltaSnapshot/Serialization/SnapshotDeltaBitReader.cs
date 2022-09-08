@@ -17,15 +17,27 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
         /// <param name="reader"></param>
         /// <param name="entityContainer"></param>
         /// <returns></returns>
-        public static void ReadAndApply(IBitReader reader,
+        public static EventSequenceId ReadAndApply(IBitReader reader,
             IEntityContainerWithGhostCreator entityGhostContainerWithCreator,
-            IEventProcessorWithCreate eventProcessorWithCreate, bool isOverlappingMergedSnapshot)
+            IEventProcessorWithCreate eventProcessorWithCreate, EventSequenceId nextExpectedSequenceId,
+            bool isOverlappingMergedSnapshot)
         {
             SnapshotDeltaEntityBitReader.ReadAndApply(reader, entityGhostContainerWithCreator,
                 isOverlappingMergedSnapshot);
 
             var eventsForThisRange = EventStreamReader.Read(eventProcessorWithCreate, reader);
-            eventProcessorWithCreate.PerformEvents(eventsForThisRange);
+            foreach (var eventToProcess in eventsForThisRange)
+            {
+                if (!eventToProcess.SequenceId.IsEqualOrSuccessor(nextExpectedSequenceId))
+                {
+                    continue;
+                }
+
+                eventProcessorWithCreate.PerformEvent(eventToProcess);
+                nextExpectedSequenceId = eventToProcess.SequenceId.Next();
+            }
+
+            return nextExpectedSequenceId;
         }
     }
 }

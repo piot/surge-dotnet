@@ -73,6 +73,12 @@ namespace Piot.Surge.Event
             }
         }
 
+        public void PerformEvent(IEventWithArchetype shortLivedEvent)
+        {
+            log.DebugLowLevel("performing event of {ArchetypeId} {Event}", shortLivedEvent.ArchetypeId,
+                shortLivedEvent);
+        }
+
         public IEventWithArchetype Create(EventArchetypeId archetypeId)
         {
             log.DebugLowLevel("creating mock event of {ArchetypeId}", archetypeId);

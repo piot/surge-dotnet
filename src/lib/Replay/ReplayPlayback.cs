@@ -26,6 +26,7 @@ namespace Piot.Surge.Replay
         private readonly TimeTicker timeTicker;
         private readonly IEntityContainerWithGhostCreator world;
         private DeltaState? nextDeltaState;
+        private EventSequenceId nextExpectedSequenceId;
         private TickId playbackTickId;
 
         public ReplayPlayback(IEntityContainerWithGhostCreator world,
@@ -66,7 +67,8 @@ namespace Piot.Surge.Replay
         {
             var bitReader = new BitReader(deltaState.Payload, deltaState.Payload.Length * 8);
             var isOverlapping = deltaState.TickIdRange.Contains(playbackTickId);
-            SnapshotDeltaBitReader.ReadAndApply(bitReader, world, eventProcessorWithCreate, isOverlapping);
+            nextExpectedSequenceId = SnapshotDeltaBitReader.ReadAndApply(bitReader, world, eventProcessorWithCreate,
+                nextExpectedSequenceId, isOverlapping);
             playbackTickId = deltaState.TickIdRange.Last;
         }
 

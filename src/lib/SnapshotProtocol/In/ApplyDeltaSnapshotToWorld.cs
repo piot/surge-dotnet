@@ -13,8 +13,9 @@ namespace Piot.Surge.SnapshotProtocol.In
 {
     public static class ApplyDeltaSnapshotToWorld
     {
-        public static void Apply(DeltaSnapshotPack pack, IEntityContainerWithGhostCreator world,
-            IEventProcessorWithCreate eventProcessor, bool isOverlappingMergedSnapshot)
+        public static EventSequenceId Apply(DeltaSnapshotPack pack, IEntityContainerWithGhostCreator world,
+            IEventProcessorWithCreate eventProcessor, EventSequenceId expectedEventSequenceId,
+            bool isOverlappingMergedSnapshot)
         {
             switch (pack.StreamType)
             {
@@ -32,8 +33,9 @@ namespace Piot.Surge.SnapshotProtocol.In
 
                     if (pack.SnapshotType == SnapshotType.DeltaSnapshot)
                     {
-                        SnapshotDeltaBitReader.ReadAndApply(bitSnapshotReader, world, eventProcessor,
-                            isOverlappingMergedSnapshot);
+                        expectedEventSequenceId = SnapshotDeltaBitReader.ReadAndApply(bitSnapshotReader, world,
+                            eventProcessor,
+                            expectedEventSequenceId, isOverlappingMergedSnapshot);
                     }
                     else
                     {
@@ -42,6 +44,8 @@ namespace Piot.Surge.SnapshotProtocol.In
                 }
                     break;
             }
+
+            return expectedEventSequenceId;
         }
     }
 }

@@ -10,5 +10,6 @@ namespace Piot.Surge.Event
     public interface IEventProcessorWithCreate : IEventCreator
     {
         public void PerformEvents(IEventWithArchetype[] shortLivedEvents);
+        public void PerformEvent(IEventWithArchetype shortLivedEvent);
     }
 }
