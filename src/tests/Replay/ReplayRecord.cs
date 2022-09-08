@@ -12,6 +12,7 @@ using Piot.Surge.DeltaSnapshot.Pack;
 using Piot.Surge.DeltaSnapshot.Pack.Convert;
 using Piot.Surge.DeltaSnapshot.Scan;
 using Piot.Surge.Entities;
+using Piot.Surge.Event;
 using Piot.Surge.Internal.Generated;
 using Piot.Surge.Replay;
 using Piot.Surge.Tick;
@@ -37,7 +38,8 @@ public class ReplayRecorderTests
         Ticker.Tick(authoritativeWorld);
         Notifier.Notify(authoritativeWorld.AllEntities);
         var deltaSnapshotEntityIds = Scanner.Scan(authoritativeWorld, hostTickId);
-        return DeltaSnapshotToBitPack.ToDeltaSnapshotPack(authoritativeWorld, deltaSnapshotEntityIds,
+        return DeltaSnapshotToBitPack.ToDeltaSnapshotPack(authoritativeWorld,
+            Array.Empty<IEventWithArchetypeAndSequenceId>(), deltaSnapshotEntityIds,
             TickIdRange.FromTickId(hostTickId));
     }
 
@@ -80,16 +82,18 @@ public class ReplayRecorderTests
         {
             var ghostCreator = new GeneratedEntityGhostCreator();
             var notifyWorld = new GeneratedNotifyEntityCreation();
+            var eventTarget =
+                new MockEventProcessorWithCreate(log.SubLog("EventTarget")); // TODO: Change to generated class
             var clientWorld = new WorldWithGhostCreator(ghostCreator, notifyWorld, false);
 
             var fileStream = FileStreamCreator.OpenWithSeek("replay.temp");
             var now = new Milliseconds(10);
-            var replayPlayback = new ReplayPlayback(clientWorld, now, applicationVersion, fileStream,
+            var replayPlayback = new ReplayPlayback(clientWorld, eventTarget, now, applicationVersion, fileStream,
                 log.SubLog("replayPlayback"));
             var clientAvatar = clientWorld.FetchEntity<AvatarLogicEntityInternal>(spawnedAvatarEntityOnHost.Id);
 
             var chainLightningCount = 0;
-            clientAvatar.OutFacing.DoFireChainLightning += direction => { chainLightningCount++; };
+            clientAvatar.OutFacing.DoFireChainLightning = direction => { chainLightningCount++; };
 
             Assert.Equal(10, clientAvatar.Self.ammoCount);
             Assert.Equal(0, chainLightningCount);

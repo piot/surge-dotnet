@@ -9,6 +9,7 @@ using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.SerializableVersion;
 using Piot.Surge.CompleteSnapshot;
+using Piot.Surge.Event;
 using Piot.Surge.Replay.Serialization;
 using Piot.Surge.SnapshotDeltaPack.Serialization;
 using Piot.Surge.Tick;
@@ -19,6 +20,7 @@ namespace Piot.Surge.Replay
     // ReSharper disable once ClassNeverInstantiated.Global
     public class ReplayPlayback
     {
+        private readonly IEventProcessorWithCreate eventProcessorWithCreate;
         private readonly ILog log;
         private readonly ReplayReader replayReader;
         private readonly TimeTicker timeTicker;
@@ -26,7 +28,8 @@ namespace Piot.Surge.Replay
         private DeltaState? nextDeltaState;
         private TickId playbackTickId;
 
-        public ReplayPlayback(IEntityContainerWithGhostCreator world, Milliseconds now,
+        public ReplayPlayback(IEntityContainerWithGhostCreator world,
+            IEventProcessorWithCreate eventProcessorWithCreate, Milliseconds now,
             SemanticVersion expectedApplicationVersion, IOctetReaderWithSeekAndSkip reader, ILog log)
         {
             replayReader = new(reader);
@@ -45,6 +48,7 @@ namespace Piot.Surge.Replay
 
             this.log = log;
             this.world = world;
+            this.eventProcessorWithCreate = eventProcessorWithCreate;
             timeTicker = new(now, PlaybackTick, new(100), log.SubLog("ReplayPlayback"));
             var completeState = replayReader.Seek(replayReader.FirstCompleteStateTickId);
             playbackTickId = replayReader.FirstCompleteStateTickId;
@@ -55,14 +59,14 @@ namespace Piot.Surge.Replay
         private void ApplyCompleteState(CompleteState completeState)
         {
             var bitReader = new BitReader(completeState.Payload, completeState.Payload.Length * 8);
-            CompleteStateBitReader.ReadAndApply(bitReader, world);
+            CompleteStateBitReader.ReadAndApply(bitReader, world, eventProcessorWithCreate);
         }
 
         private void ApplyDeltaState(DeltaState deltaState)
         {
             var bitReader = new BitReader(deltaState.Payload, deltaState.Payload.Length * 8);
             var isOverlapping = deltaState.TickIdRange.Contains(playbackTickId);
-            SnapshotDeltaBitReader.ReadAndApply(bitReader, world, isOverlapping);
+            SnapshotDeltaBitReader.ReadAndApply(bitReader, world, eventProcessorWithCreate, isOverlapping);
             playbackTickId = deltaState.TickIdRange.Last;
         }
 

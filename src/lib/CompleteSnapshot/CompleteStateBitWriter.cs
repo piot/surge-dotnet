@@ -6,6 +6,8 @@
 using System;
 using Piot.Flood;
 using Piot.Surge.DeltaSnapshot.Pack;
+using Piot.Surge.Event;
+using Piot.Surge.Event.Serialization;
 using Piot.Surge.Types.Serialization;
 
 namespace Piot.Surge.CompleteSnapshot
@@ -25,6 +27,8 @@ namespace Piot.Surge.CompleteSnapshot
                 writer.WriteBits(entityToSerialize.ArchetypeId.id, 10);
                 entityToSerialize.SerializeAll(writer);
             }
+
+            EventsWriter.Write(Array.Empty<IEventWithArchetypeAndSequenceId>(), writer);
 
             return writer.Close(out _);
         }

@@ -9,6 +9,7 @@ using Piot.MonotonicTime;
 using Piot.Stats;
 using Piot.Surge.Compress;
 using Piot.Surge.DatagramType.Serialization;
+using Piot.Surge.Event;
 using Piot.Surge.LogicalInput;
 using Piot.Surge.MonotonicTimeLowerBits;
 using Piot.Surge.OrderedDatagrams;
@@ -36,7 +37,7 @@ namespace Piot.Surge.Pulse.Client
         private readonly HoldPositive weAreSkippingAhead = new(25);
 
         public Client(ILog log, Milliseconds now, Milliseconds targetDeltaTimeMs,
-            IEntityContainerWithGhostCreator worldWithGhostCreator,
+            IEntityContainerWithGhostCreator worldWithGhostCreator, IEventProcessorWithCreate eventProcessorWithCreate,
             ITransport assignedTransport, IMultiCompressor compression, IInputPackFetch fetch)
         {
             this.log = log;
@@ -49,7 +50,8 @@ namespace Piot.Surge.Pulse.Client
                 worldWithGhostCreator,
                 log.SubLog("Predictor"));
             deltaSnapshotPlayback =
-                new ClientDeltaSnapshotPlayback(now, worldWithGhostCreator, predictor, targetDeltaTimeMs,
+                new ClientDeltaSnapshotPlayback(now, worldWithGhostCreator, eventProcessorWithCreate, predictor,
+                    targetDeltaTimeMs,
                     log.SubLog("GhostPlayback"));
         }
 

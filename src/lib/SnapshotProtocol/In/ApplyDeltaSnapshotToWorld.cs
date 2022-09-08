@@ -6,6 +6,7 @@
 using Piot.Flood;
 using Piot.Surge.CompleteSnapshot;
 using Piot.Surge.DeltaSnapshot.Pack;
+using Piot.Surge.Event;
 using Piot.Surge.SnapshotDeltaPack.Serialization;
 
 namespace Piot.Surge.SnapshotProtocol.In
@@ -13,7 +14,7 @@ namespace Piot.Surge.SnapshotProtocol.In
     public static class ApplyDeltaSnapshotToWorld
     {
         public static void Apply(DeltaSnapshotPack pack, IEntityContainerWithGhostCreator world,
-            bool isOverlappingMergedSnapshot)
+            IEventProcessorWithCreate eventProcessor, bool isOverlappingMergedSnapshot)
         {
             switch (pack.StreamType)
             {
@@ -31,11 +32,12 @@ namespace Piot.Surge.SnapshotProtocol.In
 
                     if (pack.SnapshotType == SnapshotType.DeltaSnapshot)
                     {
-                        SnapshotDeltaBitReader.ReadAndApply(bitSnapshotReader, world, isOverlappingMergedSnapshot);
+                        SnapshotDeltaBitReader.ReadAndApply(bitSnapshotReader, world, eventProcessor,
+                            isOverlappingMergedSnapshot);
                     }
                     else
                     {
-                        CompleteStateBitReader.ReadAndApply(bitSnapshotReader, world);
+                        CompleteStateBitReader.ReadAndApply(bitSnapshotReader, world, eventProcessor);
                     }
                 }
                     break;

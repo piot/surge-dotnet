@@ -7,6 +7,7 @@ using Piot.Clog;
 using Piot.MonotonicTime;
 using Piot.Surge;
 using Piot.Surge.Compress;
+using Piot.Surge.Event;
 using Piot.Surge.Internal.Generated;
 using Piot.Surge.Pulse.Client;
 using Piot.Surge.Pulse.Host;
@@ -29,6 +30,7 @@ public class Game
         var entityCreation = new GeneratedEntityGhostCreator();
         GeneratedNotifyEntityCreation = new GeneratedNotifyEntityCreation();
         world = new(entityCreation, GeneratedNotifyEntityCreation, isHosting);
+        var generatedEventTarget = new MockEventProcessorWithCreate(log);
 
         if (isHosting)
         {
@@ -37,7 +39,7 @@ public class Game
         }
         else
         {
-            Client = new(log.SubLog("Client"), now, delta, world,
+            Client = new(log.SubLog("Client"), now, delta, world, generatedEventTarget,
                 transport, compression, new GeneratedInputFetch());
         }
 

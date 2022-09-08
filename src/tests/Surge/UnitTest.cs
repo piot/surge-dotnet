@@ -678,7 +678,7 @@ public class UnitTest1
         var readBackAgain = new OctetReader(snapshotDeltaPack.deltaSnapshotPackPayload);
         SnapshotDeltaReader.ReadAndApply(readBackAgain, clientWorld);
 
-        var clientSpawnedEntityAgain = clientWorld.FetchEntity<AvatarLogicEntityInternal>(spawnedAvatar.Id);
+        var clientSpawnedEntityAgain = clientWorld.FetchEntity<AvatarLogicEntityInternal>(spawnedAvatar.ArchetypeId);
 
         Assert.Equal(3, clientSpawnedEntityAgain.Self.position.x);
         Assert.Equal(100, clientSpawnedEntityAgain.Self.ammoCount);

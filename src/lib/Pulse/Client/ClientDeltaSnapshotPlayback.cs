@@ -8,6 +8,7 @@ using Piot.MonotonicTime;
 using Piot.Stats;
 using Piot.Surge.Corrections;
 using Piot.Surge.DeltaSnapshot.Pack;
+using Piot.Surge.Event;
 using Piot.Surge.SnapshotProtocol.In;
 using Piot.Surge.Tick;
 using Piot.Surge.TimeTick;
@@ -21,6 +22,7 @@ namespace Piot.Surge.Pulse.Client
     public class ClientDeltaSnapshotPlayback
     {
         private readonly IEntityContainerWithGhostCreator clientWorld;
+        private readonly IEventProcessorWithCreate eventProcessorWithCreate;
         private readonly SnapshotDeltaPackIncludingCorrectionsQueue includingCorrectionsQueue = new();
 
         private readonly HoldPositive lastBufferWasStarved = new(14);
@@ -31,11 +33,13 @@ namespace Piot.Surge.Pulse.Client
         private TickId playbackTick = new(1);
 
         public ClientDeltaSnapshotPlayback(Milliseconds now, IEntityContainerWithGhostCreator clientWorld,
-            IClientPredictorCorrections predictor, Milliseconds targetDeltaTimeMs, ILog log)
+            IEventProcessorWithCreate eventProcessorWithCreate, IClientPredictorCorrections predictor,
+            Milliseconds targetDeltaTimeMs, ILog log)
         {
             this.log = log;
             this.predictor = predictor;
             this.clientWorld = clientWorld;
+            this.eventProcessorWithCreate = eventProcessorWithCreate;
             this.targetDeltaTimeMs = targetDeltaTimeMs;
             snapshotPlaybackTicker = new(now, NextSnapshotTick, targetDeltaTimeMs,
                 log.SubLog("NextSnapshotTick"));
@@ -134,7 +138,7 @@ namespace Piot.Surge.Pulse.Client
             LastPlaybackSnapshotWasSkipAhead = deltaSnapshotIncludingCorrectionsItem.IsSkippedAheadSnapshot;
             LastPlaybackSnapshotWasMerged = deltaSnapshotIncludingCorrectionsItem.IsMergedAndOverlapping;
 
-            ApplyDeltaSnapshotToWorld.Apply(deltaSnapshotPack, clientWorld,
+            ApplyDeltaSnapshotToWorld.Apply(deltaSnapshotPack, clientWorld, eventProcessorWithCreate,
                 deltaSnapshotIncludingCorrectionsItem.IsMergedAndOverlapping);
 
             predictor.ReadCorrections(deltaSnapshotIncludingCorrections.tickIdRange.Last,

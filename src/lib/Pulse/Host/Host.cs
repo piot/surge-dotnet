@@ -15,6 +15,7 @@ using Piot.Surge.DeltaSnapshot.Pack;
 using Piot.Surge.DeltaSnapshot.Pack.Convert;
 using Piot.Surge.DeltaSnapshot.Scan;
 using Piot.Surge.Entities;
+using Piot.Surge.Event;
 using Piot.Surge.LocalPlayer;
 using Piot.Surge.Tick;
 using Piot.Surge.TimeTick;
@@ -49,6 +50,8 @@ namespace Piot.Surge.Pulse.Host
             simulationTicker = new(new Milliseconds(0), SimulationTick, new Milliseconds(16),
                 log.SubLog("SimulationTick"));
         }
+
+        public EventStream ShortLivedEventStream { get; } = new();
 
         public IEntityContainerWithDetectChanges AuthoritativeWorld { get; }
 
@@ -129,14 +132,15 @@ namespace Piot.Surge.Pulse.Host
             SetInputsFromClientsToEntities();
 
             var (masks, deltaSnapshotPack) = StoreWorldChangesToPackContainer();
-            snapshotSyncer.SendSnapshot(masks, deltaSnapshotPack, AuthoritativeWorld);
+            snapshotSyncer.SendSnapshot(masks, deltaSnapshotPack, AuthoritativeWorld, ShortLivedEventStream);
         }
 
         private (EntityMasks, DeltaSnapshotPack) StoreWorldChangesToPackContainer()
         {
             var deltaSnapshotEntityIds = Scanner.Scan(AuthoritativeWorld, serverTickId);
+            var eventsThisTick = ShortLivedEventStream.FetchEventsForRange(TickIdRange.FromTickId(serverTickId));
             var deltaSnapshotPack = shouldUseBitStream
-                ? DeltaSnapshotToBitPack.ToDeltaSnapshotPack(AuthoritativeWorld, deltaSnapshotEntityIds,
+                ? DeltaSnapshotToBitPack.ToDeltaSnapshotPack(AuthoritativeWorld, eventsThisTick, deltaSnapshotEntityIds,
                     TickIdRange.FromTickId(deltaSnapshotEntityIds.TickId))
                 : DeltaSnapshotToPack.ToDeltaSnapshotPack(AuthoritativeWorld, deltaSnapshotEntityIds);
 

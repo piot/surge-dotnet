@@ -14,5 +14,6 @@ namespace Piot.Surge.SnapshotProtocol
         public const byte SnapshotDeltaUpdatedSync = 0x9d;
         public const uint MaxDatagramOctetSize = 1200;
         public const uint MaxSnapshotOctetSize = 64 * MaxDatagramOctetSize;
+        public const byte ShortLivedEventsStartSync = 0x88;
     }
 }

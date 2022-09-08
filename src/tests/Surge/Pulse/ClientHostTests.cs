@@ -9,6 +9,7 @@ using Piot.MonotonicTime;
 using Piot.Random;
 using Piot.Surge;
 using Piot.Surge.Compress;
+using Piot.Surge.Event;
 using Piot.Surge.Internal.Generated;
 using Piot.Surge.Pulse.Client;
 using Piot.Surge.Pulse.Host;
@@ -34,10 +35,12 @@ public class ClientHostTests
         var clientDeltaTime = new Milliseconds(16);
         var inputFetch = new GeneratedInputFetch();
         var notifyWorld = new GeneratedNotifyEntityCreation();
+        var generatedEvent = new MockEventProcessorWithCreate(log);
         var entityContainerWithGhostCreator =
             new WorldWithGhostCreator(new GeneratedEntityGhostCreator(), notifyWorld, false);
 
-        var client = new Client(log.SubLog("Client"), now, clientDeltaTime, entityContainerWithGhostCreator, transport,
+        var client = new Client(log.SubLog("Client"), now, clientDeltaTime, entityContainerWithGhostCreator,
+            generatedEvent, transport,
             DefaultMultiCompressor.Create(), inputFetch);
 
         return client;

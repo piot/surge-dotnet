@@ -15,6 +15,7 @@ using Piot.Surge.DeltaSnapshot.Convert;
 using Piot.Surge.DeltaSnapshot.EntityMask;
 using Piot.Surge.DeltaSnapshot.Pack;
 using Piot.Surge.DeltaSnapshot.Pack.Convert;
+using Piot.Surge.Event;
 using Piot.Surge.SnapshotProtocol.Out;
 using Piot.Surge.Tick;
 using Piot.Transport;
@@ -50,7 +51,8 @@ namespace Piot.Surge.Pulse.Host
         }
 
         private DeltaSnapshotPack FindBestPack(SnapshotSyncerClient connection,
-            DeltaSnapshotPack precalculatedPackForThisTick, IEntityContainer world, TickId serverTickId)
+            DeltaSnapshotPack precalculatedPackForThisTick, IEntityContainer world, EventStream eventStream,
+            TickId serverTickId)
         {
             if (connection.WantsResend)
             {
@@ -58,8 +60,10 @@ namespace Piot.Surge.Pulse.Host
                 var combinedMasks = entityMasksHistory.Fetch(rangeToSend);
 
                 var snapshotEntityIds = EntityMasksToDeltaSnapshotIds.ToEntityIds(combinedMasks);
+                var eventsForThisRange = eventStream.FetchEventsForRange(rangeToSend);
 
-                return DeltaSnapshotToBitPack.ToDeltaSnapshotPack(world, snapshotEntityIds, rangeToSend);
+                return DeltaSnapshotToBitPack.ToDeltaSnapshotPack(world, eventsForThisRange, snapshotEntityIds,
+                    rangeToSend);
             }
 
             if (!connection.HasReceivedInitialState)
@@ -79,9 +83,10 @@ namespace Piot.Surge.Pulse.Host
         }
 
         private void SendUsingContainers(SnapshotSyncerClient connection,
-            DeltaSnapshotPack precalculatedPackForThisTick, IEntityContainer world, TickId hostTickId)
+            DeltaSnapshotPack precalculatedPackForThisTick, IEntityContainer world, EventStream eventStream,
+            TickId hostTickId)
         {
-            var bestPack = FindBestPack(connection, precalculatedPackForThisTick, world, hostTickId);
+            var bestPack = FindBestPack(connection, precalculatedPackForThisTick, world, eventStream, hostTickId);
 
             var physicsCorrectionWriter = new OctetWriter(Constants.MaxSnapshotOctetSize);
             physicsCorrectionWriter.WriteUInt8((byte)connection.AssignedPredictedEntityForLocalPlayers.Keys.Count);
@@ -112,12 +117,14 @@ namespace Piot.Surge.Pulse.Host
                 connection.DatagramsSequenceIdIncrease);
         }
 
-        public void SendSnapshot(EntityMasks masks, DeltaSnapshotPack deltaSnapshotPack, IEntityContainer world)
+        public void SendSnapshot(EntityMasks masks, DeltaSnapshotPack deltaSnapshotPack, IEntityContainer world,
+            EventStream eventStream)
         {
             entityMasksHistory.Enqueue(masks);
             foreach (var syncClient in syncClients)
             {
-                SendUsingContainers(syncClient, deltaSnapshotPack, world, deltaSnapshotPack.tickIdRange.Last);
+                SendUsingContainers(syncClient, deltaSnapshotPack, world, eventStream,
+                    deltaSnapshotPack.tickIdRange.Last);
             }
         }
     }
