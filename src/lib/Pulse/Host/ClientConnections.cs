@@ -56,7 +56,6 @@ namespace Piot.Surge.Pulse.Host
                     return;
                 }
 
-
                 if (!connections.TryGetValue(clientId.Value, out var connectionToClient))
                 {
                     var syncer = notifySnapshotSyncer.Create(clientId);
@@ -65,7 +64,6 @@ namespace Piot.Surge.Pulse.Host
                     orderedConnections.Add(connectionToClient);
                     connections.Add(clientId.Value, connectionToClient);
                 }
-
 
                 var datagramReader = new OctetReader(datagram.ToArray());
                 connectionToClient.Receive(datagramReader, serverTickId);

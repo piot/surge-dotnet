@@ -6,11 +6,7 @@
 using Piot.Clog;
 using Piot.MonotonicTime;
 using Piot.Surge.Compress;
-using Piot.Surge.DeltaSnapshot.Convert;
-using Piot.Surge.DeltaSnapshot.EntityMask;
 using Piot.Surge.DeltaSnapshot.Pack;
-using Piot.Surge.DeltaSnapshot.Pack.Convert;
-using Piot.Surge.DeltaSnapshot.Scan;
 using Piot.Surge.Entities;
 using Piot.Surge.Event;
 using Piot.Surge.LocalPlayer;
@@ -23,15 +19,13 @@ namespace Piot.Surge.Pulse.Host
 {
     public class Host
     {
+        private readonly ClientConnections clientConnections;
         private readonly ILog log;
-
-        private readonly bool shouldUseBitStream = true;
         private readonly TimeTicker simulationTicker;
         private readonly SnapshotSyncer snapshotSyncer;
         private readonly ITransport transport;
         private readonly TransportStatsBoth transportWithStats;
-        private readonly ClientConnections clientConnections;
-        private TickId serverTickId;
+        private TickId authoritativeTickId;
 
         public Host(ITransport hostTransport, IMultiCompressor compression, CompressorIndex compressorIndex,
             IEntityContainerWithDetectChanges world, Milliseconds now, ILog log)
@@ -71,36 +65,22 @@ namespace Piot.Surge.Pulse.Host
 
         private void SimulationTick()
         {
-            log.Debug("== Simulation Tick! {TickId}", serverTickId);
+            log.Debug("== Simulation Tick! {TickId}", authoritativeTickId);
 
             TickWorld();
             // Exactly after Tick() and the input has been set in preparation for the next tick, we mark this as the new tick
-            serverTickId = serverTickId.Next();
-            log.Debug("== Simulation Tick post! {TickId}", serverTickId);
-            SetInputFromClients.SetInputsFromClientsToEntities(clientConnections.Connections, serverTickId, log);
+            authoritativeTickId = authoritativeTickId.Next();
+            log.Debug("== Simulation Tick post! {TickId}", authoritativeTickId);
+            SetInputFromClients.SetInputsFromClientsToEntities(clientConnections.Connections, authoritativeTickId, log);
 
-            var (masks, deltaSnapshotPack) = StoreWorldChangesToPackContainer();
+            var (masks, deltaSnapshotPack) = StoreWorldChanges.StoreWorldChangesToPackContainer(AuthoritativeWorld,
+                ShortLivedEventStream, authoritativeTickId, SnapshotStreamType.BitStream);
             snapshotSyncer.SendSnapshot(masks, deltaSnapshotPack, AuthoritativeWorld, ShortLivedEventStream);
         }
 
-        private (EntityMasks, DeltaSnapshotPack) StoreWorldChangesToPackContainer()
-        {
-            var deltaSnapshotEntityIds = Scanner.Scan(AuthoritativeWorld, serverTickId);
-            var eventsThisTick = ShortLivedEventStream.FetchEventsForRange(TickIdRange.FromTickId(serverTickId));
-            var deltaSnapshotPack = shouldUseBitStream
-                ? DeltaSnapshotToBitPack.ToDeltaSnapshotPack(AuthoritativeWorld, eventsThisTick, deltaSnapshotEntityIds,
-                    TickIdRange.FromTickId(deltaSnapshotEntityIds.TickId))
-                : DeltaSnapshotToPack.ToDeltaSnapshotPack(AuthoritativeWorld, deltaSnapshotEntityIds);
-
-            OverWriter.OverwriteAuthoritative(AuthoritativeWorld);
-
-            return (DeltaSnapshotToEntityMasks.ToEntityMasks(deltaSnapshotEntityIds), deltaSnapshotPack);
-        }
-
-
         public void Update(Milliseconds now)
         {
-            clientConnections.ReceiveFromClients(serverTickId);
+            clientConnections.ReceiveFromClients(authoritativeTickId);
             simulationTicker.Update(now);
             transportWithStats.Update(now);
             log.DebugLowLevel("stats: {Stats}", transportWithStats.Stats);
