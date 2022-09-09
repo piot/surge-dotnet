@@ -5,11 +5,11 @@
 
 namespace Piot.Surge.Entities
 {
-    public interface IEntityOverwrite
+    public interface IEntityClearChanges
     {
         /// <summary>
-        ///     Overwrites all detected field changes in the Entity as well as clearing all produced actions.
+        ///     Copies current state to previous as well as clearing all produced actions.
         /// </summary>
-        public void Overwrite();
+        public void ClearChanges();
     }
 }

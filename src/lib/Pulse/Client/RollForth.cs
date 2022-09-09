@@ -16,11 +16,11 @@ namespace Piot.Surge.Pulse.Client
             , RollbackStack rollbackStack, PredictionStateChecksumQueue predictionStateHistory
         )
         {
-            predictedEntity.RollMode = EntityRollMode.Rollforth;
+            predictedEntity.CompleteEntity.RollMode = EntityRollMode.Rollforth;
 
             foreach (var predictedInput in predictedInputs.Collection)
             {
-                if (predictedEntity.GeneratedEntity is not IInputDeserialize inputDeserialize)
+                if (predictedEntity.CompleteEntity is not IInputDeserialize inputDeserialize)
                 {
                     throw new Exception("should be able to set input and rollforth to target entity");
                 }

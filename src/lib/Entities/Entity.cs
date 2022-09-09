@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 using Piot.Flood;
-using Piot.Surge.GeneratedEntity;
 using Piot.Surge.LogicAction;
 
 namespace Piot.Surge.Entities
@@ -14,20 +13,22 @@ namespace Piot.Surge.Entities
     /// </summary>
     public class Entity : IEntity
     {
-        private readonly IGeneratedEntity generatedEntity;
+        private readonly ICompleteEntity completeEntity;
 
-        public Entity(EntityId id, IGeneratedEntity generatedEntity)
+        public Entity(EntityId id, ICompleteEntity completeEntity)
         {
             Id = id;
             Mode = EntityMode.Created;
-            this.generatedEntity = generatedEntity;
+            this.completeEntity = completeEntity;
         }
 
         public EntityRollMode RollMode
         {
-            get => generatedEntity.RollMode;
-            set => generatedEntity.RollMode = value;
+            get => completeEntity.RollMode;
+            set => completeEntity.RollMode = value;
         }
+
+        public IAction[] Actions => completeEntity.Actions;
 
         public bool IsAlive => Mode != EntityMode.Deleted;
 
@@ -35,118 +36,117 @@ namespace Piot.Surge.Entities
 
         public EntityId Id { get; }
 
-        ArchetypeId IEntity.ArchetypeId => generatedEntity.ArchetypeId;
+        ArchetypeId IEntity.ArchetypeId => completeEntity.ArchetypeId;
 
-        ILogic IEntity.Logic => generatedEntity.Logic;
-        IGeneratedEntity IEntity.GeneratedEntity => generatedEntity;
+        ILogic IEntity.Logic => completeEntity.Logic;
+        ICompleteEntity IEntity.CompleteEntity => completeEntity;
 
-
-        void IEntitySerializer.Serialize(ulong serializeFlags, IOctetWriter writer)
-        {
-            generatedEntity.Serialize(serializeFlags, writer);
-        }
-
-        void IEntitySerializer.SerializeAll(IOctetWriter writer)
-        {
-            generatedEntity.SerializeAll(writer);
-        }
 
         public void SerializePrevious(ulong changedFieldsMask, IOctetWriter writer)
         {
-            generatedEntity.SerializePrevious(changedFieldsMask, writer);
+            completeEntity.SerializePrevious(changedFieldsMask, writer);
         }
 
         public void SerializeCorrectionState(IOctetWriter writer)
         {
-            generatedEntity.SerializeCorrectionState(writer);
+            completeEntity.SerializeCorrectionState(writer);
         }
 
+        /*
+        void IEntitySerializer.Serialize(ulong serializeFlags, IOctetWriter writer)
+        {
+            completeEntity.Serialize(serializeFlags, writer);
+        }
+
+        void IEntitySerializer.SerializeAll(IOctetWriter writer)
+        {
+            completeEntity.SerializeAll(writer);
+        }
         ulong IEntityDeserializer.Deserialize(IOctetReader reader)
         {
-            return generatedEntity.Deserialize(reader);
+            return completeEntity.Deserialize(reader);
         }
 
         void IEntityDeserializer.DeserializeAll(IOctetReader reader)
         {
-            generatedEntity.DeserializeAll(reader);
+            completeEntity.DeserializeAll(reader);
         }
+        */
 
         public void DeserializeCorrectionState(IOctetReader reader)
         {
-            generatedEntity.DeserializeCorrectionState(reader);
+            completeEntity.DeserializeCorrectionState(reader);
         }
 
         public void Tick()
         {
-            generatedEntity.Tick();
+            completeEntity.Tick();
         }
 
-        public void Overwrite()
+        public void ClearChanges()
         {
-            generatedEntity.Overwrite();
+            completeEntity.ClearChanges();
         }
 
         public void FireChanges(ulong mask)
         {
-            generatedEntity.FireChanges(mask);
+            completeEntity.FireChanges(mask);
         }
 
 
         public void FireDestroyed()
         {
-            generatedEntity.FireDestroyed();
+            completeEntity.FireDestroyed();
         }
 
         public void UnDoAction(IAction action)
         {
-            generatedEntity.UnDoAction(action);
+            completeEntity.UnDoAction(action);
         }
 
         public void DoAction(IAction action)
         {
-            generatedEntity.DoAction(action);
+            completeEntity.DoAction(action);
         }
-
-        public IAction[] Actions => generatedEntity.Actions;
 
         public void Serialize(ulong changedFieldsMask, IBitWriter writer)
         {
-            generatedEntity.Serialize(changedFieldsMask, writer);
+            completeEntity.Serialize(changedFieldsMask, writer);
         }
 
         public void SerializeAll(IBitWriter writer)
         {
-            generatedEntity.SerializeAll(writer);
+            completeEntity.SerializeAll(writer);
         }
 
         public void SerializePrevious(ulong changedFieldsMask, IBitWriter writer)
         {
-            generatedEntity.SerializePrevious(changedFieldsMask, writer);
+            completeEntity.SerializePrevious(changedFieldsMask, writer);
         }
 
         public void SerializeCorrectionState(IBitWriter writer)
         {
-            generatedEntity.SerializeCorrectionState(writer);
+            completeEntity.SerializeCorrectionState(writer);
         }
 
         public ulong Deserialize(IBitReader reader)
         {
-            return generatedEntity.Deserialize(reader);
+            return completeEntity.Deserialize(reader);
         }
 
         public void DeserializeAll(IBitReader reader)
         {
-            generatedEntity.DeserializeAll(reader);
+            completeEntity.DeserializeAll(reader);
         }
 
         public void DeserializeCorrectionState(IBitReader reader)
         {
-            generatedEntity.DeserializeCorrectionState(reader);
+            completeEntity.DeserializeCorrectionState(reader);
         }
 
         public override string ToString()
         {
-            return $"[entity {Id} {generatedEntity.ArchetypeId}]";
+            return $"[entity {Id} {completeEntity.ArchetypeId}]";
         }
     }
 }

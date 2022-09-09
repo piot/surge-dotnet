@@ -15,10 +15,10 @@ namespace Piot.Surge.Pulse.Client
             PredictionStateChecksumQueue predictionStateHistory)
         {
             var savePredictedStateWriter = new OctetWriter(1200);
-            predictedEntity.SerializeAll(savePredictedStateWriter);
+            predictedEntity.CompleteEntity.SerializeAll(savePredictedStateWriter);
 
             var savePhysicsStateWriter = new OctetWriter(1200);
-            predictedEntity.SerializeCorrectionState(savePhysicsStateWriter);
+            predictedEntity.CompleteEntity.SerializeCorrectionState(savePhysicsStateWriter);
             predictionStateHistory.Enqueue(tickIdAfterPrediction, savePredictedStateWriter.Octets,
                 savePhysicsStateWriter.Octets);
         }

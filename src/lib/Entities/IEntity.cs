@@ -3,8 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using Piot.Surge.GeneratedEntity;
-
 namespace Piot.Surge.Entities
 {
     public enum EntityMode
@@ -14,13 +12,18 @@ namespace Piot.Surge.Entities
         Deleted
     }
 
-    public interface IEntity : IEntityBothSerializer, IEntityDeserializer, IEntityBitDeserializer, ISimpleLogic,
-        IEntityOverwrite,
+    /*
+     * : IEntityBothSerializer, IEntityDeserializer, IEntityBitDeserializer, ISimpleLogic,
+        IEntityClearChanges,
         IEntityFireChanges, IEntityActions, IEntityActionsDoUnDo
+     */
+
+    /// <summary>
+    ///     Separate layer for Id, IsAlive, Mode that should not be in the game specific implementation of ICompleteEntity.
+    /// </summary>
+    public interface IEntity
     {
         public EntityMode Mode { get; set; }
-
-        public EntityRollMode RollMode { get; set; }
 
         public bool IsAlive { get; }
 
@@ -30,6 +33,6 @@ namespace Piot.Surge.Entities
 
         public ILogic Logic { get; }
 
-        public IGeneratedEntity GeneratedEntity { get; }
+        public ICompleteEntity CompleteEntity { get; }
     }
 }

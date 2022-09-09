@@ -80,7 +80,7 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
                 var entityToDeserialize = entityGhostContainer.CreateGhostEntity(entityArchetype, entityId);
 
                 createdEntities.Add(entityToDeserialize);
-                entityToDeserialize.DeserializeAll(reader);
+                entityToDeserialize.CompleteEntity.DeserializeAll(reader);
             }
 #if DEBUG
             undoWriter.WriteUInt8(Constants.SnapshotDeltaCreatedSync);
@@ -89,7 +89,7 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
             foreach (var deletedEntity in deletedEntities)
             {
                 EntityIdWriter.Write(undoWriter, deletedEntity.Id);
-                deletedEntity.SerializeAll(undoWriter);
+                deletedEntity.CompleteEntity.SerializeAll(undoWriter);
 
                 entityGhostContainer.DeleteEntity(deletedEntity);
             }
@@ -115,8 +115,8 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
 
 
                 EntityIdWriter.Write(undoWriter, entityId);
-                var entityMaskChanged = entityToDeserialize.Deserialize(reader);
-                entityToDeserialize.SerializePrevious(entityMaskChanged, undoWriter);
+                var entityMaskChanged = entityToDeserialize.CompleteEntity.Deserialize(reader);
+                entityToDeserialize.CompleteEntity.SerializePrevious(entityMaskChanged, undoWriter);
                 var updatedEntity = new SnapshotDeltaReaderInfoEntity(entityToDeserialize, entityMaskChanged);
                 updatedEntities.Add(updatedEntity);
             }

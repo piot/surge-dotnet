@@ -27,13 +27,13 @@ namespace Piot.Surge
 
         public static void Notify(IEntity notifyEntity)
         {
-            notifyEntity.FireChanges(notifyEntity.GeneratedEntity.Changes());
-            foreach (var action in notifyEntity.Actions)
+            notifyEntity.CompleteEntity.FireChanges(notifyEntity.CompleteEntity.Changes());
+            foreach (var action in notifyEntity.CompleteEntity.Actions)
             {
-                notifyEntity.DoAction(action);
+                notifyEntity.CompleteEntity.DoAction(action);
             }
 
-            notifyEntity.Overwrite();
+            notifyEntity.CompleteEntity.ClearChanges();
         }
 
         public static void Notify(IEntity[] entities)

@@ -95,7 +95,7 @@ namespace Piot.Surge.Pulse.Host
             {
                 var correctionsWrite = new OctetWriter(1024);
                 var correctionEntity = localPlayerAssignedPredictedEntity.Value;
-                correctionEntity.SerializeCorrectionState(correctionsWrite);
+                correctionEntity.CompleteEntity.SerializeCorrectionState(correctionsWrite);
 
                 CorrectionsHeaderWriter.Write(correctionEntity.Id,
                     new((byte)localPlayerAssignedPredictedEntity.Key), (ushort)correctionsWrite.Octets.Length,

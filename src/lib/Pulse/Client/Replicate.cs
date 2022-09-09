@@ -20,13 +20,13 @@ namespace Piot.Surge.Pulse.Client
         public static void Replicate(IEntity targetEntity, ReadOnlySpan<byte> logicPayload,
             ReadOnlySpan<byte> correctionPayload)
         {
-            targetEntity.RollMode = EntityRollMode.Replicate;
+            targetEntity.CompleteEntity.RollMode = EntityRollMode.Replicate;
 
             var logicPayloadReader = new OctetReader(logicPayload);
-            targetEntity.Deserialize(logicPayloadReader);
+            targetEntity.CompleteEntity.Deserialize(logicPayloadReader);
 
             var correctionReader = new OctetReader(correctionPayload);
-            targetEntity.DeserializeCorrectionState(correctionReader);
+            targetEntity.CompleteEntity.DeserializeCorrectionState(correctionReader);
         }
     }
 }

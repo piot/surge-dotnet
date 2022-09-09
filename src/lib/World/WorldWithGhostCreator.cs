@@ -5,7 +5,6 @@
 
 using System.Runtime.CompilerServices;
 using Piot.Surge.Entities;
-using Piot.Surge.GeneratedEntity;
 
 namespace Piot.Surge
 {
@@ -38,13 +37,13 @@ namespace Piot.Surge
 
         public void AddGhostEntity(IEntity entity)
         {
-            notifyEntityCreation.NotifyCreation(entity.GeneratedEntity);
+            notifyEntityCreation.NotifyCreation(entity.CompleteEntity);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override IEntity AddEntity(EntityId id, IGeneratedEntity generatedEntity)
+        public override IEntity AddEntity(EntityId id, ICompleteEntity completeEntity)
         {
-            return base.AddEntity(id, generatedEntity);
+            return base.AddEntity(id, completeEntity);
         }
     }
 }

@@ -7,23 +7,13 @@ using Piot.Surge.Entities;
 
 namespace Piot.Surge
 {
-    public static class OverWriter
+    public static class ChangeClearer
     {
-        private static void Overwrite(IEntity[] entities)
+        private static void ClearChanges(IEntity[] entities)
         {
             foreach (var entity in entities)
             {
-                entity.Overwrite();
-            }
-        }
-
-        // ReSharper disable once ParameterTypeCanBeEnumerable.Global
-        public static void Overwrite(IEntityContainer world, EntityId[] ids)
-        {
-            foreach (var id in ids)
-            {
-                var entity = world.FetchEntity(id);
-                entity.Overwrite();
+                entity.CompleteEntity.ClearChanges();
             }
         }
 
@@ -31,11 +21,10 @@ namespace Piot.Surge
         ///     Overwrites all detected field changes in the <paramref name="world" />.
         /// </summary>
         /// <param name="world"></param>
-        public static void Overwrite(IEntityContainer world)
+        public static void ClearChanges(IEntityContainer world)
         {
-            Overwrite(world.AllEntities);
+            ClearChanges(world.AllEntities);
         }
-
 
         /// <summary>
         ///     Overwrites all detected field changes in the <paramref name="world" />.
@@ -44,7 +33,7 @@ namespace Piot.Surge
         public static void OverwriteAuthoritative(IEntityContainerWithDetectChanges world)
         {
             world.ClearDelta();
-            Overwrite(world.AllEntities);
+            ClearChanges(world.AllEntities);
         }
     }
 }

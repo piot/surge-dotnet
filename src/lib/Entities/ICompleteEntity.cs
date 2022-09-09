@@ -3,16 +3,15 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using Piot.Surge.Entities;
 using Piot.Surge.FastTypeInformation;
 
-namespace Piot.Surge.GeneratedEntity
+namespace Piot.Surge.Entities
 {
     /// <summary>
-    ///     Interfaces that a source code generated entity is implementing.
+    ///     Interfaces that a complete entity must support. Usually implementation is produced from a source code generator.
     /// </summary>
-    public interface IGeneratedEntity : IEntitySerializer, IEntityBitSerializer, IEntityDeserializer,
-        IEntityBitDeserializer, IEntityChanges, IEntityOverwrite,
+    public interface ICompleteEntity : IEntityBothSerializer, IEntityDeserializer,
+        IEntityBitDeserializer, IEntityChanges, IEntityClearChanges,
         ISimpleLogic, IEntityFireChanges, IEntityActions, IEntityActionsDoUnDo, IAuthoritativeEntityCaptureSnapshot
     {
         public ILogic Logic { get; }

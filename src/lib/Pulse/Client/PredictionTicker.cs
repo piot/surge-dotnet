@@ -14,20 +14,20 @@ namespace Piot.Surge.Pulse.Client
         public static void Predict(IEntity predictedEntity, TickId tickIdBeforePredictTick, RollbackStack rollbackStack,
             PredictMode predictMode)
         {
-            predictedEntity.RollMode = predictMode switch
+            predictedEntity.CompleteEntity.RollMode = predictMode switch
             {
                 PredictMode.RollingForth => EntityRollMode.Rollforth,
                 PredictMode.Predicting => EntityRollMode.Predict
             };
 
-            predictedEntity.Overwrite();
-            predictedEntity.Tick();
+            predictedEntity.CompleteEntity.ClearChanges();
+            predictedEntity.CompleteEntity.Tick();
 
-            var changes = predictedEntity.GeneratedEntity.Changes();
+            var changes = predictedEntity.CompleteEntity.Changes();
 
             var undoWriter = new OctetWriter(1200);
 
-            predictedEntity.SerializePrevious(changes, undoWriter);
+            predictedEntity.CompleteEntity.SerializePrevious(changes, undoWriter);
 
             Notifier.Notify(predictedEntity); // Notify also overwrites
 

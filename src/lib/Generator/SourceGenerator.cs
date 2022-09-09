@@ -81,7 +81,7 @@ namespace Piot.Surge.Generator
             AddClassDeclaration(sb, "GeneratedEntityGhostCreator", "IEntityGhostCreator");
             sb.Append(@" public IEntity CreateGhostEntity(ArchetypeId archetypeId, EntityId entityId)
             {
-                IGeneratedEntity generatedEntity = archetypeId.id switch
+                ICompleteEntity completeEntity = archetypeId.id switch
                 {
 ");
             foreach (var logicInfo in logicInfos)
@@ -96,7 +96,7 @@ namespace Piot.Surge.Generator
 
                 };
                 
-                return new Entity(entityId, generatedEntity);
+                return new Entity(entityId, completeEntity);
             }
         }
 ");
@@ -148,7 +148,7 @@ namespace Piot.Surge.Generator
 
 
             sb.Append(@"
-        void INotifyEntityCreation.NotifyCreation(IGeneratedEntity entity)
+        void INotifyEntityCreation.NotifyCreation(ICompleteEntity entity)
         {
             switch (entity)
             {
@@ -830,7 +830,7 @@ private readonly ActionsContainer actionsContainer = new();
     
     public ILogic Logic => current;
 
-    public void Overwrite()
+    public void ClearChanges()
     {
         last = current;
         actionsContainer.Clear();
@@ -1123,7 +1123,7 @@ public struct {EntityGeneratedInternal(logicInfo)}SimulationInfo
 
         public static void AddInternalEntity(StringBuilder sb, LogicInfo logicInfo)
         {
-            var inherit = "IGeneratedEntity";
+            var inherit = "ICompleteEntity";
             if (logicInfo.CanTakeInput)
             {
                 inherit += ", IInputDeserialize";
@@ -1336,7 +1336,6 @@ using Piot.Surge.FastTypeInformation;
 using Piot.Flood;
 using Piot.Surge.Types.Serialization;
 using Piot.Surge.Entities;
-using Piot.Surge.GeneratedEntity;
 using Piot.Surge.LogicalInput;
 using Piot.Surge.LocalPlayer;
 using Piot.Surge.LogicAction;

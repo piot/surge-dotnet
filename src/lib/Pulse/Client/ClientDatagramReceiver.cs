@@ -22,6 +22,7 @@ namespace Piot.Surge.Pulse.Client
     {
         private readonly IMultiCompressor compression;
         private readonly HoldPositive isReceivingMergedSnapshots = new(20);
+        private readonly ILog log;
         private readonly ClientDeltaSnapshotPlayback notifyPlayback;
         private readonly ClientPredictor notifyPredictor;
         private readonly OrderedDatagramsInChecker orderedDatagramsInChecker = new();
@@ -30,7 +31,6 @@ namespace Piot.Surge.Pulse.Client
         private readonly StatCountThreshold statsRoundTripTime = new(20);
         private readonly ITransportClient transportClient;
         private readonly HoldPositive weAreSkippingAhead = new(25);
-        private readonly ILog log;
 
         public ClientDatagramReceiver(ITransportClient transportClient, IMultiCompressor compression,
             ClientDeltaSnapshotPlayback notifyPlayback, ClientPredictor notifyPredictor, ILog log)

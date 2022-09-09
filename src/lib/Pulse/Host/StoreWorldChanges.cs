@@ -31,7 +31,7 @@ namespace Piot.Surge.Pulse.Host
                     deltaSnapshotEntityIds)
             };
 
-            OverWriter.OverwriteAuthoritative(AuthoritativeWorld);
+            ChangeClearer.OverwriteAuthoritative(AuthoritativeWorld);
 
             return (DeltaSnapshotToEntityMasks.ToEntityMasks(deltaSnapshotEntityIds), deltaSnapshotPack);
         }

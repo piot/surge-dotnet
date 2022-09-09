@@ -4,16 +4,16 @@
  *--------------------------------------------------------------------------------------------*/
 
 using Piot.Flood;
-using Piot.Surge.GeneratedEntity;
+using Piot.Surge.Entities;
 
 namespace Tests;
 
 public static class DeserializeWithChangeWriter
 {
-    public static void DeserializeWithChange(IGeneratedEntity generatedEntity, ulong serializeFlags,
+    public static void DeserializeWithChange(ICompleteEntity completeEntity, ulong serializeFlags,
         IOctetReader reader, IOctetWriter writerForCurrentValues)
     {
-        generatedEntity.Serialize(serializeFlags, writerForCurrentValues);
-        generatedEntity.Deserialize(reader);
+        completeEntity.Serialize(serializeFlags, writerForCurrentValues);
+        completeEntity.Deserialize(reader);
     }
 }

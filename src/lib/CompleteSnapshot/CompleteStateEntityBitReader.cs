@@ -29,7 +29,7 @@ namespace Piot.Surge.CompleteSnapshot
 
                 var entityToDeserialize =
                     entityGhostContainerWithCreator.CreateGhostEntity(entityArchetype, entityId);
-                entityToDeserialize.DeserializeAll(reader);
+                entityToDeserialize.CompleteEntity.DeserializeAll(reader);
                 //createdEntities.Add(entityToDeserialize);
                 entityGhostContainerWithCreator.AddGhostEntity(entityToDeserialize);
             }

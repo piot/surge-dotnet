@@ -4,12 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 using Piot.Surge.Entities;
-using Piot.Surge.GeneratedEntity;
 
 namespace Piot.Surge
 {
     public interface IAuthoritativeEntityContainer
     {
-        public IEntity SpawnEntity(IGeneratedEntity generatedEntity);
+        public IEntity SpawnEntity(ICompleteEntity completeEntity);
     }
 }

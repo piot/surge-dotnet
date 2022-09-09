@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Piot.Surge.Entities;
-using Piot.Surge.GeneratedEntity;
 
 namespace Piot.Surge
 {
@@ -21,11 +20,11 @@ namespace Piot.Surge
         public Dictionary<ulong, IEntity> Entities { get; } = new();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEntity SpawnEntity(IGeneratedEntity generatedEntity)
+        public IEntity SpawnEntity(ICompleteEntity completeEntity)
         {
             var freeEntityId = FindFreeEntityId();
 
-            var createdEntity = AddEntity(new EntityId(freeEntityId), generatedEntity);
+            var createdEntity = AddEntity(new EntityId(freeEntityId), completeEntity);
 
             return createdEntity;
         }
@@ -44,7 +43,7 @@ namespace Piot.Surge
                 return default;
             }
 
-            return (T)entity.GeneratedEntity;
+            return (T)entity.CompleteEntity;
         }
 
         public IEntity? FindEntity(EntityId entityId)
@@ -61,7 +60,7 @@ namespace Piot.Surge
                 throw new NullReferenceException($"could not find entity {entityId}");
             }
 
-            return (T)entity.GeneratedEntity;
+            return (T)entity.CompleteEntity;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -108,9 +107,9 @@ namespace Piot.Surge
             deleted.Clear();
         }
 
-        public virtual IEntity AddEntity(EntityId id, IGeneratedEntity generatedEntity)
+        public virtual IEntity AddEntity(EntityId id, ICompleteEntity completeEntity)
         {
-            var entity = new Entity(id, generatedEntity);
+            var entity = new Entity(id, completeEntity);
             created.Add(entity);
             Entities.Add(id.Value, entity);
             allEntities.Add(entity);

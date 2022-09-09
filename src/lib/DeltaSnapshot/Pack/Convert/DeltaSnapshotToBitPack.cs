@@ -44,13 +44,15 @@ namespace Piot.Surge.DeltaSnapshot.Pack.Convert
 
             foreach (var createdEntity in createdEntities)
             {
-                PackCreatedEntity.Write(writer, createdEntity.Id, createdEntity.ArchetypeId, createdEntity);
+                PackCreatedEntity.Write(writer, createdEntity.Id, createdEntity.ArchetypeId,
+                    createdEntity.CompleteEntity);
             }
 #if DEBUG
             writer.WriteBits(Constants.SnapshotDeltaUpdatedSync, 8);
 #endif
             var updatedEntities = deltaSnapshotEntityIds.updatedEntities.Select(x =>
-                (IUpdatedEntity)new UpdatedEntity(x.entityId, x.changeMask, world.FetchEntity(x.entityId))).ToArray();
+                (IUpdatedEntity)new UpdatedEntity(x.entityId, x.changeMask,
+                    world.FetchEntity(x.entityId).CompleteEntity)).ToArray();
             EntityCountWriter.WriteEntityCount((uint)deltaSnapshotEntityIds.updatedEntities.Length, writer);
             foreach (var updateEntity in updatedEntities)
             {

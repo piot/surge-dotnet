@@ -43,7 +43,7 @@ namespace Piot.Surge.Pulse.Host
                             continue;
                         }
 
-                        if (targetEntity.GeneratedEntity is not IInputDeserialize inputDeserialize)
+                        if (targetEntity.CompleteEntity is not IInputDeserialize inputDeserialize)
                         {
                             throw new Exception(
                                 $"It is not possible to control Entity {targetEntity}, it has no IDeserializeInput interface");

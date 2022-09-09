@@ -19,7 +19,7 @@ namespace Piot.Surge.Pulse.Client
         /// <param name="tickId"></param>
         public static void Rollback(IEntity targetEntity, RollbackStack rollbackStack, TickId tickId)
         {
-            targetEntity.RollMode = EntityRollMode.Rollback;
+            targetEntity.CompleteEntity.RollMode = EntityRollMode.Rollback;
 
             while (rollbackStack.PeekTickId() >= tickId)
             {
@@ -27,9 +27,9 @@ namespace Piot.Surge.Pulse.Client
 
                 var reader = new OctetReader(undoPack.payload.Span);
 
-                targetEntity.Overwrite();
-                var changes = targetEntity.Deserialize(reader);
-                targetEntity.FireChanges(changes);
+                targetEntity.CompleteEntity.ClearChanges();
+                var changes = targetEntity.CompleteEntity.Deserialize(reader);
+                targetEntity.CompleteEntity.FireChanges(changes);
 
                 if (undoPack.tickId.tickId == tickId.tickId)
                 {

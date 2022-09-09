@@ -71,8 +71,8 @@ namespace Piot.Surge.Pulse.Client
                 LocalPlayerIndex, physicsCorrectionPayload.Length);
 
             var logicNowReplicateWriter = new OctetWriter(1024);
-            var changesThisSnapshot = assignedAvatar.GeneratedEntity.Changes();
-            assignedAvatar.Serialize(changesThisSnapshot, logicNowReplicateWriter);
+            var changesThisSnapshot = assignedAvatar.CompleteEntity.Changes();
+            assignedAvatar.CompleteEntity.Serialize(changesThisSnapshot, logicNowReplicateWriter);
 
             if (!shouldPredictGoingForward)
             {
@@ -80,7 +80,7 @@ namespace Piot.Surge.Pulse.Client
             }
 
             var logicNowWriter = new OctetWriter(1024);
-            assignedAvatar.SerializeAll(logicNowWriter);
+            assignedAvatar.CompleteEntity.SerializeAll(logicNowWriter);
 
             if (WeDidPredictTheFutureCorrectly(correctionForTickId, logicNowWriter.Octets, physicsCorrectionPayload))
             {
@@ -97,15 +97,15 @@ namespace Piot.Surge.Pulse.Client
                 RollForth.Rollforth(assignedAvatar, PredictedInputs, rollbackStack, predictionStateChecksumHistory);
             }
 
-            assignedAvatar.RollMode = EntityRollMode.Predict;
+            assignedAvatar.CompleteEntity.RollMode = EntityRollMode.Predict;
         }
 
 
         public void Predict(LogicalInput.LogicalInput logicalInput)
         {
-            assignedAvatar.RollMode = EntityRollMode.Predict;
+            assignedAvatar.CompleteEntity.RollMode = EntityRollMode.Predict;
 
-            if (assignedAvatar.GeneratedEntity is not IInputDeserialize inputDeserialize)
+            if (assignedAvatar.CompleteEntity is not IInputDeserialize inputDeserialize)
             {
                 throw new Exception(
                     $"It is not possible to control Entity {assignedAvatar.Id}, it has no IDeserializeInput interface");

@@ -86,7 +86,7 @@ namespace Piot.Surge.Pulse.Client
                     localAvatarPredictors[localPlayerIndex.Value] = predictor;
                 }
 
-                //var changesThisSnapshot = targetEntity.GeneratedEntity.Changes();
+                //var changesThisSnapshot = targetEntity.CompleteEntity.Changes();
 
                 var physicsCorrectionPayloadForLocalPlayer = snapshotReader.ReadOctets(octetCount);
 

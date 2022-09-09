@@ -13,7 +13,6 @@ using System.Numerics;
 using Piot.Flood;
 using Piot.Surge.Entities;
 using Piot.Surge.FastTypeInformation;
-using Piot.Surge.GeneratedEntity;
 using Piot.Surge.LocalPlayer;
 using Piot.Surge.LogicAction;
 using Piot.Surge.LogicalInput;
@@ -39,14 +38,14 @@ public class GeneratedEntityGhostCreator : IEntityGhostCreator
 {
     public IEntity CreateGhostEntity(ArchetypeId archetypeId, EntityId entityId)
     {
-        IGeneratedEntity generatedEntity = archetypeId.id switch
+        ICompleteEntity completeEntity = archetypeId.id switch
         {
             ArchetypeConstants.AvatarLogic => new AvatarLogicEntityInternal(),
             ArchetypeConstants.FireballLogic => new FireballLogicEntityInternal(),
             _ => throw new Exception($"unknown entity to create {archetypeId}")
         };
 
-        return new Entity(entityId, generatedEntity);
+        return new Entity(entityId, completeEntity);
     }
 }
 
@@ -55,7 +54,7 @@ public class GeneratedNotifyEntityCreation : INotifyEntityCreation
     public Action<AvatarLogicEntity>? OnSpawnAvatarLogic;
     public Action<FireballLogicEntity>? OnSpawnFireballLogic;
 
-    void INotifyEntityCreation.NotifyCreation(IGeneratedEntity entity)
+    void INotifyEntityCreation.NotifyCreation(ICompleteEntity entity)
     {
         switch (entity)
         {
@@ -230,7 +229,7 @@ public class AvatarLogicEntity
     }
 }
 
-public class AvatarLogicEntityInternal : IGeneratedEntity, IInputDeserialize
+public class AvatarLogicEntityInternal : ICompleteEntity, IInputDeserialize
 {
     public const ulong FireButtonIsDownMask = 0x00000001;
     public const ulong CastButtonIsDownMask = 0x00000002;
@@ -271,7 +270,7 @@ public class AvatarLogicEntityInternal : IGeneratedEntity, IInputDeserialize
 
     public ILogic Logic => current;
 
-    public void Overwrite()
+    public void ClearChanges()
     {
         last = current;
         actionsContainer.Clear();
@@ -820,7 +819,7 @@ public class FireballLogicEntity
     }
 }
 
-public class FireballLogicEntityInternal : IGeneratedEntity
+public class FireballLogicEntityInternal : ICompleteEntity
 {
     public const ulong PositionMask = 0x00000001;
     public const ulong VelocityMask = 0x00000002;
@@ -854,7 +853,7 @@ public class FireballLogicEntityInternal : IGeneratedEntity
 
     public ILogic Logic => current;
 
-    public void Overwrite()
+    public void ClearChanges()
     {
         last = current;
         actionsContainer.Clear();

@@ -34,7 +34,7 @@ public class ReplayRecorderTests
 
     private static DeltaSnapshotPack TickHost(IEntityContainerWithDetectChanges authoritativeWorld, TickId hostTickId)
     {
-        OverWriter.OverwriteAuthoritative(authoritativeWorld);
+        ChangeClearer.OverwriteAuthoritative(authoritativeWorld);
         Ticker.Tick(authoritativeWorld);
         Notifier.Notify(authoritativeWorld.AllEntities);
         var shortLivedEvents = Array.Empty<IEventWithArchetypeAndSequenceId>();

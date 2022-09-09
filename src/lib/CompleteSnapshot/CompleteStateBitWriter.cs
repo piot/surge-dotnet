@@ -26,7 +26,7 @@ namespace Piot.Surge.CompleteSnapshot
             {
                 EntityIdWriter.Write(writer, entityToSerialize.Id);
                 writer.WriteBits(entityToSerialize.ArchetypeId.id, 10);
-                entityToSerialize.SerializeAll(writer);
+                entityToSerialize.CompleteEntity.SerializeAll(writer);
             }
 
             EventSequenceIdWriter.Write(writer, expectedShortLivedEventSequenceId);

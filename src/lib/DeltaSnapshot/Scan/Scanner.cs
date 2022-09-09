@@ -25,7 +25,7 @@ namespace Piot.Surge.DeltaSnapshot.Scan
 
             var updatedEntities = (from entity in world.AllEntities
                 where entity.Mode == EntityMode.Normal
-                let changes = entity.GeneratedEntity.Changes()
+                let changes = entity.CompleteEntity.Changes()
                 select new ChangedEntity(entity.Id, new(changes))).ToArray();
 
             return new DeltaSnapshotEntityIds(tickId, deletedEntities, createdEntities, updatedEntities);

@@ -13,7 +13,7 @@ namespace Piot.Surge
         {
             foreach (var entity in entities)
             {
-                entity.Tick();
+                entity.CompleteEntity.Tick();
             }
         }
 

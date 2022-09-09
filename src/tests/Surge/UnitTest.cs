@@ -18,7 +18,6 @@ using Piot.Surge.DeltaSnapshot.Pack.Convert;
 using Piot.Surge.DeltaSnapshot.Scan;
 using Piot.Surge.Entities;
 using Piot.Surge.FieldMask;
-using Piot.Surge.GeneratedEntity;
 using Piot.Surge.Internal.Generated;
 using Piot.Surge.LocalPlayer;
 using Piot.Surge.LogicalInput;
@@ -256,7 +255,7 @@ public class UnitTest1
 
         var changes = (avatarBefore as IEntityChanges).Changes();
         Assert.Equal(AvatarLogicEntityInternal.AmmoCountMask, changes);
-        avatarBefore.Overwrite();
+        avatarBefore.ClearChanges();
 
         var changesAfter = (avatarBefore as IEntityChanges).Changes();
         Assert.Equal((ulong)0, changesAfter);
@@ -305,7 +304,7 @@ public class UnitTest1
         {
             Current = new AvatarLogic { ammoCount = 100, fireButtonIsDown = false }
         };
-        avatar.Overwrite();
+        avatar.ClearChanges();
 
         Assert.Equal(0, avatar.Self.position.x);
         Assert.Equal(0u, (avatar as IEntityChanges).Changes());
@@ -342,11 +341,11 @@ public class UnitTest1
             Current = new AvatarLogic { ammoCount = 100, fireButtonIsDown = false }
         };
 
-        var typeInformation = (avatarInfo as IGeneratedEntity).TypeInformation;
+        var typeInformation = (avatarInfo as ICompleteEntity).TypeInformation;
 
         log.Info("typeInfo {TypeInformation}", typeInformation);
 
-        avatarInfo.Overwrite();
+        avatarInfo.ClearChanges();
 
         Assert.Equal(0, avatarInfo.Self.position.x);
         Assert.Equal(0u, (avatarInfo as IEntityChanges).Changes());
@@ -422,7 +421,7 @@ public class UnitTest1
 
         Assert.Equal(600, ((AvatarLogic)spawnedAvatar.Logic).position.x);
         Assert.Equal(AvatarLogicEntityInternal.PositionMask,
-            ((AvatarLogicEntityInternal)spawnedAvatar.GeneratedEntity as IEntityChanges).Changes());
+            ((AvatarLogicEntityInternal)spawnedAvatar.CompleteEntity as IEntityChanges).Changes());
 
         var firstPack = packetQueue.Dequeue();
 
@@ -448,7 +447,7 @@ public class UnitTest1
         var deltaPack =
             DeltaSnapshotToPack.ToDeltaSnapshotPack(worldToScan, deltaSnapshotEntityIds);
 
-        OverWriter.OverwriteAuthoritative(worldToScan);
+        ChangeClearer.OverwriteAuthoritative(worldToScan);
 
         return (entityMasks, deltaSnapshotEntityIds, deltaPack);
     }
@@ -499,7 +498,7 @@ public class UnitTest1
 
         Assert.Equal(AvatarLogicEntityInternal.PositionMask, secondDeltaConverted.updatedEntities[0].changeMask.mask);
 
-        var serverSpawnedAvatar = (AvatarLogicEntityInternal)spawnedAvatar.GeneratedEntity;
+        var serverSpawnedAvatar = (AvatarLogicEntityInternal)spawnedAvatar.CompleteEntity;
         Ticker.Tick(world);
 
 
@@ -596,7 +595,7 @@ public class UnitTest1
             var (_, _, updateEntities) = SnapshotDeltaReader.Read(snapshotReader, clientWorld);
             Ticker.Tick(clientWorld);
             Notifier.Notify(updateEntities);
-            OverWriter.Overwrite(clientWorld);
+            ChangeClearer.ClearChanges(clientWorld);
         }
 
 
@@ -614,7 +613,7 @@ public class UnitTest1
         Assert.True(clientSpawnedEntity.Self.fireButtonIsDown);
         Ticker.Tick(clientWorld);
         Notifier.Notify(secondToLastUpdatedEntities);
-        OverWriter.Overwrite(clientWorld);
+        ChangeClearer.ClearChanges(clientWorld);
 
         Assert.Equal(30, clientSpawnedEntity.Self.fireCooldown);
         Assert.True(clientSpawnedEntity.Self.fireButtonIsDown);
@@ -632,7 +631,7 @@ public class UnitTest1
 
         Ticker.Tick(clientWorld);
         Notifier.Notify(clientUpdated);
-        OverWriter.Overwrite(clientWorld);
+        ChangeClearer.ClearChanges(clientWorld);
 
         var undoPack = new DeltaSnapshotPack(TickIdRange.FromTickId(firstTickId), undoWriter.Octets.ToArray(),
             SnapshotStreamType.OctetStream, SnapshotType.DeltaSnapshot);
@@ -652,12 +651,12 @@ public class UnitTest1
 
         foreach (var notifyEntity in created)
         {
-            foreach (var action in notifyEntity.Actions)
+            foreach (var action in notifyEntity.CompleteEntity.Actions)
             {
-                notifyEntity.DoAction(action);
+                notifyEntity.CompleteEntity.DoAction(action);
             }
 
-            notifyEntity.Overwrite();
+            notifyEntity.CompleteEntity.ClearChanges();
         }
 
         var makeSure = clientWorld.FetchEntity(new EntityId(151));
