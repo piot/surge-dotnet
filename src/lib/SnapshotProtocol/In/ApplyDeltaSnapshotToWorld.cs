@@ -39,7 +39,8 @@ namespace Piot.Surge.SnapshotProtocol.In
                     }
                     else
                     {
-                        CompleteStateBitReader.ReadAndApply(bitSnapshotReader, world, eventProcessor);
+                        expectedEventSequenceId =
+                            CompleteStateBitReader.ReadAndApply(bitSnapshotReader, world, eventProcessor);
                     }
                 }
                     break;

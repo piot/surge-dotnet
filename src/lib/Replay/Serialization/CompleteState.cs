@@ -20,5 +20,10 @@ namespace Piot.Surge.Replay.Serialization
 
         public ReadOnlySpan<byte> Payload => payload.Span;
         public TickId TickId { get; }
+
+        public override string ToString()
+        {
+            return $"[CompleteState {TickId} octetCount: {payload.Length}]";
+        }
     }
 }

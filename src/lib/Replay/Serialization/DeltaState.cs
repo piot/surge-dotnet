@@ -20,5 +20,10 @@ namespace Piot.Surge.Replay.Serialization
 
         public ReadOnlySpan<byte> Payload => payload.Span;
         public TickIdRange TickIdRange { get; }
+
+        public override string ToString()
+        {
+            return $"[DeltaState {TickIdRange} octetCount: {payload.Length}]";
+        }
     }
 }

@@ -10,24 +10,35 @@ using Piot.Surge.Tick;
 
 namespace Piot.Surge.Event
 {
+    /// <summary>
+    ///     Holds events in a queue to be replicated as a stream.
+    /// </summary>
     public class EventStream
     {
         private readonly Queue<EventStreamItem> events = new();
 
         private bool isInitialized;
         private TickId lastInsertedTickId;
-        public ushort sequenceId;
+        private ushort sequenceId;
 
         public IEnumerable<EventStreamItem> Events => events;
+        public EventSequenceId NextSequenceId => new(sequenceId);
 
-        public void Add(TickId tickId, IEventWithArchetype eventWithArchetype)
+        /// <summary>
+        ///     Adds an event at the specified <paramref name="tickId" />. The events must be enqueued with the same
+        ///     or higher tickId than the last one enqueued.
+        /// </summary>
+        /// <param name="tickId"></param>
+        /// <param name="eventWithArchetype"></param>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        public void Enqueue(TickId tickId, IEventWithArchetype eventWithArchetype)
         {
             if (isInitialized)
             {
-                if (tickId != lastInsertedTickId && !tickId.IsImmediateFollowing(lastInsertedTickId))
+                if (tickId < lastInsertedTickId)
                 {
                     throw new ArgumentOutOfRangeException(nameof(tickId),
-                        "must have same or consecutive tickIds in event stream");
+                        "must have same or increasing tickIds in event stream");
                 }
             }
 
@@ -42,6 +53,10 @@ namespace Piot.Surge.Event
             isInitialized = true;
         }
 
+        /// <summary>
+        ///     Removes events that are before or at <paramref name="tickId" />.
+        /// </summary>
+        /// <param name="tickId"></param>
         public void DiscardIncluding(TickId tickId)
         {
             while (events.Any())
@@ -55,6 +70,11 @@ namespace Piot.Surge.Event
             }
         }
 
+        /// <summary>
+        ///     Fetches all events that are stored within the given <paramref name="tickIdRange" />.
+        /// </summary>
+        /// <param name="tickIdRange"></param>
+        /// <returns></returns>
         public IEventWithArchetypeAndSequenceId[] FetchEventsForRange(TickIdRange tickIdRange)
         {
             var matchingEvents = new List<IEventWithArchetypeAndSequenceId>();

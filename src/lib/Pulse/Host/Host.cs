@@ -26,8 +26,6 @@ namespace Piot.Surge.Pulse.Host
 {
     public class Host
     {
-        private readonly IMultiCompressor compression;
-
         private readonly Dictionary<uint, ConnectionToClient> connections = new();
         private readonly ILog log;
         private readonly List<ConnectionToClient> orderedConnections = new();
@@ -41,7 +39,6 @@ namespace Piot.Surge.Pulse.Host
         public Host(ITransport hostTransport, IMultiCompressor compression, CompressorIndex compressorIndex,
             IEntityContainerWithDetectChanges world, Milliseconds now, ILog log)
         {
-            this.compression = compression;
             transportWithStats = new TransportStatsBoth(hostTransport, now);
             transport = transportWithStats;
             snapshotSyncer = new SnapshotSyncer(transport, compression, compressorIndex, log.SubLog("Syncer"));
@@ -51,6 +48,11 @@ namespace Piot.Surge.Pulse.Host
                 log.SubLog("SimulationTick"));
         }
 
+        /// <summary>
+        ///     Short Lived Events are things that are short lived and forgettable in nature (less than one second of lifetime)
+        ///     They can be skipped for late-joining, re-joining or re-syncing clients without any impact.
+        ///     Usually used for effects like minor projectile explosions.
+        /// </summary>
         public EventStream ShortLivedEventStream { get; } = new();
 
         public IEntityContainerWithDetectChanges AuthoritativeWorld { get; }
@@ -144,8 +146,7 @@ namespace Piot.Surge.Pulse.Host
                     TickIdRange.FromTickId(deltaSnapshotEntityIds.TickId))
                 : DeltaSnapshotToPack.ToDeltaSnapshotPack(AuthoritativeWorld, deltaSnapshotEntityIds);
 
-            AuthoritativeWorld.ClearDelta();
-            OverWriter.Overwrite(AuthoritativeWorld);
+            OverWriter.OverwriteAuthoritative(AuthoritativeWorld);
 
             return (DeltaSnapshotToEntityMasks.ToEntityMasks(deltaSnapshotEntityIds), deltaSnapshotPack);
         }

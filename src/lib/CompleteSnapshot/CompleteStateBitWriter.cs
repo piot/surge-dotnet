@@ -14,7 +14,8 @@ namespace Piot.Surge.CompleteSnapshot
 {
     public static class CompleteStateBitWriter
     {
-        public static ReadOnlySpan<byte> CaptureCompleteSnapshotPack(IEntityContainer world)
+        public static ReadOnlySpan<byte> CaptureCompleteSnapshotPack(IEntityContainer world,
+            EventSequenceId expectedShortLivedEventSequenceId)
         {
             var writer = new BitWriter(SnapshotProtocol.Constants.MaxDatagramOctetSize);
 #if DEBUG
@@ -27,6 +28,8 @@ namespace Piot.Surge.CompleteSnapshot
                 writer.WriteBits(entityToSerialize.ArchetypeId.id, 10);
                 entityToSerialize.SerializeAll(writer);
             }
+
+            EventSequenceIdWriter.Write(writer, expectedShortLivedEventSequenceId);
 
             EventsWriter.Write(Array.Empty<IEventWithArchetypeAndSequenceId>(), writer);
 

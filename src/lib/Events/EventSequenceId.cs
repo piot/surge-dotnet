@@ -7,6 +7,10 @@ using System;
 
 namespace Piot.Surge.Event
 {
+    /// <summary>
+    ///     An increasing and wrap around (modulo) number that is primarily used in <see cref="EventStream" />s
+    ///     Used by the receiver to know which events that have already been received and processed.
+    /// </summary>
     public readonly struct EventSequenceId
     {
         public readonly ushort sequenceId;

@@ -25,6 +25,7 @@ namespace Piot.Surge.Replay
         private readonly ReplayReader replayReader;
         private readonly TimeTicker timeTicker;
         private readonly IEntityContainerWithGhostCreator world;
+        private TickId lastAppliedTickId;
         private DeltaState? nextDeltaState;
         private EventSequenceId nextExpectedSequenceId;
         private TickId playbackTickId;
@@ -59,17 +60,27 @@ namespace Piot.Surge.Replay
 
         private void ApplyCompleteState(CompleteState completeState)
         {
+            log.DebugLowLevel("applying complete state {CompleteState}", completeState);
             var bitReader = new BitReader(completeState.Payload, completeState.Payload.Length * 8);
-            CompleteStateBitReader.ReadAndApply(bitReader, world, eventProcessorWithCreate);
+            nextExpectedSequenceId = CompleteStateBitReader.ReadAndApply(bitReader, world, eventProcessorWithCreate);
+            lastAppliedTickId = completeState.TickId;
         }
 
         private void ApplyDeltaState(DeltaState deltaState)
         {
+            log.DebugLowLevel("applying delta state {DeltaState}", deltaState);
             var bitReader = new BitReader(deltaState.Payload, deltaState.Payload.Length * 8);
-            var isOverlapping = deltaState.TickIdRange.Contains(playbackTickId);
+            if (!deltaState.TickIdRange.CanBeFollowing(lastAppliedTickId))
+            {
+                throw new Exception(
+                    $"can not process this delta state, they are not in sequence {deltaState.TickIdRange} {lastAppliedTickId}");
+            }
+
+            var isOverlappingAndMerged = deltaState.TickIdRange.IsOverlappingAndMerged(lastAppliedTickId);
             nextExpectedSequenceId = SnapshotDeltaBitReader.ReadAndApply(bitReader, world, eventProcessorWithCreate,
-                nextExpectedSequenceId, isOverlapping);
+                nextExpectedSequenceId, isOverlappingAndMerged);
             playbackTickId = deltaState.TickIdRange.Last;
+            lastAppliedTickId = deltaState.TickIdRange.Last;
         }
 
         private void PlaybackTick()

@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 using Piot.Flood;
-using Piot.Surge.SnapshotProtocol;
 
 namespace Piot.Surge.Event.Serialization
 {
@@ -21,7 +20,7 @@ namespace Piot.Surge.Event.Serialization
                 return;
             }
 
-            writer.WriteUInt16(events[0].SequenceId.sequenceId);
+            EventSequenceIdWriter.Write(writer, events[0].SequenceId);
 
             foreach (var shortLivedEvent in events)
             {
@@ -36,7 +35,7 @@ namespace Piot.Surge.Event.Serialization
 
             if (events.Length > 0)
             {
-                writer.WriteBits(events[0].SequenceId.sequenceId, 16);
+                EventSequenceIdWriter.Write(writer, events[0].SequenceId);
             }
 
             foreach (var shortLivedEvent in events)

@@ -16,7 +16,7 @@ namespace Piot.Surge.Event
             EventWithArchetype = eventWithArchetypeEventWithArchetype;
         }
 
-        public IEventWithArchetype EventWithArchetype { get; }
+        private IEventWithArchetype EventWithArchetype { get; }
         public EventSequenceId SequenceId { get; }
 
         public void Serialize(IBitWriter bitWriter)

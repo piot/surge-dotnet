@@ -5,6 +5,9 @@
 
 namespace Piot.Surge.Event
 {
+    /// <summary>
+    ///     An ID that indicates which class or struct to be created
+    /// </summary>
     public readonly struct EventArchetypeId
     {
         public readonly byte archetype;

@@ -8,9 +8,9 @@ using Piot.Flood;
 using Piot.Surge.Event;
 using Piot.Surge.Event.Serialization;
 using Piot.Surge.SnapshotDeltaPack.Serialization;
-using Piot.Surge.SnapshotProtocol;
 using Piot.Surge.Tick;
 using Piot.Surge.Types.Serialization;
+using Constants = Piot.Surge.SnapshotProtocol.Constants;
 
 namespace Piot.Surge.DeltaSnapshot.Pack.Convert
 {

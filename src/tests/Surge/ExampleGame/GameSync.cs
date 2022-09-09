@@ -6,7 +6,6 @@
 using Piot.Clog;
 using Piot.MonotonicTime;
 using Piot.Surge.Compress;
-using Piot.Surge.Event;
 using Piot.Surge.Internal.Generated;
 using Piot.Surge.LocalPlayer;
 using Piot.Transport;
@@ -41,7 +40,7 @@ public class GameSync
         var hostGame = new Game(hostTransport, multiCompressor, true, log.SubLog("GameHost"));
 
 
-        hostGame.Host!.ShortLivedEventStream.Add(new(2), new MockEventWithArchetype(new(23)));
+        hostGame.Host!.ShortLivedEventStream.Enqueue(new(2), new MockEventWithArchetype(new(23)));
 
         var mockInput = new MockInputFetch();
 

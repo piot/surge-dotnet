@@ -69,7 +69,7 @@ namespace Piot.Surge.Pulse.Host
             if (!connection.HasReceivedInitialState)
             {
                 // Send Complete State
-                var octets = CompleteStateBitWriter.CaptureCompleteSnapshotPack(world);
+                var octets = CompleteStateBitWriter.CaptureCompleteSnapshotPack(world, eventStream.NextSequenceId);
                 return new(new(new(0), serverTickId), octets, SnapshotStreamType.BitStream, SnapshotType.CompleteState);
             }
 

@@ -448,8 +448,7 @@ public class UnitTest1
         var deltaPack =
             DeltaSnapshotToPack.ToDeltaSnapshotPack(worldToScan, deltaSnapshotEntityIds);
 
-        worldToScan.ClearDelta();
-        OverWriter.Overwrite(worldToScan);
+        OverWriter.OverwriteAuthoritative(worldToScan);
 
         return (entityMasks, deltaSnapshotEntityIds, deltaPack);
     }

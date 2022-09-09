@@ -82,6 +82,24 @@ namespace Piot.Surge.Tick
             return other.Last > Last && other.startTickId <= Last.Next();
         }
 
+        public bool CanBeFollowing(TickId otherTickId)
+        {
+            return Last > otherTickId && startTickId <= otherTickId.Next();
+        }
+
+        public bool IsOverlappingAndMerged(TickId tickId)
+        {
+            if (lastTickId <= tickId)
+            {
+                throw new ArgumentOutOfRangeException(nameof(tickId),
+                    "can not answer if it is overlapped and merging, since it is in an illegal range");
+            }
+
+            var containsTickAlreadyKnown = startTickId <= tickId;
+            var isMergedRange = Length > 1;
+            return containsTickAlreadyKnown && isMergedRange;
+        }
+
         public override string ToString()
         {
             return $"[tickIdRange {startTickId} {lastTickId}]";

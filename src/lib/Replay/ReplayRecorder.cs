@@ -32,7 +32,7 @@ namespace Piot.Surge.Replay
 
         private CompleteState CaptureCompleteState(TickId tickId)
         {
-            var payload = CompleteStateBitWriter.CaptureCompleteSnapshotPack(world);
+            var payload = CompleteStateBitWriter.CaptureCompleteSnapshotPack(world, new(0));
             var completeState = new CompleteState(tickId, payload);
 
             return completeState;

@@ -35,5 +35,16 @@ namespace Piot.Surge
         {
             Overwrite(world.AllEntities);
         }
+
+
+        /// <summary>
+        ///     Overwrites all detected field changes in the <paramref name="world" />.
+        /// </summary>
+        /// <param name="world"></param>
+        public static void OverwriteAuthoritative(IEntityContainerWithDetectChanges world)
+        {
+            world.ClearDelta();
+            Overwrite(world.AllEntities);
+        }
     }
 }

@@ -6,7 +6,6 @@
 using System;
 using System.Collections.Generic;
 using Piot.Flood;
-using Piot.Surge.SnapshotProtocol;
 
 namespace Piot.Surge.Event.Serialization
 {
@@ -22,7 +21,7 @@ namespace Piot.Surge.Event.Serialization
                 return Array.Empty<IEventWithArchetypeAndSequenceId>();
             }
 
-            var sequenceId = reader.ReadUInt16();
+            var sequenceId = EventSequenceIdReader.Read(reader).sequenceId;
 
             for (var i = 0; i < count; ++i)
             {
@@ -51,12 +50,12 @@ namespace Piot.Surge.Event.Serialization
 
             var createdEvents = new List<IEventWithArchetypeAndSequenceId>();
 
-            var sequenceId = reader.ReadBits(16);
+            var sequenceId = EventSequenceIdReader.Read(reader).sequenceId;
             for (var i = 0; i < count; ++i)
             {
                 var archetypeId = reader.ReadBits(6);
                 var createdEvent = creator.Create(new((byte)archetypeId));
-                var wrappedEvent = new EventWithSequenceId(new((ushort)sequenceId), createdEvent);
+                var wrappedEvent = new EventWithSequenceId(new(sequenceId), createdEvent);
                 createdEvent.DeSerialize(reader);
                 createdEvents.Add(wrappedEvent);
                 sequenceId++;
