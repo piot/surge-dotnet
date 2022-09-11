@@ -9,7 +9,8 @@ namespace Piot.Surge.Event.Serialization
 {
     public static class EventBitReader
     {
-        public static EventSequenceId ReadAndApply(IBitReader reader, IEventProcessor eventProcessor, EventSequenceId nextExpectedSequenceId)
+        public static EventSequenceId ReadAndApply(IBitReader reader, IEventProcessor eventProcessor,
+            EventSequenceId nextExpectedSequenceId)
         {
             var (count, startSequenceId) = EventStreamHeaderReader.Read(reader);
             var sequenceId = startSequenceId;

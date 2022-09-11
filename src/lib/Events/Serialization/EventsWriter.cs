@@ -13,7 +13,7 @@ namespace Piot.Surge.Event.Serialization
         public static void Write(EventStreamPackItem[] events, IBitWriter writer)
         {
             EventStreamHeaderWriter.Write(writer, events);
-            
+
             foreach (var shortLivedEvent in events)
             {
                 var reader = new BitReader(shortLivedEvent.payload.Span, (int)shortLivedEvent.bitCount);

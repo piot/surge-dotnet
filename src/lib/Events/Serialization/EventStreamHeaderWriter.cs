@@ -13,9 +13,9 @@ namespace Piot.Surge.Events.Serialization
     {
         public static void Write(IBitWriter writer, EventStreamPackItem[] events)
         {
-            #if DEBUG
+#if DEBUG
             BitMarker.WriteMarker(writer, Constants.ShortLivedEventsStartSync);
-            #endif
+#endif
             writer.WriteBits((byte)events.Length, 6);
 
             if (events.Length > 0)

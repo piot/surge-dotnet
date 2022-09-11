@@ -7,7 +7,6 @@ using System.Text;
 
 namespace Piot.Surge.Generator
 {
-    
     public static class GenerateShortLivedEventsEnqueue
     {
         public static void AddEventEnqueue(StringBuilder sb, ShortLivedEventInterface messageInterface, int indent)
