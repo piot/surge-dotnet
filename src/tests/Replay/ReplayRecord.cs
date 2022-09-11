@@ -17,6 +17,7 @@ using Piot.Surge.Internal.Generated;
 using Piot.Surge.Replay;
 using Piot.Surge.Tick;
 using Tests.ExampleGame;
+using Tests.Surge.ExampleGame;
 using Xunit.Abstractions;
 
 namespace Tests.Replay;
@@ -37,11 +38,17 @@ public class ReplayRecorderTests
         ChangeClearer.OverwriteAuthoritative(authoritativeWorld);
         Ticker.Tick(authoritativeWorld);
         Notifier.Notify(authoritativeWorld.AllEntities);
-        var shortLivedEvents = Array.Empty<IEventWithArchetypeAndSequenceId>();
+        var eventStream = new EventStreamPackQueue(hostTickId);
+
+        var eventEnqueue = new GeneratedEventEnqueue(eventStream);
         if (hostTickId.tickId == 33)
         {
-            shortLivedEvents = new[] { new EventWithSequenceId(new(412), new MockEventWithArchetype(new(23))) };
+            eventEnqueue.Explode(new(100, 200, 300), 23);
         }
+
+        eventStream.EndOfTick(hostTickId);
+
+        var shortLivedEvents = eventStream.FetchEventsForRange(TickIdRange.FromTickId(hostTickId));
 
         var deltaSnapshotEntityIds = Scanner.Scan(authoritativeWorld, hostTickId);
         return DeltaSnapshotToBitPack.ToDeltaSnapshotPack(authoritativeWorld,
@@ -90,7 +97,7 @@ public class ReplayRecorderTests
             var ghostCreator = new GeneratedEntityGhostCreator();
             var notifyWorld = new GeneratedNotifyEntityCreation();
             var eventTarget =
-                new MockEventProcessorWithCreate(log.SubLog("EventTarget")); // TODO: Change to generated class
+                new GeneratedEventProcessor(new ShortEvents(log.SubLog("EventTarget")));
             var clientWorld = new WorldWithGhostCreator(ghostCreator, notifyWorld, false);
 
             var fileStream = FileStreamCreator.OpenWithSeek("replay.temp");

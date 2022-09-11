@@ -22,7 +22,7 @@ namespace Piot.Surge.Pulse.Client
     public class ClientDeltaSnapshotPlayback
     {
         private readonly IEntityContainerWithGhostCreator clientWorld;
-        private readonly IEventProcessorWithCreate eventProcessorWithCreate;
+        private readonly IEventProcessor eventProcessor;
         private readonly SnapshotDeltaPackIncludingCorrectionsQueue includingCorrectionsQueue = new();
 
         private readonly HoldPositive lastBufferWasStarved = new(14);
@@ -34,13 +34,13 @@ namespace Piot.Surge.Pulse.Client
         private TickId playbackTick = new(1);
 
         public ClientDeltaSnapshotPlayback(Milliseconds now, IEntityContainerWithGhostCreator clientWorld,
-            IEventProcessorWithCreate eventProcessorWithCreate, IClientPredictorCorrections predictor,
+            IEventProcessor eventProcessor, IClientPredictorCorrections predictor,
             Milliseconds targetDeltaTimeMs, ILog log)
         {
             this.log = log;
             this.predictor = predictor;
             this.clientWorld = clientWorld;
-            this.eventProcessorWithCreate = eventProcessorWithCreate;
+            this.eventProcessor = eventProcessor;
             this.targetDeltaTimeMs = targetDeltaTimeMs;
             snapshotPlaybackTicker = new(now, NextSnapshotTick, targetDeltaTimeMs,
                 log.SubLog("NextSnapshotTick"));
@@ -140,7 +140,7 @@ namespace Piot.Surge.Pulse.Client
             LastPlaybackSnapshotWasMerged = deltaSnapshotIncludingCorrectionsItem.IsMergedAndOverlapping;
 
             expectedEventSequenceId = ApplyDeltaSnapshotToWorld.Apply(deltaSnapshotPack, clientWorld,
-                eventProcessorWithCreate, expectedEventSequenceId,
+                eventProcessor, expectedEventSequenceId,
                 deltaSnapshotIncludingCorrectionsItem.IsMergedAndOverlapping);
 
             predictor.ReadCorrections(deltaSnapshotIncludingCorrections.tickIdRange.Last,

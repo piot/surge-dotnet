@@ -31,6 +31,11 @@ namespace Piot.Surge.Generator
             return t.IsValueType && !t.IsEnum;
         }
 
+        public static bool IsInterface(Type t)
+        {
+            return t.IsInterface;
+        }
+
         public static MethodInfo ImplementedMethod(Type t, string methodName)
         {
             var methodInfo = t.GetMethod(methodName);

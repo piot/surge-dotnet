@@ -51,7 +51,7 @@ namespace Piot.Surge.Pulse.Host
         }
 
         private DeltaSnapshotPack FindBestPack(SnapshotSyncerClient connection,
-            DeltaSnapshotPack precalculatedPackForThisTick, IEntityContainer world, EventStream eventStream,
+            DeltaSnapshotPack precalculatedPackForThisTick, IEntityContainer world, EventStreamPackQueue eventStream,
             TickId serverTickId)
         {
             if (connection.WantsResend)
@@ -83,7 +83,7 @@ namespace Piot.Surge.Pulse.Host
         }
 
         private void SendUsingContainers(SnapshotSyncerClient connection,
-            DeltaSnapshotPack precalculatedPackForThisTick, IEntityContainer world, EventStream eventStream,
+            DeltaSnapshotPack precalculatedPackForThisTick, IEntityContainer world, EventStreamPackQueue eventStream,
             TickId hostTickId)
         {
             var bestPack = FindBestPack(connection, precalculatedPackForThisTick, world, eventStream, hostTickId);
@@ -118,7 +118,7 @@ namespace Piot.Surge.Pulse.Host
         }
 
         public void SendSnapshot(EntityMasks masks, DeltaSnapshotPack deltaSnapshotPack, IEntityContainer world,
-            EventStream eventStream)
+            EventStreamPackQueue eventStream)
         {
             entityMasksHistory.Enqueue(masks);
             foreach (var syncClient in syncClients)

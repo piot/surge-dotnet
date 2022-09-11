@@ -14,6 +14,7 @@ using Piot.Surge.Pulse.Client;
 using Piot.Surge.Pulse.Host;
 using Piot.Transport;
 using Piot.Transport.Memory;
+using Tests.Surge.ExampleGame;
 using Xunit.Abstractions;
 
 namespace Tests.Pulse;
@@ -34,7 +35,7 @@ public class ClientHostTests
         var clientDeltaTime = new Milliseconds(16);
         var inputFetch = new GeneratedInputFetch();
         var notifyWorld = new GeneratedNotifyEntityCreation();
-        var generatedEvent = new MockEventProcessorWithCreate(log);
+        var generatedEvent = new GeneratedEventProcessor(new ShortEvents(log.SubLog("ShortEvents")));
         var entityContainerWithGhostCreator =
             new WorldWithGhostCreator(new GeneratedEntityGhostCreator(), notifyWorld, false);
 

@@ -3,17 +3,16 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using Piot.Flood;
+using System;
 using Piot.Surge.Tick;
 
-namespace Piot.Surge.Event.Serialization
+namespace Piot.Surge.Event
 {
-    public static class EventStreamWriter
+    public struct EventStreamPackItem
     {
-        public static void Write(EventStream stream, TickIdRange tickIdRange, IOctetWriter writer)
-        {
-            var events = stream.FetchEventsForRange(tickIdRange);
-            EventsWriter.Write(events, writer);
-        }
+        public TickId tickId;
+        public EventSequenceId eventSequenceId;
+        public Memory<byte> payload;
+        public uint bitCount;
     }
 }

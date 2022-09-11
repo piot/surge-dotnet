@@ -38,6 +38,7 @@ namespace Piot.Surge.Pulse.Host
             this.log = log;
             simulationTicker = new(new Milliseconds(0), SimulationTick, new Milliseconds(16),
                 log.SubLog("SimulationTick"));
+            ShortLivedEventStream = new(authoritativeTickId);
         }
 
         /// <summary>
@@ -45,7 +46,7 @@ namespace Piot.Surge.Pulse.Host
         ///     They can be skipped for late-joining, re-joining or re-syncing clients without any impact.
         ///     Usually used for effects like minor projectile explosions.
         /// </summary>
-        public EventStream ShortLivedEventStream { get; } = new();
+        public EventStreamPackQueue ShortLivedEventStream { get; }
 
         public IEntityContainerWithDetectChanges AuthoritativeWorld { get; }
 
@@ -70,7 +71,9 @@ namespace Piot.Surge.Pulse.Host
             TickWorld();
             // Exactly after Tick() and the input has been set in preparation for the next tick, we mark this as the new tick
             authoritativeTickId = authoritativeTickId.Next();
+            ShortLivedEventStream.EndOfTick(authoritativeTickId);
             log.Debug("== Simulation Tick post! {TickId}", authoritativeTickId);
+
             SetInputFromClients.SetInputsFromClientsToEntities(clientConnections.Connections, authoritativeTickId, log);
 
             var (masks, deltaSnapshotPack) = StoreWorldChanges.StoreWorldChangesToPackContainer(AuthoritativeWorld,

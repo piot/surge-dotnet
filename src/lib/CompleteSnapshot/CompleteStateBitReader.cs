@@ -13,7 +13,7 @@ namespace Piot.Surge.CompleteSnapshot
     {
         public static EventSequenceId ReadAndApply(IBitReader reader,
             IEntityContainerWithGhostCreator entityGhostContainerWithCreator,
-            IEventProcessorWithCreate eventProcessorWithCreate)
+            IEventProcessor eventProcessor)
         {
 #if DEBUG
             BitMarker.AssertMarker(reader, Constants.CompleteSnapshotStartMarker);
@@ -22,11 +22,15 @@ namespace Piot.Surge.CompleteSnapshot
 
             var nextExpectedShortLivedEventSequenceId = EventSequenceIdReader.Read(reader);
 
-            var eventsForThisRange = EventStreamReader.Read(eventProcessorWithCreate, reader);
-            eventProcessorWithCreate.PerformEvents(eventsForThisRange);
-            if (eventsForThisRange.Length > 0)
+            var (eventCount, firstSequenceId) = EventStreamHeaderReader.Read(reader);
+
+            var sequenceId = firstSequenceId;
+            for (var i = 0; i < eventCount; ++i)
             {
-                nextExpectedShortLivedEventSequenceId = eventsForThisRange[^1].SequenceId.Next();
+                eventProcessor.ReadAndApply(reader);
+
+                sequenceId = sequenceId.Next();
+                nextExpectedShortLivedEventSequenceId = sequenceId;
             }
 
             return nextExpectedShortLivedEventSequenceId;

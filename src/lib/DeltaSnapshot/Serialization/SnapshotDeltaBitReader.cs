@@ -19,22 +19,27 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
         /// <returns></returns>
         public static EventSequenceId ReadAndApply(IBitReader reader,
             IEntityContainerWithGhostCreator entityGhostContainerWithCreator,
-            IEventProcessorWithCreate eventProcessorWithCreate, EventSequenceId nextExpectedSequenceId,
+            IEventProcessor eventProcessor, EventSequenceId nextExpectedSequenceId,
             bool isOverlappingMergedSnapshot)
         {
             SnapshotDeltaEntityBitReader.ReadAndApply(reader, entityGhostContainerWithCreator,
                 isOverlappingMergedSnapshot);
 
-            var eventsForThisRange = EventStreamReader.Read(eventProcessorWithCreate, reader);
-            foreach (var eventToProcess in eventsForThisRange)
+            var (count, startSequenceId) = EventStreamHeaderReader.Read(reader);
+            var sequenceId = startSequenceId;
+
+            for (var i = 0; i < count; ++i)
             {
-                if (!eventToProcess.SequenceId.IsEqualOrSuccessor(nextExpectedSequenceId))
+                if (!sequenceId.IsEqualOrSuccessor(nextExpectedSequenceId))
                 {
+                    sequenceId = sequenceId.Next();
+                    eventProcessor.SkipOneEvent(reader);
                     continue;
                 }
 
-                eventProcessorWithCreate.PerformEvent(eventToProcess);
-                nextExpectedSequenceId = eventToProcess.SequenceId.Next();
+                eventProcessor.ReadAndApply(reader);
+                sequenceId = sequenceId.Next();
+                nextExpectedSequenceId = sequenceId;
             }
 
             return nextExpectedSequenceId;

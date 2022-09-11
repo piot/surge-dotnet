@@ -8,5 +8,7 @@ namespace Piot.Flood
     public interface IBitWriter
     {
         public void WriteBits(uint bits, int bitCount);
+
+        public void CopyBits(IBitReader reader, int bitCount);
     }
 }

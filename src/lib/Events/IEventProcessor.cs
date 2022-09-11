@@ -3,13 +3,13 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using Piot.Surge.Tick;
+using Piot.Flood;
 
 namespace Piot.Surge.Event
 {
-    public struct EventStreamItem
+    public interface IEventProcessor
     {
-        public TickId tickId;
-        public IEventWithArchetypeAndSequenceId @event;
+        public void ReadAndApply(IBitReader bitReader);
+        public void SkipOneEvent(IBitReader bitReader);
     }
 }

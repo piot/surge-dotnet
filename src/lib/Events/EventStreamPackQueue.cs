@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Piot.Flood;
 using Piot.Surge.Tick;
 
 namespace Piot.Surge.Event
@@ -13,16 +14,26 @@ namespace Piot.Surge.Event
     /// <summary>
     ///     Holds events in a queue to be replicated as a stream.
     /// </summary>
-    public class EventStream
+    public class EventStreamPackQueue
     {
-        private readonly Queue<EventStreamItem> events = new();
+        private readonly Queue<EventStreamPackItem> events = new();
+        private TickId authoritativeTickId;
+
+        private BitWriter bitWriterForCurrentTick = new(1024);
 
         private bool isInitialized;
         private TickId lastInsertedTickId;
         private ushort sequenceId;
 
-        public IEnumerable<EventStreamItem> Events => events;
+        public EventStreamPackQueue(TickId authoritativeTickId)
+        {
+            this.authoritativeTickId = authoritativeTickId;
+        }
+
+        public IEnumerable<EventStreamPackItem> Events => events;
         public EventSequenceId NextSequenceId => new(sequenceId);
+
+        public IBitWriter BitWriter => bitWriterForCurrentTick;
 
         /// <summary>
         ///     Adds an event at the specified <paramref name="tickId" />. The events must be enqueued with the same
@@ -31,7 +42,7 @@ namespace Piot.Surge.Event
         /// <param name="tickId"></param>
         /// <param name="eventWithArchetype"></param>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public void Enqueue(TickId tickId, IEventWithArchetype eventWithArchetype)
+        public void Enqueue(TickId tickId, ReadOnlySpan<byte> payload, uint bitCount)
         {
             if (isInitialized)
             {
@@ -45,13 +56,29 @@ namespace Piot.Surge.Event
             events.Enqueue(new()
             {
                 tickId = tickId,
-                @event = new EventWithSequenceId(new(sequenceId), eventWithArchetype)
+                eventSequenceId = new(sequenceId),
+                payload = payload.ToArray(),
+                bitCount = bitCount
             });
 
             lastInsertedTickId = tickId;
             sequenceId++;
             isInitialized = true;
         }
+
+        public void EndOfTick(TickId expectedAuthoritativeTickId)
+        {
+            authoritativeTickId = expectedAuthoritativeTickId;
+            if (bitWriterForCurrentTick.BitPosition <= 0)
+            {
+                return;
+            }
+
+            var octets = bitWriterForCurrentTick.Close(out var bitPosition);
+            Enqueue(authoritativeTickId, octets, (uint)bitPosition);
+            bitWriterForCurrentTick = new BitWriter(1024);
+        }
+
 
         /// <summary>
         ///     Removes events that are before or at <paramref name="tickId" />.
@@ -75,9 +102,10 @@ namespace Piot.Surge.Event
         /// </summary>
         /// <param name="tickIdRange"></param>
         /// <returns></returns>
-        public IEventWithArchetypeAndSequenceId[] FetchEventsForRange(TickIdRange tickIdRange)
+        public EventStreamPackItem[] FetchEventsForRange(TickIdRange tickIdRange)
         {
-            var matchingEvents = new List<IEventWithArchetypeAndSequenceId>();
+            var matchingEvents = new List<EventStreamPackItem>(events.Count);
+
             foreach (var shortLivedEvent in events)
             {
                 var peekTickId = shortLivedEvent.tickId;
@@ -92,7 +120,7 @@ namespace Piot.Surge.Event
                     break;
                 }
 
-                matchingEvents.Add(shortLivedEvent.@event);
+                matchingEvents.Add(shortLivedEvent);
             }
 
             return matchingEvents.ToArray();

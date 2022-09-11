@@ -14,7 +14,7 @@ namespace Piot.Surge.SnapshotProtocol.In
     public static class ApplyDeltaSnapshotToWorld
     {
         public static EventSequenceId Apply(DeltaSnapshotPack pack, IEntityContainerWithGhostCreator world,
-            IEventProcessorWithCreate eventProcessor, EventSequenceId expectedEventSequenceId,
+            IEventProcessor eventProcessor, EventSequenceId expectedEventSequenceId,
             bool isOverlappingMergedSnapshot)
         {
             switch (pack.StreamType)

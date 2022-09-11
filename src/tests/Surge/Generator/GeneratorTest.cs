@@ -37,7 +37,13 @@ public class GeneratorTests
         Assert.Single(inputFetchers);
         var inputFetchInfos = GameInputFetchInfoCollector.Collect(inputFetchers, log);
 
-        var code = SourceGenerator.Generate(logicInfos, gameInputInfos.First(), inputFetchInfos.First());
+        var shortLivedEvents = ShortLivedEventsScanner.ScanForEventInterfaces(log);
+        Assert.Single(shortLivedEvents);
+
+        var shortLivedEventsMethods = ShortLivedEventsCollector.Collect(shortLivedEvents.First());
+
+        var code = SourceGenerator.Generate(logicInfos, gameInputInfos.First(), inputFetchInfos.First(),
+            shortLivedEventsMethods);
 
         const string target = "../../../../tests/Surge/ExampleGame/_Generated.cs";
         File.Delete(target);

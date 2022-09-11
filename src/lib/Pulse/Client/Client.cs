@@ -23,7 +23,7 @@ namespace Piot.Surge.Pulse.Client
         private readonly TransportStatsBoth transportWithStats;
 
         public Client(ILog log, Milliseconds now, Milliseconds targetDeltaTimeMs,
-            IEntityContainerWithGhostCreator worldWithGhostCreator, IEventProcessorWithCreate eventProcessorWithCreate,
+            IEntityContainerWithGhostCreator worldWithGhostCreator, IEventProcessor eventProcessorWithCreate,
             ITransport assignedTransport, IMultiCompressor compression, IInputPackFetch fetch)
         {
             this.log = log;

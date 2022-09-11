@@ -31,7 +31,7 @@ namespace Piot.Surge.CompleteSnapshot
 
             EventSequenceIdWriter.Write(writer, expectedShortLivedEventSequenceId);
 
-            EventsWriter.Write(Array.Empty<IEventWithArchetypeAndSequenceId>(), writer);
+            EventsWriter.Write(Array.Empty<EventStreamPackItem>(), writer);
 
             return writer.Close(out _);
         }

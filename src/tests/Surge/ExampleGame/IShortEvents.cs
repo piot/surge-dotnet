@@ -3,10 +3,19 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-namespace Piot.Surge.Event
+using Piot.Surge;
+using Piot.Surge.Types;
+
+namespace Tests.Surge.ExampleGame;
+
+public enum ExplodeType
 {
-    public interface IEventWithArchetypeAndSequenceId : IEventWithArchetype
-    {
-        public EventSequenceId SequenceId { get; }
-    }
+    Fireball,
+    Lightning
+}
+
+[ShortLivedEvents]
+public interface IShortEvents
+{
+    public void Explode(Position3 position, byte magnitude); //  ExplodeType explodeType,
 }

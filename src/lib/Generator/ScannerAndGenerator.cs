@@ -31,8 +31,19 @@ namespace Piot.Surge.Generator
                 throw new Exception("must have exactly one game input fetcher");
             }
 
+
+            var eventInterfaces = ShortLivedEventsScanner.ScanForEventInterfaces(log);
+            if (eventInterfaces.Count() > 1)
+            {
+                throw new Exception("must not have more than one short lived events interface");
+            }
+
+            var shortLivedEventsInfo = ShortLivedEventsCollector.Collect(eventInterfaces.First());
+
+
             var inputFetchInfos = GameInputFetchInfoCollector.Collect(inputFetchers, log);
-            var code = SourceGenerator.Generate(logicInfos, gameInputInfos.First(), inputFetchInfos.First());
+            var code = SourceGenerator.Generate(logicInfos, gameInputInfos.First(), inputFetchInfos.First(),
+                shortLivedEventsInfo);
 
             File.Delete(targetSourceFile);
             var directoryName = Path.GetDirectoryName(targetSourceFile);

@@ -17,7 +17,7 @@ namespace Piot.Surge.Pulse.Host
     {
         public static (EntityMasks, DeltaSnapshotPack) StoreWorldChangesToPackContainer(
             IEntityContainerWithDetectChanges AuthoritativeWorld,
-            EventStream ShortLivedEventStream, TickId serverTickId, SnapshotStreamType streamType)
+            EventStreamPackQueue ShortLivedEventStream, TickId serverTickId, SnapshotStreamType streamType)
         {
             var deltaSnapshotEntityIds = Scanner.Scan(AuthoritativeWorld, serverTickId);
             var eventsThisTick = ShortLivedEventStream.FetchEventsForRange(TickIdRange.FromTickId(serverTickId));

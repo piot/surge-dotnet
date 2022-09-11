@@ -28,4 +28,9 @@ namespace Piot.Surge
     public class SimulatedAttribute : Attribute
     {
     }
+
+    [AttributeUsage(AttributeTargets.Interface)]
+    public class ShortLivedEventsAttribute : Attribute
+    {
+    }
 }

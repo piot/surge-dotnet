@@ -8,6 +8,7 @@ using Piot.MonotonicTime;
 using Piot.Surge.Compress;
 using Piot.Surge.Internal.Generated;
 using Piot.Surge.LocalPlayer;
+using Piot.Surge.Types;
 using Piot.Transport;
 using Piot.Transport.Memory;
 using Xunit.Abstractions;
@@ -40,7 +41,8 @@ public class GameSync
         var hostGame = new Game(hostTransport, multiCompressor, true, log.SubLog("GameHost"));
 
 
-        hostGame.Host!.ShortLivedEventStream.Enqueue(new(2), new MockEventWithArchetype(new(23)));
+        var enqueue = new GeneratedEventEnqueue(hostGame.Host!.ShortLivedEventStream);
+
 
         var mockInput = new MockInputFetch();
 
@@ -95,6 +97,11 @@ public class GameSync
         for (var iteration = 0; iteration < maxIteration; iteration++)
         {
             var now = new Milliseconds(initNow.ms + (iteration + 1) * 16);
+
+            if (iteration == 3)
+            {
+                enqueue.Explode(new Position3(-200, 300, -400), 233);
+            }
 
             var pressButtons = iteration >= 4;
             mockInput.PrimaryAbility = pressButtons;

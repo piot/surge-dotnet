@@ -20,7 +20,7 @@ namespace Piot.Surge.Replay
     // ReSharper disable once ClassNeverInstantiated.Global
     public class ReplayPlayback
     {
-        private readonly IEventProcessorWithCreate eventProcessorWithCreate;
+        private readonly IEventProcessor eventProcessorWithCreate;
         private readonly ILog log;
         private readonly ReplayReader replayReader;
         private readonly TimeTicker timeTicker;
@@ -31,7 +31,7 @@ namespace Piot.Surge.Replay
         private TickId playbackTickId;
 
         public ReplayPlayback(IEntityContainerWithGhostCreator world,
-            IEventProcessorWithCreate eventProcessorWithCreate, Milliseconds now,
+            IEventProcessor eventProcessorWithCreate, Milliseconds now,
             SemanticVersion expectedApplicationVersion, IOctetReaderWithSeekAndSkip reader, ILog log)
         {
             replayReader = new(reader);

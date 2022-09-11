@@ -3,13 +3,22 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using Piot.Surge.Event.Serialization;
+using Piot.Clog;
+using Piot.Surge.Types;
 
-namespace Piot.Surge.Event
+namespace Tests.Surge.ExampleGame;
+
+public class ShortEvents : IShortEvents
 {
-    public interface IEventProcessorWithCreate : IEventCreator
+    private readonly ILog log;
+
+    public ShortEvents(ILog log)
     {
-        public void PerformEvents(IEventWithArchetype[] shortLivedEvents);
-        public void PerformEvent(IEventWithArchetype shortLivedEvent);
+        this.log = log;
+    }
+
+    public void Explode(Position3 position, byte magnitude)
+    {
+        log.Info("Explode {Position}, {Magnitude}", position, magnitude);
     }
 }

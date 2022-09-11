@@ -6,7 +6,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 
 // ReSharper disable MemberCanBePrivate.Global
@@ -15,49 +14,24 @@ namespace Piot.Surge.Generator
 {
     public static class SourceGenerator
     {
-        private static string Suffix(string a, string b)
-        {
-            return a + b;
-        }
-
-        public static string FullName(Type t)
-        {
-            return t.FullName!.Replace('+', '.');
-        }
-
-        public static string ShortName(Type t)
-        {
-            return t.Name;
-        }
-
-        public static string FullName(MethodInfo methodInfo)
-        {
-            return methodInfo.DeclaringType?.FullName + "." + methodInfo.Name;
-        }
-
         public static string ActionsName(Type t)
         {
-            return Suffix(t.Name, "Actions");
-        }
-
-        public static string TitleCase(string input)
-        {
-            return string.Concat(input[0].ToString().ToUpper(), input.Substring(1, input.Length - 1));
+            return Generator.Suffix(t.Name, "Actions");
         }
 
         public static string EntityExternal(LogicInfo info)
         {
-            return Suffix(info.Type.Name, "Entity");
+            return Generator.Suffix(info.Type.Name, "Entity");
         }
 
         public static string EntityGeneratedInternal(LogicInfo info)
         {
-            return Suffix(info.Type.Name, "EntityInternal");
+            return Generator.Suffix(info.Type.Name, "EntityInternal");
         }
 
         public static string EntityExternalFullName(LogicInfo info)
         {
-            return Suffix(FullName(info.Type), "Entity");
+            return Generator.Suffix(Generator.FullName(info.Type), "Entity");
         }
 
 
@@ -69,16 +43,10 @@ namespace Piot.Surge.Generator
 ");
         }
 
-        public static void AddEndDeclaration(StringBuilder sb)
-        {
-            sb.Append(@"
-}
-");
-        }
 
         public static void AddEntityCreation(StringBuilder sb, IEnumerable<LogicInfo> logicInfos)
         {
-            AddClassDeclaration(sb, "GeneratedEntityGhostCreator", "IEntityGhostCreator");
+            Generator.AddClassDeclaration(sb, "GeneratedEntityGhostCreator", "IEntityGhostCreator");
             sb.Append(@" public IEntity CreateGhostEntity(ArchetypeId archetypeId, EntityId entityId)
             {
                 ICompleteEntity completeEntity = archetypeId.id switch
@@ -106,7 +74,7 @@ namespace Piot.Surge.Generator
         public static void AddEngineSpawner(StringBuilder sb, IEnumerable<LogicInfo> infos)
         {
             const string className = "GeneratedHostEntitySpawner";
-            AddClassDeclaration(sb, className);
+            Generator.AddClassDeclaration(sb, className);
             sb.Append($@"
     private readonly IAuthoritativeEntityContainer container;
     private readonly INotifyEntityCreation notifyWorld;
@@ -119,9 +87,9 @@ namespace Piot.Surge.Generator
 ");
             foreach (var info in infos)
             {
-                var logicName = FullName(info.Type);
+                var logicName = Generator.FullName(info.Type);
                 sb.Append(@$"
-    public (IEntity, {EntityGeneratedInternal(info)}) Spawn{ShortName(info.Type)}({logicName} logic)
+    public (IEntity, {EntityGeneratedInternal(info)}) Spawn{Generator.ShortName(info.Type)}({logicName} logic)
     {{ 
         var internalEntity = new {EntityGeneratedInternal(info)}
         {{
@@ -133,12 +101,12 @@ namespace Piot.Surge.Generator
 ");
             }
 
-            AddEndDeclaration(sb);
+            Generator.AddEndDeclaration(sb);
         }
 
         public static void AddEngineWorld(StringBuilder sb, IEnumerable<LogicInfo> infos)
         {
-            AddClassDeclaration(sb, "GeneratedNotifyEntityCreation", "INotifyEntityCreation");
+            Generator.AddClassDeclaration(sb, "GeneratedNotifyEntityCreation", "INotifyEntityCreation");
 
             foreach (var info in infos)
             {
@@ -169,7 +137,7 @@ namespace Piot.Surge.Generator
         }
                 ");
 
-            AddEndDeclaration(sb);
+            Generator.AddEndDeclaration(sb);
         }
 
 
@@ -199,7 +167,7 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
 
         public static void AddChangeDelegate(StringBuilder sb, LogicFieldInfo fieldInfo)
         {
-            var titledField = TitleCase(fieldInfo.FieldInfo.Name);
+            var titledField = Generator.TitleCase(fieldInfo.FieldInfo.Name);
             sb.Append(@$"    public Action? On{titledField}Changed;
 
 ");
@@ -212,28 +180,6 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
 ");
         }
 
-        public static void AddClassDeclaration(StringBuilder sb, string className)
-        {
-            sb.Append($"public class {className}").Append(@"
-{
-");
-        }
-
-
-        public static void AddStaticClassDeclaration(StringBuilder sb, string className)
-        {
-            sb.Append($"public static class {className}").Append(@"
-{
-");
-        }
-
-        public static void AddClassDeclaration(StringBuilder sb, string className, string inheritFrom)
-        {
-            sb.Append($"public class {className} : {inheritFrom}").Append(@"
-    {
-");
-        }
-
 
         public static void AddActionStructs(StringBuilder sb, IEnumerable<CommandInfo> commandInfos)
         {
@@ -242,9 +188,8 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
             foreach (var commandInfo in commandInfos)
             {
                 var actionName = commandInfo.MethodInfo.Name;
-                sb.Append($"public struct {actionName} : IAction").Append(@"
-{
-");
+                Generator.AddStructDeclaration(sb, actionName, "IAction");
+
                 foreach (var parameter in commandInfo.CommandParameters)
                 {
                     sb.Append($"    public {parameter.type} {parameter.name}").Append(@";
@@ -260,8 +205,8 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
         public static void AddActionImplementation(StringBuilder sb, LogicInfo info)
         {
             AddSection(sb, "Internal Action Implementation");
-            var actionsImplementationName = Suffix(info.Type.Name, "Actions");
-            var actionInterface = FullName(info.CommandsInterface!);
+            var actionsImplementationName = Generator.Suffix(info.Type.Name, "Actions");
+            var actionInterface = Generator.FullName(info.CommandsInterface!);
 
             sb.Append($"public class {actionsImplementationName} : {actionInterface}").Append(@"
 {
@@ -296,7 +241,7 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
         public static void AddActionDelegate(StringBuilder sb, CommandInfo commandInfo)
         {
             var titledField = commandInfo.MethodInfo.Name;
-            var delegateName = Suffix(titledField, "Delegate");
+            var delegateName = Generator.Suffix(titledField, "Delegate");
             var actionName = commandInfo.MethodInfo.Name;
 
             var stringParts = commandInfo.CommandParameters
@@ -318,15 +263,15 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
             }
         }
 
-        public static string MaskName(LogicFieldInfo fieldInfo)
+        public static string MaskName(string Name)
         {
-            return Suffix(TitleCase(fieldInfo.FieldInfo.Name), "Mask");
+            return Generator.Suffix(Generator.TitleCase(Name), "Mask");
         }
 
         public static void AddChangeMaskConstant(StringBuilder sb, LogicFieldInfo fieldInfo)
         {
             sb.Append(
-                @$"    public const ulong {MaskName(fieldInfo)} = 0x{fieldInfo.Mask:x08};
+                @$"    public const ulong {MaskName(fieldInfo.FieldInfo.Name)} = 0x{fieldInfo.Mask:x08};
 ");
         }
 
@@ -341,162 +286,6 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
 ");
         }
 
-        public static string PrimitiveDeSerializer(string primitiveTypeName)
-        {
-            return $"reader.Read{primitiveTypeName}()";
-        }
-
-        public static string PrimitiveSerializer(string primitiveTypeName, string variableName)
-        {
-            return $"writer.Write{primitiveTypeName}({variableName})";
-        }
-
-
-        public static string DeSerializeMethodForValueTypes(Type type)
-        {
-            return $"{type.Name}Reader.Read(reader)";
-        }
-
-        public static string SerializeMethodForValueTypes(Type type, string variableName)
-        {
-            return $"{type.Name}Writer.Write({variableName}, writer)";
-        }
-
-
-        public static string DeSerializeMethod(Type type)
-        {
-            if (type == typeof(bool))
-            {
-                return "reader.ReadUInt8() != 0";
-            }
-
-            if (type == typeof(ushort))
-            {
-                return PrimitiveDeSerializer("UInt16");
-            }
-
-            if (type == typeof(uint))
-            {
-                return PrimitiveDeSerializer("UInt32");
-            }
-
-            if (type == typeof(ulong))
-            {
-                return PrimitiveDeSerializer("UInt64");
-            }
-
-            return DeSerializeMethodForValueTypes(type);
-        }
-
-
-        public static string SerializeMethod(Type type, string variableName)
-        {
-            if (type == typeof(bool))
-            {
-                return $"writer.WriteUInt8({variableName} ? (byte)1 : (byte)0)";
-            }
-
-            if (type == typeof(ushort))
-            {
-                return PrimitiveSerializer("UInt16", variableName);
-            }
-
-            if (type == typeof(uint))
-            {
-                return PrimitiveSerializer("UInt32", variableName);
-            }
-
-            if (type == typeof(ulong))
-            {
-                return PrimitiveSerializer("UInt64", variableName);
-            }
-
-            return SerializeMethodForValueTypes(type, variableName);
-        }
-
-        public static string PrimitiveBitSerializer(uint bitCount, string variableName)
-        {
-            return $"writer.WriteBits({variableName}, {bitCount})";
-        }
-
-        public static string PrimitiveBitDeSerializer(Type type)
-        {
-            int bitCount;
-
-            if (type == typeof(byte) || type == typeof(sbyte))
-            {
-                bitCount = 8;
-            }
-            else if (type == typeof(ushort) || type == typeof(short))
-            {
-                bitCount = 16;
-            }
-            else if (type == typeof(uint) || type == typeof(int))
-            {
-                bitCount = 32;
-            }
-            else if (type == typeof(ulong) || type == typeof(long))
-            {
-                bitCount = 64;
-            }
-            else
-            {
-                throw new Exception($"unknown type {type.Name}");
-            }
-
-            return $"({type.Name})reader.ReadBits({bitCount})";
-        }
-
-        public static string BitSerializeMethod(Type type, string variableName)
-        {
-            if (type == typeof(bool))
-            {
-                return $"writer.WriteBits({variableName} ? 1U : 0U, 1)";
-            }
-
-            if (type == typeof(ushort))
-            {
-                return PrimitiveBitSerializer(16, variableName);
-            }
-
-            if (type == typeof(uint))
-            {
-                return PrimitiveBitSerializer(32, variableName);
-            }
-
-            if (type == typeof(ulong))
-            {
-                return PrimitiveBitSerializer(64, variableName);
-            }
-
-            return SerializeMethodForValueTypes(type, variableName);
-        }
-
-        public static string BitDeSerializeMethod(Type type)
-        {
-            if (type == typeof(bool))
-            {
-                return "reader.ReadBits(1) != 0";
-            }
-
-            if (type == typeof(ushort))
-            {
-                return PrimitiveBitDeSerializer(type);
-            }
-
-            if (type == typeof(uint))
-            {
-                return PrimitiveBitDeSerializer(type);
-            }
-
-            if (type == typeof(ulong))
-            {
-                return PrimitiveBitDeSerializer(type);
-            }
-
-            return DeSerializeMethodForValueTypes(type);
-        }
-
 
         public static void AddChangeDelegates(StringBuilder sb, LogicInfo logicInfo,
             IEnumerable<LogicFieldInfo> fieldInfos)
@@ -506,6 +295,7 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
                 AddChangeDelegate(sb, fieldInfo);
             }
         }
+
 
         public static void AddDeserialize(StringBuilder sb, IEnumerable<LogicFieldInfo> fieldInfos)
         {
@@ -520,7 +310,7 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
             {
                 var fieldName = fieldInfo.FieldInfo.Name;
                 sb.Append(
-                    $@"        if ((serializeFlags & {MaskName(fieldInfo)}) != 0) current.{fieldName} = {DeSerializeMethod(fieldInfo.FieldInfo.FieldType)};
+                    $@"        if ((serializeFlags & {MaskName(fieldInfo.FieldInfo.Name)}) != 0) current.{fieldName} = {GenerateSerializers.DeSerializeMethod(fieldInfo.FieldInfo.FieldType)};
 ");
             }
 
@@ -554,7 +344,7 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
             {
                 var fieldName = fieldInfo.FieldInfo.Name;
                 sb.Append(
-                    $@"        if ((serializeFlags & {MaskName(fieldInfo)}) != 0) current.{fieldName} = {BitDeSerializeMethod(fieldInfo.FieldInfo.FieldType)};
+                    $@"        if ((serializeFlags & {MaskName(fieldInfo.FieldInfo.Name)}) != 0) current.{fieldName} = {GenerateSerializers.BitDeSerializeMethod(fieldInfo.FieldInfo.FieldType)};
 ");
             }
 
@@ -576,7 +366,7 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
             {
                 var fieldName = fieldInfo.FieldInfo.Name;
                 sb.Append(
-                    $@"        current.{fieldName} = {DeSerializeMethod(fieldInfo.FieldInfo.FieldType)};
+                    $@"        current.{fieldName} = {GenerateSerializers.DeSerializeMethod(fieldInfo.FieldInfo.FieldType)};
 ");
             }
 
@@ -595,7 +385,7 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
             {
                 var fieldName = fieldInfo.FieldInfo.Name;
                 sb.Append(
-                    $@"        current.{fieldName} = {BitDeSerializeMethod(fieldInfo.FieldInfo.FieldType)};
+                    $@"        current.{fieldName} = {GenerateSerializers.BitDeSerializeMethod(fieldInfo.FieldInfo.FieldType)};
 ");
             }
 
@@ -667,7 +457,7 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
                 var fieldName = fieldInfo.FieldInfo.Name;
                 var completeVariable = $"{targetFieldName}.{fieldName}";
                 sb.Append(
-                    $@"        if ((serializeFlags & {MaskName(fieldInfo)}) != 0) {SerializeMethod(fieldInfo.FieldInfo.FieldType, completeVariable)};
+                    $@"        if ((serializeFlags & {MaskName(fieldInfo.FieldInfo.Name)}) != 0) {GenerateSerializers.SerializeMethod(fieldInfo.FieldInfo.FieldType, completeVariable)};
 ");
             }
 
@@ -705,7 +495,7 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
                 var fieldName = fieldInfo.FieldInfo.Name;
                 var completeVariable = $"{targetFieldName}.{fieldName}";
                 sb.Append(
-                    $@"        if ((serializeFlags & {MaskName(fieldInfo)}) != 0) {BitSerializeMethod(fieldInfo.FieldInfo.FieldType, completeVariable)};
+                    $@"        if ((serializeFlags & {MaskName(fieldInfo.FieldInfo.Name)}) != 0) {GenerateSerializers.BitSerializeMethod(fieldInfo.FieldInfo.FieldType, completeVariable)};
 ");
             }
 
@@ -741,7 +531,7 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
                 var fieldName = fieldInfo.FieldInfo.Name;
                 var completeVariable = $"current.{fieldName}";
                 sb.Append(
-                    $@"        {SerializeMethod(fieldInfo.FieldInfo.FieldType, completeVariable)};
+                    $@"        {GenerateSerializers.SerializeMethod(fieldInfo.FieldInfo.FieldType, completeVariable)};
 ");
             }
 
@@ -761,7 +551,7 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
                 var fieldName = fieldInfo.FieldInfo.Name;
                 var completeVariable = $"current.{fieldName}";
                 sb.Append(
-                    $@"        {BitSerializeMethod(fieldInfo.FieldInfo.FieldType, completeVariable)};
+                    $@"        {GenerateSerializers.BitSerializeMethod(fieldInfo.FieldInfo.FieldType, completeVariable)};
 ");
             }
 
@@ -906,7 +696,7 @@ private readonly ActionsContainer actionsContainer = new();
             {
                 sb.Append(@"                new() { ")
                     .Append(
-                        $"mask = {MaskName(fieldInfo)}, name = new (nameof(current.{fieldInfo.FieldInfo.Name})), type = typeof({fieldInfo.FieldInfo.FieldType})")
+                        $"mask = {MaskName(fieldInfo.FieldInfo.Name)}, name = new (nameof(current.{fieldInfo.FieldInfo.Name})), type = typeof({fieldInfo.FieldInfo.FieldType})")
                     .Append(@" },
 ");
             }
@@ -932,7 +722,7 @@ private readonly ActionsContainer actionsContainer = new();
             foreach (var fieldInfo in fieldInfos)
             {
                 sb.Append(
-                        $"        if (current.{fieldInfo.FieldInfo.Name} != last.{fieldInfo.FieldInfo.Name}) mask |= {MaskName(fieldInfo)};")
+                        $"        if (current.{fieldInfo.FieldInfo.Name} != last.{fieldInfo.FieldInfo.Name}) mask |= {MaskName(fieldInfo.FieldInfo.Name)};")
                     .Append(@"
 ");
             }
@@ -955,7 +745,7 @@ private readonly ActionsContainer actionsContainer = new();
             foreach (var fieldInfo in fieldInfos)
             {
                 sb.Append(
-                        $"        if ((serializeFlags & {MaskName(fieldInfo)}) != 0) outFacing.On{TitleCase(fieldInfo.FieldInfo.Name)}Changed?.Invoke();")
+                        $"        if ((serializeFlags & {MaskName(fieldInfo.FieldInfo.Name)}) != 0) outFacing.On{Generator.TitleCase(fieldInfo.FieldInfo.Name)}Changed?.Invoke();")
                     .Append('\n');
             }
 
@@ -1010,7 +800,7 @@ private readonly ActionsContainer actionsContainer = new();
 
         public static void AddOutFacingEntity(StringBuilder sb, LogicInfo logicInfo)
         {
-            var outFacingClassName = Suffix(logicInfo.Type.Name, "Entity");
+            var outFacingClassName = Generator.Suffix(logicInfo.Type.Name, "Entity");
             sb.Append(@"
 public class ").Append(outFacingClassName).Append($@"
 {{
@@ -1032,7 +822,7 @@ public class ").Append(outFacingClassName).Append($@"
         internalEntity.Destroy();
     }}
 
-    public {FullName(logicInfo.Type)} Self => internalEntity.Self;
+    public {Generator.FullName(logicInfo.Type)} Self => internalEntity.Self;
 
     public Action? OnDestroyed;
     public Action? OnPostUpdate;
@@ -1077,7 +867,7 @@ public struct {EntityGeneratedInternal(logicInfo)}SimulationInfo
 ");
             foreach (var fieldInfo in logicInfo.SimulationFieldInfos)
             {
-                sb.Append($@"public {FullName(fieldInfo.FieldInfo.FieldType)} {fieldInfo.FieldInfo.Name};
+                sb.Append($@"public {Generator.FullName(fieldInfo.FieldInfo.FieldType)} {fieldInfo.FieldInfo.Name};
 ");
             }
 
@@ -1142,10 +932,10 @@ public class ").Append(EntityGeneratedInternal(logicInfo)).Append($" : {inherit}
 ");
 
 
-            sb.Append("    ").Append(FullName(logicInfo.Type)).Append(@" current;
-    ").Append(FullName(logicInfo.Type)).Append(@" last;
+            sb.Append("    ").Append(Generator.FullName(logicInfo.Type)).Append(@" current;
+    ").Append(Generator.FullName(logicInfo.Type)).Append(@" last;
 
-").Append($"    public {FullName(logicInfo.Type)} Self => current;").Append(@"
+").Append($"    public {Generator.FullName(logicInfo.Type)} Self => current;").Append(@"
 
         public EntityRollMode RollMode { get; set; }
 
@@ -1156,7 +946,7 @@ public class ").Append(EntityGeneratedInternal(logicInfo)).Append($" : {inherit}
 
 
 
-").Append($" internal {FullName(logicInfo.Type)} Current").Append(@"
+").Append($" internal {Generator.FullName(logicInfo.Type)} Current").Append(@"
             {
                 set => current = value;
             }
@@ -1169,8 +959,8 @@ public class ").Append(EntityGeneratedInternal(logicInfo)).Append($" : {inherit}
         }}
 ");
 
-            sb.Append($"     {Suffix(logicInfo.Type.Name, "Entity")} outFacing;").Append(@"
-").Append($"    public {Suffix(logicInfo.Type.Name, "Entity")} OutFacing => outFacing;").Append(@"
+            sb.Append($"     {Generator.Suffix(logicInfo.Type.Name, "Entity")} outFacing;").Append(@"
+").Append($"    public {Generator.Suffix(logicInfo.Type.Name, "Entity")} OutFacing => outFacing;").Append(@"
 
 ");
 
@@ -1250,8 +1040,8 @@ public class ").Append(EntityGeneratedInternal(logicInfo)).Append($" : {inherit}
 
         public static void AddGameInputReader(StringBuilder sb, GameInputInfo gameInputInfo)
         {
-            AddStaticClassDeclaration(sb, "GameInputReader");
-            var gameInputName = FullName(gameInputInfo.Type);
+            Generator.AddStaticClassDeclaration(sb, "GameInputReader");
+            var gameInputName = Generator.FullName(gameInputInfo.Type);
             sb.Append(@$"    public static {gameInputName} Read(IOctetReader reader)
     {{
         return new()
@@ -1262,21 +1052,21 @@ public class ").Append(EntityGeneratedInternal(logicInfo)).Append($" : {inherit}
             {
                 var fieldName = fieldInfo.FieldInfo.Name;
                 sb.Append(
-                    $@"             {fieldName} = {DeSerializeMethod(fieldInfo.FieldInfo.FieldType)},
+                    $@"             {fieldName} = {GenerateSerializers.DeSerializeMethod(fieldInfo.FieldInfo.FieldType)},
 ");
             }
 
             sb.Append("        }; // end of new");
 
-            AddEndDeclaration(sb);
+            Generator.AddEndDeclaration(sb);
 
-            AddEndDeclaration(sb);
+            Generator.AddEndDeclaration(sb);
         }
 
         public static void AddGameInputWriter(StringBuilder sb, GameInputInfo gameInputInfo)
         {
-            AddStaticClassDeclaration(sb, "GameInputWriter");
-            var gameInputName = FullName(gameInputInfo.Type);
+            Generator.AddStaticClassDeclaration(sb, "GameInputWriter");
+            var gameInputName = Generator.FullName(gameInputInfo.Type);
             sb.Append(@$"    public static void Write(IOctetWriter writer, {gameInputName} input)
     {{
 ");
@@ -1286,19 +1076,19 @@ public class ").Append(EntityGeneratedInternal(logicInfo)).Append($" : {inherit}
                 var fieldName = fieldInfo.FieldInfo.Name;
                 var completeVariable = $"input.{fieldName}";
                 sb.Append(
-                    $@"       {SerializeMethod(fieldInfo.FieldInfo.FieldType, completeVariable)};
+                    $@"       {GenerateSerializers.SerializeMethod(fieldInfo.FieldInfo.FieldType, completeVariable)};
 ");
             }
 
 
-            AddEndDeclaration(sb);
+            Generator.AddEndDeclaration(sb);
 
-            AddEndDeclaration(sb);
+            Generator.AddEndDeclaration(sb);
         }
 
         public static void AddGameInputFetch(StringBuilder sb, GameInputFetchInfo inputFetchInfo)
         {
-            var fetchMethodName = FullName(inputFetchInfo.MethodInfo);
+            var fetchMethodName = Generator.FullName(inputFetchInfo.MethodInfo);
             sb.Append(@$"
 
 public class GeneratedInputFetch : IInputPackFetch
@@ -1323,7 +1113,7 @@ public class GeneratedInputFetch : IInputPackFetch
         /// <param name="infos"></param>
         /// <returns></returns>
         public static string Generate(IEnumerable<LogicInfo> infos, GameInputInfo gameInputInfo,
-            GameInputFetchInfo gameInputFetchInfo)
+            GameInputFetchInfo gameInputFetchInfo, ShortLivedEventInterface shortLivedEventInterface)
         {
             var sb = new StringBuilder();
 
@@ -1336,6 +1126,7 @@ using Piot.Surge.FastTypeInformation;
 using Piot.Flood;
 using Piot.Surge.Types.Serialization;
 using Piot.Surge.Entities;
+using Piot.Surge.Event;
 using Piot.Surge.LogicalInput;
 using Piot.Surge.LocalPlayer;
 using Piot.Surge.LogicAction;
@@ -1344,6 +1135,7 @@ namespace Piot.Surge.Internal.Generated
 {
 ");
 
+            var indent = 0;
             AddArchetypeConstants(sb, infos);
             AddEntityCreation(sb, infos);
 
@@ -1353,6 +1145,10 @@ namespace Piot.Surge.Internal.Generated
             AddGameInputReader(sb, gameInputInfo);
             AddGameInputWriter(sb, gameInputInfo);
             AddGameInputFetch(sb, gameInputFetchInfo);
+
+            GenerateShortLivedEvent.AddShortLivedEventValueConstants(sb, shortLivedEventInterface.methodInfos);
+            GenerateShortLivedEventsEnqueue.AddEventEnqueue(sb, shortLivedEventInterface, indent);
+            GenerateShortLivedEventsProcessor.AddEventProcessor(sb, shortLivedEventInterface, indent);
 
             foreach (var logicInfo in infos)
             {

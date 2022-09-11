@@ -12,6 +12,7 @@ using Piot.Surge.Pulse.Client;
 using Piot.Surge.Pulse.Host;
 using Piot.Surge.Types;
 using Piot.Transport;
+using Tests.Surge.ExampleGame;
 
 namespace Tests.ExampleGame;
 
@@ -29,7 +30,7 @@ public class Game
         var entityCreation = new GeneratedEntityGhostCreator();
         GeneratedNotifyEntityCreation = new GeneratedNotifyEntityCreation();
         world = new(entityCreation, GeneratedNotifyEntityCreation, isHosting);
-        var generatedEventTarget = new MockEventProcessorWithCreate(log);
+        var generatedEventTarget = new GeneratedEventProcessor(new ShortEvents(log.SubLog("ShortEvents")));
 
         if (isHosting)
         {

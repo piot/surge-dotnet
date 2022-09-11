@@ -67,6 +67,20 @@ namespace Piot.Flood
             bitPosition += bitCount;
         }
 
+
+        public void CopyBits(IBitReader bitReader, int bitCount)
+        {
+            var uint32Count = bitCount / 32;
+            for (var i = 0; i < uint32Count; ++i)
+            {
+                var bits = bitReader.ReadBits(32);
+                WriteBits(bits, 32);
+            }
+
+            var restBitCount = bitCount % 32;
+            WriteBits(bitReader.ReadBits(restBitCount), restBitCount);
+        }
+
         public ReadOnlySpan<byte> Close(out int outBitPosition)
         {
             if (bitsInAccumulator > 0)
