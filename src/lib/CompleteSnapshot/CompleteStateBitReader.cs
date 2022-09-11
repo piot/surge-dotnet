@@ -5,7 +5,6 @@
 
 using Piot.Flood;
 using Piot.Surge.Event;
-using Piot.Surge.Event.Serialization;
 
 namespace Piot.Surge.CompleteSnapshot
 {
@@ -20,20 +19,7 @@ namespace Piot.Surge.CompleteSnapshot
 #endif
             CompleteStateEntityBitReader.Apply(reader, entityGhostContainerWithCreator);
 
-            var nextExpectedShortLivedEventSequenceId = EventSequenceIdReader.Read(reader);
-
-            var (eventCount, firstSequenceId) = EventStreamHeaderReader.Read(reader);
-
-            var sequenceId = firstSequenceId;
-            for (var i = 0; i < eventCount; ++i)
-            {
-                eventProcessor.ReadAndApply(reader);
-
-                sequenceId = sequenceId.Next();
-                nextExpectedShortLivedEventSequenceId = sequenceId;
-            }
-
-            return nextExpectedShortLivedEventSequenceId;
+            return EventCompleteBitReader.ReadAndApply(eventProcessor, reader);
         }
     }
 }

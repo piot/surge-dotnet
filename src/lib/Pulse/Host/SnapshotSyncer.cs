@@ -61,6 +61,11 @@ namespace Piot.Surge.Pulse.Host
 
                 var snapshotEntityIds = EntityMasksToDeltaSnapshotIds.ToEntityIds(combinedMasks);
                 var eventsForThisRange = eventStream.FetchEventsForRange(rangeToSend);
+                if (eventsForThisRange.Length > 0)
+                {
+                    log.DebugLowLevel("fetched event packs for {TickId} to {EndTickId}", eventsForThisRange[0],
+                        eventsForThisRange[^1]);
+                }
 
                 return DeltaSnapshotToBitPack.ToDeltaSnapshotPack(world, eventsForThisRange, snapshotEntityIds,
                     rangeToSend);

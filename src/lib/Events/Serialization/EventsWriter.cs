@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using Piot.Flood;
+using Piot.Surge.Events.Serialization;
 
 namespace Piot.Surge.Event.Serialization
 {
@@ -11,14 +12,8 @@ namespace Piot.Surge.Event.Serialization
     {
         public static void Write(EventStreamPackItem[] events, IBitWriter writer)
         {
-            BitMarker.WriteMarker(writer, Constants.ShortLivedEventsStartSync);
-            writer.WriteBits((byte)events.Length, 6);
-
-            if (events.Length > 0)
-            {
-                EventSequenceIdWriter.Write(writer, events[0].eventSequenceId);
-            }
-
+            EventStreamHeaderWriter.Write(writer, events);
+            
             foreach (var shortLivedEvent in events)
             {
                 var reader = new BitReader(shortLivedEvent.payload.Span, (int)shortLivedEvent.bitCount);

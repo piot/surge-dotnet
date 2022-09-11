@@ -25,24 +25,7 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
             SnapshotDeltaEntityBitReader.ReadAndApply(reader, entityGhostContainerWithCreator,
                 isOverlappingMergedSnapshot);
 
-            var (count, startSequenceId) = EventStreamHeaderReader.Read(reader);
-            var sequenceId = startSequenceId;
-
-            for (var i = 0; i < count; ++i)
-            {
-                if (!sequenceId.IsEqualOrSuccessor(nextExpectedSequenceId))
-                {
-                    sequenceId = sequenceId.Next();
-                    eventProcessor.SkipOneEvent(reader);
-                    continue;
-                }
-
-                eventProcessor.ReadAndApply(reader);
-                sequenceId = sequenceId.Next();
-                nextExpectedSequenceId = sequenceId;
-            }
-
-            return nextExpectedSequenceId;
+            return EventBitReader.ReadAndApply(reader, eventProcessor, nextExpectedSequenceId);
         }
     }
 }
