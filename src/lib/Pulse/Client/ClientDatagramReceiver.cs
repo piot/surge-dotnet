@@ -23,8 +23,8 @@ namespace Piot.Surge.Pulse.Client
         private readonly IMultiCompressor compression;
         private readonly HoldPositive isReceivingMergedSnapshots = new(20);
         private readonly ILog log;
+        private readonly ClientLocalInputFetch notifyLocalInputFetch;
         private readonly ClientDeltaSnapshotPlayback notifyPlayback;
-        private readonly ClientPredictor notifyPredictor;
         private readonly OrderedDatagramsInChecker orderedDatagramsInChecker = new();
         private readonly SnapshotFragmentReAssembler snapshotFragmentReAssembler;
         private readonly StatCountThreshold statsHostInputQueueCount = new(60);
@@ -33,12 +33,12 @@ namespace Piot.Surge.Pulse.Client
         private readonly HoldPositive weAreSkippingAhead = new(25);
 
         public ClientDatagramReceiver(ITransportClient transportClient, IMultiCompressor compression,
-            ClientDeltaSnapshotPlayback notifyPlayback, ClientPredictor notifyPredictor, ILog log)
+            ClientDeltaSnapshotPlayback notifyPlayback, ClientLocalInputFetch notifyLocalInputFetch, ILog log)
         {
             this.log = log;
             this.compression = compression;
             this.notifyPlayback = notifyPlayback;
-            this.notifyPredictor = notifyPredictor;
+            this.notifyLocalInputFetch = notifyLocalInputFetch;
             this.transportClient = transportClient;
             snapshotFragmentReAssembler = new(log);
         }
@@ -68,7 +68,8 @@ namespace Piot.Surge.Pulse.Client
 
             if (statsRoundTripTime.IsReady)
             {
-                notifyPredictor.AdjustPredictionSpeed(serverIsProcessingTickId, (uint)statsRoundTripTime.Stat.average);
+                notifyLocalInputFetch.AdjustInputTickSpeed(serverIsProcessingTickId,
+                    (uint)statsRoundTripTime.Stat.average);
             }
 
             log.DebugLowLevel("InputQueueCountFromHost {InputQueueCount} {AverageInputQueueCount}",
@@ -80,7 +81,7 @@ namespace Piot.Surge.Pulse.Client
             log.DebugLowLevel("receiving snapshot datagram from server");
             ReceiveSnapshotExtraData(reader, now);
             var snapshotIsDone = snapshotFragmentReAssembler.Read(reader, out var tickIdRange, out var completePayload);
-            notifyPredictor.LastSeenSnapshotTickId = tickIdRange.Last;
+            notifyLocalInputFetch.LastSeenSnapshotTickId = tickIdRange.Last;
 
             if (!snapshotIsDone)
             {
@@ -109,7 +110,7 @@ namespace Piot.Surge.Pulse.Client
                 log.Notice("we are receiving merged snapshots");
             }
 
-            notifyPredictor.NextExpectedSnapshotTickId = snapshotWithCorrections.tickIdRange.lastTickId.Next();
+            notifyLocalInputFetch.NextExpectedSnapshotTickId = snapshotWithCorrections.tickIdRange.lastTickId.Next();
         }
 
         private void ReceiveDatagramFromHost(IOctetReader reader, Milliseconds now)

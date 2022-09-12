@@ -3,13 +3,20 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System;
-using Piot.Surge.Tick;
+using Piot.Surge.LocalPlayer;
+using Piot.Surge.LogicalInput;
 
 namespace Piot.Surge.Pulse.Client
 {
-    public interface IClientPredictorCorrections
+    public class LocalPlayerInput
     {
-        public void AssignAvatarAndReadCorrections(TickId tickId, ReadOnlySpan<byte> snapshotReader);
+        public LogicalInputQueue PredictedInputs { get; } = new();
+
+        public LocalPlayerIndex LocalPlayerIndex { get; }
+
+        public LocalPlayerInput(LocalPlayerIndex localPlayerIndex)
+        {
+            LocalPlayerIndex = localPlayerIndex;
+        }
     }
 }

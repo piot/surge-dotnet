@@ -44,6 +44,12 @@ namespace Piot.Surge.Types
             this.pitch = pitch;
         }
 
+        public Aiming(float yaw, float pitch)
+        {
+            this.yaw = (ushort)(yaw * 0xffff / 2 * Math.PI);
+            this.pitch = (short)(pitch * 0x7fff / Math.PI);
+        }
+
         public Vector3 ToDirection
         {
             get

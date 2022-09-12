@@ -18,7 +18,7 @@ namespace Piot.Surge.Pulse.Client
         private readonly ClientDatagramReceiver datagramReceiver;
         private readonly ClientDeltaSnapshotPlayback deltaSnapshotPlayback;
         private readonly ILog log;
-        private readonly ClientPredictor predictor;
+        private readonly ClientLocalInputFetch localInputFetch;
         private readonly ITransportClient transportClient;
         private readonly TransportStatsBoth transportWithStats;
 
@@ -31,20 +31,22 @@ namespace Piot.Surge.Pulse.Client
             World = worldWithGhostCreator;
             transportWithStats = new(assignedTransport, now);
             transportClient = new TransportClient(transportWithStats);
-            predictor = new ClientPredictor(fetch, transportClient, now, targetDeltaTimeMs,
+            var clientPredictor = new ClientPredictor(log.SubLog("ClientPredictor"));
+            const bool usePrediction = false;
+            localInputFetch = new ClientLocalInputFetch(fetch, clientPredictor, usePrediction, transportClient, now, targetDeltaTimeMs,
                 worldWithGhostCreator,
                 log.SubLog("Predictor"));
             deltaSnapshotPlayback =
-                new ClientDeltaSnapshotPlayback(now, worldWithGhostCreator, eventProcessorWithCreate, predictor,
+                new ClientDeltaSnapshotPlayback(now, worldWithGhostCreator, eventProcessorWithCreate, localInputFetch,
                     targetDeltaTimeMs,
                     log.SubLog("GhostPlayback"));
 
-            datagramReceiver = new(transportClient, compression, deltaSnapshotPlayback, predictor, log);
+            datagramReceiver = new(transportClient, compression, deltaSnapshotPlayback, localInputFetch, log);
         }
 
         public IInputPackFetch InputFetch
         {
-            set => predictor.InputFetch = value;
+            set => localInputFetch.InputFetch = value;
         }
 
         public IEntityContainerWithGhostCreator World { get; }
@@ -53,7 +55,7 @@ namespace Piot.Surge.Pulse.Client
         {
             datagramReceiver.ReceiveDatagramsFromHost(now);
             transportWithStats.Update(now);
-            predictor.Update(now);
+            localInputFetch.Update(now);
             deltaSnapshotPlayback.Update(now);
             var readStats = transportWithStats.Stats;
             log.DebugLowLevel("stats: {Stats}", readStats);

@@ -8,7 +8,6 @@ using Piot.Clog;
 using Piot.Flood;
 using Piot.Surge.Entities;
 using Piot.Surge.LocalPlayer;
-using Piot.Surge.LogicalInput;
 using Piot.Surge.Tick;
 
 namespace Piot.Surge.Pulse.Client
@@ -22,22 +21,21 @@ namespace Piot.Surge.Pulse.Client
         private readonly RollbackStack rollbackStack = new();
         private readonly bool shouldPredictGoingForward = true;
         private bool shouldPredict = true;
+        private readonly LocalPlayerInput localPlayerInput;
+
+        public LocalPlayerInput LocalPlayerInput => localPlayerInput;
 
         public AvatarPredictor(LocalPlayerIndex localPlayerIndex, IEntity assignedAvatar, ILog log)
         {
             this.log = log;
-            LocalPlayerIndex = localPlayerIndex;
+            localPlayerInput = new (localPlayerIndex);
             this.assignedAvatar = assignedAvatar;
         }
-
-        public LogicalInputQueue PredictedInputs { get; } = new();
-
-        public LocalPlayerIndex LocalPlayerIndex { get; }
 
         public override string ToString()
         {
             return
-                $"[AvatarPredictor localPlayer:{LocalPlayerIndex} entity:{assignedAvatar.Id} predictedInputs:{PredictedInputs.Count}]";
+                $"[AvatarPredictor localPlayer:{localPlayerInput.LocalPlayerIndex} entity:{assignedAvatar.Id} predictedInputs:{localPlayerInput.PredictedInputs.Count}]";
         }
 
         public bool WeDidPredictTheFutureCorrectly(TickId correctionForTickId, ReadOnlySpan<byte> logicPayload,
@@ -65,10 +63,10 @@ namespace Piot.Surge.Pulse.Client
         /// <exception cref="NotImplementedException"></exception>
         public void ReadCorrection(TickId correctionForTickId, ReadOnlySpan<byte> physicsCorrectionPayload)
         {
-            PredictedInputs.DiscardUpToAndExcluding(correctionForTickId);
+            localPlayerInput.PredictedInputs.DiscardUpToAndExcluding(correctionForTickId);
 
             log.DebugLowLevel("CorrectionsHeader {EntityId}, {LocalPlayerIndex} {Checksum}", assignedAvatar.Id,
-                LocalPlayerIndex, physicsCorrectionPayload.Length);
+                localPlayerInput.LocalPlayerIndex, physicsCorrectionPayload.Length);
 
             var logicNowReplicateWriter = new OctetWriter(1024);
             var changesThisSnapshot = assignedAvatar.CompleteEntity.Changes();
@@ -94,7 +92,7 @@ namespace Piot.Surge.Pulse.Client
 
             if (shouldPredict)
             {
-                RollForth.Rollforth(assignedAvatar, PredictedInputs, rollbackStack, predictionStateChecksumHistory);
+                RollForth.Rollforth(assignedAvatar, localPlayerInput.PredictedInputs, rollbackStack, predictionStateChecksumHistory);
             }
 
             assignedAvatar.CompleteEntity.RollMode = EntityRollMode.Predict;

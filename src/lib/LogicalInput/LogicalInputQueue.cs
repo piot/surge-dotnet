@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System.Collections.Generic;
+using System.Linq;
 using Piot.Surge.Tick;
 
 namespace Piot.Surge.LogicalInput
@@ -26,6 +27,8 @@ namespace Piot.Surge.LogicalInput
         public TickId WaitingForTickId => waitingForTickId;
 
         public bool IsInitialized { get; private set; }
+
+        public LogicalInput Last => queue.Last();
 
         public void AddLogicalInput(LogicalInput logicalInput)
         {

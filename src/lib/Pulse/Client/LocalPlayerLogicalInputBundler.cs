@@ -10,11 +10,11 @@ namespace Piot.Surge.Pulse.Client
     public static class LocalPlayerLogicalInputBundler
     {
         public static LogicalInputsForAllLocalPlayers BundleInputForAllLocalPlayers(
-            AvatarPredictor[] localAvatarPredictors)
+            LocalPlayerInput[] localPlayerInputs)
         {
-            var inputForAllPlayers = new LogicalInputArrayForPlayer[localAvatarPredictors.Length];
+            var inputForAllPlayers = new LogicalInputArrayForPlayer[localPlayerInputs.Length];
             var index = 0;
-            foreach (var localAvatarPredictor in localAvatarPredictors)
+            foreach (var localAvatarPredictor in localPlayerInputs)
             {
                 var inputForLocal = localAvatarPredictor.PredictedInputs.Collection;
                 inputForAllPlayers[index].inputs = inputForLocal;

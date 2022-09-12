@@ -10,14 +10,14 @@ using Piot.Surge.Tick;
 
 namespace Piot.Surge.Pulse.Client
 {
-    public static class PredictLocalAvatars
+    public static class FetchAndStoreInput
     {
-        public static void PredictLocalPlayers(TickId predictTickId, IInputPackFetch inputPackFetch,
-            IEnumerable<AvatarPredictor> localAvatarPredictors, bool usePrediction, ILog log)
+        public static void FetchAndStore(TickId predictTickId, IInputPackFetch inputPackFetch,
+            IEnumerable<LocalPlayerInput> localPlayerInputs, ILog log)
         {
-            foreach (var localAvatarPredictor in localAvatarPredictors)
+            foreach (var localPlayerInput in localPlayerInputs)
             {
-                var inputOctets = inputPackFetch.Fetch(localAvatarPredictor.LocalPlayerIndex);
+                var inputOctets = inputPackFetch.Fetch(localPlayerInput.LocalPlayerIndex);
                 var logicalInput = new LogicalInput.LogicalInput
                 {
                     appliedAtTickId = predictTickId,
@@ -25,12 +25,8 @@ namespace Piot.Surge.Pulse.Client
                 };
 
                 log.DebugLowLevel("Adding logical input {LogicalInput} for {LocalPredictor}", logicalInput,
-                    localAvatarPredictor);
-                localAvatarPredictor.PredictedInputs.AddLogicalInput(logicalInput);
-                if (usePrediction)
-                {
-                    localAvatarPredictor.Predict(logicalInput);
-                }
+                    localPlayerInput);
+                localPlayerInput.PredictedInputs.AddLogicalInput(logicalInput);
             }
         }
     }

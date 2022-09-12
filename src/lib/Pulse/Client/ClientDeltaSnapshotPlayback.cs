@@ -143,7 +143,7 @@ namespace Piot.Surge.Pulse.Client
                 eventProcessor, expectedEventSequenceId,
                 deltaSnapshotIncludingCorrectionsItem.IsMergedAndOverlapping);
 
-            predictor.ReadCorrections(deltaSnapshotIncludingCorrections.tickIdRange.Last,
+            predictor.AssignAvatarAndReadCorrections(deltaSnapshotIncludingCorrections.tickIdRange.Last,
                 deltaSnapshotIncludingCorrections.physicsCorrections.Span);
 
             // Ghosts are never predicted, corrected, nor rolled back

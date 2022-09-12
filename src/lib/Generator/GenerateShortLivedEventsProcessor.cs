@@ -12,22 +12,22 @@ namespace Piot.Surge.Generator
         public static void AddEventProcessor(StringBuilder sb, ShortLivedEventInterface messageInterface, int indent)
         {
             Generator.AddClassDeclaration(sb, "GeneratedEventProcessor", "IEventProcessor", indent);
-            sb.Append(@"
-    private readonly Tests.Surge.ExampleGame.IShortEvents target;
-    public GeneratedEventProcessor(Tests.Surge.ExampleGame.IShortEvents target)
-    {
+            sb.Append($@"
+    private readonly {Generator.FullName(messageInterface.eventInterface)} target;
+    public GeneratedEventProcessor({Generator.FullName(messageInterface.eventInterface)} target)
+    {{
         this.target = target;
-    }
+    }}
 
     public void ReadAndApply(IBitReader reader)
-    {
+    {{
 #if DEBUG
         BitMarker.AssertMarker(reader, 0x5, 3);
 #endif
         var archetypeValue = reader.ReadBits(7);
 
         switch (archetypeValue)
-        {
+        {{
 ");
             foreach (var methodInfo in messageInterface.methodInfos)
             {

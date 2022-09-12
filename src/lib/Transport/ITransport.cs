@@ -28,6 +28,8 @@ namespace Piot.Transport
 
     public readonly struct RemoteEndpointId
     {
+        public const uint ReservedId = uint.MaxValue;
+
         public RemoteEndpointId(uint channel)
         {
             Value = channel;
