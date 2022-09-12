@@ -15,7 +15,7 @@ namespace Piot.Surge.Pulse.Host
     public static class SetInputFromClients
     {
         public static void SetInputsFromClientsToEntities(IEnumerable<ConnectionToClient> orderedConnections,
-            TickId serverTickId, ILog log)
+            TickId authoritativeTickId, ILog log)
         {
             foreach (var connection in orderedConnections)
             {
@@ -23,10 +23,11 @@ namespace Piot.Surge.Pulse.Host
                 foreach (var connectionPlayer in connection.ConnectionPlayers.Values)
                 {
                     var logicalInputQueue = connectionPlayer.LogicalInputQueue;
-                    if (!logicalInputQueue.HasInputForTickId(serverTickId))
+                    if (!logicalInputQueue.HasInputForTickId(authoritativeTickId))
                     {
                         // The old data on the input is intentionally kept
-                        log.Notice($"connection {connection.Id} didn't have an input for tick {serverTickId}");
+                        log.Notice($"connection {connection.Id} didn't have an input for tick {authoritativeTickId}");
+                        connection.NotifyThatInputWasTooLate(authoritativeTickId);
                         continue;
                     }
 

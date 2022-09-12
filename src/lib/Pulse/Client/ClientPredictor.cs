@@ -15,13 +15,13 @@ namespace Piot.Surge.Pulse.Client
     public class ClientPredictor
     {
         private readonly Dictionary<byte, AvatarPredictor> localAvatarPredictors = new();
-        readonly ILog log;
-        
+        private readonly ILog log;
+
         public ClientPredictor(ILog log)
         {
             this.log = log;
         }
-        
+
         public AvatarPredictor CreateAvatarPredictor(LocalPlayerIndex localPlayerIndex, IEntity assignedEntity)
         {
             var avatarPredictor = new AvatarPredictor(localPlayerIndex, assignedEntity, log);

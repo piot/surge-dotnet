@@ -62,6 +62,11 @@ namespace Piot.Surge.Corrections
             return !hasBeenInitialized || lastInsertedTickIdRange.CanAppend(tickIdRange);
         }
 
+        public void Clear()
+        {
+            packs.Clear();
+        }
+
         public SnapshotDeltaPackIncludingCorrectionsItem Peek()
         {
             return packs.Peek();

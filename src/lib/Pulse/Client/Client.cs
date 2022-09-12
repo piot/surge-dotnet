@@ -17,8 +17,8 @@ namespace Piot.Surge.Pulse.Client
     {
         private readonly ClientDatagramReceiver datagramReceiver;
         private readonly ClientDeltaSnapshotPlayback deltaSnapshotPlayback;
-        private readonly ILog log;
         private readonly ClientLocalInputFetch localInputFetch;
+        private readonly ILog log;
         private readonly ITransportClient transportClient;
         private readonly TransportStatsBoth transportWithStats;
 
@@ -33,7 +33,8 @@ namespace Piot.Surge.Pulse.Client
             transportClient = new TransportClient(transportWithStats);
             var clientPredictor = new ClientPredictor(log.SubLog("ClientPredictor"));
             const bool usePrediction = false;
-            localInputFetch = new ClientLocalInputFetch(fetch, clientPredictor, usePrediction, transportClient, now, targetDeltaTimeMs,
+            localInputFetch = new ClientLocalInputFetch(fetch, clientPredictor, usePrediction, transportClient, now,
+                targetDeltaTimeMs,
                 worldWithGhostCreator,
                 log.SubLog("Predictor"));
             deltaSnapshotPlayback =
@@ -44,10 +45,14 @@ namespace Piot.Surge.Pulse.Client
             datagramReceiver = new(transportClient, compression, deltaSnapshotPlayback, localInputFetch, log);
         }
 
+        public bool ShouldPlayIncomingSnapshots { get; set; } = true;
+
         public IInputPackFetch InputFetch
         {
             set => localInputFetch.InputFetch = value;
         }
+
+        public LocalPlayersInfo LocalPlayersInfo => new(localInputFetch.LocalPlayerInputs);
 
         public IEntityContainerWithGhostCreator World { get; }
 
@@ -56,7 +61,15 @@ namespace Piot.Surge.Pulse.Client
             datagramReceiver.ReceiveDatagramsFromHost(now);
             transportWithStats.Update(now);
             localInputFetch.Update(now);
-            deltaSnapshotPlayback.Update(now);
+            if (ShouldPlayIncomingSnapshots)
+            {
+                deltaSnapshotPlayback.Update(now);
+            }
+            else
+            {
+                deltaSnapshotPlayback.ClearSnapshots();
+            }
+
             var readStats = transportWithStats.Stats;
             log.DebugLowLevel("stats: {Stats}", readStats);
             log.DebugLowLevel("netStats: {Stats}", datagramReceiver.NetworkQuality);

@@ -40,6 +40,11 @@ namespace Piot.Surge.Pulse.Host
             return $"[ConnectionToClient {Id} playerCount:{ConnectionPlayers.Count}]";
         }
 
+        public void NotifyThatInputWasTooLate(TickId authoritativeTickId)
+        {
+            // TODO: Send information to client about that input was too late, and is guessed by host
+        }
+
         public void AssignPredictEntityToPlayer(LocalPlayerIndex localPlayerIndex, IEntity entity)
         {
             ConnectionPlayer connectionPlayer;

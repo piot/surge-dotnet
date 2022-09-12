@@ -57,6 +57,11 @@ namespace Piot.Surge.Pulse.Client
             snapshotPlaybackTicker.Update(now);
         }
 
+        public void ClearSnapshots()
+        {
+            includingCorrectionsQueue.Clear();
+        }
+
         public bool WantsSnapshotWithTickIdRange(TickIdRange tickIdRange)
         {
             return includingCorrectionsQueue.IsValidPackToInsert(tickIdRange);

@@ -69,7 +69,7 @@ namespace Piot.Surge.Pulse.Host
             log.Debug("== Simulation Tick! {TickId}", authoritativeTickId);
 
             TickWorld();
-            // Exactly after Tick() and the input has been set in preparation for the next tick, we mark this as the new tick
+
             authoritativeTickId = authoritativeTickId.Next();
             ShortLivedEventStream.EndOfTick(authoritativeTickId);
             log.Debug("== Simulation Tick post! {TickId}", authoritativeTickId);

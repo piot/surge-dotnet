@@ -11,8 +11,6 @@ using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.Surge.Corrections.Serialization;
 using Piot.Surge.LogicalInput;
-using Piot.Surge.LogicalInput.Serialization;
-using Piot.Surge.OrderedDatagrams;
 using Piot.Surge.Tick;
 using Piot.Surge.TimeTick;
 using Piot.Transport;
@@ -25,19 +23,19 @@ namespace Piot.Surge.Pulse.Client
     /// </summary>
     public class ClientLocalInputFetch : IClientPredictorCorrections
     {
+        private readonly BundleAndSendOutInput bundleAndSendOutInput;
+        private readonly TimeTicker fetchInputTicker;
         private readonly Milliseconds fixedSimulationDeltaTimeMs;
         private readonly ILog log;
-        private readonly TimeTicker fetchInputTicker;
+        private readonly ClientPredictor notifyPredictor;
+        private readonly bool usePrediction;
         private readonly IEntityContainer world;
         private IInputPackFetch inputPackFetch;
-        private readonly BundleAndSendOutInput bundleAndSendOutInput;
-        private readonly Dictionary<byte, LocalPlayerInput> localPlayerInputs = new();
-        private readonly ClientPredictor notifyPredictor;
-        private bool usePrediction;
 
         private TickId inputTickId = new(1); // HACK: We need it to start ahead of the host
 
-        public ClientLocalInputFetch(IInputPackFetch inputPackFetch, ClientPredictor notifyPredictor, bool usePrediction, ITransportClient transportClient,
+        public ClientLocalInputFetch(IInputPackFetch inputPackFetch, ClientPredictor notifyPredictor,
+            bool usePrediction, ITransportClient transportClient,
             Milliseconds now, Milliseconds targetDeltaTimeMs, IEntityContainer world, ILog log)
         {
             this.log = log;
@@ -66,7 +64,10 @@ namespace Piot.Surge.Pulse.Client
             set => inputPackFetch = value;
         }
 
-        public void AssignAvatarAndReadCorrections(TickId correctionsForTickId, ReadOnlySpan<byte> physicsCorrectionPayload)
+        public Dictionary<byte, LocalPlayerInput> LocalPlayerInputs { get; } = new();
+
+        public void AssignAvatarAndReadCorrections(TickId correctionsForTickId,
+            ReadOnlySpan<byte> physicsCorrectionPayload)
         {
             log.DebugLowLevel("we have corrections for {TickId}, clear old predicted inputs", correctionsForTickId);
             var snapshotReader = new OctetReader(physicsCorrectionPayload);
@@ -77,14 +78,14 @@ namespace Piot.Surge.Pulse.Client
             {
                 var (targetEntityId, localPlayerIndex, octetCount) = CorrectionsHeaderReader.Read(snapshotReader);
                 var targetEntity = world.FetchEntity(targetEntityId);
-                var wasFound = localPlayerInputs.TryGetValue(localPlayerIndex.Value, out var localPlayerInput);
+                var wasFound = LocalPlayerInputs.TryGetValue(localPlayerIndex.Value, out var localPlayerInput);
                 if (!wasFound || localPlayerInput is null)
                 {
                     log.Debug("assigned an avatar to {LocalPlayer} {EntityId}", localPlayerIndex, targetEntityId);
-                    
+
                     //targetEntity  log.SubLog($"AvatarPredictor/{localPlayerIndex}")
-                    localPlayerInput = new LocalPlayerInput(localPlayerIndex);
-                    localPlayerInputs[localPlayerIndex.Value] = localPlayerInput;
+                    localPlayerInput = new LocalPlayerInput(localPlayerIndex, targetEntity);
+                    LocalPlayerInputs[localPlayerIndex.Value] = localPlayerInput;
                     notifyPredictor.CreateAvatarPredictor(localPlayerIndex, targetEntity);
                 }
 
@@ -135,11 +136,11 @@ namespace Piot.Surge.Pulse.Client
 
             log.Debug("--- Fetch And Store Input Tick {TickId}", inputTickId);
 
-            var localPlayerInputsArray = localPlayerInputs.Values.ToArray();
+            var localPlayerInputsArray = LocalPlayerInputs.Values.ToArray();
 
             FetchAndStoreInput.FetchAndStore(inputTickId, inputPackFetch, localPlayerInputsArray,
                 log);
-            
+
             bundleAndSendOutInput.BundleAndSendInputDatagram(localPlayerInputsArray, now);
 
             if (usePrediction)
