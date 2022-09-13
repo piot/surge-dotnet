@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Piot.Flood;
 using Piot.Surge.Tick.Serialization;
 
@@ -18,7 +19,7 @@ namespace Piot.Surge.LogicalInput.Serialization
         /// </summary>
         /// <param name="reader"></param>
         /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static LogicalInputsForAllLocalPlayers Deserialize(IOctetReader reader)
         {
             var localPlayerCount = reader.ReadUInt8();

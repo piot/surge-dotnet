@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
-using System.Linq;
+using System.Runtime.CompilerServices;
 using Piot.Flood;
 using Piot.Surge.Tick.Serialization;
 
@@ -17,6 +17,7 @@ namespace Piot.Surge.LogicalInput.Serialization
         ///     The inputs should be fed to this method with redundancy. All outstanding inputs should be
         ///     sent each network tick in order to handle packet drops.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Serialize(IOctetWriter writer, LogicalInputsForAllLocalPlayers inputsForLocalPlayers)
         {
             writer.WriteUInt8((byte)inputsForLocalPlayers.inputForEachPlayerInSequence.Length);
@@ -35,7 +36,7 @@ namespace Piot.Surge.LogicalInput.Serialization
                     continue;
                 }
 
-                var first = inputsForPlayer.inputs.First();
+                var first = inputsForPlayer.inputs[0];
                 TickIdWriter.Write(writer, first.appliedAtTickId);
 
                 var expectedTickIdValue = first.appliedAtTickId.tickId;
