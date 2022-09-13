@@ -30,6 +30,11 @@ namespace Piot.Surge.LogicalInput
 
         public LogicalInput Last => queue.Last();
 
+        public LogicalInput Peek()
+        {
+            return queue.Peek();
+        }
+
         public void AddLogicalInput(LogicalInput logicalInput)
         {
             if (!IsInitialized)
