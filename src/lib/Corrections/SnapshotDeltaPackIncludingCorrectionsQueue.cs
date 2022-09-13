@@ -13,15 +13,16 @@ namespace Piot.Surge.Corrections
     {
         private readonly Queue<SnapshotDeltaPackIncludingCorrectionsItem> packs = new();
 
-        private bool hasBeenInitialized;
         private TickIdRange lastInsertedTickIdRange;
 
         private uint wantsTickIdValue = 1;
 
         public TickId WantsTickId => new(wantsTickIdValue);
 
-        public bool LastInsertedIsMergedSnapshot => hasBeenInitialized && lastInsertedTickIdRange.Length > 1;
+        public bool LastInsertedIsMergedSnapshot => HasBeenInitialized && lastInsertedTickIdRange.Length > 1;
         public TickIdRange LastInsertedTickIdRange => lastInsertedTickIdRange;
+
+        public bool HasBeenInitialized { get; private set; }
 
         public void Enqueue(SnapshotDeltaPackIncludingCorrections pack)
         {
@@ -31,7 +32,7 @@ namespace Piot.Surge.Corrections
             }
 
 
-            hasBeenInitialized = true;
+            HasBeenInitialized = true;
 
             var lastInsertedTickId = packs.Count > 0 ? lastInsertedTickIdRange.Last : (TickId?)null;
 
@@ -59,7 +60,7 @@ namespace Piot.Surge.Corrections
 
         public bool IsValidPackToInsert(TickIdRange tickIdRange)
         {
-            return !hasBeenInitialized || lastInsertedTickIdRange.CanAppend(tickIdRange);
+            return !HasBeenInitialized || lastInsertedTickIdRange.CanAppend(tickIdRange);
         }
 
         public void Clear()

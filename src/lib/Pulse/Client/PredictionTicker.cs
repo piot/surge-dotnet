@@ -29,7 +29,7 @@ namespace Piot.Surge.Pulse.Client
 
             predictedEntity.CompleteEntity.SerializePrevious(changes, undoWriter);
 
-            Notifier.Notify(predictedEntity); // Notify also overwrites
+            Notifier.Notify(predictedEntity); // Notify also clear changes
 
             rollbackStack.PushUndoPack(tickIdBeforePredictTick, undoWriter.Octets);
         }

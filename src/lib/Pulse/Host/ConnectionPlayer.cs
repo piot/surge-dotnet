@@ -17,21 +17,22 @@ namespace Piot.Surge.Pulse.Host
     public sealed class ConnectionPlayer
     {
         private readonly RemoteEndpointId connectionId;
-        private readonly LocalPlayerIndex localPlayerIndex;
         public IEntity? AssignedPredictEntity;
 
         public ConnectionPlayer(RemoteEndpointId connectionId, LocalPlayerIndex localPlayerIndex)
         {
             this.connectionId = connectionId;
-            this.localPlayerIndex = localPlayerIndex;
+            this.LocalPlayerIndex = localPlayerIndex;
         }
 
         public LogicalInputQueue LogicalInputQueue { get; } = new();
 
+        public LocalPlayerIndex LocalPlayerIndex { get; }
+
         public override string ToString()
         {
             return
-                $"[ConnectionPlayer connectionId:{connectionId} localPlayerIndex:{localPlayerIndex} inputQueue:{LogicalInputQueue.Count}]";
+                $"[ConnectionPlayer connectionId:{connectionId} localPlayerIndex:{LocalPlayerIndex} inputQueue:{LogicalInputQueue.Count}]";
         }
     }
 }

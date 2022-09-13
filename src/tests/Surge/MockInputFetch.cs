@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using Piot.Clog;
 using Piot.Flood;
 using Piot.Surge.Internal.Generated;
 using Piot.Surge.LocalPlayer;
@@ -13,9 +14,15 @@ namespace Tests;
 
 public sealed class MockInputFetch : IInputPackFetch
 {
+    private readonly ILog log;
     private bool primaryAbility;
 
     private bool secondaryAbility;
+
+    public MockInputFetch(ILog log)
+    {
+        this.log = log;
+    }
 
     public bool PrimaryAbility
     {
@@ -38,6 +45,7 @@ public sealed class MockInputFetch : IInputPackFetch
             ultimateAbility = false,
             desiredMovement = default
         };
+
         var writer = new OctetWriter(30);
 
         GameInputWriter.Write(writer, input);

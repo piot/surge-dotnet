@@ -36,6 +36,8 @@ namespace Piot.Surge.Pulse.Client
                     break;
                 }
             }
+
+            rollbackStack.Clear();
         }
     }
 }

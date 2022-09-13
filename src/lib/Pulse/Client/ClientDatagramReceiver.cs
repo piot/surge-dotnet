@@ -67,7 +67,6 @@ namespace Piot.Surge.Pulse.Client
 
             var serverIsProcessingTickId = TickIdReader.Read(reader);
 
-
             log.DebugLowLevel("InputQueueCountFromHost {InputQueueCount} {AverageInputQueueCount}",
                 numberOfInputInQueue, statsHostInputQueueCount.Stat.average);
         }
@@ -79,13 +78,13 @@ namespace Piot.Surge.Pulse.Client
             var snapshotIsDone = snapshotFragmentReAssembler.Read(reader, out var tickIdRange, out var completePayload);
             notifyLocalInputFetch.LastSeenSnapshotTickId = tickIdRange.Last;
 
-            notifyLocalInputFetch.AdjustInputTickSpeed(tickIdRange.Last,
-                (uint)statsRoundTripTime.Stat.average);
-
             if (!snapshotIsDone)
             {
                 return;
             }
+
+            notifyLocalInputFetch.AdjustInputTickSpeed(tickIdRange.Last,
+                (uint)statsRoundTripTime.Stat.average);
 
             if (!notifyPlayback.WantsSnapshotWithTickIdRange(tickIdRange))
             {

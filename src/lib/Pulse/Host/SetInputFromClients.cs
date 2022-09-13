@@ -31,7 +31,10 @@ namespace Piot.Surge.Pulse.Host
                         continue;
                     }
 
+                    logicalInputQueue.DiscardUpToAndExcluding(authoritativeTickId);
+
                     var input = logicalInputQueue.Dequeue();
+
                     log.DebugLowLevel("dequeued logical input {ConnectionPlayer} {Input}", connectionPlayer, input);
 
                     {
@@ -51,7 +54,8 @@ namespace Piot.Surge.Pulse.Host
                         }
 
                         var inputReader = new OctetReader(input.payload.Span);
-                        log.DebugLowLevel("setting input for {Entity}", targetEntity);
+                        log.DebugLowLevel("setting input for {TickId} {PlayerIndex} {Entity}", input.appliedAtTickId,
+                            connectionPlayer.LocalPlayerIndex, targetEntity);
                         inputDeserialize.SetInput(inputReader);
                     }
                 }

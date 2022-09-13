@@ -17,21 +17,21 @@ namespace Piot.Surge.Pulse.Client
 {
     /// <summary>
     ///     Enqueues delta snapshots and plays them back at varying delta time depending on number of delta snapshots in
-    ///     includingCorrectionsQueue.
+    ///     snapshotsQueue.
     /// </summary>
     public sealed class ClientDeltaSnapshotPlayback
     {
         private readonly IEntityContainerWithGhostCreator clientWorld;
         private readonly IEventProcessor eventProcessor;
-        private readonly SnapshotDeltaPackIncludingCorrectionsQueue includingCorrectionsQueue = new();
 
         private readonly HoldPositive lastBufferWasStarved = new(14);
         private readonly ILog log;
         private readonly IClientPredictorCorrections predictor;
         private readonly TimeTicker snapshotPlaybackTicker;
+        private readonly SnapshotDeltaPackIncludingCorrectionsQueue snapshotsQueue = new();
         private readonly Milliseconds targetDeltaTimeMs;
         private EventSequenceId expectedEventSequenceId;
-        private TickId playbackTick = new(1);
+        private TickId playbackTick = new(0);
 
         public ClientDeltaSnapshotPlayback(Milliseconds now, IEntityContainerWithGhostCreator clientWorld,
             IEventProcessor eventProcessor, IClientPredictorCorrections predictor,
@@ -59,49 +59,49 @@ namespace Piot.Surge.Pulse.Client
 
         public void ClearSnapshots()
         {
-            includingCorrectionsQueue.Clear();
+            snapshotsQueue.Clear();
         }
 
         public bool WantsSnapshotWithTickIdRange(TickIdRange tickIdRange)
         {
-            return includingCorrectionsQueue.IsValidPackToInsert(tickIdRange);
+            return snapshotsQueue.IsValidPackToInsert(tickIdRange);
         }
 
         public void FeedSnapshotDeltaPack(SnapshotDeltaPackIncludingCorrections pack)
         {
-            if (!pack.tickIdRange.Contains(includingCorrectionsQueue.WantsTickId))
+            if (!pack.tickIdRange.Contains(snapshotsQueue.WantsTickId))
             {
                 log.Notice("unexpected incoming delta pack encountered {TickIdRange}, expected {TickId}",
-                    pack.tickIdRange, includingCorrectionsQueue.WantsTickId);
+                    pack.tickIdRange, snapshotsQueue.WantsTickId);
                 return;
             }
 
-            if (pack.tickIdRange.Last.tickId < includingCorrectionsQueue.WantsTickId.tickId)
+            if (pack.tickIdRange.Last.tickId < snapshotsQueue.WantsTickId.tickId)
             {
                 log.Notice("old incoming delta pack encountered {TickIdRange}, expected {TickId}", pack.tickIdRange,
-                    includingCorrectionsQueue.WantsTickId);
+                    snapshotsQueue.WantsTickId);
                 return;
             }
 
-            if (!includingCorrectionsQueue.IsValidPackToInsert(pack.tickIdRange))
+            if (!snapshotsQueue.IsValidPackToInsert(pack.tickIdRange))
             {
                 throw new DeserializeException("wrong pack id ordering");
             }
 
-            includingCorrectionsQueue.Enqueue(pack);
+            snapshotsQueue.Enqueue(pack);
 
-            if (includingCorrectionsQueue.LastInsertedIsMergedSnapshot)
+            if (snapshotsQueue.LastInsertedIsMergedSnapshot)
             {
-                log.Notice("Receiving merged snapshots {Range}", includingCorrectionsQueue.LastInsertedTickIdRange);
+                log.Notice("Receiving merged snapshots {Range}", snapshotsQueue.LastInsertedTickIdRange);
             }
         }
 
         private void NextSnapshotTick()
         {
             var targetDeltaTimeMsValue = targetDeltaTimeMs.ms;
-            // Our goal is to have just two snapshots in the includingCorrectionsQueue.
+            // Our goal is to have just two snapshots in the snapshotsQueue.
             // So adjust the playback speed using the playback delta time.
-            var bufferAheadCount = includingCorrectionsQueue.TicksAheadOf(playbackTick);
+            var bufferAheadCount = snapshotsQueue.TicksAheadOf(playbackTick);
             var deltaTimeMs = bufferAheadCount switch
             {
                 < 2 => targetDeltaTimeMsValue * 12 / 10,
@@ -109,30 +109,37 @@ namespace Piot.Surge.Pulse.Client
                 _ => targetDeltaTimeMsValue
             };
 
-            log.DebugLowLevel("Try to read next snapshot in includingCorrectionsQueue. {PlaybackDeltaTimeMs}",
+            log.DebugLowLevel("Try to read next snapshot in snapshotsQueue. {PlaybackDeltaTimeMs}",
                 deltaTimeMs);
 
             snapshotPlaybackTicker.DeltaTime = new(deltaTimeMs);
 
+            if (!snapshotsQueue.HasBeenInitialized)
+            {
+                log.DebugLowLevel("Not trying to playback yet, waiting for first incoming snapshot");
+                return;
+            }
+
+
             lastBufferWasStarved.Value = bufferAheadCount < 2;
 
-            if (includingCorrectionsQueue.Count == 0)
+            if (snapshotsQueue.Count == 0)
             {
                 log.Notice(
-                    "Snapshot playback has stalled because incoming snapshot includingCorrectionsQueue is empty");
+                    "Snapshot playback has stalled because incoming snapshot snapshotsQueue is empty");
                 return;
             }
 
             playbackTick = new(playbackTick.tickId + 1);
 
-            if (includingCorrectionsQueue.Peek().Pack.tickIdRange.Last > playbackTick)
+            if (snapshotsQueue.Peek().Pack.tickIdRange.Last > playbackTick)
             {
                 log.Notice(
                     "Snapshot playback has stalled because next snapshot is in the future compared to playback");
                 return;
             }
 
-            var deltaSnapshotIncludingCorrectionsItem = includingCorrectionsQueue.Dequeue();
+            var deltaSnapshotIncludingCorrectionsItem = snapshotsQueue.Dequeue();
 
             var deltaSnapshotIncludingCorrections = deltaSnapshotIncludingCorrectionsItem.Pack;
             log.DebugLowLevel("dequeued snapshot {DeltaSnapshotEntityIds}", deltaSnapshotIncludingCorrections);

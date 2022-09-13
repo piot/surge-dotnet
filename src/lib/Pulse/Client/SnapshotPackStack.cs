@@ -46,5 +46,10 @@ namespace Piot.Surge.Pulse.Client
         {
             return stack.Peek().tickId;
         }
+
+        public void Clear()
+        {
+            stack.Clear();
+        }
     }
 }

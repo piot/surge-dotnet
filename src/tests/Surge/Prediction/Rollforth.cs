@@ -68,7 +68,7 @@ public sealed class Rollforth
         var spawnedEntity = new Entity(new(99), internalEntity);
         var rollbackStack = new RollbackStack();
         var predictedInputs = new LogicalInputQueue();
-        var mockInputFetch = new MockInputFetch();
+        var mockInputFetch = new MockInputFetch(log.SubLog("MockInput"));
 
         var now = new TickId(23);
 

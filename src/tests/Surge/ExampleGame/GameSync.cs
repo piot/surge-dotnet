@@ -44,7 +44,7 @@ public sealed class GameSync
         var enqueue = new GeneratedEventEnqueue(hostGame.Host!.ShortLivedEventStream);
 
 
-        var mockInput = new MockInputFetch();
+        var mockInput = new MockInputFetch(log.SubLog("MockInput"));
 
         clientGame.Client!.InputFetch = mockInput;
 
@@ -80,7 +80,7 @@ public sealed class GameSync
             avatar.OnFireButtonIsDownChanged += () =>
             {
                 fireButtonChanged++;
-                log.Debug("FireButton changed {Count} {State}", fireButtonChanged, avatar.Self.fireButtonIsDown);
+                log.Info("FireButton changed {Count} {State}", fireButtonChanged, avatar.Self.fireButtonIsDown);
             };
 
             avatar.DoCastFireball += (position, direction) => { fireballFireCount++; };
@@ -122,10 +122,10 @@ public sealed class GameSync
         }
 
         Assert.Equal(1, spawnedCalled);
-        Assert.Equal(9, spawnedHostAvatar.Self.ammoCount);
-        Assert.Equal(1, chainLightningCount);
         Assert.Equal(1, fireballFireCount);
         Assert.Equal(1, fireButtonChanged);
+        Assert.Equal(1, chainLightningCount);
+        Assert.Equal(9, spawnedHostAvatar.Self.ammoCount);
 
         var clientAvatar = clientGame.EntityContainer.FetchEntity<AvatarLogicEntityInternal>(spawnedEntity.Id);
 
