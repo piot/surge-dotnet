@@ -62,7 +62,7 @@ namespace Piot.Clog
             target.Log(LogLevel.Info, prefix, message, new object[] { arg0, arg1, arg2 });
         }
 
-        public void Info(string message, object[] args)
+        public void Info(string message, params object[] args)
         {
             if (LogLevel > LogLevel.Info)
             {
@@ -113,7 +113,7 @@ namespace Piot.Clog
             target.Log(LogLevel.Warning, prefix, message, new object[] { arg0, arg1, arg2 });
         }
 
-        public void Warn(string message, object[] args)
+        public void Warn(string message, params object[] args)
         {
             if (LogLevel > LogLevel.Warning)
             {
@@ -164,7 +164,7 @@ namespace Piot.Clog
             target.Log(LogLevel.Debug, prefix, message, new object[] { arg0, arg1, arg2 });
         }
 
-        public void Debug(string message, object[] args)
+        public void Debug(string message, params object[] args)
         {
             if (LogLevel > LogLevel.Debug)
             {
@@ -215,7 +215,7 @@ namespace Piot.Clog
             target.Log(LogLevel.LowLevel, prefix, message, new object[] { arg0, arg1, arg2 });
         }
 
-        public void DebugLowLevel(string message, object[] args)
+        public void DebugLowLevel(string message, params object[] args)
         {
             if (LogLevel > LogLevel.LowLevel)
             {
@@ -267,7 +267,7 @@ namespace Piot.Clog
             target.Log(LogLevel.Notice, prefix, message, new object[] { arg0, arg1, arg2 });
         }
 
-        public void Notice(string message, object[] args)
+        public void Notice(string message, params object[] args)
         {
             if (LogLevel > LogLevel.Notice)
             {
@@ -319,7 +319,7 @@ namespace Piot.Clog
             target.Log(LogLevel.Error, prefix, message, new object[] { arg0, arg1, arg2 });
         }
 
-        public void Error(string message, object[] args)
+        public void Error(string message, params object[] args)
         {
             if (LogLevel > LogLevel.Error)
             {

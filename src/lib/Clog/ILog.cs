@@ -14,7 +14,7 @@ namespace Piot.Clog
         public void DebugLowLevel<T0, T1, T2>(string s, T0 arg0, T1 arg1, T2 arg2)
             where T0 : notnull where T1 : notnull where T2 : notnull;
 
-        public void DebugLowLevel(string s, object[] args);
+        public void DebugLowLevel(string s, params object[] args);
 
 
         public void Debug(string s);
@@ -24,7 +24,7 @@ namespace Piot.Clog
         public void Debug<T0, T1, T2>(string s, T0 arg0, T1 arg1, T2 arg2)
             where T0 : notnull where T1 : notnull where T2 : notnull;
 
-        public void Debug(string s, object[] args);
+        public void Debug(string s, params object[] args);
 
 
         public void Info(string s);
@@ -34,7 +34,7 @@ namespace Piot.Clog
         public void Info<T0, T1, T2>(string s, T0 arg0, T1 arg1, T2 arg2)
             where T0 : notnull where T1 : notnull where T2 : notnull;
 
-        public void Info(string s, object[] args);
+        public void Info(string s, params object[] args);
 
 
         public void Notice(string s);
@@ -44,7 +44,7 @@ namespace Piot.Clog
         public void Notice<T0, T1, T2>(string s, T0 arg0, T1 arg1, T2 arg2)
             where T0 : notnull where T1 : notnull where T2 : notnull;
 
-        public void Notice(string s, object[] args);
+        public void Notice(string s, params object[] args);
 
 
         public void Warn(string s);
@@ -54,7 +54,7 @@ namespace Piot.Clog
         public void Warn<T0, T1, T2>(string s, T0 arg0, T1 arg1, T2 arg2)
             where T0 : notnull where T1 : notnull where T2 : notnull;
 
-        public void Warn(string s, object[] args);
+        public void Warn(string s, params object[] args);
 
         public void Error(string s);
         public void Error<T>(string s, T arg) where T : notnull;
@@ -63,7 +63,7 @@ namespace Piot.Clog
         public void Error<T0, T1, T2>(string s, T0 arg0, T1 arg1, T2 arg2)
             where T0 : notnull where T1 : notnull where T2 : notnull;
 
-        public void Error(string s, object[] args);
+        public void Error(string s, params object[] args);
 
         public ILog SubLog(string debugPrefix);
     }
