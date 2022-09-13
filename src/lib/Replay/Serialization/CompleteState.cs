@@ -8,7 +8,7 @@ using Piot.Surge.Tick;
 
 namespace Piot.Surge.Replay.Serialization
 {
-    public class CompleteState
+    public sealed class CompleteState
     {
         private readonly ReadOnlyMemory<byte> payload;
 

@@ -10,7 +10,7 @@ using Piot.Clog;
 
 namespace Piot.Surge.Generator
 {
-    public class GameInputFetchInfo
+    public sealed class GameInputFetchInfo
     {
         public GameInputFetchInfo(MethodInfo methodInfo)
         {

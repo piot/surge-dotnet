@@ -10,7 +10,7 @@ namespace Piot.Surge.LogicAction
     /// <summary>
     ///     Discards actions added to it. Useful for testing purposes.
     /// </summary>
-    public class NullActionsContainer : IActionsContainer
+    public sealed class NullActionsContainer : IActionsContainer
     {
         public IAction[] Actions { get; } = Array.Empty<IAction>();
 

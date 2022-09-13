@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 
 namespace Piot.Stats
 {
-    public class StatCountThreshold
+    public sealed class StatCountThreshold
     {
         private readonly uint countThreshold;
         private uint count;

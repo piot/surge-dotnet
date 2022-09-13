@@ -9,7 +9,7 @@ using Piot.Stats;
 
 namespace Piot.Transport.Stats
 {
-    public class TransportStatsReceive : ITransportReceive
+    public sealed class TransportStatsReceive : ITransportReceive
     {
         private readonly StatPerSecond bitsPerSecond;
         private readonly StatPerSecond datagramCountPerSecond;

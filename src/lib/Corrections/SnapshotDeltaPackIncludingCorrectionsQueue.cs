@@ -9,7 +9,7 @@ using Piot.Surge.Tick;
 
 namespace Piot.Surge.Corrections
 {
-    public class SnapshotDeltaPackIncludingCorrectionsQueue : ISnapshotDeltaPackQueue
+    public sealed class SnapshotDeltaPackIncludingCorrectionsQueue : ISnapshotDeltaPackQueue
     {
         private readonly Queue<SnapshotDeltaPackIncludingCorrectionsItem> packs = new();
 

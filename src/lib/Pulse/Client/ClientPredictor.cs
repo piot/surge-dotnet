@@ -12,7 +12,7 @@ using Piot.Surge.Tick;
 
 namespace Piot.Surge.Pulse.Client
 {
-    public class ClientPredictor
+    public sealed class ClientPredictor
     {
         private readonly Dictionary<byte, AvatarPredictor> localAvatarPredictors = new();
         private readonly ILog log;

@@ -12,7 +12,7 @@ using Piot.Surge.Tick.Serialization;
 
 namespace Piot.Surge.Replay.Serialization
 {
-    public class ReplayWriter
+    public sealed class ReplayWriter
     {
         private readonly RaffWriter raffWriter;
         private TickIdRange lastInsertedDeltaStateRange;

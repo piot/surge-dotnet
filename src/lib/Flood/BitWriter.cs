@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 
 namespace Piot.Flood
 {
-    public class BitWriter : IBitWriter
+    public sealed class BitWriter : IBitWriter
     {
         private readonly Memory<byte> array;
         private ulong accumulator;

@@ -15,7 +15,7 @@ namespace Piot.Surge.DeltaSnapshot.Pack
     ///     It also serves as a small optimization for the current delta snapshot, the field values doesn't have to be
     ///     re-serialized for each client.
     /// </summary>
-    public class DeltaSnapshotPack
+    public sealed class DeltaSnapshotPack
     {
         public ReadOnlyMemory<byte> payload;
         public TickIdRange tickIdRange;

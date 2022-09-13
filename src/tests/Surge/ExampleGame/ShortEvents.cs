@@ -8,7 +8,7 @@ using Piot.Surge.Types;
 
 namespace Tests.Surge.ExampleGame;
 
-public class ShortEvents : IShortEvents
+public sealed class ShortEvents : IShortEvents
 {
     private readonly ILog log;
 

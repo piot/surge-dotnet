@@ -11,7 +11,7 @@ namespace Piot.Surge.Corrections
 {
     /// <summary>
     /// </summary>
-    public class SnapshotDeltaPackIncludingCorrections
+    public sealed class SnapshotDeltaPackIncludingCorrections
     {
         public ReadOnlyMemory<byte> deltaSnapshotPackPayload;
         public ReadOnlyMemory<byte> physicsCorrections;

@@ -47,7 +47,7 @@ namespace Piot.Stats
         }
     }
 
-    public class StatPerSecond
+    public sealed class StatPerSecond
     {
         private readonly Milliseconds minimumAverageTime;
         private uint averageCount;

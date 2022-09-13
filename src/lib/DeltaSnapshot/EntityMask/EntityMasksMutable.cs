@@ -13,7 +13,7 @@ namespace Piot.Surge.DeltaSnapshot.EntityMask
     /// <summary>
     ///     Normally used for building up a <see cref="EntityMasksUnion" />.
     /// </summary>
-    public class EntityMasksMutable
+    public sealed class EntityMasksMutable
     {
         public EntityMasksMutable(TickIdRange tickIdRange)
         {

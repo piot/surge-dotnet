@@ -7,7 +7,7 @@ using System.Diagnostics;
 
 namespace Piot.MonotonicTime
 {
-    public class MonotonicTimeMs : IMonotonicTimeMs
+    public sealed class MonotonicTimeMs : IMonotonicTimeMs
     {
         /// <summary>
         ///     Returns the monotonic time in milliseconds. Implementation is using the Environment tick count

@@ -14,7 +14,7 @@ namespace Piot.Surge.Pulse.Host
     ///     Represents a player that is sharing a connection. Usually when they are sharing the same device (e.g. split
     ///     screen).
     /// </summary>
-    public class ConnectionPlayer
+    public sealed class ConnectionPlayer
     {
         private readonly RemoteEndpointId connectionId;
         private readonly LocalPlayerIndex localPlayerIndex;

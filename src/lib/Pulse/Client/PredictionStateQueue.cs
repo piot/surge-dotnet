@@ -50,7 +50,7 @@ namespace Piot.Surge.Pulse.Client
         }
     }
 
-    public class PredictionStateChecksumQueue
+    public sealed class PredictionStateChecksumQueue
     {
         private readonly Queue<PredictionStateAllChecksums> queue = new();
 

@@ -12,7 +12,7 @@ using Piot.Surge.Tick;
 
 namespace Piot.Surge.Pulse.Client
 {
-    public class AvatarPredictor
+    public sealed class AvatarPredictor
     {
         private readonly IEntity assignedAvatar;
         private readonly ILog log;

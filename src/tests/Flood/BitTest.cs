@@ -9,7 +9,7 @@ using Xunit.Abstractions;
 
 namespace Tests.Flood;
 
-public class TestBits
+public sealed class TestBits
 {
     private readonly ILog log;
 

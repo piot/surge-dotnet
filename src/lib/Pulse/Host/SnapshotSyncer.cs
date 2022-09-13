@@ -23,7 +23,7 @@ using Constants = Piot.Surge.SnapshotProtocol.Constants;
 
 namespace Piot.Surge.Pulse.Host
 {
-    public class SnapshotSyncer
+    public sealed class SnapshotSyncer
     {
         private readonly IMultiCompressor compression;
         private readonly CompressorIndex compressorIndex;

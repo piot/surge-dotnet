@@ -7,7 +7,7 @@ using Piot.Surge.Tick;
 
 namespace Piot.Surge.Corrections
 {
-    public class SnapshotDeltaPackIncludingCorrectionsItem
+    public sealed class SnapshotDeltaPackIncludingCorrectionsItem
     {
         private readonly TickId? previousTickId;
 

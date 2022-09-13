@@ -9,7 +9,7 @@ using Piot.MonotonicTime;
 
 namespace Piot.Surge.TimeTick
 {
-    public class TimeTicker : ITimeTicker
+    public sealed class TimeTicker : ITimeTicker
     {
         private readonly ILog log;
         private readonly Action Tick;

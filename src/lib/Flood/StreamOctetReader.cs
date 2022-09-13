@@ -8,7 +8,7 @@ using System.IO;
 
 namespace Piot.Flood
 {
-    public class StreamOctetReader : IOctetReaderWithSeekAndSkip
+    public sealed class StreamOctetReader : IOctetReaderWithSeekAndSkip
     {
         private readonly Stream stream;
 

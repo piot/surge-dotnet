@@ -9,7 +9,7 @@ using Xunit.Abstractions;
 
 namespace Tests.Generator;
 
-public class GeneratorTests
+public sealed class GeneratorTests
 {
     private readonly ILog log;
 

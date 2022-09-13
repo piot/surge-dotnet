@@ -11,7 +11,7 @@ namespace Piot.Surge.DeltaSnapshot.EntityMask
     /// <summary>
     ///     <see cref="FieldMask" /> for all the entities that changed this tick.
     /// </summary>
-    public class EntityMasks
+    public sealed class EntityMasks
     {
         public EntityMasks(TickId tickId, Dictionary<ushort, ulong> toMask)
         {

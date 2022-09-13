@@ -9,7 +9,7 @@ using System;
 
 namespace Piot.Clog
 {
-    public class Log : ILog, ILogConfiguration
+    public sealed class Log : ILog, ILogConfiguration
     {
         private readonly string prefix;
         private readonly ILogTarget target;

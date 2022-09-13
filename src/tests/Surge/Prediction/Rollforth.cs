@@ -16,7 +16,7 @@ using Xunit.Abstractions;
 
 namespace Tests.ExampleGame;
 
-public class Rollforth
+public sealed class Rollforth
 {
     private readonly ILog log;
 

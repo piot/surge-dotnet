@@ -8,7 +8,7 @@ using Piot.Surge.OrderedDatagrams;
 
 namespace Tests;
 
-public class OrderedDatagramsTests
+public sealed class OrderedDatagramsTests
 {
     [Fact]
     public void OrderedDatagrams()

@@ -10,7 +10,7 @@ using Xunit.Abstractions;
 
 namespace Tests;
 
-public class TimeTickerTests
+public sealed class TimeTickerTests
 {
     private readonly ILog log;
 

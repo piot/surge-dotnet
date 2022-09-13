@@ -62,7 +62,7 @@ namespace Piot.Surge.Generator
 
         public static void AddClassDeclaration(StringBuilder sb, string className, int indent = 0)
         {
-            sb.Append($"{Indent(indent)}public class {className}").Append(@$"
+            sb.Append($"{Indent(indent)}public sealed class {className}").Append(@$"
 {Indent(indent)}{{
 ");
         }
@@ -76,7 +76,7 @@ namespace Piot.Surge.Generator
 
         public static void AddClassDeclaration(StringBuilder sb, string className, string inheritFrom, int indent = 0)
         {
-            sb.Append($"{Indent(indent)}public class {className} : {inheritFrom}").Append($@"
+            sb.Append($"{Indent(indent)}public sealed class {className} : {inheritFrom}").Append($@"
 {Indent(indent)}{{
 ");
         }

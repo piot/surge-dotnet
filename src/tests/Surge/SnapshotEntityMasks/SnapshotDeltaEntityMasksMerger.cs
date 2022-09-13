@@ -12,7 +12,7 @@ using Xunit.Abstractions;
 
 namespace Tests.Pulse.SnapshotEntityMasks;
 
-public class SnapshotDeltaEntityMasksMerger
+public sealed class SnapshotDeltaEntityMasksMerger
 {
     private readonly ILog log;
 

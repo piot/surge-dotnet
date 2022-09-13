@@ -5,7 +5,7 @@
 
 namespace Piot.MonotonicTime
 {
-    public class MonotonicTimeMockMs : IMonotonicTimeMs
+    public sealed class MonotonicTimeMockMs : IMonotonicTimeMs
     {
         public MonotonicTimeMockMs(Milliseconds now)
         {

@@ -5,7 +5,7 @@
 
 namespace Piot.Random
 {
-    public class SystemRandom : IRandom
+    public sealed class SystemRandom : IRandom
     {
         private readonly System.Random rand = new();
 

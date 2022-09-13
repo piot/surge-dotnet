@@ -14,7 +14,7 @@ namespace Piot.Hazy
         bool Dequeue(Milliseconds atOrBeforeMs, out Packet packet);
     }
 
-    public class PacketQueue : IPacketQueuePop
+    public sealed class PacketQueue : IPacketQueuePop
     {
         private readonly LinkedList<Packet> queue = new();
 

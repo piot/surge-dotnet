@@ -11,7 +11,7 @@ using Piot.Clog;
 
 namespace Piot.Surge.Generator
 {
-    public class CommandInfo
+    public sealed class CommandInfo
     {
         public CommandInfo(MethodBase methodInfo)
         {
@@ -30,7 +30,7 @@ namespace Piot.Surge.Generator
             return $"[commandInfo {MethodInfo.Name} {s}]";
         }
 
-        public class CommandParameter
+        public sealed class CommandParameter
         {
             public string name;
             private ParameterInfo parameterInfo;
@@ -57,7 +57,7 @@ namespace Piot.Surge.Generator
         Simulation
     }
 
-    public class LogicFieldInfo
+    public sealed class LogicFieldInfo
     {
         public LogicFieldInfo(FieldInfo fieldInfo, ulong mask, FieldSource source)
         {
@@ -77,7 +77,7 @@ namespace Piot.Surge.Generator
         }
     }
 
-    public class LogicInfo
+    public sealed class LogicInfo
     {
         public LogicInfo(Type type, MethodInfo tickMethod, MethodInfo? setInputMethod, ILog log)
         {

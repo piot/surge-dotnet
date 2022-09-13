@@ -11,7 +11,7 @@ namespace Piot.Surge.DeltaSnapshot.EntityMask
     /// <summary>
     ///     A union of entity mask changes that happened in the <see cref="TickIdRange" /> of delta snapshots.
     /// </summary>
-    public class EntityMasksUnion
+    public sealed class EntityMasksUnion
     {
         public EntityMasksUnion(TickIdRange tickIdRange, Dictionary<ushort, ulong> entityToMask)
         {

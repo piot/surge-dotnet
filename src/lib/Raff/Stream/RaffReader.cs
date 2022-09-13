@@ -8,7 +8,7 @@ using Piot.Flood;
 
 namespace Piot.Raff.Stream
 {
-    public class RaffReader
+    public sealed class RaffReader
     {
         private readonly IOctetReader reader;
 

@@ -11,7 +11,7 @@ using Piot.Clog;
 
 namespace Piot.Surge.Generator
 {
-    public class GameInputFieldInfo
+    public sealed class GameInputFieldInfo
     {
         public GameInputFieldInfo(FieldInfo fieldInfo, ulong mask)
         {
@@ -29,7 +29,7 @@ namespace Piot.Surge.Generator
         }
     }
 
-    public class GameInputInfo
+    public sealed class GameInputInfo
     {
         public GameInputInfo(Type type, ILog log)
         {

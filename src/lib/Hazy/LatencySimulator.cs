@@ -15,7 +15,7 @@ namespace Piot.Hazy
     ///     Currently provides simplistic latency "jitter" (inter-packet delay variance)
     ///     and short latency bursts.
     /// </summary>
-    public class LatencySimulator
+    public sealed class LatencySimulator
     {
         private readonly ILog log;
         private readonly IRandom random;

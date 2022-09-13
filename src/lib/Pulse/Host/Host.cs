@@ -17,7 +17,7 @@ using Piot.Transport.Stats;
 
 namespace Piot.Surge.Pulse.Host
 {
-    public class Host
+    public sealed class Host
     {
         private readonly ClientConnections clientConnections;
         private readonly ILog log;

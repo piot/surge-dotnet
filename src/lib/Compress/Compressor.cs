@@ -7,7 +7,7 @@ using System;
 
 namespace Piot.Surge.Compress
 {
-    public class Compressor
+    public sealed class Compressor
     {
         public delegate ReadOnlySpan<byte> CompressDelegate(ReadOnlySpan<byte> data);
 

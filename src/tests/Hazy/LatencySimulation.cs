@@ -11,7 +11,7 @@ using Xunit.Abstractions;
 
 namespace Tests.Hazy;
 
-public class LatencySimulationTests
+public sealed class LatencySimulationTests
 {
     private readonly ILog log;
 

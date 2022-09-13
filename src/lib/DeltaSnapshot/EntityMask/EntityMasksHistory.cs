@@ -9,7 +9,7 @@ using Piot.Surge.Tick;
 
 namespace Piot.Surge.DeltaSnapshot.EntityMask
 {
-    public class EntityMasksHistory
+    public sealed class EntityMasksHistory
     {
         private readonly Queue<EntityMasks> masksQueue = new();
 

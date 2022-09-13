@@ -45,7 +45,7 @@ namespace Piot.Hazy
         public uint threshold;
     }
 
-    public class Decision
+    public sealed class Decision
     {
         private readonly List<Threshold> thresholds = new();
 

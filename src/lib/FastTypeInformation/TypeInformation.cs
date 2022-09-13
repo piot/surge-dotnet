@@ -10,7 +10,7 @@ namespace Piot.Surge.FastTypeInformation
     /// <summary>
     ///     Only used for debug output
     /// </summary>
-    public class TypeInformation
+    public sealed class TypeInformation
     {
         public TypeInformation(TypeInformationField[] fields)
         {

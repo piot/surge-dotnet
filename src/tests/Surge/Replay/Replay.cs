@@ -10,7 +10,7 @@ using Xunit.Abstractions;
 
 namespace Tests.Replay;
 
-public class ReplayTests
+public sealed class ReplayTests
 {
     private readonly ILog log;
 

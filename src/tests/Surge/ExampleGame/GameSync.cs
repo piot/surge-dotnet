@@ -15,7 +15,7 @@ using Xunit.Abstractions;
 
 namespace Tests.ExampleGame;
 
-public class GameSync
+public sealed class GameSync
 {
     private readonly ILog log;
 

@@ -10,7 +10,7 @@ using Xunit.Abstractions;
 
 namespace Tests.Stats;
 
-public class StatsTests
+public sealed class StatsTests
 {
     private readonly ILog log;
 

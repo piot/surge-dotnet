@@ -14,7 +14,7 @@ namespace Piot.Surge.Event
     /// <summary>
     ///     Holds events in a queue to be replicated as a stream.
     /// </summary>
-    public class EventStreamPackQueue
+    public sealed class EventStreamPackQueue
     {
         private readonly Queue<EventStreamPackItem> events = new();
         private TickId authoritativeTickId;

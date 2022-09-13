@@ -9,7 +9,7 @@ using Xunit.Abstractions;
 
 namespace Tests.Pulse.Generator;
 
-public class ScannerTests
+public sealed class ScannerTests
 {
     private readonly ILog log;
 

@@ -5,7 +5,7 @@
 
 namespace Piot.Surge.OrderedDatagrams
 {
-    public class OrderedDatagramsSequenceIdIncrease
+    public sealed class OrderedDatagramsSequenceIdIncrease
     {
         private OrderedDatagramsSequenceId value;
 

@@ -10,7 +10,7 @@ namespace Piot.Surge.LogicAction
     /// <summary>
     ///     Holds a list of actions that is added by a Tick method in the Logic implementation.
     /// </summary>
-    public class ActionsContainer : IActionsContainer
+    public sealed class ActionsContainer : IActionsContainer
     {
         private readonly List<IAction> actions = new();
 

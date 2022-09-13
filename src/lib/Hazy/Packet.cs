@@ -9,7 +9,7 @@ using Piot.Transport;
 
 namespace Piot.Hazy
 {
-    public class Packet
+    public sealed class Packet
     {
         public RemoteEndpointId endPoint;
         public Milliseconds monotonicTimeMs;

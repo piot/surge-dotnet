@@ -11,7 +11,7 @@ using Tests.ExampleGame;
 
 namespace Tests;
 
-public class MockInputFetch : IInputPackFetch
+public sealed class MockInputFetch : IInputPackFetch
 {
     private bool primaryAbility;
 

@@ -13,7 +13,7 @@ using Piot.Surge.Tick.Serialization;
 
 namespace Piot.Surge.Replay.Serialization
 {
-    public class ReplayReader
+    public sealed class ReplayReader
     {
         private readonly CompleteStateEntry[] completeStateEntries;
         private readonly RaffReader raffReader;

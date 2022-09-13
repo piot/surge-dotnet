@@ -11,7 +11,7 @@ using Piot.Surge.Tick;
 
 namespace Piot.Surge.SnapshotProtocol.Fragment
 {
-    public class SnapshotFragmentReAssembler
+    public sealed class SnapshotFragmentReAssembler
     {
         private readonly ILog log;
         private readonly MemoryStream payloadAssembly = new();

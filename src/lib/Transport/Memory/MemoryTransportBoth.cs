@@ -7,7 +7,7 @@ using System;
 
 namespace Piot.Transport.Memory
 {
-    public class MemoryTransportBoth : ITransport, ITransportEnqueue
+    public sealed class MemoryTransportBoth : ITransport, ITransportEnqueue
     {
         private readonly MemoryTransportReceive receive = new();
         private ITransportEnqueue? enqueueTarget;

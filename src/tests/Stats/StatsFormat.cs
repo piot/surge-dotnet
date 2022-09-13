@@ -9,7 +9,7 @@ using Xunit.Abstractions;
 
 namespace Tests.Stats;
 
-public class StatsFormatTest
+public sealed class StatsFormatTest
 {
     private readonly ILog log;
 

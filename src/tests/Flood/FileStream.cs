@@ -9,7 +9,7 @@ using Xunit.Abstractions;
 
 namespace Tests.Flood;
 
-public class FileStreams
+public sealed class FileStreams
 {
     private readonly ILog log;
 

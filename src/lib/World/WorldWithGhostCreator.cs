@@ -8,7 +8,7 @@ using Piot.Surge.Entities;
 
 namespace Piot.Surge
 {
-    public class WorldWithGhostCreator : AuthoritativeWorld, IEntityContainerWithGhostCreator
+    public sealed class WorldWithGhostCreator : AuthoritativeWorld, IEntityContainerWithGhostCreator
     {
         private readonly IEntityGhostCreator creator;
         private readonly INotifyEntityCreation notifyEntityCreation;

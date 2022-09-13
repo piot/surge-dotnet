@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Piot.Clog
 {
-    public class CombinedLogTarget : ILogTarget
+    public sealed class CombinedLogTarget : ILogTarget
     {
         private readonly IEnumerable<ILogTarget> logTargets;
 

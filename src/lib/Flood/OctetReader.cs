@@ -8,7 +8,7 @@ using System.Buffers.Binary;
 
 namespace Piot.Flood
 {
-    public class OctetReader : IOctetReader
+    public sealed class OctetReader : IOctetReader
     {
         private readonly ReadOnlyMemory<byte> array;
         private int pos;

@@ -21,7 +21,7 @@ namespace Piot.Surge.Pulse.Client
     ///     Predicts the future of an avatar. If misprediction occurs, it will roll back,
     ///     apply the correction, and fast forward (Roll forth).
     /// </summary>
-    public class ClientLocalInputFetch : IClientPredictorCorrections
+    public sealed class ClientLocalInputFetch : IClientPredictorCorrections
     {
         private readonly BundleAndSendOutInput bundleAndSendOutInput;
         private readonly TimeTicker fetchInputTicker;

@@ -8,7 +8,7 @@ using Piot.MonotonicTime;
 
 namespace Piot.Transport.Stats
 {
-    public class TransportStatsBoth : ITransport
+    public sealed class TransportStatsBoth : ITransport
     {
         private readonly TransportStatsReceive receive;
         private readonly TransportStatsSend send;

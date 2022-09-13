@@ -8,7 +8,7 @@ using Xunit.Abstractions;
 
 namespace Tests;
 
-public class TestOutputLogger : ILogTarget
+public sealed class TestOutputLogger : ILogTarget
 {
     private readonly ITestOutputHelper output;
 

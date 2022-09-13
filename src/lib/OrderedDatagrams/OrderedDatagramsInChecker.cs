@@ -10,7 +10,7 @@ namespace Piot.Surge.OrderedDatagrams
     /// <summary>
     ///     Very simple protocol to detect out of order and dropped datagrams.
     /// </summary>
-    public class OrderedDatagramsInChecker
+    public sealed class OrderedDatagramsInChecker
     {
         private bool hasReceivedInitialValue;
 

@@ -19,7 +19,7 @@ namespace Piot.Surge.Pulse.Client
     ///     Enqueues delta snapshots and plays them back at varying delta time depending on number of delta snapshots in
     ///     includingCorrectionsQueue.
     /// </summary>
-    public class ClientDeltaSnapshotPlayback
+    public sealed class ClientDeltaSnapshotPlayback
     {
         private readonly IEntityContainerWithGhostCreator clientWorld;
         private readonly IEventProcessor eventProcessor;

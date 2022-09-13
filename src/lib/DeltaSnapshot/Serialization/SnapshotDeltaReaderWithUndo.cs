@@ -13,7 +13,7 @@ using Piot.Surge.Types.Serialization;
 
 namespace Piot.Surge.SnapshotDeltaPack.Serialization
 {
-    public class SnapshotDeltaReaderInfoEntity
+    public sealed class SnapshotDeltaReaderInfoEntity
     {
         public readonly ulong changeMask;
         public readonly IEntity entity;

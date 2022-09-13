@@ -14,7 +14,7 @@ namespace Piot.Surge.LogicalInput
     ///     Used by the predicting client to keep track of inputs that needs to be
     ///     re-simulated when a correction state is received.
     /// </summary>
-    public class LogicalInputQueue
+    public sealed class LogicalInputQueue
     {
         private readonly Queue<LogicalInput> queue = new();
 

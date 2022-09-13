@@ -8,29 +8,29 @@ using System;
 namespace Piot.Surge
 {
     [AttributeUsage(AttributeTargets.Struct)]
-    public class LogicAttribute : Attribute
+    public sealed class LogicAttribute : Attribute
     {
         public bool generate { get; set; }
     }
 
     [AttributeUsage(AttributeTargets.Struct)]
-    public class InputAttribute : Attribute
+    public sealed class InputAttribute : Attribute
     {
         public bool generate { get; set; }
     }
 
     [AttributeUsage(AttributeTargets.Method)]
-    public class InputFetchAttribute : Attribute
+    public sealed class InputFetchAttribute : Attribute
     {
     }
 
     [AttributeUsage(AttributeTargets.Field)]
-    public class SimulatedAttribute : Attribute
+    public sealed class SimulatedAttribute : Attribute
     {
     }
 
     [AttributeUsage(AttributeTargets.Interface)]
-    public class ShortLivedEventsAttribute : Attribute
+    public sealed class ShortLivedEventsAttribute : Attribute
     {
     }
 }

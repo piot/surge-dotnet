@@ -18,7 +18,7 @@ using Piot.Transport;
 
 namespace Piot.Surge.Pulse.Client
 {
-    public class ClientDatagramReceiver
+    public sealed class ClientDatagramReceiver
     {
         private readonly IMultiCompressor compression;
         private readonly HoldPositive isReceivingMergedSnapshots = new(20);

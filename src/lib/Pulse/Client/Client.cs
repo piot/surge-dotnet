@@ -13,7 +13,7 @@ using Piot.Transport.Stats;
 
 namespace Piot.Surge.Pulse.Client
 {
-    public class Client
+    public sealed class Client
     {
         private readonly ClientDatagramReceiver datagramReceiver;
         private readonly ClientDeltaSnapshotPlayback deltaSnapshotPlayback;

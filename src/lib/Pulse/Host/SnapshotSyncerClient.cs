@@ -13,7 +13,7 @@ using Piot.Transport;
 
 namespace Piot.Surge.Pulse.Host
 {
-    public class SnapshotSyncerClient
+    public sealed class SnapshotSyncerClient
     {
         public sbyte clientInputTickCountAheadOfServer;
         public MonotonicTimeLowerBits.MonotonicTimeLowerBits lastReceivedMonotonicTimeLowerBits;

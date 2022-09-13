@@ -10,7 +10,7 @@ using Xunit.Abstractions;
 
 namespace Tests;
 
-public class MonotonicTimeLowerBitsTests
+public sealed class MonotonicTimeLowerBitsTests
 {
     private readonly ILog log;
 

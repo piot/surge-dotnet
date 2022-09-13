@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 
 namespace Piot.Surge.Compress
 {
-    public class MultiCompressor : IMultiCompressor
+    public sealed class MultiCompressor : IMultiCompressor
     {
         private readonly Dictionary<uint, Compressor> selection = new();
 

@@ -13,7 +13,7 @@ using Xunit.Abstractions;
 
 namespace Tests.ExampleGame;
 
-public class Prediction
+public sealed class Prediction
 {
     private readonly ILog log;
 

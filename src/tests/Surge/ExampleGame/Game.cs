@@ -16,7 +16,7 @@ using Tests.Surge.ExampleGame;
 
 namespace Tests.ExampleGame;
 
-public class Game
+public sealed class Game
 {
     private readonly ILog log;
     private readonly WorldWithGhostCreator world;

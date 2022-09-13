@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 
 namespace Piot.Flood
 {
-    public class BitReader : IBitReader
+    public sealed class BitReader : IBitReader
     {
         private readonly ReadOnlyMemory<byte> octets;
         private readonly int totalBitCount;

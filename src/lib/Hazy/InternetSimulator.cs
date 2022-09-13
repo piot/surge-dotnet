@@ -11,7 +11,7 @@ using Piot.Transport;
 
 namespace Piot.Hazy
 {
-    public class InternetSimulator
+    public sealed class InternetSimulator
     {
         private readonly PacketQueue packetQueue = new();
         private readonly IRandom random;

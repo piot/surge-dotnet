@@ -7,7 +7,7 @@ using Piot.Hazy;
 
 namespace Tests.Hazy;
 
-public class PacketQueueTests
+public sealed class PacketQueueTests
 {
     [Fact]
     public void TestPacketQueue()

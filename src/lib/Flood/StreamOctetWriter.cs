@@ -8,7 +8,7 @@ using System.IO;
 
 namespace Piot.Flood
 {
-    public class StreamOctetWriter : IDisposableOctetWriter
+    public sealed class StreamOctetWriter : IDisposableOctetWriter
     {
         private readonly Stream stream;
 

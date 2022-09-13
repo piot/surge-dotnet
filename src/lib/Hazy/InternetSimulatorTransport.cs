@@ -11,7 +11,7 @@ using Piot.Transport;
 
 namespace Piot.Hazy
 {
-    public class InternetSimulatorTransport : ITransport
+    public sealed class InternetSimulatorTransport : ITransport
     {
         private readonly InternetSimulatorIn simulatorIn;
         private readonly InternetSimulatorOut simulatorOut;

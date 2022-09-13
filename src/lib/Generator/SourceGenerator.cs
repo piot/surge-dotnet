@@ -142,7 +142,7 @@ namespace Piot.Surge.Generator
 
 
         /*
-         * public class GeneratedEntityWorld
+         * public sealed class GeneratedEntityWorld
 {
     public Action<AvatarLogicEntity>? OnSpawnAvatarLogic;
     public Action<FireballLogicEntity>? OnSpawnFireballLogic;
@@ -208,7 +208,7 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
             var actionsImplementationName = Generator.Suffix(info.Type.Name, "Actions");
             var actionInterface = Generator.FullName(info.CommandsInterface!);
 
-            sb.Append($"public class {actionsImplementationName} : {actionInterface}").Append(@"
+            sb.Append($"public sealed class {actionsImplementationName} : {actionInterface}").Append(@"
 {
     private readonly IActionsContainer actionsContainer;
 
@@ -802,7 +802,7 @@ private readonly ActionsContainer actionsContainer = new();
         {
             var outFacingClassName = Generator.Suffix(logicInfo.Type.Name, "Entity");
             sb.Append(@"
-public class ").Append(outFacingClassName).Append($@"
+public sealed class ").Append(outFacingClassName).Append($@"
 {{
     public EntityRollMode RollMode => internalEntity.RollMode;
 
@@ -920,7 +920,7 @@ public struct {EntityGeneratedInternal(logicInfo)}SimulationInfo
             }
 
             sb.Append(@"
-public class ").Append(EntityGeneratedInternal(logicInfo)).Append($" : {inherit}").Append(@"
+public sealed class ").Append(EntityGeneratedInternal(logicInfo)).Append($" : {inherit}").Append(@"
 {
 ");
             AddInternalMembers(sb);
@@ -1091,7 +1091,7 @@ public class ").Append(EntityGeneratedInternal(logicInfo)).Append($" : {inherit}
             var fetchMethodName = Generator.FullName(inputFetchInfo.MethodInfo);
             sb.Append(@$"
 
-public class GeneratedInputFetch : IInputPackFetch
+public sealed class GeneratedInputFetch : IInputPackFetch
 {{
     public ReadOnlySpan<byte> Fetch(LocalPlayerIndex index)
     {{

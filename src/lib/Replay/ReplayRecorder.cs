@@ -14,7 +14,7 @@ using Piot.Surge.Tick;
 
 namespace Piot.Surge.Replay
 {
-    public class ReplayRecorder
+    public sealed class ReplayRecorder
     {
         private readonly ILog log;
         private readonly ReplayWriter replayWriter;

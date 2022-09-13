@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Piot.Clog
 {
-    public class ConsoleOutputLogger : ILogTarget
+    public sealed class ConsoleOutputLogger : ILogTarget
     {
         private const string resetColor = "\x1b[0m";
 

@@ -34,7 +34,7 @@ using Xunit.Abstractions;
 
 namespace Tests;
 
-public class CompareLogicalInputCollections : IEqualityComparer<ICollection<LogicalInput>>
+public sealed class CompareLogicalInputCollections : IEqualityComparer<ICollection<LogicalInput>>
 {
     public bool Equals(ICollection<LogicalInput>? x, ICollection<LogicalInput>? y)
     {
@@ -67,7 +67,7 @@ public class CompareLogicalInputCollections : IEqualityComparer<ICollection<Logi
     }
 }
 
-public class UnitTest1
+public sealed class UnitTest1
 {
     private readonly ILog log;
 

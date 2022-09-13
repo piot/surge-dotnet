@@ -7,7 +7,7 @@ using System;
 
 namespace Piot.Transport
 {
-    public class WrappedSender
+    public sealed class WrappedSender
     {
         private readonly RemoteEndpointId id;
         private readonly ITransportSend sender;

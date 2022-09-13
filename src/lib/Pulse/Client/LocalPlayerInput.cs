@@ -9,7 +9,7 @@ using Piot.Surge.LogicalInput;
 
 namespace Piot.Surge.Pulse.Client
 {
-    public class LocalPlayerInput
+    public sealed class LocalPlayerInput
     {
         public LocalPlayerInput(LocalPlayerIndex localPlayerIndex, IEntity assignedEntity)
         {

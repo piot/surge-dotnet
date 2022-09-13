@@ -12,7 +12,7 @@ using Piot.Transport;
 
 namespace Piot.Surge.Pulse.Client
 {
-    public class BundleAndSendOutInput
+    public sealed class BundleAndSendOutInput
     {
         private readonly OrderedDatagramsSequenceIdIncrease datagramsOut = new();
         private readonly ILog log;

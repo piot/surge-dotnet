@@ -8,7 +8,7 @@ using Piot.Surge.Tick;
 
 namespace Piot.Surge.Pulse.Client
 {
-    public class RollbackStack : SnapshotPackStack
+    public sealed class RollbackStack : SnapshotPackStack
     {
         public int Count => base.Count;
 

@@ -11,7 +11,7 @@ using Piot.Transport;
 
 namespace Piot.Hazy
 {
-    public class InternetSimulatorOut : ITransportSend
+    public sealed class InternetSimulatorOut : ITransportSend
     {
         private readonly InternetSimulator internetSimulator;
         private readonly IMonotonicTimeMs timeProvider;

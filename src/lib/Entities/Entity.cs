@@ -11,7 +11,7 @@ namespace Piot.Surge.Entities
     /// <summary>
     ///     Representation of a network entity
     /// </summary>
-    public class Entity : IEntity
+    public sealed class Entity : IEntity
     {
         private readonly ICompleteEntity completeEntity;
 

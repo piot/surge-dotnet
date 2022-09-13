@@ -19,7 +19,7 @@ using Xunit.Abstractions;
 
 namespace Tests.Pulse;
 
-public class ClientHostTests
+public sealed class ClientHostTests
 {
     private readonly ILog log;
 

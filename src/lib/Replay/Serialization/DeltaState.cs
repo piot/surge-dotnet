@@ -8,7 +8,7 @@ using Piot.Surge.Tick;
 
 namespace Piot.Surge.Replay.Serialization
 {
-    public class DeltaState
+    public sealed class DeltaState
     {
         private readonly ReadOnlyMemory<byte> payload;
 

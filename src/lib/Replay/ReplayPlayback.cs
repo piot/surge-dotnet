@@ -18,7 +18,7 @@ using Piot.Surge.TimeTick;
 namespace Piot.Surge.Replay
 {
     // ReSharper disable once ClassNeverInstantiated.Global
-    public class ReplayPlayback
+    public sealed class ReplayPlayback
     {
         private readonly IEventProcessor eventProcessorWithCreate;
         private readonly ILog log;

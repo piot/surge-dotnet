@@ -7,7 +7,7 @@ using System;
 
 namespace Piot.Transport
 {
-    public class TransportClient : ITransportClient
+    public sealed class TransportClient : ITransportClient
     {
         private readonly ITransport wrappedTransport;
 

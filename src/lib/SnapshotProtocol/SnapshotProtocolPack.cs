@@ -10,7 +10,7 @@ namespace Piot.Surge.SnapshotProtocol
 {
     /// <summary>
     /// </summary>
-    public class SnapshotProtocolPack
+    public sealed class SnapshotProtocolPack
     {
         public ReadOnlyMemory<byte> payload;
         public TickIdRange tickIdRange;

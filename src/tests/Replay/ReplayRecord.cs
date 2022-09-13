@@ -22,7 +22,7 @@ using Xunit.Abstractions;
 
 namespace Tests.Replay;
 
-public class ReplayRecorderTests
+public sealed class ReplayRecorderTests
 {
     private readonly ILog log;
 

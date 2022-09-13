@@ -18,7 +18,7 @@ using Piot.Transport;
 
 namespace Piot.Surge.Pulse.Host
 {
-    public class ConnectionToClient
+    public sealed class ConnectionToClient
     {
         private readonly ILog log;
         private readonly OrderedDatagramsInChecker orderedDatagramsIn = new();

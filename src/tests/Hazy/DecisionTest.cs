@@ -10,7 +10,7 @@ using Xunit.Abstractions;
 
 namespace Tests.Hazy;
 
-public class DecisionTests
+public sealed class DecisionTests
 {
     private readonly ILog log;
 

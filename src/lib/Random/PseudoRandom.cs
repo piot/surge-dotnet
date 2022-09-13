@@ -5,7 +5,7 @@
 
 namespace Piot.Random
 {
-    public class PseudoRandom : IRandom
+    public sealed class PseudoRandom : IRandom
     {
         private ulong value;
 

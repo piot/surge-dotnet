@@ -13,7 +13,7 @@ using Piot.Transport;
 
 namespace Piot.Surge.Pulse.Host
 {
-    public class ClientConnections
+    public sealed class ClientConnections
     {
         private readonly Dictionary<uint, ConnectionToClient> connections = new();
         private readonly ITransport hostTransport;
