@@ -65,8 +65,8 @@ namespace Piot.Surge.Pulse.Host
 
         private void ReceivePredictedInputs(IOctetReader reader, TickId serverIsAtTickId)
         {
-            log.DebugLowLevel("received predicted inputs");
             syncer.lastReceivedMonotonicTimeLowerBits = MonotonicTimeLowerBitsReader.Read(reader);
+            log.Debug("received predicted inputs {LowerBits}", syncer.lastReceivedMonotonicTimeLowerBits);
             SnapshotReceiveStatusReader.Read(reader, out var expectingTickId, out var droppedFrames);
 
             syncer.SetExpectedTickIdByRemote(expectingTickId, droppedFrames);
@@ -94,7 +94,7 @@ namespace Piot.Surge.Pulse.Host
                                                           logicalInputQueue.IsInitialized))
                 {
                     log.Notice(
-                        $"there is a gap in the input queue. Input queue is waiting for {logicalInputQueue.WaitingForTickId} but first received in this datagram {first.appliedAtTickId}");
+                        $"there is a gap in the input queue. Input queue is waiting for {logicalInputQueue.WaitingForTickId} but first received in this datagram {first.appliedAtTickId}. Reset it so we can receive the inputs");
                     logicalInputQueue.Reset();
                 }
 
@@ -102,8 +102,8 @@ namespace Piot.Surge.Pulse.Host
                 {
                     if (logicalInput.appliedAtTickId.tickId < serverIsAtTickId.tickId)
                     {
-                        log.Notice("Host has passed this tickId already, skipping input {TickId} {HostTickId}",
-                            logicalInput.appliedAtTickId, serverIsAtTickId);
+                        // log.Notice("Host has passed this tickId already, skipping input {TickId} {HostTickId}",
+                        //   logicalInput.appliedAtTickId, serverIsAtTickId);
                         continue;
                     }
 

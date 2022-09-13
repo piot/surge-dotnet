@@ -69,10 +69,27 @@ namespace Piot.Surge.Pulse.Client
         public void AssignAvatarAndReadCorrections(TickId correctionsForTickId,
             ReadOnlySpan<byte> physicsCorrectionPayload)
         {
-            log.DebugLowLevel("we have corrections for {TickId}, clear old predicted inputs", correctionsForTickId);
+//            log.DebugLowLevel("we have corrections for {TickId}, clear old predicted inputs", correctionsForTickId);
+            if (LocalPlayerInputs.Values.Count > 0)
+            {
+                var firstLocalPlayer = LocalPlayerInputs.Values.First();
+                if (firstLocalPlayer.PredictedInputs.Count > 0)
+                {
+                    log.DebugLowLevel(
+                        "we have corrections for {TickId}, clear old predicted inputs. Input in buffer {FirstTick} {LastTickId}",
+                        correctionsForTickId, firstLocalPlayer.PredictedInputs.Peek().appliedAtTickId,
+                        firstLocalPlayer.PredictedInputs.Last.appliedAtTickId);
+                }
+            }
+
             var snapshotReader = new OctetReader(physicsCorrectionPayload);
 
             var correctionsCount = snapshotReader.ReadUInt8();
+
+            foreach (var localPlayerInput in LocalPlayerInputs.Values)
+            {
+                localPlayerInput.PredictedInputs.DiscardUpToAndExcluding(correctionsForTickId);
+            }
 
             for (var i = 0; i < correctionsCount; ++i)
             {
@@ -110,19 +127,45 @@ namespace Piot.Surge.Pulse.Client
             const int counterProcessOrder = 1;
             var tickIdThatWeShouldSendNow = tickIdThatWeShouldSendNowInTheory + counterProcessOrder + counterJitter;
 
-            var inputDiffInTicks = inputTickId.tickId - tickIdThatWeShouldSendNow;
+            var inputDiffInTicks = tickIdThatWeShouldSendNow - inputTickId.tickId;
 
             var newDeltaTimeMs = inputDiffInTicks switch
             {
-                < 0 => fixedSimulationDeltaTimeMs.ms * 100 / 120,
-                > 30 => 0,
-                > 0 => fixedSimulationDeltaTimeMs.ms * 100 / 80,
+                < 0 => fixedSimulationDeltaTimeMs.ms * 190 / 100,
+                > 0 => fixedSimulationDeltaTimeMs.ms * 70 / 100,
                 _ => fixedSimulationDeltaTimeMs.ms
             };
 
-            log.DebugLowLevel("New Input Fetch Speed {Diff} {NewDeltaTimeMs}", inputDiffInTicks, newDeltaTimeMs);
+            var maxInputCount = MaxPredictedInputQueueCount();
+            if (maxInputCount > 25)
+            {
+                var localPlayerInputsArray = LocalPlayerInputs.Values.ToArray();
+                foreach (var localPlayerInput in localPlayerInputsArray)
+                {
+                    localPlayerInput.PredictedInputs.Reset();
+                }
+            }
+
+            log.Debug(
+                "New Input Fetch Speed {Diff} {tickId} {TickIdThatWeShouldSendNow} {NewDeltaTimeMs} based on {RoundTripTimeMs}",
+                inputTickId.tickId, tickIdThatWeShouldSendNow, inputDiffInTicks, newDeltaTimeMs, roundTripTimeMs);
 
             fetchInputTicker.DeltaTime = new(newDeltaTimeMs);
+        }
+
+        private int MaxPredictedInputQueueCount()
+        {
+            var maxInputCount = 0;
+            var localPlayerInputsArray = LocalPlayerInputs.Values.ToArray();
+            foreach (var localPlayerInput in localPlayerInputsArray)
+            {
+                if (localPlayerInput.PredictedInputs.Count > maxInputCount)
+                {
+                    maxInputCount = localPlayerInput.PredictedInputs.Count;
+                }
+            }
+
+            return maxInputCount;
         }
 
         public void Update(Milliseconds now)
@@ -137,6 +180,12 @@ namespace Piot.Surge.Pulse.Client
             log.Debug("--- Fetch And Store Input Tick {TickId}", inputTickId);
 
             var localPlayerInputsArray = LocalPlayerInputs.Values.ToArray();
+
+            if (localPlayerInputsArray.Length > 0)
+            {
+                log.DebugLowLevel("Have {InputCount} in queue",
+                    localPlayerInputsArray[0].PredictedInputs.Collection.Length);
+            }
 
             FetchAndStoreInput.FetchAndStore(inputTickId, inputPackFetch, localPlayerInputsArray,
                 log);

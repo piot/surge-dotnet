@@ -66,13 +66,13 @@ namespace Piot.Surge.Pulse.Host
 
         private void SimulationTick()
         {
-            log.Debug("== Simulation Tick! {TickId}", authoritativeTickId);
+            //log.Debug("== Simulation Tick! {TickId}", authoritativeTickId);
 
             TickWorld();
 
             authoritativeTickId = authoritativeTickId.Next();
             ShortLivedEventStream.EndOfTick(authoritativeTickId);
-            log.Debug("== Simulation Tick post! {TickId}", authoritativeTickId);
+            //log.Debug("== Simulation Tick post! {TickId}", authoritativeTickId);
 
             SetInputFromClients.SetInputsFromClientsToEntities(clientConnections.Connections, authoritativeTickId, log);
 

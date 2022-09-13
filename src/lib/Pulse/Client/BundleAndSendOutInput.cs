@@ -15,11 +15,11 @@ namespace Piot.Surge.Pulse.Client
     public class BundleAndSendOutInput
     {
         private readonly OrderedDatagramsSequenceIdIncrease datagramsOut = new();
+        private readonly ILog log;
+        private readonly ITransportClient transportClient;
 
         private TickId lastSeenSnapshotTickId;
-        private readonly ILog log;
         private TickId nextExpectedSnapshotTickId;
-        private readonly ITransportClient transportClient;
 
         public BundleAndSendOutInput(ITransportClient transportClient, ILog log)
         {
@@ -50,7 +50,7 @@ namespace Piot.Surge.Pulse.Client
                     droppedSnapshotCount,
                     now, logicalInputForAllPlayers);
 
-            log.DebugLowLevel("Sending inputs to host {FirstTickId} {LastTickId}",
+            log.Debug("Sending inputs to host {FirstTickId} {LastTickId}",
                 logicalInputForAllPlayers.debugFirstId, logicalInputForAllPlayers.debugLastId);
 
             transportClient.SendToHost(outDatagram);

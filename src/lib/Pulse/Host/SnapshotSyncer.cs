@@ -31,6 +31,7 @@ namespace Piot.Surge.Pulse.Host
         private readonly ILog log;
         private readonly List<SnapshotSyncerClient> syncClients = new();
         private readonly ITransportSend transportSend;
+        private TickId allClientsAreWaitingForAtLeastTickId;
 
         public SnapshotSyncer(ITransportSend transportSend, IMultiCompressor compression,
             CompressorIndex compressorIndex, ILog log)
@@ -41,9 +42,37 @@ namespace Piot.Surge.Pulse.Host
             this.log = log;
         }
 
+        private void HandleNotifyExpectedTickId(TickId _)
+        {
+            TickId lowestTickId = new(0);
+            var hasBeenSet = false;
+            foreach (var syncClient in syncClients)
+            {
+                if (syncClient.RemoteIsExpectingTickId <= allClientsAreWaitingForAtLeastTickId)
+                {
+                    // We can give up early, this client is still waiting for the same tick id
+                    return;
+                }
+
+                if (!hasBeenSet || syncClient.RemoteIsExpectingTickId < lowestTickId)
+                {
+                    lowestTickId = syncClient.RemoteIsExpectingTickId;
+                    hasBeenSet = true;
+                }
+            }
+
+            if (!hasBeenSet || lowestTickId < allClientsAreWaitingForAtLeastTickId)
+            {
+                return;
+            }
+
+            allClientsAreWaitingForAtLeastTickId = lowestTickId;
+            entityMasksHistory.DiscardUpTo(allClientsAreWaitingForAtLeastTickId);
+        }
+
         public SnapshotSyncerClient Create(RemoteEndpointId id)
         {
-            var client = new SnapshotSyncerClient(id);
+            var client = new SnapshotSyncerClient(id, HandleNotifyExpectedTickId);
 
             syncClients.Add(client);
 
@@ -115,7 +144,8 @@ namespace Piot.Surge.Pulse.Host
 
             var sender = new WrappedSender(transportSend, connection.Endpoint);
 
-            log.DebugLowLevel("sending datagrams {Flattened}", includingCorrections);
+            log.Debug("sending datagrams {Flattened} {ClientPontTime}", includingCorrections,
+                connection.lastReceivedMonotonicTimeLowerBits);
             SnapshotPackIncludingCorrectionsWriter.Write(sender.Send, snapshotProtocolPack,
                 connection.lastReceivedMonotonicTimeLowerBits, connection.clientInputTickCountAheadOfServer,
                 hostTickId,

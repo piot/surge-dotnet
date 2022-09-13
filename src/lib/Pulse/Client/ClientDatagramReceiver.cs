@@ -28,7 +28,7 @@ namespace Piot.Surge.Pulse.Client
         private readonly OrderedDatagramsInChecker orderedDatagramsInChecker = new();
         private readonly SnapshotFragmentReAssembler snapshotFragmentReAssembler;
         private readonly StatCountThreshold statsHostInputQueueCount = new(60);
-        private readonly StatCountThreshold statsRoundTripTime = new(20);
+        private readonly StatCountThreshold statsRoundTripTime = new(10);
         private readonly ITransportClient transportClient;
         private readonly HoldPositive weAreSkippingAhead = new(25);
 
@@ -58,7 +58,8 @@ namespace Piot.Surge.Pulse.Client
             var pongTime = LowerBitsToMonotonic.LowerBitsToMonotonicMs(now, pongTimeLowerBits);
             var roundTripTimeMs = now.ms - pongTime.ms;
             statsRoundTripTime.Add((int)roundTripTimeMs);
-            log.DebugLowLevel("RoundTripTime {RoundTripTimeMs} {AverageRoundTripTimeMs}", roundTripTimeMs,
+            log.Debug("RoundTripTime {Now} {PongTime} {RoundTripTimeMs} {AverageRoundTripTimeMs}", now.ms, pongTime.ms,
+                roundTripTimeMs,
                 statsRoundTripTime.Stat.average);
 
             var numberOfInputInQueue = reader.ReadInt8();
@@ -66,11 +67,6 @@ namespace Piot.Surge.Pulse.Client
 
             var serverIsProcessingTickId = TickIdReader.Read(reader);
 
-            if (statsRoundTripTime.IsReady)
-            {
-                notifyLocalInputFetch.AdjustInputTickSpeed(serverIsProcessingTickId,
-                    (uint)statsRoundTripTime.Stat.average);
-            }
 
             log.DebugLowLevel("InputQueueCountFromHost {InputQueueCount} {AverageInputQueueCount}",
                 numberOfInputInQueue, statsHostInputQueueCount.Stat.average);
@@ -82,6 +78,9 @@ namespace Piot.Surge.Pulse.Client
             ReceiveSnapshotExtraData(reader, now);
             var snapshotIsDone = snapshotFragmentReAssembler.Read(reader, out var tickIdRange, out var completePayload);
             notifyLocalInputFetch.LastSeenSnapshotTickId = tickIdRange.Last;
+
+            notifyLocalInputFetch.AdjustInputTickSpeed(tickIdRange.Last,
+                (uint)statsRoundTripTime.Stat.average);
 
             if (!snapshotIsDone)
             {
@@ -135,7 +134,7 @@ namespace Piot.Surge.Pulse.Client
 
         public void ReceiveDatagramsFromHost(Milliseconds now)
         {
-            for (var i = 0; i < 30; i++)
+            for (var i = 0; i < 5; i++)
             {
                 var datagram = transportClient.ReceiveFromHost();
                 if (datagram.IsEmpty)

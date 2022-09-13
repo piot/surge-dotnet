@@ -40,7 +40,7 @@ namespace Piot.Surge.TimeTick
         {
             set
             {
-                if (value.ms <= 0)
+                if (value.ms < 0)
                 {
                     throw new ArgumentOutOfRangeException(nameof(deltaTimeMs), deltaTimeMs,
                         $"illegal monotonic time <= 0 {deltaTimeMs}");
@@ -63,16 +63,33 @@ namespace Piot.Surge.TimeTick
 
             lastUpdateTime = now;
 
+            if (now.ms < lastTick.ms)
+            {
+                throw new ArgumentOutOfRangeException(nameof(now), now.ms,
+                    $"monotonic time can only stand still or move forward ${now} ${lastTick}");
+            }
+
 #endif
+            if (deltaTimeMs == 0)
+            {
+                lastTick = now;
+                return;
+            }
+
             var iterationCount = (now.ms - lastTick.ms) / deltaTimeMs;
             if (iterationCount <= 0)
             {
                 return;
             }
 
+            if (iterationCount > 4)
+            {
+                iterationCount = 4;
+            }
+
             lastTick = new Milliseconds(lastTick.ms + iterationCount * deltaTimeMs);
 
-            Now = now;
+            Now = lastTick;
             for (var i = 0; i < iterationCount; i++)
             {
                 Tick();

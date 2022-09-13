@@ -17,6 +17,7 @@ namespace Piot.Surge.Pulse.Client
         {
             foreach (var localPlayerInput in localPlayerInputs)
             {
+                log.DebugLowLevel("Fetch input from {LocalPlayerIndex}", localPlayerInput.LocalPlayerIndex);
                 var inputOctets = inputPackFetch.Fetch(localPlayerInput.LocalPlayerIndex);
                 var logicalInput = new LogicalInput.LogicalInput
                 {

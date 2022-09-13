@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using System;
 using System.Collections.Generic;
 using Piot.Surge.Entities;
 using Piot.Surge.LocalPlayer;
@@ -17,8 +18,11 @@ namespace Piot.Surge.Pulse.Host
         public sbyte clientInputTickCountAheadOfServer;
         public MonotonicTimeLowerBits.MonotonicTimeLowerBits lastReceivedMonotonicTimeLowerBits;
 
-        public SnapshotSyncerClient(RemoteEndpointId id)
+        private readonly Action<TickId> OnNotifyExpectingTickId;
+
+        public SnapshotSyncerClient(RemoteEndpointId id, Action<TickId> onNotifyExpectingTickId)
         {
+            OnNotifyExpectingTickId = onNotifyExpectingTickId;
             Endpoint = id;
         }
 
@@ -40,6 +44,11 @@ namespace Piot.Surge.Pulse.Host
 
         public void SetExpectedTickIdByRemote(TickId tickId, uint droppedCount)
         {
+            if (tickId != RemoteIsExpectingTickId)
+            {
+                OnNotifyExpectingTickId(tickId);
+            }
+
             RemoteIsExpectingTickId = tickId;
             WantsResend = droppedCount > 0;
         }
