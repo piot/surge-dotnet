@@ -16,5 +16,10 @@ namespace Piot.Surge.MonotonicTimeLowerBits
         {
             this.lowerBits = lowerBits;
         }
+
+        public override string ToString()
+        {
+            return $"[LowerBits {lowerBits:X}]";
+        }
     }
 }
