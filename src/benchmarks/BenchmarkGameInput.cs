@@ -23,7 +23,6 @@ public struct BenchmarkGameInput
 
 public static class GameInputFetch
 {
-    [InputFetch]
     public static BenchmarkGameInput ReadFromDevice(LocalPlayerIndex _)
     {
         return new()

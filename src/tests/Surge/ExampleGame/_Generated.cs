@@ -134,15 +134,18 @@ public static class GameInputWriter
     }
 }
 
-public sealed class GeneratedInputFetch : IInputPackFetch
+public class GeneratedInputPackFetch : IInputPackFetch
 {
+    private readonly InputPackFetch<GameInput> inputFetcher;
+
+    public GeneratedInputPackFetch(Func<LocalPlayerIndex, GameInput> gameSpecificFetch)
+    {
+        inputFetcher = new(gameSpecificFetch, GameInputWriter.Write);
+    }
+
     public ReadOnlySpan<byte> Fetch(LocalPlayerIndex index)
     {
-        var gameInput = GameInputFetch.ReadFromDevice(index); // Found from scanning
-        var writer = new OctetWriter(256);
-        GameInputWriter.Write(writer, gameInput);
-
-        return writer.Octets;
+        return inputFetcher.Fetch(index);
     }
 }
 

@@ -21,9 +21,8 @@ public struct GameInput
     public Velocity2 desiredMovement;
 }
 
-public static class GameInputFetch
+public class GameInputFetch
 {
-    [InputFetch]
     public static GameInput ReadFromDevice(LocalPlayerIndex _)
     {
         return new()

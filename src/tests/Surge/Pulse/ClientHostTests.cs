@@ -10,18 +10,33 @@ using Piot.Random;
 using Piot.Surge;
 using Piot.Surge.Compress;
 using Piot.Surge.Internal.Generated;
+using Piot.Surge.LocalPlayer;
 using Piot.Surge.Pulse.Client;
 using Piot.Surge.Pulse.Host;
 using Piot.Transport;
 using Piot.Transport.Memory;
+using Tests.ExampleGame;
 using Tests.Surge.ExampleGame;
 using Xunit.Abstractions;
 
 namespace Tests.Pulse;
 
+public class FetchInput
+{
+    public GameInput ReadFromDevice(LocalPlayerIndex localPlayerIndex)
+    {
+        return new GameInput
+        {
+            primaryAbility = true,
+            secondaryAbility = false
+        };
+    }
+}
+
 public sealed class ClientHostTests
 {
     private readonly ILog log;
+    private readonly FetchInput mockInput = new();
 
     public ClientHostTests(ITestOutputHelper output)
     {
@@ -33,7 +48,7 @@ public sealed class ClientHostTests
     private Client CreateClient(Milliseconds now, ITransport transport)
     {
         var clientDeltaTime = new Milliseconds(16);
-        var inputFetch = new GeneratedInputFetch();
+        var inputFetch = new GeneratedInputPackFetch(mockInput.ReadFromDevice);
         var notifyWorld = new GeneratedNotifyEntityCreation();
         var generatedEvent = new GeneratedEventProcessor(new ShortEvents(log.SubLog("ShortEvents")));
         var entityContainerWithGhostCreator =

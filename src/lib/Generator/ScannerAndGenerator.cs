@@ -25,13 +25,6 @@ namespace Piot.Surge.Generator
                 throw new Exception("must have at least one game input struct");
             }
 
-            var inputFetchers = InputFetchScanner.ScanForInputFetchMethods(log);
-            if (inputFetchers.Count() != 1)
-            {
-                throw new Exception("must have exactly one game input fetcher");
-            }
-
-
             var eventInterfaces = ShortLivedEventsScanner.ScanForEventInterfaces(log);
             if (eventInterfaces.Count() > 1)
             {
@@ -41,8 +34,7 @@ namespace Piot.Surge.Generator
             var shortLivedEventsInfo = ShortLivedEventsCollector.Collect(eventInterfaces.First());
 
 
-            var inputFetchInfos = GameInputFetchInfoCollector.Collect(inputFetchers, log);
-            var code = SourceGenerator.Generate(logicInfos, gameInputInfos.First(), inputFetchInfos.First(),
+            var code = SourceGenerator.Generate(logicInfos, gameInputInfos.First(),
                 shortLivedEventsInfo);
 
             File.Delete(targetSourceFile);

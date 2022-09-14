@@ -1086,22 +1086,26 @@ public sealed class ").Append(EntityGeneratedInternal(logicInfo)).Append($" : {i
             Generator.AddEndDeclaration(sb);
         }
 
-        public static void AddGameInputFetch(StringBuilder sb, GameInputFetchInfo inputFetchInfo)
+        public static void AddGameInputFetch(StringBuilder sb, GameInputInfo gameInputInfo)
         {
-            var fetchMethodName = Generator.FullName(inputFetchInfo.MethodInfo);
+            var fullGameInputTypeName = Generator.FullName(gameInputInfo.Type);
             sb.Append(@$"
 
-public sealed class GeneratedInputFetch : IInputPackFetch
+public class GeneratedInputPackFetch : IInputPackFetch
 {{
-    public ReadOnlySpan<byte> Fetch(LocalPlayerIndex index)
-    {{
-        var gameInput = {fetchMethodName}(index); // Found from scanning
-        var writer = new OctetWriter(256);
-        GameInputWriter.Write(writer, gameInput);
+        private readonly InputPackFetch<{fullGameInputTypeName}> inputFetcher;
+    
+        public GeneratedInputPackFetch(Func<LocalPlayerIndex, {fullGameInputTypeName}> gameSpecificFetch)
+        {{
+            inputFetcher = new(gameSpecificFetch, GameInputWriter.Write);
+        }}
 
-        return writer.Octets;
-    }}
+        public ReadOnlySpan<byte> Fetch(LocalPlayerIndex index)
+        {{
+            return inputFetcher.Fetch(index);
+        }}
 }}
+
 
 ");
         }
@@ -1113,7 +1117,7 @@ public sealed class GeneratedInputFetch : IInputPackFetch
         /// <param name="infos"></param>
         /// <returns></returns>
         public static string Generate(IEnumerable<LogicInfo> infos, GameInputInfo gameInputInfo,
-            GameInputFetchInfo gameInputFetchInfo, ShortLivedEventInterface shortLivedEventInterface)
+            ShortLivedEventInterface shortLivedEventInterface)
         {
             var sb = new StringBuilder();
 
@@ -1144,7 +1148,7 @@ namespace Piot.Surge.Internal.Generated
 
             AddGameInputReader(sb, gameInputInfo);
             AddGameInputWriter(sb, gameInputInfo);
-            AddGameInputFetch(sb, gameInputFetchInfo);
+            AddGameInputFetch(sb, gameInputInfo);
 
             GenerateShortLivedEvent.AddShortLivedEventValueConstants(sb, shortLivedEventInterface.methodInfos);
             GenerateShortLivedEventsEnqueue.AddEventEnqueue(sb, shortLivedEventInterface, indent);

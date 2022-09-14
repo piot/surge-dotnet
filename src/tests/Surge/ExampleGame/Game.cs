@@ -8,6 +8,7 @@ using Piot.MonotonicTime;
 using Piot.Surge;
 using Piot.Surge.Compress;
 using Piot.Surge.Internal.Generated;
+using Piot.Surge.LocalPlayer;
 using Piot.Surge.Pulse.Client;
 using Piot.Surge.Pulse.Host;
 using Piot.Surge.Types;
@@ -20,6 +21,8 @@ public sealed class Game
 {
     private readonly ILog log;
     private readonly WorldWithGhostCreator world;
+
+    private readonly FetchInput inputFetch = new();
 
     public Game(ITransport transport, IMultiCompressor compression, bool isHosting, ILog log)
     {
@@ -40,7 +43,7 @@ public sealed class Game
         else
         {
             Client = new(log.SubLog("Client"), now, delta, world, generatedEventTarget,
-                transport, compression, new GeneratedInputFetch());
+                transport, compression, new GeneratedInputPackFetch(inputFetch.ReadFromDevice));
         }
 
         GeneratedHostEntitySpawner = new GeneratedHostEntitySpawner(world, GeneratedNotifyEntityCreation);
@@ -102,5 +105,17 @@ public sealed class Game
         log.Debug("Update");
         Client?.Update(now);
         Host?.Update(now);
+    }
+
+    public class FetchInput
+    {
+        public GameInput ReadFromDevice(LocalPlayerIndex localPlayerIndex)
+        {
+            return new GameInput
+            {
+                primaryAbility = true,
+                secondaryAbility = false
+            };
+        }
     }
 }
