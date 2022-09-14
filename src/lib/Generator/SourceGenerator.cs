@@ -1093,18 +1093,18 @@ public sealed class ").Append(EntityGeneratedInternal(logicInfo)).Append($" : {i
 
 public class GeneratedInputPackFetch : IInputPackFetch
 {{
-        private readonly InputPackFetch<{fullGameInputTypeName}> inputFetcher;
-    
-        public GeneratedInputPackFetch(Func<LocalPlayerIndex, {fullGameInputTypeName}> gameSpecificFetch)
+        private InputPackFetch<{fullGameInputTypeName}>? inputFetcher;
+
+        public Func<LocalPlayerIndex, {fullGameInputTypeName}> GameSpecificInputFetch
         {{
-            inputFetcher = new(gameSpecificFetch, GameInputWriter.Write);
+            set => inputFetcher = new(value, GameInputWriter.Write);
         }}
 
         public ReadOnlySpan<byte> Fetch(LocalPlayerIndex index)
         {{
-            return inputFetcher.Fetch(index);
+            return inputFetcher is null ? ReadOnlySpan<byte>.Empty : inputFetcher.Fetch(index);
         }}
-}}
+        }}
 
 
 ");
