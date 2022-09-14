@@ -48,7 +48,8 @@ public sealed class ClientHostTests
     private Client CreateClient(Milliseconds now, ITransport transport)
     {
         var clientDeltaTime = new Milliseconds(16);
-        var inputFetch = new GeneratedInputPackFetch(mockInput.ReadFromDevice);
+        var inputFetch = new GeneratedInputPackFetch();
+        inputFetch.GameSpecificInputFetch = mockInput.ReadFromDevice;
         var notifyWorld = new GeneratedNotifyEntityCreation();
         var generatedEvent = new GeneratedEventProcessor(new ShortEvents(log.SubLog("ShortEvents")));
         var entityContainerWithGhostCreator =

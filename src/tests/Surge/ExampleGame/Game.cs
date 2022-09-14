@@ -19,10 +19,9 @@ namespace Tests.ExampleGame;
 
 public sealed class Game
 {
+    private readonly FetchInput inputFetch = new();
     private readonly ILog log;
     private readonly WorldWithGhostCreator world;
-
-    private readonly FetchInput inputFetch = new();
 
     public Game(ITransport transport, IMultiCompressor compression, bool isHosting, ILog log)
     {
@@ -42,8 +41,10 @@ public sealed class Game
         }
         else
         {
+            var gameInputFetch = new GeneratedInputPackFetch();
+            gameInputFetch.GameSpecificInputFetch = inputFetch.ReadFromDevice;
             Client = new(log.SubLog("Client"), now, delta, world, generatedEventTarget,
-                transport, compression, new GeneratedInputPackFetch(inputFetch.ReadFromDevice));
+                transport, compression, gameInputFetch);
         }
 
         GeneratedHostEntitySpawner = new GeneratedHostEntitySpawner(world, GeneratedNotifyEntityCreation);

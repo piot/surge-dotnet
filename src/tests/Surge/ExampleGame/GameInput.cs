@@ -23,7 +23,7 @@ public struct GameInput
 
 public class GameInputFetch
 {
-    public static GameInput ReadFromDevice(LocalPlayerIndex _)
+    public GameInput FetchInput(LocalPlayerIndex playerIndex)
     {
         return new()
         {

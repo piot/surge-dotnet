@@ -136,16 +136,16 @@ public static class GameInputWriter
 
 public class GeneratedInputPackFetch : IInputPackFetch
 {
-    private readonly InputPackFetch<GameInput> inputFetcher;
+    private InputPackFetch<GameInput>? inputFetcher;
 
-    public GeneratedInputPackFetch(Func<LocalPlayerIndex, GameInput> gameSpecificFetch)
+    public Func<LocalPlayerIndex, GameInput> GameSpecificInputFetch
     {
-        inputFetcher = new(gameSpecificFetch, GameInputWriter.Write);
+        set => inputFetcher = new(value, GameInputWriter.Write);
     }
 
     public ReadOnlySpan<byte> Fetch(LocalPlayerIndex index)
     {
-        return inputFetcher.Fetch(index);
+        return inputFetcher is null ? ReadOnlySpan<byte>.Empty : inputFetcher.Fetch(index);
     }
 }
 

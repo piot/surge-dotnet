@@ -115,7 +115,7 @@ public sealed class GameSync
         // Since snapshot queue has been starved on the client, the client playback is intentionally delayed
         // using a delta time of 19 ms instead of the normal 16 ms.
         // We add two ticks for the client to catch up.
-        for (var clientIteration = 0; clientIteration < 2; clientIteration++)
+        for (var clientIteration = 0; clientIteration < 0; clientIteration++)
         {
             var nowAfter = new Milliseconds(initNow.ms + (maxIteration + 1 + clientIteration) * 16);
             clientGame.Update(nowAfter);
