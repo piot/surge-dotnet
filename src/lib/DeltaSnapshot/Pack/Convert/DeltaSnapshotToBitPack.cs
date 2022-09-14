@@ -24,10 +24,8 @@ namespace Piot.Surge.DeltaSnapshot.Pack.Convert
         /// <returns></returns>
         public static DeltaSnapshotPack ToDeltaSnapshotPack(IEntityContainer world,
             EventStreamPackItem[] shortLivedEvents,
-            DeltaSnapshotEntityIds deltaSnapshotEntityIds, TickIdRange tickIdRange)
+            DeltaSnapshotEntityIds deltaSnapshotEntityIds, TickIdRange tickIdRange, IBitWriterWithResult writer)
         {
-            var writer = new BitWriter(Constants.MaxSnapshotOctetSize);
-
 #if DEBUG
             writer.WriteBits(Constants.SnapshotDeltaSync, 8);
 #endif

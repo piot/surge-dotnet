@@ -12,7 +12,7 @@ namespace Piot.Surge.Pulse.Client
     public static class PredictionTicker
     {
         public static void Predict(IEntity predictedEntity, TickId tickIdBeforePredictTick, RollbackStack rollbackStack,
-            PredictMode predictMode)
+            PredictMode predictMode, IOctetWriterWithResult undoWriter)
         {
             predictedEntity.CompleteEntity.RollMode = predictMode switch
             {
@@ -25,7 +25,6 @@ namespace Piot.Surge.Pulse.Client
 
             var changes = predictedEntity.CompleteEntity.Changes();
 
-            var undoWriter = new OctetWriter(1200);
 
             predictedEntity.CompleteEntity.SerializePrevious(changes, undoWriter);
 

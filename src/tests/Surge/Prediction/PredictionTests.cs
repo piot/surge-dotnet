@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using Piot.Clog;
+using Piot.Flood;
 using Piot.Surge.Entities;
 using Piot.Surge.Internal.Generated;
 using Piot.Surge.Pulse.Client;
@@ -13,11 +14,11 @@ using Xunit.Abstractions;
 
 namespace Tests.ExampleGame;
 
-public sealed class Prediction
+public sealed class PredictionTests
 {
     private readonly ILog log;
 
-    public Prediction(ITestOutputHelper output)
+    public PredictionTests(ITestOutputHelper output)
     {
         var logTarget = new TestOutputLogger(output);
 
@@ -48,7 +49,8 @@ public sealed class Prediction
         var rollbackQueue = new RollbackStack();
         var now = new TickId(23);
 
-        PredictionTicker.Predict(spawnedEntity, now, rollbackQueue, PredictMode.Predicting);
+        var undoWriter = new OctetWriter(1024);
+        PredictionTicker.Predict(spawnedEntity, now, rollbackQueue, PredictMode.Predicting, undoWriter);
         Assert.Equal(1, rollbackQueue.Count);
         Assert.Equal(1, positionChangedCount);
     }
@@ -111,7 +113,8 @@ public sealed class Prediction
                 ammoAt26 = internalEntity.Self.ammoCount;
             }
 
-            PredictionTicker.Predict(spawnedEntity, now, rollbackStack, PredictMode.Predicting);
+            var undoWriterScratch = new OctetWriter(1024);
+            PredictionTicker.Predict(spawnedEntity, now, rollbackStack, PredictMode.Predicting, undoWriterScratch);
             now = now.Next();
             log.Debug("Prediction at {Now} {Position} {Ammo}", now, internalEntity.Self.position,
                 internalEntity.Self.ammoCount);

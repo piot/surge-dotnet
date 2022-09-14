@@ -4,9 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 using Piot.Clog;
+using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.Surge.LogicalInput.Serialization;
 using Piot.Surge.OrderedDatagrams;
+using Piot.Surge.SnapshotProtocol;
 using Piot.Surge.Tick;
 using Piot.Transport;
 
@@ -14,6 +16,7 @@ namespace Piot.Surge.Pulse.Client
 {
     public sealed class BundleAndSendOutInput
     {
+        private readonly OctetWriter cachedDatagramWriter = new(Constants.MaxDatagramOctetSize);
         private readonly OrderedDatagramsSequenceIdIncrease datagramsOut = new();
         private readonly ILog log;
         private readonly ITransportClient transportClient;
@@ -45,15 +48,16 @@ namespace Piot.Surge.Pulse.Client
             var droppedSnapshotCount = lastSeenSnapshotTickId > nextExpectedSnapshotTickId
                 ? (byte)(lastSeenSnapshotTickId - nextExpectedSnapshotTickId).tickId
                 : (byte)0;
-            var outDatagram =
-                LogicInputDatagramPackOut.CreateInputDatagram(datagramsOut.Value, nextExpectedSnapshotTickId,
-                    droppedSnapshotCount,
-                    now, logicalInputForAllPlayers);
+            cachedDatagramWriter.Reset();
+
+            LogicInputDatagramSerialize.Serialize(cachedDatagramWriter, datagramsOut.Value, nextExpectedSnapshotTickId,
+                droppedSnapshotCount,
+                now, logicalInputForAllPlayers);
 
             log.Debug("Sending inputs to host {FirstTickId} {LastTickId}",
                 logicalInputForAllPlayers.debugFirstId, logicalInputForAllPlayers.debugLastId);
 
-            transportClient.SendToHost(outDatagram);
+            transportClient.SendToHost(cachedDatagramWriter.Octets);
 
             datagramsOut.Increase();
         }

@@ -13,7 +13,8 @@ namespace Piot.Surge.SnapshotProtocol.Out
     public static class SnapshotIncludingCorrectionsWriter
     {
         public static void Write(SnapshotDeltaPackIncludingCorrections deltaSnapshotIncludingCorrectionsPack,
-            IMultiCompressor multiCompressor, CompressorIndex compressorIndex, IOctetWriter writer)
+            IMultiCompressor multiCompressor, CompressorIndex compressorIndex, IOctetWriter writer,
+            IOctetWriterWithResult subWriter)
         {
 #if DEBUG
             writer.WriteUInt8(Constants.DeltaSnapshotIncludingCorrectionsSync);
@@ -28,7 +29,6 @@ namespace Piot.Surge.SnapshotProtocol.Out
 
             writer.WriteUInt8(snapshotMode);
 
-            var subWriter = new OctetWriter(Constants.MaxSnapshotOctetSize);
             subWriter.WriteUInt16((ushort)deltaSnapshotIncludingCorrectionsPack.deltaSnapshotPackPayload.Length);
             subWriter.WriteOctets(deltaSnapshotIncludingCorrectionsPack.deltaSnapshotPackPayload.Span);
 

@@ -15,6 +15,7 @@ using Piot.Surge.Entities;
 using Piot.Surge.Event;
 using Piot.Surge.Internal.Generated;
 using Piot.Surge.Replay;
+using Piot.Surge.SnapshotProtocol;
 using Piot.Surge.Tick;
 using Tests.ExampleGame;
 using Tests.Surge.ExampleGame;
@@ -50,10 +51,11 @@ public sealed class ReplayRecorderTests
 
         var shortLivedEvents = eventStream.FetchEventsForRange(TickIdRange.FromTickId(hostTickId));
 
+        var bitWriter = new BitWriter(Constants.MaxSnapshotOctetSize);
         var deltaSnapshotEntityIds = Scanner.Scan(authoritativeWorld, hostTickId);
         return DeltaSnapshotToBitPack.ToDeltaSnapshotPack(authoritativeWorld,
             shortLivedEvents, deltaSnapshotEntityIds,
-            TickIdRange.FromTickId(hostTickId));
+            TickIdRange.FromTickId(hostTickId), bitWriter);
     }
 
     [Fact]

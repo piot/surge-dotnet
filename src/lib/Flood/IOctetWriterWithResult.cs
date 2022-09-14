@@ -3,11 +3,9 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-namespace Piot.Surge.Event.Serialization
+namespace Piot.Flood
 {
-    public static class Constants
+    public interface IOctetWriterWithResult : IOctetWriter, IOctetWriterResult
     {
-        public const byte ShortLivedEventsStartSync = 0x88;
-        public const int MaxEventQueueOctetSize = 1024;
     }
 }

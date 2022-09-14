@@ -15,6 +15,7 @@ namespace Piot.Surge.Replay.Serialization
     public sealed class ReplayWriter
     {
         private readonly RaffWriter raffWriter;
+        private readonly OctetWriter cachedStateWriter = new(16 * 1024);
         private TickIdRange lastInsertedDeltaStateRange;
         private uint packCountSinceCompleteState;
 
@@ -57,13 +58,13 @@ namespace Piot.Surge.Replay.Serialization
             }
 
             packCountSinceCompleteState = 0;
-            var totalWriter = new OctetWriter((uint)(completeState.Payload.Length + 10));
 
-            WriteCompleteStateHeader(totalWriter, completeState.TickId);
+            cachedStateWriter.Reset();
+            WriteCompleteStateHeader(cachedStateWriter, completeState.TickId);
             //totalWriter.WriteUInt32((ushort)completeState.Payload.Length);
-            totalWriter.WriteOctets(completeState.Payload);
+            cachedStateWriter.WriteOctets(completeState.Payload);
 
-            raffWriter.WriteChunk(Constants.CompleteStateIcon, Constants.CompleteStateName, totalWriter.Octets);
+            raffWriter.WriteChunk(Constants.CompleteStateIcon, Constants.CompleteStateName, cachedStateWriter.Octets);
         }
 
         private static void WriteDeltaHeader(IOctetWriter writer, TickIdRange tickIdRange)
@@ -84,10 +85,10 @@ namespace Piot.Surge.Replay.Serialization
                 throw new Exception($"not appendable {lastInsertedDeltaStateRange} and {deltaState.TickIdRange}");
             }
 
-            var totalWriter = new OctetWriter((uint)(deltaState.Payload.Length + 10));
-            WriteDeltaHeader(totalWriter, deltaState.TickIdRange);
-            totalWriter.WriteOctets(deltaState.Payload);
-            raffWriter.WriteChunk(Constants.DeltaStateIcon, Constants.DeltaStateName, totalWriter.Octets);
+            cachedStateWriter.Reset();
+            WriteDeltaHeader(cachedStateWriter, deltaState.TickIdRange);
+            cachedStateWriter.WriteOctets(deltaState.Payload);
+            raffWriter.WriteChunk(Constants.DeltaStateIcon, Constants.DeltaStateName, cachedStateWriter.Octets);
             lastInsertedDeltaStateRange = deltaState.TickIdRange;
         }
 

@@ -13,7 +13,8 @@ namespace Piot.Surge.Pulse.Client
     public static class RollForth
     {
         public static void Rollforth(IEntity predictedEntity, LogicalInputQueue predictedInputs
-            , RollbackStack rollbackStack, PredictionStateChecksumQueue predictionStateHistory
+            , RollbackStack rollbackStack, PredictionStateChecksumQueue predictionStateHistory,
+            IOctetWriterWithResult undoScratchWriter
         )
         {
             predictedEntity.CompleteEntity.RollMode = EntityRollMode.Rollforth;
@@ -30,7 +31,7 @@ namespace Piot.Surge.Pulse.Client
 
                 PredictionTickAndStateSave.PredictAndStateSave(predictedEntity, predictedInput.appliedAtTickId,
                     rollbackStack,
-                    predictionStateHistory, PredictMode.RollingForth);
+                    predictionStateHistory, PredictMode.RollingForth, undoScratchWriter);
             }
         }
     }

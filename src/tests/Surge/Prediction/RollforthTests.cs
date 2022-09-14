@@ -16,11 +16,11 @@ using Xunit.Abstractions;
 
 namespace Tests.ExampleGame;
 
-public sealed class Rollforth
+public sealed class RollforthTests
 {
     private readonly ILog log;
 
-    public Rollforth(ITestOutputHelper output)
+    public RollforthTests(ITestOutputHelper output)
     {
         var logTarget = new TestOutputLogger(output);
 
@@ -98,7 +98,8 @@ public sealed class Rollforth
             var logicalInputPack = new LogicalInput(localPlayerIndex, now, inputPack);
             predictedInputs.AddLogicalInput(logicalInputPack);
 
-            PredictionTicker.Predict(spawnedEntity, now, rollbackStack, PredictMode.Predicting);
+            var undoWriter = new OctetWriter(1024);
+            PredictionTicker.Predict(spawnedEntity, now, rollbackStack, PredictMode.Predicting, undoWriter);
             now = now.Next();
             log.Debug("Prediction at {Now} {Position} {Ammo}", now, internalEntity.Self.position,
                 internalEntity.Self.ammoCount);
@@ -128,7 +129,8 @@ public sealed class Rollforth
         const int expectedRollforthCount = 7;
         var predictionStateHistory = new PredictionStateChecksumQueue();
         Assert.Equal(20, internalEntity.Self.ammoCount);
-        RollForth.Rollforth(spawnedEntity, predictedInputs, rollbackStack, predictionStateHistory);
+        var undoWriterScratch = new OctetWriter(1024);
+        RollForth.Rollforth(spawnedEntity, predictedInputs, rollbackStack, predictionStateHistory, undoWriterScratch);
         Assert.Equal(positionAfter, internalEntity.Self.position);
         Assert.Equal(19, internalEntity.Self.ammoCount);
         Assert.Equal(expectedRollforthCount, predictionStateHistory.Count);

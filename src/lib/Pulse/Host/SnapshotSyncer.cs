@@ -16,6 +16,7 @@ using Piot.Surge.DeltaSnapshot.EntityMask;
 using Piot.Surge.DeltaSnapshot.Pack;
 using Piot.Surge.DeltaSnapshot.Pack.Convert;
 using Piot.Surge.Event;
+using Piot.Surge.SnapshotProtocol;
 using Piot.Surge.SnapshotProtocol.Out;
 using Piot.Surge.Tick;
 using Piot.Transport;
@@ -25,6 +26,12 @@ namespace Piot.Surge.Pulse.Host
 {
     public sealed class SnapshotSyncer
     {
+        private readonly BitWriter cachedBitWriterForSnapshots = new(Constants.MaxSnapshotOctetSize);
+        private readonly OctetWriter cachedDatagramsWriter = new(Constants.MaxDatagramOctetSize);
+        private readonly OctetWriter cachedPhysicsCorrectionPackSubWriter = new(12 * 1024);
+        private readonly OctetWriter cachedPhysicsCorrectionPackWriter = new(12 * 1024);
+        private readonly OctetWriter cachedPhysicsCorrectionWriter = new(10 * 1024);
+        private readonly OctetWriter cachedSinglePhysicsCorrectionWriter = new(1024);
         private readonly IMultiCompressor compression;
         private readonly CompressorIndex compressorIndex;
         private readonly EntityMasksHistory entityMasksHistory = new();
@@ -32,6 +39,7 @@ namespace Piot.Surge.Pulse.Host
         private readonly List<SnapshotSyncerClient> syncClients = new();
         private readonly ITransportSend transportSend;
         private TickId allClientsAreWaitingForAtLeastTickId;
+
 
         public SnapshotSyncer(ITransportSend transportSend, IMultiCompressor compression,
             CompressorIndex compressorIndex, ILog log)
@@ -96,8 +104,10 @@ namespace Piot.Surge.Pulse.Host
                         eventsForThisRange[^1]);
                 }
 
+                cachedBitWriterForSnapshots.Reset();
+
                 return DeltaSnapshotToBitPack.ToDeltaSnapshotPack(world, eventsForThisRange, snapshotEntityIds,
-                    rangeToSend);
+                    rangeToSend, cachedBitWriterForSnapshots);
             }
 
             if (!connection.HasReceivedInitialState)
@@ -122,34 +132,43 @@ namespace Piot.Surge.Pulse.Host
         {
             var bestPack = FindBestPack(connection, precalculatedPackForThisTick, world, eventStream, hostTickId);
 
-            var physicsCorrectionWriter = new OctetWriter(Constants.MaxSnapshotOctetSize);
-            physicsCorrectionWriter.WriteUInt8((byte)connection.AssignedPredictedEntityForLocalPlayers.Keys.Count);
+            cachedPhysicsCorrectionWriter.Reset();
+            cachedPhysicsCorrectionWriter.WriteUInt8((byte)connection.AssignedPredictedEntityForLocalPlayers.Keys
+                .Count);
 
             foreach (var localPlayerAssignedPredictedEntity in connection.AssignedPredictedEntityForLocalPlayers)
             {
-                var correctionsWrite = new OctetWriter(1024);
+                cachedSinglePhysicsCorrectionWriter.Reset();
                 var correctionEntity = localPlayerAssignedPredictedEntity.Value;
-                correctionEntity.CompleteEntity.SerializeCorrectionState(correctionsWrite);
+                correctionEntity.CompleteEntity.SerializeCorrectionState(cachedSinglePhysicsCorrectionWriter);
 
                 CorrectionsHeaderWriter.Write(correctionEntity.Id,
-                    new((byte)localPlayerAssignedPredictedEntity.Key), (ushort)correctionsWrite.Octets.Length,
-                    physicsCorrectionWriter);
-                physicsCorrectionWriter.WriteOctets(correctionsWrite.Octets);
+                    new((byte)localPlayerAssignedPredictedEntity.Key),
+                    (ushort)cachedSinglePhysicsCorrectionWriter.Octets.Length,
+                    cachedPhysicsCorrectionWriter);
+                cachedPhysicsCorrectionWriter.WriteOctets(cachedSinglePhysicsCorrectionWriter.Octets);
             }
 
             var includingCorrections = new SnapshotDeltaPackIncludingCorrections(bestPack.tickIdRange,
-                bestPack.payload.Span, physicsCorrectionWriter.Octets, bestPack.StreamType, bestPack.SnapshotType);
+                bestPack.payload.Span, cachedPhysicsCorrectionWriter.Octets, bestPack.StreamType,
+                bestPack.SnapshotType);
 
-            var snapshotProtocolPack = SnapshotProtocolPacker.Pack(includingCorrections, compression, compressorIndex);
-
+            cachedPhysicsCorrectionPackWriter.Reset();
+            cachedPhysicsCorrectionPackSubWriter.Reset();
+            SnapshotIncludingCorrectionsWriter.Write(includingCorrections, compression, compressorIndex,
+                cachedPhysicsCorrectionPackWriter, cachedPhysicsCorrectionPackSubWriter);
+            var snapshotProtocolPack =
+                new SnapshotProtocolPack(bestPack.tickIdRange, cachedPhysicsCorrectionPackWriter.Octets);
             var sender = new WrappedSender(transportSend, connection.Endpoint);
 
             log.Debug("sending datagrams {Flattened} {ClientPontTime}", includingCorrections,
                 connection.lastReceivedMonotonicTimeLowerBits);
+
+            cachedDatagramsWriter.Reset();
             SnapshotPackIncludingCorrectionsWriter.Write(sender.Send, snapshotProtocolPack,
                 connection.lastReceivedMonotonicTimeLowerBits, connection.clientInputTickCountAheadOfServer,
                 hostTickId,
-                connection.DatagramsSequenceIdIncrease);
+                connection.DatagramsSequenceIdIncrease, cachedDatagramsWriter);
         }
 
         public void SendSnapshot(EntityMasks masks, DeltaSnapshotPack deltaSnapshotPack, IEntityContainer world,

@@ -21,10 +21,8 @@ namespace Piot.Surge.DeltaSnapshot.Pack.Convert
         /// <param name="deltaSnapshotEntityIds"></param>
         /// <returns></returns>
         public static DeltaSnapshotPack ToDeltaSnapshotPack(IEntityContainer world,
-            DeltaSnapshotEntityIds deltaSnapshotEntityIds)
+            DeltaSnapshotEntityIds deltaSnapshotEntityIds, IOctetWriterWithResult writer)
         {
-            var writer = new OctetWriter(Constants.MaxSnapshotOctetSize);
-
 #if DEBUG
             writer.WriteUInt8(Constants.SnapshotDeltaSync);
 #endif

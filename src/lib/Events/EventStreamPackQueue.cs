@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Piot.Flood;
+using Piot.Surge.Event.Serialization;
 using Piot.Surge.Tick;
 
 namespace Piot.Surge.Event
@@ -16,10 +17,9 @@ namespace Piot.Surge.Event
     /// </summary>
     public sealed class EventStreamPackQueue
     {
+        private readonly BitWriter bitWriterForCurrentTick = new(Constants.MaxEventQueueOctetSize);
         private readonly Queue<EventStreamPackItem> events = new();
         private TickId authoritativeTickId;
-
-        private BitWriter bitWriterForCurrentTick = new(1024);
 
         private bool isInitialized;
         private TickId lastInsertedTickId;
@@ -76,7 +76,7 @@ namespace Piot.Surge.Event
 
             var octets = bitWriterForCurrentTick.Close(out var bitPosition);
             Enqueue(authoritativeTickId, octets, (uint)bitPosition);
-            bitWriterForCurrentTick = new BitWriter(1024);
+            bitWriterForCurrentTick.Reset();
         }
 
 

@@ -15,6 +15,7 @@ namespace Tests;
 public sealed class MockInputFetch : IInputPackFetch
 {
     private readonly ILog log;
+    private readonly OctetWriter cachedWriter = new(30);
     private bool primaryAbility;
 
     private bool secondaryAbility;
@@ -46,10 +47,10 @@ public sealed class MockInputFetch : IInputPackFetch
             desiredMovement = default
         };
 
-        var writer = new OctetWriter(30);
 
-        GameInputWriter.Write(writer, input);
+        cachedWriter.Reset();
+        GameInputWriter.Write(cachedWriter, input);
 
-        return writer.Octets;
+        return cachedWriter.Octets;
     }
 }

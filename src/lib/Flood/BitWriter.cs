@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 
 namespace Piot.Flood
 {
-    public sealed class BitWriter : IBitWriter
+    public sealed class BitWriter : IBitWriterWithResult
     {
         private readonly Memory<byte> array;
         private ulong accumulator;
@@ -92,6 +92,14 @@ namespace Piot.Flood
 
             outBitPosition = bitPosition;
             return array.Span[..octetPosition];
+        }
+
+        public void Reset()
+        {
+            bitPosition = 0;
+            bitsInAccumulator = 0;
+            octetPosition = 0;
+            accumulator = 0;
         }
     }
 }

@@ -15,6 +15,7 @@ namespace Piot.Surge.Pulse.Client
     public sealed class AvatarPredictor
     {
         private readonly IEntity assignedAvatar;
+        private readonly OctetWriter cachedUndoWriter = new(1024);
         private readonly ILog log;
 
         private readonly PredictionStateChecksumQueue predictionStateChecksumHistory = new();
@@ -91,8 +92,9 @@ namespace Piot.Surge.Pulse.Client
 
             if (shouldPredict)
             {
+                cachedUndoWriter.Reset();
                 RollForth.Rollforth(assignedAvatar, LocalPlayerInput.PredictedInputs, rollbackStack,
-                    predictionStateChecksumHistory);
+                    predictionStateChecksumHistory, cachedUndoWriter);
             }
 
             assignedAvatar.CompleteEntity.RollMode = EntityRollMode.Predict;
@@ -111,8 +113,9 @@ namespace Piot.Surge.Pulse.Client
 
             var inputReader = new OctetReader(logicalInput.payload.Span);
             inputDeserialize.SetInput(inputReader);
+            cachedUndoWriter.Reset();
             PredictionTickAndStateSave.PredictAndStateSave(assignedAvatar, logicalInput.appliedAtTickId, rollbackStack,
-                predictionStateChecksumHistory, PredictMode.Predicting);
+                predictionStateChecksumHistory, PredictMode.Predicting, cachedUndoWriter);
         }
     }
 }

@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using Piot.Flood;
 using Piot.Surge.DeltaSnapshot.Convert;
 using Piot.Surge.DeltaSnapshot.EntityMask;
 using Piot.Surge.DeltaSnapshot.Pack;
@@ -17,7 +18,8 @@ namespace Piot.Surge.Pulse.Host
     {
         public static (EntityMasks, DeltaSnapshotPack) StoreWorldChangesToPackContainer(
             IEntityContainerWithDetectChanges AuthoritativeWorld,
-            EventStreamPackQueue ShortLivedEventStream, TickId serverTickId, SnapshotStreamType streamType)
+            EventStreamPackQueue ShortLivedEventStream, TickId serverTickId, SnapshotStreamType streamType,
+            IOctetWriterWithResult octetWriter, IBitWriterWithResult bitWriter)
         {
             var deltaSnapshotEntityIds = Scanner.Scan(AuthoritativeWorld, serverTickId);
             var eventsThisTick = ShortLivedEventStream.FetchEventsForRange(TickIdRange.FromTickId(serverTickId));
@@ -25,10 +27,10 @@ namespace Piot.Surge.Pulse.Host
             {
                 SnapshotStreamType.BitStream => DeltaSnapshotToBitPack.ToDeltaSnapshotPack(AuthoritativeWorld,
                     eventsThisTick, deltaSnapshotEntityIds,
-                    TickIdRange.FromTickId(deltaSnapshotEntityIds.TickId)),
+                    TickIdRange.FromTickId(deltaSnapshotEntityIds.TickId), bitWriter),
 
                 SnapshotStreamType.OctetStream => DeltaSnapshotToPack.ToDeltaSnapshotPack(AuthoritativeWorld,
-                    deltaSnapshotEntityIds)
+                    deltaSnapshotEntityIds, octetWriter)
             };
 
             ChangeClearer.OverwriteAuthoritative(AuthoritativeWorld);

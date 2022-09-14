@@ -4,12 +4,14 @@
  *--------------------------------------------------------------------------------------------*/
 
 using Piot.Clog;
+using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.Surge.Compress;
 using Piot.Surge.DeltaSnapshot.Pack;
 using Piot.Surge.Entities;
 using Piot.Surge.Event;
 using Piot.Surge.LocalPlayer;
+using Piot.Surge.SnapshotProtocol;
 using Piot.Surge.Tick;
 using Piot.Surge.TimeTick;
 using Piot.Transport;
@@ -19,6 +21,8 @@ namespace Piot.Surge.Pulse.Host
 {
     public sealed class Host
     {
+        private readonly BitWriter cachedSnapshotBitWriter = new(Constants.MaxSnapshotOctetSize);
+        private readonly OctetWriter cachedSnapshotWriter = new(Constants.MaxSnapshotOctetSize);
         private readonly ClientConnections clientConnections;
         private readonly ILog log;
         private readonly TimeTicker simulationTicker;
@@ -76,8 +80,11 @@ namespace Piot.Surge.Pulse.Host
 
             SetInputFromClients.SetInputsFromClientsToEntities(clientConnections.Connections, authoritativeTickId, log);
 
+            cachedSnapshotBitWriter.Reset();
+            cachedSnapshotWriter.Reset();
             var (masks, deltaSnapshotPack) = StoreWorldChanges.StoreWorldChangesToPackContainer(AuthoritativeWorld,
-                ShortLivedEventStream, authoritativeTickId, SnapshotStreamType.BitStream);
+                ShortLivedEventStream, authoritativeTickId, SnapshotStreamType.BitStream, cachedSnapshotWriter,
+                cachedSnapshotBitWriter);
             snapshotSyncer.SendSnapshot(masks, deltaSnapshotPack, AuthoritativeWorld, ShortLivedEventStream);
         }
 

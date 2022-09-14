@@ -16,7 +16,6 @@ using Piot.Surge.DeltaSnapshot.EntityMask;
 using Piot.Surge.DeltaSnapshot.Pack;
 using Piot.Surge.DeltaSnapshot.Pack.Convert;
 using Piot.Surge.DeltaSnapshot.Scan;
-using Piot.Surge.Entities;
 using Piot.Surge.FieldMask;
 using Piot.Surge.Internal.Generated;
 using Piot.Surge.LocalPlayer;
@@ -31,6 +30,7 @@ using Piot.Surge.Types;
 using Piot.Surge.Types.Serialization;
 using Tests.ExampleGame;
 using Xunit.Abstractions;
+using Constants = Piot.Surge.SnapshotProtocol.Constants;
 
 namespace Tests;
 
@@ -136,13 +136,13 @@ public sealed class UnitTest1
         var now = new Milliseconds(0x954299);
 
         var datagramsOut = new OrderedDatagramsSequenceId();
-        var outDatagram =
-            LogicInputDatagramPackOut.CreateInputDatagram(datagramsOut, new TickId(42), 0,
-                now,
-                new LogicalInputsForAllLocalPlayers(new LogicalInputArrayForPlayer[]
-                    { new(new LocalPlayerIndex(0), logicalInputQueue.Collection) }));
+        var octetWriter = new OctetWriter(1024);
+        LogicInputDatagramSerialize.Serialize(octetWriter, datagramsOut, new TickId(42), 0,
+            now,
+            new LogicalInputsForAllLocalPlayers(new LogicalInputArrayForPlayer[]
+                { new(new LocalPlayerIndex(0), logicalInputQueue.Collection) }));
 
-        var reader = new OctetReader(outDatagram.ToArray());
+        var reader = new OctetReader(octetWriter.Octets);
         var datagramsSequenceIn = OrderedDatagramsSequenceIdReader.Read(reader);
         Assert.Equal(datagramsOut.Value, datagramsSequenceIn.Value);
         var typeOfDatagram = DatagramTypeReader.Read(reader);
@@ -197,14 +197,14 @@ public sealed class UnitTest1
             { Current = new AvatarLogic { position = new Position3(100, 200, 300), ammoCount = 1234 } };
 
         var writer = new OctetWriter(64);
-        (someAvatar as IEntitySerializer).SerializeAll(writer);
+        someAvatar.SerializeAll(writer);
         Assert.Equal(28, writer.Octets.Length);
 
         var readAvatar = new AvatarLogicEntityInternal();
 
         var reader = new OctetReader(writer.Octets);
 
-        (readAvatar as IEntityDeserializer).DeserializeAll(reader);
+        readAvatar.DeserializeAll(reader);
 
         Assert.Equal(someAvatar.Self.ammoCount, readAvatar.Self.ammoCount);
     }
@@ -218,12 +218,12 @@ public sealed class UnitTest1
 
         {
             var writer = new OctetWriter(64);
-            (someAvatar as IEntitySerializer).SerializeAll(writer);
+            someAvatar.SerializeAll(writer);
             Assert.Equal(28, writer.Octets.Length);
 
             var reader = new OctetReader(writer.Octets);
 
-            (readAvatar as IEntityDeserializer).DeserializeAll(reader);
+            readAvatar.DeserializeAll(reader);
         }
 
         Assert.Equal(someAvatar.Self.ammoCount, readAvatar.Self.ammoCount);
@@ -234,12 +234,12 @@ public sealed class UnitTest1
         {
             var writer = new OctetWriter(64);
 
-            (someAvatar as IEntitySerializer).Serialize(AvatarLogicEntityInternal.AmmoCountMask, writer);
+            someAvatar.Serialize(AvatarLogicEntityInternal.AmmoCountMask, writer);
 
             Assert.NotEqual(someAvatar.Self.ammoCount, readAvatar.Self.ammoCount);
 
             var reader = new OctetReader(writer.Octets);
-            (readAvatar as IEntityDeserializer).Deserialize(reader);
+            readAvatar.Deserialize(reader);
         }
 
         Assert.Equal(someAvatar.Self.ammoCount, readAvatar.Self.ammoCount);
@@ -253,11 +253,11 @@ public sealed class UnitTest1
             Current = new AvatarLogic { ammoCount = 100 }
         };
 
-        var changes = (avatarBefore as IEntityChanges).Changes();
+        var changes = avatarBefore.Changes();
         Assert.Equal(AvatarLogicEntityInternal.AmmoCountMask, changes);
         avatarBefore.ClearChanges();
 
-        var changesAfter = (avatarBefore as IEntityChanges).Changes();
+        var changesAfter = avatarBefore.Changes();
         Assert.Equal((ulong)0, changesAfter);
     }
 
@@ -275,7 +275,7 @@ public sealed class UnitTest1
         };
 
         var writerButtonDown = new OctetWriter(100);
-        (avatarButtonDown as IEntitySerializer).Serialize(AvatarLogicEntityInternal.FireButtonIsDownMask,
+        avatarButtonDown.Serialize(AvatarLogicEntityInternal.FireButtonIsDownMask,
             writerButtonDown);
         Assert.Equal(3, writerButtonDown.Octets.Length);
         Assert.Equal(1, writerButtonDown.Octets[2]);
@@ -292,7 +292,7 @@ public sealed class UnitTest1
 
         var rollbackReader = new OctetReader(writerButtonHistory.Octets);
 
-        (avatarBeforeInfo as IEntityDeserializer).Deserialize(rollbackReader);
+        avatarBeforeInfo.Deserialize(rollbackReader);
 
         Assert.False(avatarBeforeInfo.Self.fireButtonIsDown);
     }
@@ -307,11 +307,11 @@ public sealed class UnitTest1
         avatar.ClearChanges();
 
         Assert.Equal(0, avatar.Self.position.x);
-        Assert.Equal(0u, (avatar as IEntityChanges).Changes());
-        (avatar as ISimpleLogic).Tick();
+        Assert.Equal(0u, avatar.Changes());
+        avatar.Tick();
 
         Assert.Equal(300, avatar.Self.position.x);
-        Assert.Equal(AvatarLogicEntityInternal.PositionMask, (avatar as IEntityChanges).Changes());
+        Assert.Equal(AvatarLogicEntityInternal.PositionMask, avatar.Changes());
     }
 
     [Fact]
@@ -341,14 +341,14 @@ public sealed class UnitTest1
             Current = new AvatarLogic { ammoCount = 100, fireButtonIsDown = false }
         };
 
-        var typeInformation = (avatarInfo as ICompleteEntity).TypeInformation;
+        var typeInformation = avatarInfo.TypeInformation;
 
         log.Info("typeInfo {TypeInformation}", typeInformation);
 
         avatarInfo.ClearChanges();
 
         Assert.Equal(0, avatarInfo.Self.position.x);
-        Assert.Equal(0u, (avatarInfo as IEntityChanges).Changes());
+        Assert.Equal(0u, avatarInfo.Changes());
 
         var packetQueue = new SnapshotDeltaPackIncludingCorrectionsQueue();
         var notifyWorld = new GeneratedNotifyEntityCreation();
@@ -391,8 +391,9 @@ public sealed class UnitTest1
             Assert.Single(updateForPacker);
 */
         }
+        var writer = new OctetWriter(1024);
         var snapshotDeltaPack =
-            DeltaSnapshotToPack.ToDeltaSnapshotPack(world, deltaSnapshotEntityIdsAfter);
+            DeltaSnapshotToPack.ToDeltaSnapshotPack(world, deltaSnapshotEntityIdsAfter, writer);
 
 
         var firstTickId = new TickId(8);
@@ -421,7 +422,7 @@ public sealed class UnitTest1
 
         Assert.Equal(600, ((AvatarLogic)spawnedAvatar.Logic).position.x);
         Assert.Equal(AvatarLogicEntityInternal.PositionMask,
-            ((AvatarLogicEntityInternal)spawnedAvatar.CompleteEntity as IEntityChanges).Changes());
+            ((AvatarLogicEntityInternal)spawnedAvatar.CompleteEntity).Changes());
 
         var firstPack = packetQueue.Dequeue();
 
@@ -445,7 +446,8 @@ public sealed class UnitTest1
         var deltaSnapshotEntityIds = Scanner.Scan(worldToScan, tickId);
         var entityMasks = DeltaSnapshotToEntityMasks.ToEntityMasks(deltaSnapshotEntityIds);
         var deltaPack =
-            DeltaSnapshotToPack.ToDeltaSnapshotPack(worldToScan, deltaSnapshotEntityIds);
+            DeltaSnapshotToPack.ToDeltaSnapshotPack(worldToScan, deltaSnapshotEntityIds,
+                new OctetWriter(Constants.MaxSnapshotOctetSize));
 
         ChangeClearer.OverwriteAuthoritative(worldToScan);
 
@@ -517,7 +519,7 @@ public sealed class UnitTest1
 
 
         Assert.Equal(900, serverSpawnedAvatarForAssertAtThree.Self.position.x);
-        Assert.IsType<FireChainLightning>((serverSpawnedAvatar as IEntityActions).Actions[0]);
+        Assert.IsType<FireChainLightning>(serverSpawnedAvatar.Actions[0]);
 
         Assert.Equal(
             AvatarLogicEntityInternal.PositionMask |
