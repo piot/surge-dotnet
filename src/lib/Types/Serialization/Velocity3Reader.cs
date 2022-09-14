@@ -23,9 +23,9 @@ namespace Piot.Surge.Types.Serialization
         {
             return new Velocity3
             {
-                x = (short)reader.ReadBits(10),
-                y = (short)reader.ReadBits(10),
-                z = (short)reader.ReadBits(10)
+                x = BitReaderUtils.ReadSignedBits(reader, 12),
+                y = BitReaderUtils.ReadSignedBits(reader, 12),
+                z = BitReaderUtils.ReadSignedBits(reader, 12)
             };
         }
     }

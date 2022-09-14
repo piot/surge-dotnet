@@ -11,7 +11,7 @@ namespace Piot.Surge.Types
         public int y;
         public int z;
 
-        internal const int VelocityResolution = 512;
+        internal const int VelocityResolution = 16;
 
         public Velocity3(int x, int y, int z)
         {

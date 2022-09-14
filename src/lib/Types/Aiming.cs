@@ -13,8 +13,13 @@ namespace Piot.Surge.Types
         public ushort yaw;
         public short pitch;
 
-        public float Yaw => yaw * (float)Math.PI * 2.0f / 0xffff;
-        public float Pitch => pitch * (float)Math.PI / 32768;
+        public float Yaw => yaw * (float)Math.PI * 2.0f / 65535.0f;
+
+        public float YawDegrees => yaw * 360.0f / 65535.0f;
+        public float Pitch => pitch * PitchMax / 32768.0f;
+        public float PitchDegrees => pitch * 89.0f / 32768.0f;
+
+        public const float PitchMax = (float)Math.PI / 2.0f - 0.1f;
 
 
         public bool Equals(Aiming other)
@@ -46,8 +51,28 @@ namespace Piot.Surge.Types
 
         public Aiming(float yaw, float pitch)
         {
+            if (pitch < -PitchMax)
+            {
+                pitch = -PitchMax;
+            }
+
+            if (pitch > PitchMax)
+            {
+                pitch = PitchMax;
+            }
+
+            if (yaw > Math.PI * 2.0f)
+            {
+                yaw = (float)Math.PI * 2.0f;
+            }
+
+            if (yaw < 0)
+            {
+                yaw = 0;
+            }
+
             this.yaw = (ushort)(yaw * 0xffff / 2 * Math.PI);
-            this.pitch = (short)(pitch * 0x7fff / Math.PI);
+            this.pitch = (short)(pitch * 32767.0 / PitchMax);
         }
 
         public Vector3 ToDirection

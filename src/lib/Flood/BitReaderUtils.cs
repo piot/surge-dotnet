@@ -3,15 +3,13 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-namespace Piot.Surge.Input
+namespace Piot.Flood
 {
-    public readonly struct Axis
+    public static class BitReaderUtils
     {
-        public readonly short value;
-
-        public override string ToString()
+        public static int ReadSignedBits(IBitReader reader, int bitCount)
         {
-            return $"[Axis {value}]";
+            return (int)reader.ReadBits(bitCount) - (2 ^ (bitCount - 1));
         }
     }
 }

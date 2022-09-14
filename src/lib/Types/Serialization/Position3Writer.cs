@@ -18,9 +18,9 @@ namespace Piot.Surge.Types.Serialization
 
         public static void Write(Position3 position, IBitWriter writer)
         {
-            writer.WriteBits((ushort)position.x, 20);
-            writer.WriteBits((ushort)position.y, 20);
-            writer.WriteBits((ushort)position.z, 20);
+            BitWriterUtils.WriteSignedBits(writer, position.x, 20);
+            BitWriterUtils.WriteSignedBits(writer, position.y, 20);
+            BitWriterUtils.WriteSignedBits(writer, position.z, 20);
         }
     }
 }
