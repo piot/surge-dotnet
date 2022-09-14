@@ -48,14 +48,14 @@ namespace Piot.Surge.Corrections
 
         public int Count => packs.Count;
 
-        public int TicksAheadOf(TickId tickId)
+        public int TicksAheadOfLastInQueue(TickId tickId)
         {
             if (packs.Count == 0)
             {
                 return 0;
             }
 
-            return (int)(Peek().Pack.tickIdRange.Last.tickId - tickId.tickId);
+            return (int)(LastInsertedTickIdRange.Last.tickId - tickId.tickId);
         }
 
         public bool IsValidPackToInsert(TickIdRange tickIdRange)

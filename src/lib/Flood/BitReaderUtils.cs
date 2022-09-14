@@ -9,7 +9,7 @@ namespace Piot.Flood
     {
         public static int ReadSignedBits(IBitReader reader, int bitCount)
         {
-            return (int)reader.ReadBits(bitCount) - (2 ^ (bitCount - 1));
+            return (int)reader.ReadBits(bitCount) - (1 << (bitCount - 1));
         }
     }
 }

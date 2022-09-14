@@ -101,16 +101,16 @@ namespace Piot.Surge.Pulse.Client
             var targetDeltaTimeMsValue = targetDeltaTimeMs.ms;
             // Our goal is to have just two snapshots in the snapshotsQueue.
             // So adjust the playback speed using the playback delta time.
-            var bufferAheadCount = snapshotsQueue.TicksAheadOf(playbackTick);
+            var bufferAheadCount = snapshotsQueue.TicksAheadOfLastInQueue(playbackTick);
             var deltaTimeMs = bufferAheadCount switch
             {
-                < 2 => targetDeltaTimeMsValue * 12 / 10,
-                > 4 => targetDeltaTimeMsValue * 8 / 10,
+                < 2 => targetDeltaTimeMsValue * 110 / 100,
+                > 4 => targetDeltaTimeMsValue * 70 / 100,
                 _ => targetDeltaTimeMsValue
             };
 
-            log.DebugLowLevel("Try to read next snapshot in snapshotsQueue. {PlaybackDeltaTimeMs}",
-                deltaTimeMs);
+            log.DebugLowLevel("Try to read next snapshot in snapshotsQueue. {BufferAheadCount} {PlaybackTickId} {PlaybackDeltaTimeMs}",
+                bufferAheadCount, playbackTick, deltaTimeMs);
 
             snapshotPlaybackTicker.DeltaTime = new(deltaTimeMs);
 
