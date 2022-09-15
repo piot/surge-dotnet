@@ -10,5 +10,6 @@ namespace Piot.Surge
     public interface IEntityContainerWithGhostCreator : IEntityContainer, IEntityGhostCreator
     {
         public void AddGhostEntity(IEntity entity);
+        public void Reset();
     }
 }

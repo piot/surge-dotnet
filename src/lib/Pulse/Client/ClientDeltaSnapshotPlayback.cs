@@ -56,6 +56,8 @@ namespace Piot.Surge.Pulse.Client
         public bool ShouldApplySnapshotsToWorld { get; set; } = true;
         public bool IsIncomingBufferStarving => lastBufferWasStarved.IsOrWasTrue;
 
+        public TickId PlaybackTickId => playbackTick;
+
         public void Update(TimeMs now)
         {
             snapshotPlaybackTicker.Update(now);

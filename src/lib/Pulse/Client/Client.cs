@@ -9,6 +9,7 @@ using Piot.SerializableVersion;
 using Piot.Surge.Compress;
 using Piot.Surge.Event;
 using Piot.Surge.LogicalInput;
+using Piot.Surge.Tick;
 using Piot.Transport;
 using Piot.Transport.Stats;
 
@@ -59,6 +60,8 @@ namespace Piot.Surge.Pulse.Client
         }
 
         public IReplayControl ReplayControl => snapshotRecorder;
+
+        public TickId PlaybackTickId => deltaSnapshotPlayback.PlaybackTickId;
 
         public IInputPackFetch InputFetch
         {

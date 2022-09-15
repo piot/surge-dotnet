@@ -14,7 +14,7 @@ namespace Piot.Surge
     {
         public readonly List<IEntity> allEntities = new();
         protected readonly List<IEntity> created = new();
-        private readonly List<IEntity> deleted = new();
+        protected readonly List<IEntity> deleted = new();
 
         private ushort lastEntityId;
         public Dictionary<ulong, IEntity> Entities { get; } = new();

@@ -36,7 +36,7 @@ namespace Piot.Surge.TimeTick
 #endif
         }
 
-        public TimeMs DeltaTime
+        public FixedDeltaTimeMs DeltaTime
         {
             set
             {

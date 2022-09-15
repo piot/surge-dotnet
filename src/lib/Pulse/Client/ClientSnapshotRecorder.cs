@@ -56,6 +56,9 @@ namespace Piot.Surge.Pulse.Client
 
         public void StartPlaybackFromFile(TimeMs now, string filename)
         {
+            seekableOctetReader?.Dispose();
+
+            entityContainer.Reset();
             seekableOctetReader = FileStreamCreator.OpenWithSeek(filename);
             playback = new(entityContainer, eventProcessor, now, applicationVersion, seekableOctetReader,
                 log);

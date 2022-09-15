@@ -40,6 +40,14 @@ namespace Piot.Surge
             notifyEntityCreation.NotifyCreation(entity.CompleteEntity);
         }
 
+        public void Reset()
+        {
+            Entities.Clear();
+            allEntities.Clear();
+            created.Clear();
+            deleted.Clear();
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override IEntity AddEntity(EntityId id, ICompleteEntity completeEntity)
         {

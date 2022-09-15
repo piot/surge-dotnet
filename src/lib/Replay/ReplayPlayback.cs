@@ -51,9 +51,10 @@ namespace Piot.Surge.Replay
             this.log = log;
             this.world = world;
             this.eventProcessor = eventProcessor;
-            timeTicker = new(now, PlaybackTick, new(100), log.SubLog("ReplayPlayback"));
+            timeTicker = new(now, PlaybackTick, new(20), log.SubLog("ReplayPlayback"));
             var completeState = replayReader.Seek(replayReader.FirstCompleteStateTickId);
             playbackTickId = replayReader.FirstCompleteStateTickId;
+            log.Info("Playback starts at {TickId}", playbackTickId);
             ApplyCompleteState(completeState);
             nextDeltaState = replayReader.ReadDeltaState();
         }
@@ -85,22 +86,26 @@ namespace Piot.Surge.Replay
 
         private void PlaybackTick()
         {
-            log.Debug("===Playback Tick()=== {TickId}", playbackTickId);
+            log.DebugLowLevel("===Playback Tick()=== {TickId}", playbackTickId);
             if (nextDeltaState is null)
             {
-                log.Notice("end of playback stream");
+                log.Debug("end of playback stream");
+                timeTicker.DeltaTime = new(0);
                 return;
             }
 
             if (nextDeltaState.TickIdRange.Last > playbackTickId)
             {
+                log.Debug(
+                    "not time yet to read next tickId, we want to apply {TickId} but next state is at {NextStateTickIdRange}",
+                    playbackTickId, nextDeltaState.TickIdRange);
                 playbackTickId = playbackTickId.Next();
-                log.Notice("not time yet to read next tickId");
+                return;
             }
 
             Ticker.Tick(world);
             Notifier.Notify(world.AllEntities);
-            log.Debug("===Playback Tick()=== Applying {TickId}", playbackTickId);
+            log.DebugLowLevel("===Playback Tick()=== Applying {TickId}", playbackTickId);
             ApplyDeltaState(nextDeltaState);
             playbackTickId = playbackTickId.Next();
             nextDeltaState = replayReader.ReadDeltaState();
