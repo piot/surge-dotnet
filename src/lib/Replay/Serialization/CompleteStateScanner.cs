@@ -36,8 +36,9 @@ namespace Piot.Surge.Replay.Serialization
                         throw new Exception("wrong");
                     }
 
+                    var time = readerWithSeek.ReadUInt64();
                     var tickId = TickIdReader.Read(readerWithSeek);
-                    entries.Add(new(tickId.tickId, positionBefore));
+                    entries.Add(new(time, tickId.tickId, positionBefore));
                 }
 
                 readerWithSeek.Seek(positionAfterHeader + octetLength);

@@ -5,9 +5,11 @@
 
 using System;
 using Piot.Flood;
+using Piot.MonotonicTime;
 using Piot.Raff.Stream;
 using Piot.SerializableVersion;
 using Piot.SerializableVersion.Serialization;
+using Piot.Surge.MonotonicTimeLowerBits;
 using Piot.Surge.Tick;
 using Piot.Surge.Tick.Serialization;
 
@@ -18,6 +20,8 @@ namespace Piot.Surge.Replay.Serialization
         private readonly CompleteStateEntry[] completeStateEntries;
         private readonly RaffReader raffReader;
         private readonly IOctetReaderWithSeekAndSkip readerWithSeek;
+        private TimeMs lastReadTimeMs;
+        private TimeMs lastTimeMsFromDeltaState;
 
         public ReplayReader(IOctetReaderWithSeekAndSkip readerWithSeek)
         {
@@ -114,18 +118,48 @@ namespace Piot.Surge.Replay.Serialization
                 return ReadDeltaState();
             }
 
+            var beforePosition = readerWithSeek.Position;
+
             var type = readerWithSeek.ReadUInt8();
+            if (type != 01)
+            {
+                throw new Exception($"desync {type}");
+            }
+
+            var timeLowerBits = MonotonicTimeLowerBitsReader.Read(readerWithSeek);
+            lastTimeMsFromDeltaState =
+                LowerBitsToMonotonic.LowerBitsToPastMonotonicMs(lastTimeMsFromDeltaState, timeLowerBits);
             var tickIdRange = TickIdRangeReader.Read(readerWithSeek);
-            return new(tickIdRange, readerWithSeek.ReadOctets((int)octetLength - 1 - 5));
+
+            var afterPosition = readerWithSeek.Position;
+            var headerOctetCount = (int)(afterPosition - beforePosition);
+
+            return new(lastTimeMsFromDeltaState, tickIdRange,
+                readerWithSeek.ReadOctets((int)octetLength - headerOctetCount));
         }
 
         private CompleteState ReadCompleteState()
         {
             var octetLength =
                 raffReader.ReadExpectedChunkHeader(Constants.CompleteStateIcon, Constants.CompleteStateName);
+            var beforePosition = readerWithSeek.Position;
+
             var type = readerWithSeek.ReadUInt8();
+            if (type != 02)
+            {
+                throw new Exception("desync");
+            }
+
+            var time = new TimeMs((long)readerWithSeek.ReadUInt64());
+            lastReadTimeMs = time;
+            lastTimeMsFromDeltaState = time;
             var tickId = TickIdReader.Read(readerWithSeek);
-            return new(tickId, readerWithSeek.ReadOctets((int)octetLength - 1 - 4));
+
+            var afterPosition = readerWithSeek.Position;
+
+            var headerOctetCount = (int)(afterPosition - beforePosition);
+
+            return new(time, tickId, readerWithSeek.ReadOctets((int)octetLength - headerOctetCount));
         }
     }
 }

@@ -10,8 +10,8 @@ namespace Piot.Surge.SnapshotReplay
 {
     public interface IReplayControl
     {
-        public void StartRecordingToMemory(TickId tickIdNow);
-        public void StartRecordingToFile(TickId nowTickId, string filename);
+        public void StartRecordingToMemory(TimeMs timeNowMs, TickId tickIdNow);
+        public void StartRecordingToFile(TimeMs timeNowMs, TickId nowTickId, string filename);
         public void StopRecording();
 
         public void StartPlaybackFromFile(TimeMs now, string filename);

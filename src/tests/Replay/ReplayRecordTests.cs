@@ -87,11 +87,12 @@ public sealed class ReplayRecorderTests
                 jumpTime = 0
             });
 
-            var replayRecorder = new ReplayRecorder(authoritative, new(32), applicationVersion, outputStream,
+            var replayRecorder = new ReplayRecorder(authoritative, new(14800), new(32), applicationVersion,
+                outputStream,
                 log.SubLog("replayRecorder"));
             TickId hostTickId = new(33);
             var deltaSnapshotPack = TickHost(authoritative, hostTickId);
-            replayRecorder.AddPack(deltaSnapshotPack, hostTickId);
+            replayRecorder.AddPack(deltaSnapshotPack, new(14830), hostTickId);
             replayRecorder.Close();
         }
 

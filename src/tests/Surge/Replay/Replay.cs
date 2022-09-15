@@ -27,9 +27,11 @@ public sealed class ReplayTests
         var fileStream = FileStreamCreator.Create("write_replay_with_gap_fail.temp");
         var versionInfo = new ReplayVersionInfo(new(0, 1, 2), new(3, 4, 5));
         var replayRecorder =
-            new ReplayWriter(new CompleteState(new(42), new byte[] { 0xca, 0xba }), versionInfo, fileStream);
+            new ReplayWriter(new CompleteState(new(49200), new(42), new byte[] { 0xca, 0xba }), versionInfo,
+                fileStream);
 
-        Assert.Throws<Exception>(() => replayRecorder.AddDeltaState(new(new(new(48), new(50)), new byte[] { 0xfe })));
+        Assert.Throws<Exception>(() =>
+            replayRecorder.AddDeltaState(new(new(42439), new(new(48), new(50)), new byte[] { 0xfe })));
     }
 
     [Fact]
@@ -39,9 +41,11 @@ public sealed class ReplayTests
         var versionInfo = new ReplayVersionInfo(new(0, 1, 2), new(3, 4, 5));
 
         var replayRecorder =
-            new ReplayWriter(new CompleteState(new(42), new byte[] { 0xca, 0xba }), versionInfo, fileStream);
+            new ReplayWriter(new CompleteState(new(49200), new(42), new byte[] { 0xca, 0xba }), versionInfo,
+                fileStream);
 
-        Assert.Throws<Exception>(() => replayRecorder.AddDeltaState(new(new(new(40), new(42)), new byte[] { 0xfe })));
+        Assert.Throws<Exception>(() =>
+            replayRecorder.AddDeltaState(new(new(4949), new(new(40), new(42)), new byte[] { 0xfe })));
     }
 
     [Fact]
@@ -51,9 +55,10 @@ public sealed class ReplayTests
         var versionInfo = new ReplayVersionInfo(new(0, 1, 2), new(3, 4, 5));
 
         var replayRecorder =
-            new ReplayWriter(new CompleteState(new(42), new byte[] { 0xca, 0xba }), versionInfo, fileStream);
+            new ReplayWriter(new CompleteState(new(49200), new(42), new byte[] { 0xca, 0xba }), versionInfo,
+                fileStream);
 
-        replayRecorder.AddDeltaState(new(new(new(43), new(45)), new byte[] { 0xfe }));
+        replayRecorder.AddDeltaState(new(new(10459), new(new(43), new(45)), new byte[] { 0xfe }));
     }
 
     [Fact]
@@ -64,9 +69,10 @@ public sealed class ReplayTests
             using var fileStream = FileStreamCreator.Create(filename);
             var versionInfo = new ReplayVersionInfo(new(0, 1, 2), new(3, 4, 5));
 
-            var replayRecorder = new ReplayWriter(new CompleteState(new(42), new byte[] { 0xca, 0xba }), versionInfo,
+            var replayRecorder = new ReplayWriter(new CompleteState(new(49200), new(42), new byte[] { 0xca, 0xba }),
+                versionInfo,
                 fileStream);
-            replayRecorder.AddDeltaState(new(new(new(42), new(43)), new byte[] { 0xfe }));
+            replayRecorder.AddDeltaState(new(new(49200), new(new(42), new(43)), new byte[] { 0xfe }));
             replayRecorder.Close();
         }
 

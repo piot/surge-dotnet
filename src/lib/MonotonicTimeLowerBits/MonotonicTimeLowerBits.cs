@@ -23,5 +23,10 @@ namespace Piot.Surge.MonotonicTimeLowerBits
         {
             return $"[LowerBits {lowerBits:X}]";
         }
+
+        public static MonotonicTimeLowerBits FromTime(TimeMs timeMs)
+        {
+            return new((ushort)(timeMs.ms & 0xffff));
+        }
     }
 }

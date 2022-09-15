@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
+using Piot.MonotonicTime;
 using Piot.Surge.Tick;
 
 namespace Piot.Surge.Replay.Serialization
@@ -12,8 +13,9 @@ namespace Piot.Surge.Replay.Serialization
     {
         private readonly ReadOnlyMemory<byte> payload;
 
-        public CompleteState(TickId tickId, ReadOnlySpan<byte> payload)
+        public CompleteState(TimeMs capturedAtTimeMs, TickId tickId, ReadOnlySpan<byte> payload)
         {
+            CapturedAtTimeMs = capturedAtTimeMs;
             TickId = tickId;
             this.payload = payload.ToArray();
         }
@@ -21,9 +23,11 @@ namespace Piot.Surge.Replay.Serialization
         public ReadOnlySpan<byte> Payload => payload.Span;
         public TickId TickId { get; }
 
+        public TimeMs CapturedAtTimeMs { get; }
+
         public override string ToString()
         {
-            return $"[CompleteState {TickId} octetCount: {payload.Length}]";
+            return $"[CompleteState {CapturedAtTimeMs}   {TickId} octetCount: {payload.Length}]";
         }
     }
 }

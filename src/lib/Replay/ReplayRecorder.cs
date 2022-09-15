@@ -6,6 +6,7 @@
 using System;
 using Piot.Clog;
 using Piot.Flood;
+using Piot.MonotonicTime;
 using Piot.SerializableVersion;
 using Piot.Surge.CompleteSnapshot;
 using Piot.Surge.DeltaSnapshot.Pack;
@@ -20,25 +21,25 @@ namespace Piot.Surge.Replay
         private readonly ReplayWriter replayWriter;
         private readonly IEntityContainer world;
 
-        public ReplayRecorder(IEntityContainer world, TickId nowTickId,
+        public ReplayRecorder(IEntityContainer world, TimeMs timeNowMs, TickId nowTickId,
             SemanticVersion applicationVersion, IOctetWriter writer, ILog log)
         {
             this.log = log.SubLog("ReplayRecorder");
             this.world = world;
-            var completeState = CaptureCompleteState(nowTickId);
+            var completeState = CaptureCompleteState(timeNowMs, nowTickId);
             var versionInfo = new ReplayVersionInfo(applicationVersion, SurgeConstants.SnapshotSerializationVersion);
             replayWriter = new(completeState, versionInfo, writer);
         }
 
-        private CompleteState CaptureCompleteState(TickId tickId)
+        private CompleteState CaptureCompleteState(TimeMs timeNow, TickId tickId)
         {
             var payload = CompleteStateBitWriter.CaptureCompleteSnapshotPack(world, new(0));
-            var completeState = new CompleteState(tickId, payload);
+            var completeState = new CompleteState(timeNow, tickId, payload);
 
             return completeState;
         }
 
-        public void AddPack(DeltaSnapshotPack pack, TickId worldTickIdNow)
+        public void AddPack(DeltaSnapshotPack pack, TimeMs timeNowMs, TickId worldTickIdNow)
         {
             if (pack.TickIdRange.Last != worldTickIdNow)
             {
@@ -46,7 +47,7 @@ namespace Piot.Surge.Replay
             }
 
             log.Info("Add delta state {TickIdRange}", pack.tickIdRange);
-            var deltaState = new DeltaState(pack.tickIdRange, pack.payload.Span);
+            var deltaState = new DeltaState(timeNowMs, pack.tickIdRange, pack.payload.Span);
             replayWriter.AddDeltaState(deltaState);
 
             if (!replayWriter.NeedsCompleteState)
@@ -55,7 +56,7 @@ namespace Piot.Surge.Replay
             }
 
             log.Info("Time to capture complete state {TickIdNow}", worldTickIdNow);
-            replayWriter.AddCompleteState(CaptureCompleteState(worldTickIdNow));
+            replayWriter.AddCompleteState(CaptureCompleteState(timeNowMs, worldTickIdNow));
         }
 
         public void Close()

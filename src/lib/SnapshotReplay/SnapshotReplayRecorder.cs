@@ -39,20 +39,20 @@ namespace Piot.Surge.SnapshotReplay
             this.eventProcessor = eventProcessor;
         }
 
-        public void StartRecordingToMemory(TickId nowTickId)
+        public void StartRecordingToMemory(TimeMs timeNowMs, TickId nowTickId)
         {
             if (recorder is not null)
             {
                 return;
             }
 
-            recorder = new(entityContainer, nowTickId, applicationVersion, writer, log);
+            recorder = new(entityContainer, timeNowMs, nowTickId, applicationVersion, writer, log);
         }
 
-        public void StartRecordingToFile(TickId nowTickId, string filename)
+        public void StartRecordingToFile(TimeMs timeNowMs, TickId nowTickId, string filename)
         {
             disposableOctetWriter = FileStreamCreator.Create(filename);
-            recorder = new(entityContainer, nowTickId, applicationVersion, disposableOctetWriter, log);
+            recorder = new(entityContainer, timeNowMs, nowTickId, applicationVersion, disposableOctetWriter, log);
         }
 
         public void StartPlaybackFromFile(TimeMs now, string filename)
@@ -85,7 +85,7 @@ namespace Piot.Surge.SnapshotReplay
             disposableOctetWriter = null;
         }
 
-        public void SnapshotPlaybackNotify(TimeMs now, TickId tickIdNow, DeltaSnapshotPack deltaSnapshotPack)
+        public void SnapshotPlaybackNotify(TimeMs timeNowMs, TickId tickIdNow, DeltaSnapshotPack deltaSnapshotPack)
         {
             if (recorder is null)
             {
@@ -99,7 +99,7 @@ namespace Piot.Surge.SnapshotReplay
                 return;
             }
 
-            recorder.AddPack(deltaSnapshotPack, tickIdNow);
+            recorder.AddPack(deltaSnapshotPack, timeNowMs, tickIdNow);
         }
     }
 }

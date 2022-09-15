@@ -17,7 +17,7 @@ namespace Piot.Surge.MonotonicTimeLowerBits
         public static void Write(MonotonicTimeLowerBits lowerBits, IOctetWriter writer)
         {
 #if DEBUG
-            writer.WriteUInt8(Constants.MonotonicTimeLowerBitsSync);
+            OctetMarker.WriteMarker(writer, Constants.MonotonicTimeLowerBitsSync);
 #endif
 
             writer.WriteUInt16((ushort)(lowerBits.lowerBits & 0xffff));

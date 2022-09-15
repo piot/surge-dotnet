@@ -30,5 +30,26 @@ namespace Piot.Surge.MonotonicTimeLowerBits
 
             return new TimeMs((long)receivedMonotonic);
         }
+
+        public static TimeMs LowerBitsToPastMonotonicMs(TimeMs now, MonotonicTimeLowerBits lowerBits)
+        {
+            var nowBits = (ulong)(now.ms & 0xffff);
+            var receivedLowerBits = (ulong)lowerBits.lowerBits;
+            var top = (ulong)now.ms & 0xffffffffffff0000;
+
+            var receivedMonotonic = top | receivedLowerBits;
+            if (receivedLowerBits < nowBits)
+            {
+                receivedMonotonic -= 0x10000;
+            }
+
+            var diff = receivedMonotonic - (ulong)now.ms;
+            if (diff > 300200)
+            {
+                throw new Exception($"suspicious time lower bits diff {diff}");
+            }
+
+            return new TimeMs((long)receivedMonotonic);
+        }
     }
 }

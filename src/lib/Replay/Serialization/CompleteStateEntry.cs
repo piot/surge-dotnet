@@ -7,11 +7,13 @@ namespace Piot.Surge.Replay.Serialization
 {
     public readonly struct CompleteStateEntry
     {
+        public readonly ulong timeMs;
         public readonly uint tickId;
         public readonly ulong streamPosition;
 
-        public CompleteStateEntry(uint tickId, ulong streamPosition)
+        public CompleteStateEntry(ulong timeMs, uint tickId, ulong streamPosition)
         {
+            this.timeMs = timeMs;
             this.tickId = tickId;
             this.streamPosition = streamPosition;
         }

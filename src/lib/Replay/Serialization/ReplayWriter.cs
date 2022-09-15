@@ -5,8 +5,10 @@
 
 using System;
 using Piot.Flood;
+using Piot.MonotonicTime;
 using Piot.Raff.Stream;
 using Piot.SerializableVersion.Serialization;
+using Piot.Surge.MonotonicTimeLowerBits;
 using Piot.Surge.Tick;
 using Piot.Surge.Tick.Serialization;
 
@@ -14,8 +16,8 @@ namespace Piot.Surge.Replay.Serialization
 {
     public sealed class ReplayWriter
     {
-        private readonly RaffWriter raffWriter;
         private readonly OctetWriter cachedStateWriter = new(16 * 1024);
+        private readonly RaffWriter raffWriter;
         private TickIdRange lastInsertedDeltaStateRange;
         private uint packCountSinceCompleteState;
 
@@ -38,9 +40,10 @@ namespace Piot.Surge.Replay.Serialization
             raffWriter.WriteChunk(Constants.ReplayIcon, Constants.ReplayName, writer.Octets);
         }
 
-        private static void WriteCompleteStateHeader(IOctetWriter writer, TickId tickId)
+        private static void WriteCompleteStateHeader(IOctetWriter writer, TimeMs timeNowMs, TickId tickId)
         {
             writer.WriteUInt8(0x02);
+            writer.WriteUInt64((ulong)timeNowMs.ms);
             TickIdWriter.Write(writer, tickId);
         }
 
@@ -60,16 +63,18 @@ namespace Piot.Surge.Replay.Serialization
             packCountSinceCompleteState = 0;
 
             cachedStateWriter.Reset();
-            WriteCompleteStateHeader(cachedStateWriter, completeState.TickId);
+            WriteCompleteStateHeader(cachedStateWriter, completeState.CapturedAtTimeMs, completeState.TickId);
             //totalWriter.WriteUInt32((ushort)completeState.Payload.Length);
             cachedStateWriter.WriteOctets(completeState.Payload);
 
             raffWriter.WriteChunk(Constants.CompleteStateIcon, Constants.CompleteStateName, cachedStateWriter.Octets);
         }
 
-        private static void WriteDeltaHeader(IOctetWriter writer, TickIdRange tickIdRange)
+        private static void WriteDeltaHeader(IOctetWriter writer, TimeMs timeNowMs, TickIdRange tickIdRange)
         {
             writer.WriteUInt8(0x01);
+            var lowerBits = MonotonicTimeLowerBits.MonotonicTimeLowerBits.FromTime(timeNowMs);
+            MonotonicTimeLowerBitsWriter.Write(lowerBits, writer);
             TickIdRangeWriter.Write(writer, tickIdRange);
         }
 
@@ -86,7 +91,7 @@ namespace Piot.Surge.Replay.Serialization
             }
 
             cachedStateWriter.Reset();
-            WriteDeltaHeader(cachedStateWriter, deltaState.TickIdRange);
+            WriteDeltaHeader(cachedStateWriter, deltaState.TimeProcessedMs, deltaState.TickIdRange);
             cachedStateWriter.WriteOctets(deltaState.Payload);
             raffWriter.WriteChunk(Constants.DeltaStateIcon, Constants.DeltaStateName, cachedStateWriter.Octets);
             lastInsertedDeltaStateRange = deltaState.TickIdRange;

@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
+using Piot.MonotonicTime;
 using Piot.Surge.Tick;
 
 namespace Piot.Surge.Replay.Serialization
@@ -12,18 +13,20 @@ namespace Piot.Surge.Replay.Serialization
     {
         private readonly ReadOnlyMemory<byte> payload;
 
-        public DeltaState(TickIdRange tickId, ReadOnlySpan<byte> payload)
+        public DeltaState(TimeMs timeProcessedMs, TickIdRange tickId, ReadOnlySpan<byte> payload)
         {
+            TimeProcessedMs = timeProcessedMs;
             TickIdRange = tickId;
             this.payload = payload.ToArray();
         }
 
         public ReadOnlySpan<byte> Payload => payload.Span;
         public TickIdRange TickIdRange { get; }
+        public TimeMs TimeProcessedMs { get; }
 
         public override string ToString()
         {
-            return $"[DeltaState {TickIdRange} octetCount: {payload.Length}]";
+            return $"[DeltaState {TimeProcessedMs} {TickIdRange} octetCount: {payload.Length}]";
         }
     }
 }
