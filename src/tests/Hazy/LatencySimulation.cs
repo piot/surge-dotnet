@@ -26,11 +26,11 @@ public sealed class LatencySimulationTests
     {
         var random = new PseudoRandom(42);
 
-        var latencySimulation = new LatencySimulator(20, 95, new Milliseconds(), random, log);
+        var latencySimulation = new LatencySimulator(20, 95, new TimeMs(), random, log);
 
         for (var i = 0; i < 1000; i += 16)
         {
-            var now = new Milliseconds(i);
+            var now = new TimeMs(i);
             latencySimulation.Update(now);
             log.DebugLowLevel("Latency {Latency}", latencySimulation.LatencyInMs);
             Assert.InRange(latencySimulation.LatencyInMs.ms, 20, 95);

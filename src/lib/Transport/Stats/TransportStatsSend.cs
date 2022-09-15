@@ -17,9 +17,9 @@ namespace Piot.Transport.Stats
         private readonly ITransportSend wrappedTransport;
         private TransportStatsInDirection stats;
 
-        public TransportStatsSend(Milliseconds now, ITransportSend transportSend)
+        public TransportStatsSend(TimeMs now, ITransportSend transportSend)
         {
-            var deltaTimeUntilStats = new Milliseconds(500);
+            var deltaTimeUntilStats = new TimeMs(500);
             bitsPerSecond = new(now, deltaTimeUntilStats, BitsPerSecondFormatter.Format);
             datagramCountPerSecond = new(now, deltaTimeUntilStats, StandardFormatterPerSecond.Format);
             datagramOctetSize = new(25);
@@ -45,7 +45,7 @@ namespace Piot.Transport.Stats
             wrappedTransport.SendToEndpoint(remoteEndpointId, payload);
         }
 
-        public void Update(Milliseconds now)
+        public void Update(TimeMs now)
         {
             bitsPerSecond.Update(now);
             datagramCountPerSecond.Update(now);

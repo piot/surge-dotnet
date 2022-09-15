@@ -3,25 +3,20 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using Piot.MonotonicTime;
-
-namespace Piot.Surge.MonotonicTimeLowerBits
+namespace Piot.MonotonicTime
 {
-    /// <summary>
-    ///     The 16 lower bits of a monotonic <see cref="TimeMs" />.
-    /// </summary>
-    public readonly struct MonotonicTimeLowerBits
+    public readonly struct FixedDeltaTimeMs
     {
-        public readonly ushort lowerBits;
+        public readonly uint ms;
 
-        public MonotonicTimeLowerBits(ushort lowerBits)
+        public FixedDeltaTimeMs(uint ms)
         {
-            this.lowerBits = lowerBits;
+            this.ms = ms;
         }
 
         public override string ToString()
         {
-            return $"[LowerBits {lowerBits:X}]";
+            return $"[FixedDeltaTime: {ms}]";
         }
     }
 }

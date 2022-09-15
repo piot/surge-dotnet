@@ -20,7 +20,7 @@ namespace Piot.Surge.Replay
     // ReSharper disable once ClassNeverInstantiated.Global
     public sealed class ReplayPlayback
     {
-        private readonly IEventProcessor eventProcessorWithCreate;
+        private readonly IEventProcessor eventProcessor;
         private readonly ILog log;
         private readonly ReplayReader replayReader;
         private readonly TimeTicker timeTicker;
@@ -31,7 +31,7 @@ namespace Piot.Surge.Replay
         private TickId playbackTickId;
 
         public ReplayPlayback(IEntityContainerWithGhostCreator world,
-            IEventProcessor eventProcessorWithCreate, Milliseconds now,
+            IEventProcessor eventProcessor, TimeMs now,
             SemanticVersion expectedApplicationVersion, IOctetReaderWithSeekAndSkip reader, ILog log)
         {
             replayReader = new(reader);
@@ -50,7 +50,7 @@ namespace Piot.Surge.Replay
 
             this.log = log;
             this.world = world;
-            this.eventProcessorWithCreate = eventProcessorWithCreate;
+            this.eventProcessor = eventProcessor;
             timeTicker = new(now, PlaybackTick, new(100), log.SubLog("ReplayPlayback"));
             var completeState = replayReader.Seek(replayReader.FirstCompleteStateTickId);
             playbackTickId = replayReader.FirstCompleteStateTickId;
@@ -62,7 +62,7 @@ namespace Piot.Surge.Replay
         {
             log.DebugLowLevel("applying complete state {CompleteState}", completeState);
             var bitReader = new BitReader(completeState.Payload, completeState.Payload.Length * 8);
-            nextExpectedSequenceId = CompleteStateBitReader.ReadAndApply(bitReader, world, eventProcessorWithCreate);
+            nextExpectedSequenceId = CompleteStateBitReader.ReadAndApply(bitReader, world, eventProcessor);
             lastAppliedTickId = completeState.TickId;
         }
 
@@ -77,7 +77,7 @@ namespace Piot.Surge.Replay
             }
 
             var isOverlappingAndMerged = deltaState.TickIdRange.IsOverlappingAndMerged(lastAppliedTickId);
-            nextExpectedSequenceId = SnapshotDeltaBitReader.ReadAndApply(bitReader, world, eventProcessorWithCreate,
+            nextExpectedSequenceId = SnapshotDeltaBitReader.ReadAndApply(bitReader, world, eventProcessor,
                 nextExpectedSequenceId, isOverlappingAndMerged);
             playbackTickId = deltaState.TickIdRange.Last;
             lastAppliedTickId = deltaState.TickIdRange.Last;
@@ -106,7 +106,7 @@ namespace Piot.Surge.Replay
             nextDeltaState = replayReader.ReadDeltaState();
         }
 
-        public void Update(Milliseconds now)
+        public void Update(TimeMs now)
         {
             timeTicker.Update(now);
         }

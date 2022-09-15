@@ -5,11 +5,11 @@
 
 namespace Piot.MonotonicTime
 {
-    public readonly struct Milliseconds
+    public readonly struct TimeMs
     {
         public readonly long ms;
 
-        public Milliseconds(long ms)
+        public TimeMs(long ms)
         {
             this.ms = ms;
         }
@@ -19,9 +19,19 @@ namespace Piot.MonotonicTime
             return $"[monotonic-ms: {ms}]";
         }
 
-        public bool IsBeforeOrAt(Milliseconds other)
+        public bool IsBeforeOrAt(TimeMs other)
         {
             return ms <= other.ms;
+        }
+
+        public static TimeMs operator +(TimeMs timeMs, FixedDeltaTimeMs deltaTimeMs)
+        {
+            return new(timeMs.ms + deltaTimeMs.ms);
+        }
+
+        public static TimeMs operator -(TimeMs timeMs, FixedDeltaTimeMs deltaTimeMs)
+        {
+            return new(timeMs.ms - deltaTimeMs.ms);
         }
     }
 }

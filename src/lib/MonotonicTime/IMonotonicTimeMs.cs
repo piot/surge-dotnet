@@ -7,6 +7,6 @@ namespace Piot.MonotonicTime
 {
     public interface IMonotonicTimeMs
     {
-        Milliseconds TimeInMs { get; }
+        TimeMs TimeInMs { get; }
     }
 }

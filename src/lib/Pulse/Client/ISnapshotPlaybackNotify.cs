@@ -3,12 +3,9 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using Piot.MonotonicTime;
-
-namespace Piot.Surge.TimeTick
+namespace Piot.Surge.Pulse.Client
 {
-    public interface ITimeTicker
+    public interface ISnapshotPlaybackNotify
     {
-        public void Update(TimeMs now);
     }
 }

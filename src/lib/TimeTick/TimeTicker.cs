@@ -14,12 +14,12 @@ namespace Piot.Surge.TimeTick
         private readonly ILog log;
         private readonly Action Tick;
         private long deltaTimeMs;
-        private Milliseconds lastTick;
+        private TimeMs lastTick;
 #if DEBUG
-        private Milliseconds lastUpdateTime;
+        private TimeMs lastUpdateTime;
 #endif
 
-        public TimeTicker(Milliseconds now, Action action, Milliseconds deltaTimeMs, ILog log)
+        public TimeTicker(TimeMs now, Action action, FixedDeltaTimeMs deltaTimeMs, ILog log)
         {
             if (deltaTimeMs.ms <= 0)
             {
@@ -36,7 +36,7 @@ namespace Piot.Surge.TimeTick
 #endif
         }
 
-        public Milliseconds DeltaTime
+        public TimeMs DeltaTime
         {
             set
             {
@@ -50,9 +50,9 @@ namespace Piot.Surge.TimeTick
             }
         }
 
-        public Milliseconds Now { get; private set; }
+        public TimeMs Now { get; private set; }
 
-        public void Update(Milliseconds now)
+        public void Update(TimeMs now)
         {
 #if DEBUG
             if (now.ms < lastUpdateTime.ms)
@@ -77,17 +77,16 @@ namespace Piot.Surge.TimeTick
             }
 
             var iterationCount = (now.ms - lastTick.ms) / deltaTimeMs;
-            if (iterationCount <= 0)
+            switch (iterationCount)
             {
-                return;
+                case <= 0:
+                    return;
+                case > 4:
+                    iterationCount = 4;
+                    break;
             }
 
-            if (iterationCount > 4)
-            {
-                iterationCount = 4;
-            }
-
-            lastTick = new Milliseconds(lastTick.ms + iterationCount * deltaTimeMs);
+            lastTick = new(lastTick.ms + iterationCount * deltaTimeMs);
 
             Now = lastTick;
             for (var i = 0; i < iterationCount; i++)

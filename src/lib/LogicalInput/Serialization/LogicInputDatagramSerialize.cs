@@ -22,7 +22,7 @@ namespace Piot.Surge.LogicalInput.Serialization
         /// <param name="writer"></param>
         /// <param name="inputs"></param>
         public static void Serialize(IOctetWriter writer, OrderedDatagramsSequenceId sequenceOut,
-            TickId lastReceivedSnapshot, byte droppedSnapshotCount, Milliseconds now,
+            TickId lastReceivedSnapshot, byte droppedSnapshotCount, TimeMs now,
             LogicalInputsForAllLocalPlayers inputs)
         {
             OrderedDatagramsSequenceIdWriter.Write(writer, sequenceOut);

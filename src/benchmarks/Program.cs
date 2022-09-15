@@ -3,8 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-﻿
-
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 using Piot.Clog;
@@ -24,7 +22,7 @@ public class BenchmarkGameTest
         var log = new Log(new ConsoleOutputLogger());
         log.LogLevel = LogLevel.Error;
 
-        var initNow = new Milliseconds(10);
+        var initNow = new TimeMs(10);
 
         var (clientTransport, hostTransport) = MemoryTransportFactory.CreateClientAndHostTransport();
 
@@ -53,7 +51,7 @@ public class BenchmarkGameTest
 
         for (var iteration = 0; iteration < 100; iteration++)
         {
-            var now = new Milliseconds(20 + iteration * 14);
+            var now = new TimeMs(20 + iteration * 14);
             timeProvider.TimeInMs = now;
             internetSimulatedHostTransport?.Update();
             clientGame.Update(now);

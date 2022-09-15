@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 using Piot.Clog;
-using Piot.MonotonicTime;
 using Piot.Surge.TimeTick;
 using Xunit.Abstractions;
 
@@ -26,7 +25,7 @@ public sealed class TimeTickingTests
     public void Test()
     {
         var calledCount = 0;
-        var ticker = new TimeTicker(new Milliseconds(0), () => { calledCount++; }, new Milliseconds(16), log);
+        var ticker = new TimeTicker(new(0), () => { calledCount++; }, new(16), log);
 
         for (var now = 0; now <= 420; now += 42)
         {
@@ -36,7 +35,7 @@ public sealed class TimeTickingTests
         Assert.Equal(26, calledCount);
 
         calledCount = 0;
-        var ticker2 = new TimeTicker(new Milliseconds(0), () => { calledCount++; }, new Milliseconds(16), log);
+        var ticker2 = new TimeTicker(new(0), () => { calledCount++; }, new(16), log);
         for (var now = 0; now <= 420; now += 1)
         {
             ticker2.Update(new(now));

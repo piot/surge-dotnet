@@ -26,8 +26,8 @@ public sealed class Game
     public Game(ITransport transport, IMultiCompressor compression, bool isHosting, ILog log)
     {
         this.log = log;
-        var now = new Milliseconds(0);
-        var delta = new Milliseconds(16);
+        var now = new TimeMs(0);
+        var delta = new FixedDeltaTimeMs(16);
 
         var entityCreation = new GeneratedEntityGhostCreator();
         GeneratedNotifyEntityCreation = new GeneratedNotifyEntityCreation();
@@ -44,7 +44,7 @@ public sealed class Game
             var gameInputFetch = new GeneratedInputPackFetch();
             gameInputFetch.GameSpecificInputFetch = inputFetch.ReadFromDevice;
             Client = new(log.SubLog("Client"), now, delta, world, generatedEventTarget,
-                transport, compression, gameInputFetch);
+                transport, compression, gameInputFetch, new(0, 0, 0));
         }
 
         GeneratedHostEntitySpawner = new GeneratedHostEntitySpawner(world, GeneratedNotifyEntityCreation);
@@ -101,7 +101,7 @@ public sealed class Game
 
     public GeneratedNotifyEntityCreation GeneratedNotifyEntityCreation { get; }
 
-    public void Update(Milliseconds now)
+    public void Update(TimeMs now)
     {
         log.Debug("Update");
         Client?.Update(now);

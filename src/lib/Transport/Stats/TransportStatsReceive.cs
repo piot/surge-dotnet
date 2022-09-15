@@ -17,9 +17,9 @@ namespace Piot.Transport.Stats
         private readonly ITransportReceive wrappedTransport;
         private TransportStatsInDirection stats;
 
-        public TransportStatsReceive(Milliseconds now, ITransportReceive transportReceive)
+        public TransportStatsReceive(TimeMs now, ITransportReceive transportReceive)
         {
-            var deltaTimeUntilStats = new Milliseconds(500);
+            var deltaTimeUntilStats = new TimeMs(500);
             bitsPerSecond = new(now, deltaTimeUntilStats, BitsPerSecondFormatter.Format);
             datagramCountPerSecond = new(now, deltaTimeUntilStats, StandardFormatterPerSecond.Format);
             datagramOctetSize = new(25);
@@ -44,7 +44,7 @@ namespace Piot.Transport.Stats
             return payload;
         }
 
-        public void Update(Milliseconds now)
+        public void Update(TimeMs now)
         {
             bitsPerSecond.Update(now);
             datagramCountPerSecond.Update(now);

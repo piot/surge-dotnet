@@ -25,7 +25,7 @@ namespace Piot.Surge.Pulse.Client
     {
         private readonly BundleAndSendOutInput bundleAndSendOutInput;
         private readonly TimeTicker fetchInputTicker;
-        private readonly Milliseconds fixedSimulationDeltaTimeMs;
+        private readonly FixedDeltaTimeMs fixedSimulationDeltaTimeMs;
         private readonly ILog log;
         private readonly ClientPredictor notifyPredictor;
         private readonly bool usePrediction;
@@ -36,7 +36,7 @@ namespace Piot.Surge.Pulse.Client
 
         public ClientLocalInputFetch(IInputPackFetch inputPackFetch, ClientPredictor notifyPredictor,
             bool usePrediction, ITransportClient transportClient,
-            Milliseconds now, Milliseconds targetDeltaTimeMs, IEntityContainer world, ILog log)
+            TimeMs now, FixedDeltaTimeMs targetDeltaTimeMs, IEntityContainer world, ILog log)
         {
             this.log = log;
             this.world = world;
@@ -127,7 +127,7 @@ namespace Piot.Surge.Pulse.Client
             const int counterProcessOrder = 1;
             var tickIdThatWeShouldSendNow = tickIdThatWeShouldSendNowInTheory + counterProcessOrder + counterJitter;
 
-            var inputDiffInTicks = tickIdThatWeShouldSendNow - inputTickId.tickId;
+            var inputDiffInTicks = (int)tickIdThatWeShouldSendNow - (int)inputTickId.tickId;
 
             var newDeltaTimeMs = inputDiffInTicks switch
             {
@@ -168,7 +168,7 @@ namespace Piot.Surge.Pulse.Client
             return maxInputCount;
         }
 
-        public void Update(Milliseconds now)
+        public void Update(TimeMs now)
         {
             fetchInputTicker.Update(now);
         }

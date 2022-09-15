@@ -12,6 +12,6 @@ namespace Piot.MonotonicTime
         /// <summary>
         ///     Returns the monotonic time in milliseconds. Implementation is using the Environment tick count
         /// </summary>
-        public Milliseconds TimeInMs => new(Stopwatch.GetTimestamp() * 1000 / Stopwatch.Frequency);
+        public TimeMs TimeInMs => new(Stopwatch.GetTimestamp() * 1000 / Stopwatch.Frequency);
     }
 }

@@ -10,7 +10,7 @@ namespace Piot.Surge.MonotonicTimeLowerBits
 {
     public static class LowerBitsToMonotonic
     {
-        public static Milliseconds LowerBitsToMonotonicMs(Milliseconds now, MonotonicTimeLowerBits lowerBits)
+        public static TimeMs LowerBitsToMonotonicMs(TimeMs now, MonotonicTimeLowerBits lowerBits)
         {
             var nowBits = (ulong)(now.ms & 0xffff);
             var receivedLowerBits = (ulong)lowerBits.lowerBits;
@@ -28,7 +28,7 @@ namespace Piot.Surge.MonotonicTimeLowerBits
                 throw new Exception($"suspicious time lower bits diff {diff}");
             }
 
-            return new Milliseconds((long)receivedMonotonic);
+            return new TimeMs((long)receivedMonotonic);
         }
     }
 }

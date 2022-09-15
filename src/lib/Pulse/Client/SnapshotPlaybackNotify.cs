@@ -4,11 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 using Piot.MonotonicTime;
+using Piot.Surge.DeltaSnapshot.Pack;
+using Piot.Surge.Tick;
 
-namespace Piot.Surge.TimeTick
+namespace Piot.Surge.Pulse.Client
 {
-    public interface ITimeTicker
-    {
-        public void Update(TimeMs now);
-    }
+    public delegate void SnapshotPlaybackNotify(TimeMs now, TickId tickIdNow, DeltaSnapshotPack deltaSnapshotPack);
 }

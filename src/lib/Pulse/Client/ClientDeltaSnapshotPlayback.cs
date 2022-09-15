@@ -27,20 +27,23 @@ namespace Piot.Surge.Pulse.Client
         private readonly HoldPositive lastBufferWasStarved = new(14);
         private readonly ILog log;
         private readonly IClientPredictorCorrections predictor;
+        private readonly SnapshotPlaybackNotify snapshotPlaybackNotify;
         private readonly TimeTicker snapshotPlaybackTicker;
         private readonly SnapshotDeltaPackIncludingCorrectionsQueue snapshotsQueue = new();
-        private readonly Milliseconds targetDeltaTimeMs;
+        private readonly FixedDeltaTimeMs targetDeltaTimeMs;
         private EventSequenceId expectedEventSequenceId;
         private TickId playbackTick = new(0);
 
-        public ClientDeltaSnapshotPlayback(Milliseconds now, IEntityContainerWithGhostCreator clientWorld,
+        public ClientDeltaSnapshotPlayback(TimeMs now, IEntityContainerWithGhostCreator clientWorld,
             IEventProcessor eventProcessor, IClientPredictorCorrections predictor,
-            Milliseconds targetDeltaTimeMs, ILog log)
+            SnapshotPlaybackNotify snapshotPlaybackNotify,
+            FixedDeltaTimeMs targetDeltaTimeMs, ILog log)
         {
             this.log = log;
             this.predictor = predictor;
             this.clientWorld = clientWorld;
             this.eventProcessor = eventProcessor;
+            this.snapshotPlaybackNotify = snapshotPlaybackNotify;
             this.targetDeltaTimeMs = targetDeltaTimeMs;
             snapshotPlaybackTicker = new(now, NextSnapshotTick, targetDeltaTimeMs,
                 log.SubLog("NextSnapshotTick"));
@@ -50,16 +53,12 @@ namespace Piot.Surge.Pulse.Client
         public bool LastPlaybackSnapshotWasMerged { get; private set; }
         public bool LastBufferWasStarved => lastBufferWasStarved.Value;
 
+        public bool ShouldApplySnapshotsToWorld { get; set; } = true;
         public bool IsIncomingBufferStarving => lastBufferWasStarved.IsOrWasTrue;
 
-        public void Update(Milliseconds now)
+        public void Update(TimeMs now)
         {
             snapshotPlaybackTicker.Update(now);
-        }
-
-        public void ClearSnapshots()
-        {
-            snapshotsQueue.Clear();
         }
 
         public bool WantsSnapshotWithTickIdRange(TickIdRange tickIdRange)
@@ -109,7 +108,8 @@ namespace Piot.Surge.Pulse.Client
                 _ => targetDeltaTimeMsValue
             };
 
-            log.DebugLowLevel("Try to read next snapshot in snapshotsQueue. {BufferAheadCount} {PlaybackTickId} {PlaybackDeltaTimeMs}",
+            log.DebugLowLevel(
+                "Try to read next snapshot in snapshotsQueue. {BufferAheadCount} {PlaybackTickId} {PlaybackDeltaTimeMs}",
                 bufferAheadCount, playbackTick, deltaTimeMs);
 
             snapshotPlaybackTicker.DeltaTime = new(deltaTimeMs);
@@ -141,6 +141,7 @@ namespace Piot.Surge.Pulse.Client
 
             var deltaSnapshotIncludingCorrectionsItem = snapshotsQueue.Dequeue();
 
+
             var deltaSnapshotIncludingCorrections = deltaSnapshotIncludingCorrectionsItem.Pack;
             log.DebugLowLevel("dequeued snapshot {DeltaSnapshotEntityIds}", deltaSnapshotIncludingCorrections);
 
@@ -148,8 +149,16 @@ namespace Piot.Surge.Pulse.Client
                 deltaSnapshotIncludingCorrections.deltaSnapshotPackPayload.Span,
                 deltaSnapshotIncludingCorrections.StreamType, deltaSnapshotIncludingCorrections.SnapshotType);
 
+            snapshotPlaybackNotify.Invoke(snapshotPlaybackTicker.Now, playbackTick, deltaSnapshotPack);
+
             LastPlaybackSnapshotWasSkipAhead = deltaSnapshotIncludingCorrectionsItem.IsSkippedAheadSnapshot;
             LastPlaybackSnapshotWasMerged = deltaSnapshotIncludingCorrectionsItem.IsMergedAndOverlapping;
+
+            if (!ShouldApplySnapshotsToWorld)
+            {
+                snapshotsQueue.Clear();
+                return;
+            }
 
             expectedEventSequenceId = ApplyDeltaSnapshotToWorld.Apply(deltaSnapshotPack, clientWorld,
                 eventProcessor, expectedEventSequenceId,

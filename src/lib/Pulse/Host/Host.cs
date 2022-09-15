@@ -32,7 +32,7 @@ namespace Piot.Surge.Pulse.Host
         private TickId authoritativeTickId;
 
         public Host(ITransport hostTransport, IMultiCompressor compression, CompressorIndex compressorIndex,
-            IEntityContainerWithDetectChanges world, Milliseconds now, ILog log)
+            IEntityContainerWithDetectChanges world, TimeMs now, ILog log)
         {
             transportWithStats = new TransportStatsBoth(hostTransport, now);
             transport = transportWithStats;
@@ -40,7 +40,7 @@ namespace Piot.Surge.Pulse.Host
             AuthoritativeWorld = world;
             clientConnections = new(hostTransport, snapshotSyncer, log);
             this.log = log;
-            simulationTicker = new(new Milliseconds(0), SimulationTick, new Milliseconds(16),
+            simulationTicker = new(new(0), SimulationTick, new(16),
                 log.SubLog("SimulationTick"));
             ShortLivedEventStream = new(authoritativeTickId);
         }
@@ -88,7 +88,7 @@ namespace Piot.Surge.Pulse.Host
             snapshotSyncer.SendSnapshot(masks, deltaSnapshotPack, AuthoritativeWorld, ShortLivedEventStream);
         }
 
-        public void Update(Milliseconds now)
+        public void Update(TimeMs now)
         {
             clientConnections.ReceiveFromClients(authoritativeTickId);
             simulationTicker.Update(now);

@@ -11,7 +11,7 @@ namespace Piot.Hazy
 {
     public interface IPacketQueuePop
     {
-        bool Dequeue(Milliseconds atOrBeforeMs, out Packet packet);
+        bool Dequeue(TimeMs atOrBeforeMs, out Packet packet);
     }
 
     public sealed class PacketQueue : IPacketQueuePop
@@ -26,7 +26,7 @@ namespace Piot.Hazy
         /// <param name="atOrBeforeMs"></param>
         /// <param name="packet"></param>
         /// <returns>true if a packet exists that have a timestamp equal or less than <paramref name="atOrBeforeMs" /></returns>
-        public bool Dequeue(Milliseconds atOrBeforeMs, out Packet packet)
+        public bool Dequeue(TimeMs atOrBeforeMs, out Packet packet)
         {
             foreach (var queuedPacket in queue)
             {

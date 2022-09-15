@@ -40,7 +40,7 @@ namespace Piot.Surge.Pulse.Client
             set => nextExpectedSnapshotTickId = value;
         }
 
-        public void BundleAndSendInputDatagram(LocalPlayerInput[] localPlayerInputs, Milliseconds now)
+        public void BundleAndSendInputDatagram(LocalPlayerInput[] localPlayerInputs, TimeMs now)
         {
             var logicalInputForAllPlayers =
                 LocalPlayerLogicalInputBundler.BundleInputForAllLocalPlayers(localPlayerInputs);

@@ -30,7 +30,7 @@ public sealed class GameSync
     [Fact]
     public void ExampleGameSync()
     {
-        var initNow = new Milliseconds(10);
+        var initNow = new TimeMs(10);
 
         var (clientTransport, hostTransport) = MemoryTransportFactory.CreateClientAndHostTransport();
 
@@ -96,7 +96,7 @@ public sealed class GameSync
         const int maxIteration = 9;
         for (var iteration = 0; iteration < maxIteration; iteration++)
         {
-            var now = new Milliseconds(initNow.ms + (iteration + 1) * 16);
+            var now = new TimeMs(initNow.ms + (iteration + 1) * 16);
 
             if (iteration == 3)
             {
@@ -110,15 +110,6 @@ public sealed class GameSync
 
             clientGame.Update(now);
             hostGame.Update(now);
-        }
-
-        // Since snapshot queue has been starved on the client, the client playback is intentionally delayed
-        // using a delta time of 19 ms instead of the normal 16 ms.
-        // We add two ticks for the client to catch up.
-        for (var clientIteration = 0; clientIteration < 0; clientIteration++)
-        {
-            var nowAfter = new Milliseconds(initNow.ms + (maxIteration + 1 + clientIteration) * 16);
-            clientGame.Update(nowAfter);
         }
 
         Assert.Equal(1, spawnedCalled);

@@ -52,7 +52,7 @@ namespace Piot.Surge.Pulse.Client
                 averageRoundTripTimeMs = (uint)statsRoundTripTime.Stat.average
             };
 
-        private void ReceiveSnapshotExtraData(IOctetReader reader, Milliseconds now)
+        private void ReceiveSnapshotExtraData(IOctetReader reader, TimeMs now)
         {
             var pongTimeLowerBits = MonotonicTimeLowerBitsReader.Read(reader);
             var pongTime = LowerBitsToMonotonic.LowerBitsToMonotonicMs(now, pongTimeLowerBits);
@@ -71,7 +71,7 @@ namespace Piot.Surge.Pulse.Client
                 numberOfInputInQueue, statsHostInputQueueCount.Stat.average);
         }
 
-        private void ReceiveSnapshot(IOctetReader reader, Milliseconds now)
+        private void ReceiveSnapshot(IOctetReader reader, TimeMs now)
         {
             log.DebugLowLevel("receiving snapshot datagram from server");
             ReceiveSnapshotExtraData(reader, now);
@@ -111,7 +111,7 @@ namespace Piot.Surge.Pulse.Client
             notifyLocalInputFetch.NextExpectedSnapshotTickId = snapshotWithCorrections.tickIdRange.lastTickId.Next();
         }
 
-        private void ReceiveDatagramFromHost(IOctetReader reader, Milliseconds now)
+        private void ReceiveDatagramFromHost(IOctetReader reader, TimeMs now)
         {
             if (!orderedDatagramsInChecker.ReadAndCheck(reader))
             {
@@ -131,7 +131,7 @@ namespace Piot.Surge.Pulse.Client
             }
         }
 
-        public void ReceiveDatagramsFromHost(Milliseconds now)
+        public void ReceiveDatagramsFromHost(TimeMs now)
         {
             for (var i = 0; i < 5; i++)
             {

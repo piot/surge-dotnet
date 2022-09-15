@@ -103,7 +103,7 @@ public sealed class ReplayRecorderTests
             var clientWorld = new WorldWithGhostCreator(ghostCreator, notifyWorld, false);
 
             var fileStream = FileStreamCreator.OpenWithSeek("replay.temp");
-            var now = new Milliseconds(10);
+            var now = new TimeMs(10);
             var replayPlayback = new ReplayPlayback(clientWorld, eventTarget, now, applicationVersion, fileStream,
                 log.SubLog("replayPlayback"));
             var clientAvatar = clientWorld.FetchEntity<AvatarLogicEntityInternal>(spawnedAvatarEntityOnHost.Id);

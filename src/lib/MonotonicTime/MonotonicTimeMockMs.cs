@@ -7,7 +7,7 @@ namespace Piot.MonotonicTime
 {
     public sealed class MonotonicTimeMockMs : IMonotonicTimeMs
     {
-        public MonotonicTimeMockMs(Milliseconds now)
+        public MonotonicTimeMockMs(TimeMs now)
         {
             TimeInMs = now;
         }
@@ -15,6 +15,6 @@ namespace Piot.MonotonicTime
         /// <summary>
         ///     Returns the monotonic time in milliseconds. Implementation is mostly for testing.
         /// </summary>
-        public Milliseconds TimeInMs { get; set; }
+        public TimeMs TimeInMs { get; set; }
     }
 }

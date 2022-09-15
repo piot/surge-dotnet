@@ -13,7 +13,7 @@ namespace Piot.Transport.Stats
         private readonly TransportStatsReceive receive;
         private readonly TransportStatsSend send;
 
-        public TransportStatsBoth(ITransport transport, Milliseconds now)
+        public TransportStatsBoth(ITransport transport, TimeMs now)
         {
             receive = new(now, transport);
             send = new(now, transport);
@@ -31,7 +31,7 @@ namespace Piot.Transport.Stats
             return receive.Receive(out remoteEndpointId);
         }
 
-        public void Update(Milliseconds now)
+        public void Update(TimeMs now)
         {
             send.Update(now);
             receive.Update(now);

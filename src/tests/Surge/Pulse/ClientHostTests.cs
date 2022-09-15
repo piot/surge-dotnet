@@ -45,9 +45,9 @@ public sealed class ClientHostTests
         log = new Log(combinedLogTarget, LogLevel.LowLevel);
     }
 
-    private Client CreateClient(Milliseconds now, ITransport transport)
+    private Client CreateClient(TimeMs now, ITransport transport)
     {
-        var clientDeltaTime = new Milliseconds(16);
+        var clientDeltaTime = new FixedDeltaTimeMs(16);
         var inputFetch = new GeneratedInputPackFetch();
         inputFetch.GameSpecificInputFetch = mockInput.ReadFromDevice;
         var notifyWorld = new GeneratedNotifyEntityCreation();
@@ -57,12 +57,12 @@ public sealed class ClientHostTests
 
         var client = new Client(log.SubLog("Client"), now, clientDeltaTime, entityContainerWithGhostCreator,
             generatedEvent, transport,
-            DefaultMultiCompressor.Create(), inputFetch);
+            DefaultMultiCompressor.Create(), inputFetch, new(0, 0, 0));
 
         return client;
     }
 
-    private Host CreateHost(Milliseconds now, ITransport transport)
+    private Host CreateHost(TimeMs now, ITransport transport)
     {
         var worldWithDetectChanges = new AuthoritativeWorld();
         var host = new Host(transport, DefaultMultiCompressor.Create(), DefaultMultiCompressor.DeflateCompressionIndex,
@@ -73,7 +73,7 @@ public sealed class ClientHostTests
     [Fact]
     public void TestClientAndHostUpdates()
     {
-        var initNow = new Milliseconds(10);
+        var initNow = new TimeMs(10);
 
         var (clientTransport, hostTransport) = MemoryTransportFactory.CreateClientAndHostTransport();
 
@@ -101,7 +101,7 @@ public sealed class ClientHostTests
 
         for (var iteration = 0; iteration < 62; iteration++)
         {
-            var now = new Milliseconds(20 + iteration * 14);
+            var now = new TimeMs(20 + iteration * 14);
             timeProvider.TimeInMs = now;
             internetSimulatedHostTransport?.Update();
             client.Update(now);

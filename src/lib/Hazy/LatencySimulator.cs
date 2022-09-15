@@ -32,7 +32,7 @@ namespace Piot.Hazy
         private long savedLatencyBeforeSpike;
         private long targetLatencyInMs;
 
-        public LatencySimulator(int minimumLatency, int maximumLatency, Milliseconds now, IRandom random, ILog log)
+        public LatencySimulator(int minimumLatency, int maximumLatency, TimeMs now, IRandom random, ILog log)
         {
             this.log = log;
             this.random = random;
@@ -45,7 +45,7 @@ namespace Piot.Hazy
             latencyInMs = targetLatencyInMs;
         }
 
-        public Milliseconds LatencyInMs => new(latencyInMs);
+        public TimeMs LatencyInMs => new(latencyInMs);
 
         public void SetLatencyRange(int minimumLatency, int maximumLatency)
         {
@@ -64,7 +64,7 @@ namespace Piot.Hazy
         ///     TODO: Needs a more sophisticated solution
         /// </summary>
         /// <param name="now"></param>
-        public void Update(Milliseconds now)
+        public void Update(TimeMs now)
         {
             var timePassed = now.ms - lastUpdate;
             if (timePassed < 10)

@@ -49,17 +49,17 @@ namespace Piot.Stats
 
     public sealed class StatPerSecond
     {
-        private readonly Milliseconds minimumAverageTime;
+        private readonly TimeMs minimumAverageTime;
         private uint averageCount;
         private uint count;
         private bool isInitialized;
-        private Milliseconds lastTime;
+        private TimeMs lastTime;
         private int max;
         private int min;
         private Stat stat;
         private long total;
 
-        public StatPerSecond(Milliseconds now, Milliseconds minimumAverageTime, Func<int, string>? formatter = null)
+        public StatPerSecond(TimeMs now, TimeMs minimumAverageTime, Func<int, string>? formatter = null)
         {
             stat.Formatter = formatter ?? StandardFormatter.Format;
 
@@ -77,14 +77,14 @@ namespace Piot.Stats
             count++; // count is technically not needed, but is nice to know how many samples the average was based on.
         }
 
-        private void Reset(Milliseconds now)
+        private void Reset(TimeMs now)
         {
             count = 0;
             total = 0;
             lastTime = now;
         }
 
-        public void Update(Milliseconds now)
+        public void Update(TimeMs now)
         {
             if (isInitialized && now.ms < lastTime.ms + minimumAverageTime.ms)
             {

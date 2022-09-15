@@ -23,7 +23,7 @@ public sealed class MonotonicTimeLowerBitsTests
     private static void TestLowerBits(ushort lowerBitsValue, ulong nowValue, ulong expectedResult)
     {
         var lowerBits = new MonotonicTimeLowerBits(lowerBitsValue);
-        var now = new Milliseconds((long)nowValue);
+        var now = new TimeMs((long)nowValue);
         var calculatedMonotonic = LowerBitsToMonotonic.LowerBitsToMonotonicMs(now, lowerBits);
         Assert.Equal((long)expectedResult, calculatedMonotonic.ms);
     }
@@ -56,7 +56,7 @@ public sealed class MonotonicTimeLowerBitsTests
     public void TestCalculatorException()
     {
         var lowerBits = new MonotonicTimeLowerBits(0xff30);
-        var now = new Milliseconds(0x36ff20);
+        var now = new TimeMs(0x36ff20);
         Assert.Throws<Exception>(() => LowerBitsToMonotonic.LowerBitsToMonotonicMs(now, lowerBits));
     }
 }

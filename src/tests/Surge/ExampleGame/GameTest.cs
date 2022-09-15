@@ -27,7 +27,7 @@ public sealed class GameTests
     [Fact]
     public void TestExampleGame()
     {
-        var initNow = new Milliseconds(10);
+        var initNow = new TimeMs(10);
 
         var (clientTransport, hostTransport) = MemoryTransportFactory.CreateClientAndHostTransport();
 
@@ -56,7 +56,7 @@ public sealed class GameTests
 
         for (var iteration = 0; iteration < 62; iteration++)
         {
-            var now = new Milliseconds(20 + iteration * 14);
+            var now = new TimeMs(20 + iteration * 14);
             timeProvider.TimeInMs = now;
             internetSimulatedHostTransport?.Update();
             clientGame.Update(now);

@@ -133,7 +133,7 @@ public sealed class UnitTest1
         logicalInputQueue.AddLogicalInput(new LogicalInput
             { appliedAtTickId = new TickId(20), payload = new byte[] { 0x0a, 0x0b } });
 
-        var now = new Milliseconds(0x954299);
+        var now = new TimeMs(0x954299);
 
         var datagramsOut = new OrderedDatagramsSequenceId();
         var octetWriter = new OctetWriter(1024);
