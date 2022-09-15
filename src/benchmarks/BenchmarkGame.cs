@@ -7,13 +7,22 @@ using Piot.Clog;
 using Piot.MonotonicTime;
 using Piot.Surge;
 using Piot.Surge.Compress;
+using Piot.Surge.DeltaSnapshot.Pack;
 using Piot.Surge.Internal.Generated;
 using Piot.Surge.Pulse.Client;
 using Piot.Surge.Pulse.Host;
+using Piot.Surge.Tick;
 using Piot.Surge.Types;
 using Piot.Transport;
 
 namespace Benchmark.Surge.ExampleGame;
+
+public class MockPlaybackNotify : ISnapshotPlaybackNotify
+{
+    public void SnapshotPlaybackNotify(TimeMs now, TickId tickIdNow, DeltaSnapshotPack deltaSnapshotPack)
+    {
+    }
+}
 
 public sealed class BenchmarkGame
 {
@@ -40,7 +49,7 @@ public sealed class BenchmarkGame
         else
         {
             Client = new(log.SubLog("Client"), now, delta, world, generatedEventTarget,
-                transport, compression, new GeneratedInputFetch(), new(0, 0, 0));
+                transport, compression, new GeneratedInputFetch(), new MockPlaybackNotify());
         }
 
         GeneratedHostEntitySpawner = new GeneratedHostEntitySpawner(world, GeneratedNotifyEntityCreation);

@@ -131,8 +131,8 @@ namespace Piot.Surge.Pulse.Client
 
             var newDeltaTimeMs = inputDiffInTicks switch
             {
-                < 0 => fixedSimulationDeltaTimeMs.ms * 190 / 100,
-                > 0 => fixedSimulationDeltaTimeMs.ms * 70 / 100,
+                < 0 => fixedSimulationDeltaTimeMs.ms * 180 / 100,
+                > 0 => fixedSimulationDeltaTimeMs.ms * 60 / 100,
                 _ => fixedSimulationDeltaTimeMs.ms
             };
 
@@ -147,7 +147,7 @@ namespace Piot.Surge.Pulse.Client
             }
 
             log.Debug(
-                "New Input Fetch Speed {Diff} {tickId} {TickIdThatWeShouldSendNow} {NewDeltaTimeMs} based on {RoundTripTimeMs}",
+                "New Input Fetch Speed {tickId} {TickIdThatWeShouldSendNow} {InputDiffInTicks} {NewDeltaTimeMs} based on {RoundTripTimeMs}",
                 inputTickId.tickId, tickIdThatWeShouldSendNow, inputDiffInTicks, newDeltaTimeMs, roundTripTimeMs);
 
             fetchInputTicker.DeltaTime = new(newDeltaTimeMs);

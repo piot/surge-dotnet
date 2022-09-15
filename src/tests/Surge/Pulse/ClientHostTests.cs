@@ -57,7 +57,7 @@ public sealed class ClientHostTests
 
         var client = new Client(log.SubLog("Client"), now, clientDeltaTime, entityContainerWithGhostCreator,
             generatedEvent, transport,
-            DefaultMultiCompressor.Create(), inputFetch, new(0, 0, 0));
+            DefaultMultiCompressor.Create(), inputFetch, new MockPlaybackNotify());
 
         return client;
     }

@@ -27,7 +27,7 @@ namespace Piot.Surge.Pulse.Client
         private readonly HoldPositive lastBufferWasStarved = new(14);
         private readonly ILog log;
         private readonly IClientPredictorCorrections predictor;
-        private readonly SnapshotPlaybackNotify snapshotPlaybackNotify;
+        private readonly ISnapshotPlaybackNotify snapshotPlaybackNotify;
         private readonly TimeTicker snapshotPlaybackTicker;
         private readonly SnapshotDeltaPackIncludingCorrectionsQueue snapshotsQueue = new();
         private readonly FixedDeltaTimeMs targetDeltaTimeMs;
@@ -36,7 +36,7 @@ namespace Piot.Surge.Pulse.Client
 
         public ClientDeltaSnapshotPlayback(TimeMs now, IEntityContainerWithGhostCreator clientWorld,
             IEventProcessor eventProcessor, IClientPredictorCorrections predictor,
-            SnapshotPlaybackNotify snapshotPlaybackNotify,
+            ISnapshotPlaybackNotify snapshotPlaybackNotify,
             FixedDeltaTimeMs targetDeltaTimeMs, ILog log)
         {
             this.log = log;
@@ -136,8 +136,12 @@ namespace Piot.Surge.Pulse.Client
 
             if (snapshotsQueue.Peek().Pack.tickIdRange.Last > playbackTick)
             {
-                log.Notice(
-                    "Snapshot playback has stalled because next snapshot is in the future compared to playback");
+                if (ShouldApplySnapshotsToWorld)
+                {
+                    log.Notice(
+                        "Snapshot playback has stalled because next snapshot is in the future compared to playback");
+                }
+
                 return;
             }
 
@@ -151,7 +155,7 @@ namespace Piot.Surge.Pulse.Client
                 deltaSnapshotIncludingCorrections.deltaSnapshotPackPayload.Span,
                 deltaSnapshotIncludingCorrections.StreamType, deltaSnapshotIncludingCorrections.SnapshotType);
 
-            snapshotPlaybackNotify.Invoke(snapshotPlaybackTicker.Now, playbackTick, deltaSnapshotPack);
+            snapshotPlaybackNotify.SnapshotPlaybackNotify(snapshotPlaybackTicker.Now, playbackTick, deltaSnapshotPack);
 
             LastPlaybackSnapshotWasSkipAhead = deltaSnapshotIncludingCorrectionsItem.IsSkippedAheadSnapshot;
             LastPlaybackSnapshotWasMerged = deltaSnapshotIncludingCorrectionsItem.IsMergedAndOverlapping;

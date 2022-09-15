@@ -5,7 +5,6 @@
 
 using Piot.Clog;
 using Piot.MonotonicTime;
-using Piot.SerializableVersion;
 using Piot.Surge.Compress;
 using Piot.Surge.Event;
 using Piot.Surge.LogicalInput;
@@ -21,21 +20,18 @@ namespace Piot.Surge.Pulse.Client
         private readonly ClientDeltaSnapshotPlayback deltaSnapshotPlayback;
         private readonly ClientLocalInputFetch localInputFetch;
         private readonly ILog log;
-        private readonly ClientSnapshotRecorder snapshotRecorder;
         private readonly ITransportClient transportClient;
         private readonly TransportStatsBoth transportWithStats;
 
         public Client(ILog log, TimeMs now, FixedDeltaTimeMs targetDeltaTimeMs,
             IEntityContainerWithGhostCreator worldWithGhostCreator, IEventProcessor eventProcessor,
             ITransport assignedTransport, IMultiCompressor compression, IInputPackFetch fetch,
-            SemanticVersion applicationVersion)
+            ISnapshotPlaybackNotify snapshotPlaybackNotify)
         {
             this.log = log;
 
             World = worldWithGhostCreator;
-            snapshotRecorder =
-                new ClientSnapshotRecorder(applicationVersion, worldWithGhostCreator, eventProcessor,
-                    log.SubLog("SnapshotRecorder"));
+
 
             transportWithStats = new(assignedTransport, now);
             transportClient = new TransportClient(transportWithStats);
@@ -47,7 +43,7 @@ namespace Piot.Surge.Pulse.Client
                 log.SubLog("Predictor"));
             deltaSnapshotPlayback =
                 new ClientDeltaSnapshotPlayback(now, worldWithGhostCreator, eventProcessor, localInputFetch,
-                    snapshotRecorder.OnSnapshotPlayback, targetDeltaTimeMs,
+                    snapshotPlaybackNotify, targetDeltaTimeMs,
                     log.SubLog("GhostPlayback"));
 
             datagramReceiver = new(transportClient, compression, deltaSnapshotPlayback, localInputFetch, log);
@@ -58,8 +54,6 @@ namespace Piot.Surge.Pulse.Client
             get => deltaSnapshotPlayback.ShouldApplySnapshotsToWorld;
             set => deltaSnapshotPlayback.ShouldApplySnapshotsToWorld = value;
         }
-
-        public IReplayControl ReplayControl => snapshotRecorder;
 
         public TickId PlaybackTickId => deltaSnapshotPlayback.PlaybackTickId;
 
@@ -78,7 +72,6 @@ namespace Piot.Surge.Pulse.Client
             transportWithStats.Update(now);
             localInputFetch.Update(now);
             deltaSnapshotPlayback.Update(now);
-            snapshotRecorder.Update(now);
 
             var readStats = transportWithStats.Stats;
             log.DebugLowLevel("stats: {Stats}", readStats);

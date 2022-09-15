@@ -6,7 +6,7 @@
 using Piot.MonotonicTime;
 using Piot.Surge.Tick;
 
-namespace Piot.Surge.Pulse.Client
+namespace Piot.Surge.SnapshotReplay
 {
     public interface IReplayControl
     {

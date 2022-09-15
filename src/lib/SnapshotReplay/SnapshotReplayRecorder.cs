@@ -10,12 +10,13 @@ using Piot.MonotonicTime;
 using Piot.SerializableVersion;
 using Piot.Surge.DeltaSnapshot.Pack;
 using Piot.Surge.Event;
+using Piot.Surge.Pulse.Client;
 using Piot.Surge.Replay;
 using Piot.Surge.Tick;
 
-namespace Piot.Surge.Pulse.Client
+namespace Piot.Surge.SnapshotReplay
 {
-    public class ClientSnapshotRecorder : IReplayControl
+    public class SnapshotReplayRecorder : IReplayControl, ISnapshotPlaybackNotify
     {
         private const int replayMemoryOctetSize = 32 * 1024;
         private const int replayMemoryOctetThreshold = 28 * 1024;
@@ -29,7 +30,7 @@ namespace Piot.Surge.Pulse.Client
         private ReplayRecorder? recorder;
         private IOctetReaderWithSeekAndSkip? seekableOctetReader;
 
-        public ClientSnapshotRecorder(SemanticVersion applicationVersion, IEntityContainerWithGhostCreator world,
+        public SnapshotReplayRecorder(SemanticVersion applicationVersion, IEntityContainerWithGhostCreator world,
             IEventProcessor eventProcessor, ILog log)
         {
             this.log = log;
@@ -84,7 +85,7 @@ namespace Piot.Surge.Pulse.Client
             disposableOctetWriter = null;
         }
 
-        public void OnSnapshotPlayback(TimeMs timeNowMs, TickId tickIdNow, DeltaSnapshotPack deltaSnapshotPack)
+        public void SnapshotPlaybackNotify(TimeMs now, TickId tickIdNow, DeltaSnapshotPack deltaSnapshotPack)
         {
             if (recorder is null)
             {

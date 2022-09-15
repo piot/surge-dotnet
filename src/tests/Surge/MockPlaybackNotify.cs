@@ -5,12 +5,14 @@
 
 using Piot.MonotonicTime;
 using Piot.Surge.DeltaSnapshot.Pack;
+using Piot.Surge.Pulse.Client;
 using Piot.Surge.Tick;
 
-namespace Piot.Surge.Pulse.Client
+namespace Tests;
+
+public class MockPlaybackNotify : ISnapshotPlaybackNotify
 {
-    public interface ISnapshotPlaybackNotify
+    public void SnapshotPlaybackNotify(TimeMs now, TickId tickIdNow, DeltaSnapshotPack deltaSnapshotPack)
     {
-        public void SnapshotPlaybackNotify(TimeMs now, TickId tickIdNow, DeltaSnapshotPack deltaSnapshotPack);
     }
 }
