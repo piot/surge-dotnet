@@ -65,9 +65,9 @@ namespace Piot.Surge.Types
                 newPitch = PitchMax;
             }
 
-            newYaw = RealMod(newYaw, Mathf.PI * 2.0f);
+            newYaw = RealMod(newYaw, 2.0f * (float)Math.PI);
 
-            yaw = (ushort)(newYaw / (2.0f * Mathf.PI) * 65535.0f);
+            yaw = (ushort)(newYaw / (2.0f * Math.PI) * 65535.0f);
             pitch = (short)(newPitch * 32767.0 / PitchMax);
         }
 
