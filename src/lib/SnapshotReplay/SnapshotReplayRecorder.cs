@@ -21,22 +21,35 @@ namespace Piot.Surge.SnapshotReplay
         private const int replayMemoryOctetSize = 32 * 1024;
         private const int replayMemoryOctetThreshold = 28 * 1024;
         private readonly SemanticVersion applicationVersion;
-        private readonly IEntityContainerWithGhostCreator entityContainer;
+        private readonly IEntityContainer entityContainer;
         private readonly IEventProcessor eventProcessor;
         private readonly ILog log;
         private readonly OctetWriter writer = new(replayMemoryOctetSize);
         private IDisposableOctetWriter? disposableOctetWriter;
         private ReplayPlayback? playback;
+        private readonly IEntityContainerWithGhostCreator playbackWorld;
         private ReplayRecorder? recorder;
         private IOctetReaderWithSeekAndSkip? seekableOctetReader;
 
-        public SnapshotReplayRecorder(SemanticVersion applicationVersion, IEntityContainerWithGhostCreator world,
-            IEventProcessor eventProcessor, ILog log)
+        public SnapshotReplayRecorder(SemanticVersion applicationVersion, IEntityContainer recordWorld,
+            IEntityContainerWithGhostCreator playbackWorld, IEventProcessor eventProcessor, ILog log)
         {
             this.log = log;
             this.applicationVersion = applicationVersion;
-            entityContainer = world ?? throw new ArgumentNullException(nameof(world));
+            entityContainer = recordWorld ?? throw new ArgumentNullException(nameof(recordWorld));
+            this.playbackWorld = playbackWorld;
             this.eventProcessor = eventProcessor;
+        }
+
+        public FixedDeltaTimeMs DeltaTime
+        {
+            set
+            {
+                if (playback is not null)
+                {
+                    playback.DeltaTime = value;
+                }
+            }
         }
 
         public void StartRecordingToMemory(TimeMs timeNowMs, TickId nowTickId)
@@ -59,9 +72,9 @@ namespace Piot.Surge.SnapshotReplay
         {
             seekableOctetReader?.Dispose();
 
-            entityContainer.Reset();
+            playbackWorld.Reset();
             seekableOctetReader = FileStreamCreator.OpenWithSeek(filename);
-            playback = new(entityContainer, eventProcessor, now, applicationVersion, seekableOctetReader,
+            playback = new(playbackWorld, eventProcessor, now, applicationVersion, seekableOctetReader,
                 log);
         }
 

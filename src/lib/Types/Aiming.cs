@@ -21,6 +21,10 @@ namespace Piot.Surge.Types
 
         public const float PitchMax = (float)Math.PI / 2.0f - 0.1f;
 
+        public static float RealMod(float x, float y)
+        {
+            return (x % y + y) % y;
+        }
 
         public bool Equals(Aiming other)
         {
@@ -49,30 +53,22 @@ namespace Piot.Surge.Types
             this.pitch = pitch;
         }
 
-        public Aiming(float yaw, float pitch)
+        public Aiming(float newYaw, float newPitch)
         {
-            if (pitch < -PitchMax)
+            if (newPitch < -PitchMax)
             {
-                pitch = -PitchMax;
+                newPitch = -PitchMax;
             }
 
-            if (pitch > PitchMax)
+            if (newPitch > PitchMax)
             {
-                pitch = PitchMax;
+                newPitch = PitchMax;
             }
 
-            if (yaw > Math.PI * 2.0f)
-            {
-                yaw = (float)Math.PI * 2.0f;
-            }
+            newYaw = RealMod(newYaw, Mathf.PI * 2.0f);
 
-            if (yaw < 0)
-            {
-                yaw = 0;
-            }
-
-            this.yaw = (ushort)(yaw * 0xffff / 2 * Math.PI);
-            this.pitch = (short)(pitch * 32767.0 / PitchMax);
+            yaw = (ushort)(newYaw / (2.0f * Mathf.PI) * 65535.0f);
+            pitch = (short)(newPitch * 32767.0 / PitchMax);
         }
 
         public Vector3 ToDirection

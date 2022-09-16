@@ -59,6 +59,11 @@ namespace Piot.Surge.Replay
             nextDeltaState = replayReader.ReadDeltaState();
         }
 
+        public FixedDeltaTimeMs DeltaTime
+        {
+            set => timeTicker.DeltaTime = value;
+        }
+
         private void ApplyCompleteState(CompleteState completeState)
         {
             log.DebugLowLevel("applying complete state {CompleteState}", completeState);

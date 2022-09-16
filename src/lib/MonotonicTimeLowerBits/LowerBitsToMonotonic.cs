@@ -46,7 +46,7 @@ namespace Piot.Surge.MonotonicTimeLowerBits
             var diff = receivedMonotonic - (ulong)now.ms;
             if (diff > 300200)
             {
-                throw new Exception($"suspicious time lower bits diff {diff}");
+//                throw new Exception($"suspicious time lower bits diff {diff}");
             }
 
             return new TimeMs((long)receivedMonotonic);
