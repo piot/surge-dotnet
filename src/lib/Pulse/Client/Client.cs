@@ -9,6 +9,7 @@ using Piot.Surge.Compress;
 using Piot.Surge.Event;
 using Piot.Surge.LogicalInput;
 using Piot.Surge.Tick;
+using Piot.Surge.TimeTick;
 using Piot.Transport;
 using Piot.Transport.Stats;
 
@@ -18,8 +19,9 @@ namespace Piot.Surge.Pulse.Client
     {
         private readonly ClientDatagramReceiver datagramReceiver;
         private readonly ClientDeltaSnapshotPlayback deltaSnapshotPlayback;
-        private readonly ClientLocalInputFetch localInputFetch;
+        private readonly ClientLocalInputFetchAndSend localInputFetchAndSend;
         private readonly ILog log;
+        private readonly TimeTicker statsTicker;
         private readonly ITransportClient transportClient;
         private readonly TransportStatsBoth transportWithStats;
 
@@ -37,45 +39,51 @@ namespace Piot.Surge.Pulse.Client
             transportClient = new TransportClient(transportWithStats);
             var clientPredictor = new ClientPredictor(log.SubLog("ClientPredictor"));
             const bool usePrediction = false;
-            localInputFetch = new ClientLocalInputFetch(fetch, clientPredictor, usePrediction, transportClient, now,
+            localInputFetchAndSend = new ClientLocalInputFetchAndSend(fetch, clientPredictor, usePrediction,
+                transportClient, now,
                 targetDeltaTimeMs,
                 worldWithGhostCreator,
-                log.SubLog("Predictor"));
+                log.SubLog("InputFetchAndSend"));
             deltaSnapshotPlayback =
-                new ClientDeltaSnapshotPlayback(now, worldWithGhostCreator, eventProcessor, localInputFetch,
+                new ClientDeltaSnapshotPlayback(now, worldWithGhostCreator, eventProcessor, localInputFetchAndSend,
                     snapshotPlaybackNotify, targetDeltaTimeMs,
-                    log.SubLog("GhostPlayback"));
+                    log.SubLog("SnapshotPlayback"));
 
-            datagramReceiver = new(transportClient, compression, deltaSnapshotPlayback, localInputFetch, log);
+            datagramReceiver = new(transportClient, compression, deltaSnapshotPlayback, localInputFetchAndSend, log);
+            statsTicker = new(new(0), StatsOutput, new(1000), log.SubLog("Stats"));
         }
 
         public bool ShouldApplyIncomingSnapshotsToWorld
         {
-            get => deltaSnapshotPlayback.ShouldApplySnapshotsToWorld;
-            set => deltaSnapshotPlayback.ShouldApplySnapshotsToWorld = value;
+            get => deltaSnapshotPlayback.ShouldTickAndNotifySnapshots;
+            set => deltaSnapshotPlayback.ShouldTickAndNotifySnapshots = value;
         }
 
         public TickId PlaybackTickId => deltaSnapshotPlayback.PlaybackTickId;
 
         public IInputPackFetch InputFetch
         {
-            set => localInputFetch.InputFetch = value;
+            set => localInputFetchAndSend.InputFetch = value;
         }
 
-        public LocalPlayersInfo LocalPlayersInfo => new(localInputFetch.LocalPlayerInputs);
+        public LocalPlayersInfo LocalPlayersInfo => new(localInputFetchAndSend.LocalPlayerInputs);
 
         public IEntityContainerWithGhostCreator World { get; }
+
+        private void StatsOutput()
+        {
+            var readStats = transportWithStats.Stats;
+            log.DebugLowLevel("stats: {Stats}", readStats);
+            log.DebugLowLevel("netStats: {Stats}", datagramReceiver.NetworkQuality);
+        }
 
         public void Update(TimeMs now)
         {
             datagramReceiver.ReceiveDatagramsFromHost(now);
             transportWithStats.Update(now);
-            localInputFetch.Update(now);
+            localInputFetchAndSend.Update(now);
             deltaSnapshotPlayback.Update(now);
-
-            var readStats = transportWithStats.Stats;
-            log.DebugLowLevel("stats: {Stats}", readStats);
-            log.DebugLowLevel("netStats: {Stats}", datagramReceiver.NetworkQuality);
+            statsTicker.Update(now);
         }
     }
 }

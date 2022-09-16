@@ -132,6 +132,9 @@ namespace Piot.Surge.Pulse.Host
         {
             var bestPack = FindBestPack(connection, precalculatedPackForThisTick, world, eventStream, hostTickId);
 
+            log.DebugLowLevel("Sending assigned physics correction {LocalPlayerCount}",
+                connection.AssignedPredictedEntityForLocalPlayers.Keys.Count);
+
             cachedPhysicsCorrectionWriter.Reset();
             cachedPhysicsCorrectionWriter.WriteUInt8((byte)connection.AssignedPredictedEntityForLocalPlayers.Keys
                 .Count);
@@ -161,7 +164,7 @@ namespace Piot.Surge.Pulse.Host
                 new SnapshotProtocolPack(bestPack.tickIdRange, cachedPhysicsCorrectionPackWriter.Octets);
             var sender = new WrappedSender(transportSend, connection.Endpoint);
 
-            log.Debug("sending datagrams {Flattened} {ClientPontTime}", includingCorrections,
+            log.Debug("sending datagrams {SnapshotWithCorrection} {ClientPontTime}", includingCorrections,
                 connection.lastReceivedMonotonicTimeLowerBits);
 
             cachedDatagramsWriter.Reset();

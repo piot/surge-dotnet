@@ -26,7 +26,8 @@ namespace Piot.Surge.Pulse.Host
                     if (!logicalInputQueue.HasInputForTickId(authoritativeTickId))
                     {
                         // The old data on the input is intentionally kept
-                        log.Notice($"connection {connection.Id} didn't have an input for tick {authoritativeTickId}");
+                        log.Notice("connection {Connection} didn't have an input for tick {AuthoritativeTickId}",
+                            connection, authoritativeTickId);
                         connection.NotifyThatInputWasTooLate(authoritativeTickId);
                         continue;
                     }

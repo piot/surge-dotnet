@@ -73,6 +73,8 @@ namespace Piot.Surge.Pulse.Host
 
             var logicalInputs = LogicalInputDeserialize.Deserialize(reader);
 
+
+            log.Debug("received predicted input count {Count}", logicalInputs.inputForEachPlayerInSequence.Length);
             foreach (var logicalInputArrayForPlayer in logicalInputs.inputForEachPlayerInSequence)
             {
                 ConnectionPlayers.TryGetValue(logicalInputArrayForPlayer.localPlayerIndex.Value,

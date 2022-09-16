@@ -11,5 +11,6 @@ namespace Piot.Surge.Pulse.Client
     public interface IClientPredictorCorrections
     {
         public void AssignAvatarAndReadCorrections(TickId tickId, ReadOnlySpan<byte> snapshotReader);
+        public void ReadAndAssignLocalPlayers(ReadOnlySpan<byte> physicsCorrectionPayload);
     }
 }

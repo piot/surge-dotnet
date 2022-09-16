@@ -23,7 +23,7 @@ namespace Piot.Surge.Pulse.Client
         private readonly IMultiCompressor compression;
         private readonly HoldPositive isReceivingMergedSnapshots = new(20);
         private readonly ILog log;
-        private readonly ClientLocalInputFetch notifyLocalInputFetch;
+        private readonly ClientLocalInputFetchAndSend notifyLocalInputFetchAndSend;
         private readonly ClientDeltaSnapshotPlayback notifyPlayback;
         private readonly OrderedDatagramsInChecker orderedDatagramsInChecker = new();
         private readonly SnapshotFragmentReAssembler snapshotFragmentReAssembler;
@@ -33,12 +33,13 @@ namespace Piot.Surge.Pulse.Client
         private readonly HoldPositive weAreSkippingAhead = new(25);
 
         public ClientDatagramReceiver(ITransportClient transportClient, IMultiCompressor compression,
-            ClientDeltaSnapshotPlayback notifyPlayback, ClientLocalInputFetch notifyLocalInputFetch, ILog log)
+            ClientDeltaSnapshotPlayback notifyPlayback, ClientLocalInputFetchAndSend notifyLocalInputFetchAndSend,
+            ILog log)
         {
             this.log = log;
             this.compression = compression;
             this.notifyPlayback = notifyPlayback;
-            this.notifyLocalInputFetch = notifyLocalInputFetch;
+            this.notifyLocalInputFetchAndSend = notifyLocalInputFetchAndSend;
             this.transportClient = transportClient;
             snapshotFragmentReAssembler = new(log);
         }
@@ -76,14 +77,14 @@ namespace Piot.Surge.Pulse.Client
             log.DebugLowLevel("receiving snapshot datagram from server");
             ReceiveSnapshotExtraData(reader, now);
             var snapshotIsDone = snapshotFragmentReAssembler.Read(reader, out var tickIdRange, out var completePayload);
-            notifyLocalInputFetch.LastSeenSnapshotTickId = tickIdRange.Last;
+            notifyLocalInputFetchAndSend.LastSeenSnapshotTickId = tickIdRange.Last;
 
             if (!snapshotIsDone)
             {
                 return;
             }
 
-            notifyLocalInputFetch.AdjustInputTickSpeed(tickIdRange.Last,
+            notifyLocalInputFetchAndSend.AdjustInputTickSpeed(tickIdRange.Last,
                 (uint)statsRoundTripTime.Stat.average);
 
             if (!notifyPlayback.WantsSnapshotWithTickIdRange(tickIdRange))
@@ -108,7 +109,8 @@ namespace Piot.Surge.Pulse.Client
                 log.Notice("we are receiving merged snapshots");
             }
 
-            notifyLocalInputFetch.NextExpectedSnapshotTickId = snapshotWithCorrections.tickIdRange.lastTickId.Next();
+            notifyLocalInputFetchAndSend.NextExpectedSnapshotTickId =
+                snapshotWithCorrections.tickIdRange.lastTickId.Next();
         }
 
         private void ReceiveDatagramFromHost(IOctetReader reader, TimeMs now)

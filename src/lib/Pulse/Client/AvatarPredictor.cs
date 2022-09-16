@@ -7,7 +7,6 @@ using System;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.Surge.Entities;
-using Piot.Surge.LocalPlayer;
 using Piot.Surge.Tick;
 
 namespace Piot.Surge.Pulse.Client
@@ -23,10 +22,10 @@ namespace Piot.Surge.Pulse.Client
         private readonly bool shouldPredictGoingForward = true;
         private bool shouldPredict = true;
 
-        public AvatarPredictor(LocalPlayerIndex localPlayerIndex, IEntity assignedAvatar, ILog log)
+        public AvatarPredictor(LocalPlayerInput localPlayerInput, IEntity assignedAvatar, ILog log)
         {
             this.log = log;
-            LocalPlayerInput = new(localPlayerIndex, assignedAvatar);
+            LocalPlayerInput = localPlayerInput;
             this.assignedAvatar = assignedAvatar;
         }
 

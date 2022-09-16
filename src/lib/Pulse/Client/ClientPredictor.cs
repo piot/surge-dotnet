@@ -22,10 +22,10 @@ namespace Piot.Surge.Pulse.Client
             this.log = log;
         }
 
-        public AvatarPredictor CreateAvatarPredictor(LocalPlayerIndex localPlayerIndex, IEntity assignedEntity)
+        public AvatarPredictor CreateAvatarPredictor(LocalPlayerInput localPlayerInput)
         {
-            var avatarPredictor = new AvatarPredictor(localPlayerIndex, assignedEntity, log);
-            localAvatarPredictors[localPlayerIndex.Value] = avatarPredictor;
+            var avatarPredictor = new AvatarPredictor(localPlayerInput, localPlayerInput.AssignedEntity, log);
+            localAvatarPredictors[localPlayerInput.LocalPlayerIndex.Value] = avatarPredictor;
 
             return avatarPredictor;
         }

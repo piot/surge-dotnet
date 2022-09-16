@@ -53,7 +53,7 @@ namespace Piot.Surge.Pulse.Client
         public bool LastPlaybackSnapshotWasMerged { get; private set; }
         public bool LastBufferWasStarved => lastBufferWasStarved.Value;
 
-        public bool ShouldApplySnapshotsToWorld { get; set; } = true;
+        public bool ShouldTickAndNotifySnapshots { get; set; } = true;
         public bool IsIncomingBufferStarving => lastBufferWasStarved.IsOrWasTrue;
 
         public TickId PlaybackTickId => playbackTick;
@@ -136,7 +136,7 @@ namespace Piot.Surge.Pulse.Client
 
             if (snapshotsQueue.Peek().Pack.tickIdRange.Last > playbackTick)
             {
-                if (ShouldApplySnapshotsToWorld)
+                if (ShouldTickAndNotifySnapshots)
                 {
                     log.Notice(
                         "Snapshot playback has stalled because next snapshot is in the future compared to playback");
@@ -160,18 +160,19 @@ namespace Piot.Surge.Pulse.Client
             LastPlaybackSnapshotWasSkipAhead = deltaSnapshotIncludingCorrectionsItem.IsSkippedAheadSnapshot;
             LastPlaybackSnapshotWasMerged = deltaSnapshotIncludingCorrectionsItem.IsMergedAndOverlapping;
 
-            if (!ShouldApplySnapshotsToWorld)
-            {
-                snapshotsQueue.Clear();
-                return;
-            }
-
             expectedEventSequenceId = ApplyDeltaSnapshotToWorld.Apply(deltaSnapshotPack, clientWorld,
                 eventProcessor, expectedEventSequenceId,
                 deltaSnapshotIncludingCorrectionsItem.IsMergedAndOverlapping);
 
             predictor.AssignAvatarAndReadCorrections(deltaSnapshotIncludingCorrections.tickIdRange.Last,
                 deltaSnapshotIncludingCorrections.physicsCorrections.Span);
+
+            if (!ShouldTickAndNotifySnapshots)
+            {
+                // Just to save some performance of Tick and Notify for a client running on a host
+                return;
+            }
+
 
             // Ghosts are never predicted, corrected, nor rolled back
             // All the changed fields are set to the new values and Tick() is called to trigger the resulting effects of

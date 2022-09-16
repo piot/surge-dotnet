@@ -21,7 +21,7 @@ namespace Piot.Surge.MonotonicTimeLowerBits
 
         public override string ToString()
         {
-            return $"[LowerBits {lowerBits:X}]";
+            return $"[LowerBits {lowerBits:X4}]";
         }
 
         public static MonotonicTimeLowerBits FromTime(TimeMs timeMs)

@@ -27,6 +27,7 @@ namespace Piot.Surge.Pulse.Host
         private readonly ILog log;
         private readonly TimeTicker simulationTicker;
         private readonly SnapshotSyncer snapshotSyncer;
+        private readonly TimeTicker statsTicker;
         private readonly ITransport transport;
         private readonly TransportStatsBoth transportWithStats;
         private TickId authoritativeTickId;
@@ -36,12 +37,13 @@ namespace Piot.Surge.Pulse.Host
         {
             transportWithStats = new TransportStatsBoth(hostTransport, now);
             transport = transportWithStats;
-            snapshotSyncer = new SnapshotSyncer(transport, compression, compressorIndex, log.SubLog("Syncer"));
+            snapshotSyncer = new SnapshotSyncer(transport, compression, compressorIndex, log.SubLog("SnapshotSyncer"));
             AuthoritativeWorld = world;
             clientConnections = new(hostTransport, snapshotSyncer, log);
             this.log = log;
             simulationTicker = new(new(0), SimulationTick, new(16),
                 log.SubLog("SimulationTick"));
+            statsTicker = new(new(0), StatsOutput, new(1000), log.SubLog("Stats"));
             ShortLivedEventStream = new(authoritativeTickId);
         }
 
@@ -88,12 +90,17 @@ namespace Piot.Surge.Pulse.Host
             snapshotSyncer.SendSnapshot(masks, deltaSnapshotPack, AuthoritativeWorld, ShortLivedEventStream);
         }
 
+        private void StatsOutput()
+        {
+            log.DebugLowLevel("stats: {Stats}", transportWithStats.Stats);
+        }
+
         public void Update(TimeMs now)
         {
             clientConnections.ReceiveFromClients(authoritativeTickId);
             simulationTicker.Update(now);
             transportWithStats.Update(now);
-            log.DebugLowLevel("stats: {Stats}", transportWithStats.Stats);
+            statsTicker.Update(now);
         }
     }
 }

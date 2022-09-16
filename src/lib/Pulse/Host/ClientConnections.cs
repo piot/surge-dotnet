@@ -60,7 +60,7 @@ namespace Piot.Surge.Pulse.Host
                 {
                     var syncer = notifySnapshotSyncer.Create(clientId);
                     connectionToClient =
-                        new ConnectionToClient(clientId, syncer, log.SubLog($"Client{clientId.Value}"));
+                        new ConnectionToClient(clientId, syncer, log.SubLog($"Client/{clientId.Value}"));
                     orderedConnections.Add(connectionToClient);
                     connections.Add(clientId.Value, connectionToClient);
                 }

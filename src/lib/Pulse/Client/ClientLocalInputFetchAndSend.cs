@@ -10,6 +10,7 @@ using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.Surge.Corrections.Serialization;
+using Piot.Surge.LocalPlayer;
 using Piot.Surge.LogicalInput;
 using Piot.Surge.Tick;
 using Piot.Surge.TimeTick;
@@ -21,7 +22,7 @@ namespace Piot.Surge.Pulse.Client
     ///     Predicts the future of an avatar. If misprediction occurs, it will roll back,
     ///     apply the correction, and fast forward (Roll forth).
     /// </summary>
-    public sealed class ClientLocalInputFetch : IClientPredictorCorrections
+    public sealed class ClientLocalInputFetchAndSend : IClientPredictorCorrections
     {
         private readonly BundleAndSendOutInput bundleAndSendOutInput;
         private readonly TimeTicker fetchInputTicker;
@@ -34,7 +35,7 @@ namespace Piot.Surge.Pulse.Client
 
         private TickId inputTickId = new(1); // HACK: We need it to start ahead of the host
 
-        public ClientLocalInputFetch(IInputPackFetch inputPackFetch, ClientPredictor notifyPredictor,
+        public ClientLocalInputFetchAndSend(IInputPackFetch inputPackFetch, ClientPredictor notifyPredictor,
             bool usePrediction, ITransportClient transportClient,
             TimeMs now, FixedDeltaTimeMs targetDeltaTimeMs, IEntityContainer world, ILog log)
         {
@@ -66,6 +67,57 @@ namespace Piot.Surge.Pulse.Client
 
         public Dictionary<byte, LocalPlayerInput> LocalPlayerInputs { get; } = new();
 
+        public struct CorrectionInfo
+        {
+            public bool wasCreatedNow;
+            public LocalPlayerInput localPlayerInput;
+            
+            public Memory<byte> payload;
+            
+        }
+        
+        public CorrectionInfo[] ReadCorrectionsAndAssignLocalPlayerInput(ReadOnlySpan<byte> physicsCorrectionPayload)
+        {
+            var snapshotReader = new OctetReader(physicsCorrectionPayload);
+            var correctionsCount = snapshotReader.ReadUInt8();
+
+            var corrections = new List<CorrectionInfo>();
+            
+            for (var i = 0; i < correctionsCount; ++i)
+            {
+                var (targetEntityId, localPlayerIndex, octetCount) = CorrectionsHeaderReader.Read(snapshotReader);
+                var wasFound = LocalPlayerInputs.TryGetValue(localPlayerIndex.Value, out var localPlayerInput);
+                var wasCreatedNow = false;
+                if (!wasFound || localPlayerInput is null)
+                {
+                    log.Debug("assigned an avatar to {LocalPlayer} {EntityId}", localPlayerIndex, targetEntityId);
+                    var targetEntity = world.FetchEntity(targetEntityId);
+
+                    localPlayerInput = new LocalPlayerInput(localPlayerIndex, targetEntity);
+                    LocalPlayerInputs[localPlayerIndex.Value] = localPlayerInput;
+                    wasCreatedNow = true;
+                }
+
+                var physicsCorrectionPayloadForLocalPlayer = snapshotReader.ReadOctets(octetCount);
+                
+                var correctionInfo = new CorrectionInfo
+                {
+                    wasCreatedNow = wasCreatedNow,
+                    localPlayerInput = localPlayerInput,
+                    payload = physicsCorrectionPayloadForLocalPlayer.ToArray()
+                };
+                
+                corrections.Add(correctionInfo);
+            }
+
+            return corrections.ToArray();
+        }
+        
+        public void ReadAndAssignLocalPlayers(ReadOnlySpan<byte> physicsCorrectionPayload)
+        {
+            ReadCorrectionsAndAssignLocalPlayerInput(physicsCorrectionPayload);
+        }
+
         public void AssignAvatarAndReadCorrections(TickId correctionsForTickId,
             ReadOnlySpan<byte> physicsCorrectionPayload)
         {
@@ -82,38 +134,24 @@ namespace Piot.Surge.Pulse.Client
                 }
             }
 
-            var snapshotReader = new OctetReader(physicsCorrectionPayload);
-
-            var correctionsCount = snapshotReader.ReadUInt8();
-
             foreach (var localPlayerInput in LocalPlayerInputs.Values)
             {
                 localPlayerInput.PredictedInputs.DiscardUpToAndExcluding(correctionsForTickId);
             }
 
-            for (var i = 0; i < correctionsCount; ++i)
+            var corrections = ReadCorrectionsAndAssignLocalPlayerInput(physicsCorrectionPayload);
+            
+            foreach (var correction in corrections)
             {
-                var (targetEntityId, localPlayerIndex, octetCount) = CorrectionsHeaderReader.Read(snapshotReader);
-                var targetEntity = world.FetchEntity(targetEntityId);
-                var wasFound = LocalPlayerInputs.TryGetValue(localPlayerIndex.Value, out var localPlayerInput);
-                if (!wasFound || localPlayerInput is null)
+                if (correction.wasCreatedNow)
                 {
-                    log.Debug("assigned an avatar to {LocalPlayer} {EntityId}", localPlayerIndex, targetEntityId);
-
-                    //targetEntity  log.SubLog($"AvatarPredictor/{localPlayerIndex}")
-                    localPlayerInput = new LocalPlayerInput(localPlayerIndex, targetEntity);
-                    LocalPlayerInputs[localPlayerIndex.Value] = localPlayerInput;
-                    notifyPredictor.CreateAvatarPredictor(localPlayerIndex, targetEntity);
+                    notifyPredictor.CreateAvatarPredictor(correction.localPlayerInput);
                 }
-
-                //var changesThisSnapshot = targetEntity.CompleteEntity.Changes();
-
-                var physicsCorrectionPayloadForLocalPlayer = snapshotReader.ReadOctets(octetCount);
 
                 if (usePrediction)
                 {
-                    notifyPredictor.ReadCorrection(localPlayerIndex, correctionsForTickId,
-                        physicsCorrectionPayloadForLocalPlayer);
+                    notifyPredictor.ReadCorrection(correction.localPlayerInput.LocalPlayerIndex, correctionsForTickId,
+                        correction.payload.Span);
                 }
             }
         }
@@ -131,8 +169,8 @@ namespace Piot.Surge.Pulse.Client
 
             var newDeltaTimeMs = inputDiffInTicks switch
             {
-                < 0 => fixedSimulationDeltaTimeMs.ms * 180 / 100,
-                > 0 => fixedSimulationDeltaTimeMs.ms * 60 / 100,
+                < 0 => fixedSimulationDeltaTimeMs.ms * 110 / 100,
+                > 0 => fixedSimulationDeltaTimeMs.ms * 90 / 100,
                 _ => fixedSimulationDeltaTimeMs.ms
             };
 
@@ -183,8 +221,12 @@ namespace Piot.Surge.Pulse.Client
 
             if (localPlayerInputsArray.Length > 0)
             {
-                log.DebugLowLevel("Have {InputCount} in queue",
+                log.DebugLowLevel("Have {InputCount} in queue for first player",
                     localPlayerInputsArray[0].PredictedInputs.Collection.Length);
+            }
+            else
+            {
+                log.DebugLowLevel("We have no local players that give input");
             }
 
             FetchAndStoreInput.FetchAndStore(inputTickId, inputPackFetch, localPlayerInputsArray,
