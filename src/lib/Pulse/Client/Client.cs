@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using System.Collections.Generic;
 using Piot.Clog;
 using Piot.MonotonicTime;
 using Piot.Surge.Compress;
@@ -67,6 +68,8 @@ namespace Piot.Surge.Pulse.Client
         }
 
         public LocalPlayersInfo LocalPlayersInfo => new(localInputFetchAndSend.LocalPlayerInputs);
+
+        public IEnumerable<int> SnapshotLatencies => datagramReceiver.SnapshotLatencies;
 
         public IEntityContainerWithGhostCreator World { get; }
 

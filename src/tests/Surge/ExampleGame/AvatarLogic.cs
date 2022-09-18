@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System.Numerics;
 using Piot.Surge;
 using Piot.Surge.Types;
 
@@ -46,7 +45,7 @@ public struct AvatarLogic : ILogic
         ///     Fires very fast-moving Chain Lightning
         /// </summary>
         /// <param name="direction"></param>
-        public void FireChainLightning(Vector3 direction);
+        public void FireChainLightning(UnitVector3 direction);
 
         /// <summary>
         ///     Casts a fireball in the given direction. Starts playing the effects.
@@ -55,18 +54,18 @@ public struct AvatarLogic : ILogic
         /// <param name="position"></param>
         /// <param name="direction"></param>
         /// <param name="isAuthoritative"></param>
-        public void CastFireball(Position3 position, Vector3 direction);
+        public void CastFireball(Position3 position, UnitVector3 direction);
     }
 
     private void Fire(IAvatarLogicActions commands)
     {
         ammoCount--;
         fireCooldown = 30;
-        var fakeAiming = new Vector3
+        var fakeAiming = new UnitVector3
         {
-            X = position.x,
-            Y = position.y,
-            Z = position.z
+            x = position.x,
+            y = position.y,
+            z = position.z
         };
         commands.FireChainLightning(fakeAiming); // aiming.ToDirection
     }

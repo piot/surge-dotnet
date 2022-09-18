@@ -13,5 +13,7 @@ namespace Piot.Surge.Input
         {
             return $"[Axis {value}]";
         }
+
+        public float ToFloat => value / 32768.0f;
     }
 }

@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
-using System.Numerics;
 
 namespace Piot.Surge.Types
 {
@@ -20,6 +19,8 @@ namespace Piot.Surge.Types
         public float PitchDegrees => pitch * 89.0f / 32768.0f;
 
         public const float PitchMax = (float)Math.PI / 2.0f - 0.1f;
+
+        public UnitVector2 YawDirection => UnitVector2.FromFloats((float)Math.Cos(Yaw), (float)Math.Sin(Yaw));
 
         public static float RealMod(float x, float y)
         {
@@ -71,15 +72,15 @@ namespace Piot.Surge.Types
             pitch = (short)(newPitch * 32767.0 / PitchMax);
         }
 
-        public Vector3 ToDirection
+        public UnitVector3 ToDirection
         {
             get
             {
-                var pitch = Pitch;
-                var yaw = Yaw;
+                var pitchRad = Pitch;
+                var yawRad = Yaw;
 
-                return new Vector3(MathF.Cos(pitch) * MathF.Sin(yaw), MathF.Sin(pitch),
-                    MathF.Cos(pitch) * MathF.Cos(yaw));
+                return UnitVector3.FromFloats(MathF.Cos(pitchRad) * MathF.Sin(yawRad), MathF.Sin(pitchRad),
+                    MathF.Cos(pitchRad) * MathF.Cos(yawRad));
             }
         }
     }

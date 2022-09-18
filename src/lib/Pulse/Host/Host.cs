@@ -11,11 +11,11 @@ using Piot.Surge.DeltaSnapshot.Pack;
 using Piot.Surge.Entities;
 using Piot.Surge.Event;
 using Piot.Surge.LocalPlayer;
-using Piot.Surge.SnapshotProtocol;
 using Piot.Surge.Tick;
 using Piot.Surge.TimeTick;
 using Piot.Transport;
 using Piot.Transport.Stats;
+using Constants = Piot.Surge.SnapshotProtocol.Constants;
 
 namespace Piot.Surge.Pulse.Host
 {

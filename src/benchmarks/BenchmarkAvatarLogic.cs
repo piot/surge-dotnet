@@ -55,7 +55,7 @@ public struct BenchmarkAvatarLogic : ILogic
         /// <param name="position"></param>
         /// <param name="direction"></param>
         /// <param name="isAuthoritative"></param>
-        public void CastFireball(Position3 position, Vector3 direction);
+        public void CastFireball(Position3 position, UnitVector3 direction);
     }
 
     private void Fire(IAvatarLogicActions commands)

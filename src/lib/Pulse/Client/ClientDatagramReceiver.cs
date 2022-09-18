@@ -3,7 +3,9 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using System.Collections.Generic;
 using Piot.Clog;
+using Piot.Collections;
 using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.Stats;
@@ -27,6 +29,7 @@ namespace Piot.Surge.Pulse.Client
         private readonly ClientDeltaSnapshotPlayback notifyPlayback;
         private readonly OrderedDatagramsInChecker orderedDatagramsInChecker = new();
         private readonly SnapshotFragmentReAssembler snapshotFragmentReAssembler;
+        private readonly CircularBuffer<int> snapshotLatencies = new(128);
         private readonly StatCountThreshold statsHostInputQueueCount = new(60);
         private readonly StatCountThreshold statsRoundTripTime = new(10);
         private readonly ITransportClient transportClient;
@@ -53,7 +56,9 @@ namespace Piot.Surge.Pulse.Client
                 averageRoundTripTimeMs = (uint)statsRoundTripTime.Stat.average
             };
 
-        private void ReceiveSnapshotExtraData(IOctetReader reader, TimeMs now)
+        public IEnumerable<int> SnapshotLatencies => snapshotLatencies;
+
+        private long ReceiveSnapshotExtraData(IOctetReader reader, TimeMs now)
         {
             var pongTimeLowerBits = MonotonicTimeLowerBitsReader.Read(reader);
             var pongTime = LowerBitsToMonotonic.LowerBitsToMonotonicMs(now, pongTimeLowerBits);
@@ -70,19 +75,23 @@ namespace Piot.Surge.Pulse.Client
 
             log.DebugLowLevel("InputQueueCountFromHost {InputQueueCount} {AverageInputQueueCount}",
                 numberOfInputInQueue, statsHostInputQueueCount.Stat.average);
+
+            return roundTripTimeMs;
         }
 
         private void ReceiveSnapshot(IOctetReader reader, TimeMs now)
         {
             log.DebugLowLevel("receiving snapshot datagram from server");
-            ReceiveSnapshotExtraData(reader, now);
-            var snapshotIsDone = snapshotFragmentReAssembler.Read(reader, out var tickIdRange, out var completePayload);
+            var lastRoundTripTime = ReceiveSnapshotExtraData(reader, now);
+            var snapshotState = snapshotFragmentReAssembler.Read(reader, out var tickIdRange, out var completePayload);
             notifyLocalInputFetchAndSend.LastSeenSnapshotTickId = tickIdRange.Last;
 
-            if (!snapshotIsDone)
+            if (snapshotState != SnapshotFragmentReAssembler.State.Done)
             {
                 return;
             }
+
+            snapshotLatencies.Enqueue((int)lastRoundTripTime);
 
             notifyLocalInputFetchAndSend.AdjustInputTickSpeed(tickIdRange.Last,
                 (uint)statsRoundTripTime.Stat.average);

@@ -13,6 +13,13 @@ namespace Piot.Surge.SnapshotProtocol.Fragment
 {
     public sealed class SnapshotFragmentReAssembler
     {
+        public enum State
+        {
+            Receiving,
+            Done,
+            Discarded
+        }
+
         private readonly ILog log;
         private readonly MemoryStream payloadAssembly = new();
         private TickIdRange assemblingTickIdRange;
@@ -24,7 +31,7 @@ namespace Piot.Surge.SnapshotProtocol.Fragment
             this.log = log;
         }
 
-        public bool Read(IOctetReader reader, out TickIdRange outTickIdRange, out ReadOnlySpan<byte> outPayload)
+        public State Read(IOctetReader reader, out TickIdRange outTickIdRange, out ReadOnlySpan<byte> outPayload)
         {
             SnapshotFragmentHeaderReader.Read(reader, out var tickIdRange, out var datagramIndex, out var octetCount,
                 out var isLastOne);
@@ -35,12 +42,13 @@ namespace Piot.Surge.SnapshotProtocol.Fragment
             if (!tickIdRangeSet || assemblingTickIdRange != tickIdRange)
             {
                 payloadAssembly.SetLength(0);
-                if (datagramIndex != 0)
+                if (datagramIndex != 0) // We have caught a snapshot, but not at the start index
                 {
                     tickIdRangeSet = false;
                     outPayload = ReadOnlySpan<byte>.Empty;
 
-                    return false;
+
+                    return State.Discarded;
                 }
 
                 tickIdRangeSet = true;
@@ -53,7 +61,7 @@ namespace Piot.Surge.SnapshotProtocol.Fragment
                 payloadAssembly.SetLength(0);
                 tickIdRangeSet = false;
                 outPayload = ReadOnlySpan<byte>.Empty;
-                return false;
+                return State.Discarded;
             }
 
             var fragmentPayload = reader.ReadOctets(octetCount);
@@ -70,7 +78,7 @@ namespace Piot.Surge.SnapshotProtocol.Fragment
 
             outPayload = fragmentPayload;
 
-            return isLastOne;
+            return isLastOne ? State.Done : State.Receiving;
         }
     }
 }

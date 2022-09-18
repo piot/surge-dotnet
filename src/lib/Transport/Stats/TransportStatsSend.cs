@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
+using Piot.Collections;
 using Piot.MonotonicTime;
 using Piot.Stats;
 
@@ -14,6 +15,7 @@ namespace Piot.Transport.Stats
         private readonly StatPerSecond bitsPerSecond;
         private readonly StatPerSecond datagramCountPerSecond;
         private readonly StatCountThreshold datagramOctetSize;
+        private readonly CircularBuffer<int> datagramOctetSizes = new(Constants.CircularBufferSize);
         private readonly ITransportSend wrappedTransport;
         private TransportStatsInDirection stats;
 
@@ -28,6 +30,7 @@ namespace Piot.Transport.Stats
             stats.bitsPerSecond = bitsPerSecond.Stat;
             stats.datagramCountPerSecond = datagramCountPerSecond.Stat;
             stats.datagramOctetSize = datagramOctetSize.Stat;
+            stats.datagramOctetSizes = datagramOctetSizes;
         }
 
         public TransportStatsInDirection Stats => stats;
@@ -41,6 +44,7 @@ namespace Piot.Transport.Stats
 
             bitsPerSecond.Add(payload.Length * 8);
             datagramOctetSize.Add(payload.Length);
+            datagramOctetSizes.Enqueue(payload.Length);
             datagramCountPerSecond.Add(1);
             wrappedTransport.SendToEndpoint(remoteEndpointId, payload);
         }
