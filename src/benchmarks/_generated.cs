@@ -250,6 +250,10 @@ public sealed class AvatarLogicActions : BenchmarkAvatarLogic.IAvatarLogicAction
         actionsContainer.Add(new FireChainLightning { direction = direction });
     }
 
+    public void CastFireball(Position3 position, UnitVector3 direction)
+    {
+    }
+
     public void CastFireball(Position3 position, Vector3 direction)
     {
         actionsContainer.Add(new CastFireball { position = position, direction = direction });
