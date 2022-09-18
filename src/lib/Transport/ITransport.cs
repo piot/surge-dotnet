@@ -30,12 +30,12 @@ namespace Piot.Transport
     {
         public const uint ReservedId = uint.MaxValue;
 
-        public RemoteEndpointId(uint channel)
+        public RemoteEndpointId(ushort channel)
         {
             Value = channel;
         }
 
-        public uint Value { get; }
+        public ushort Value { get; }
 
         public override string ToString()
         {

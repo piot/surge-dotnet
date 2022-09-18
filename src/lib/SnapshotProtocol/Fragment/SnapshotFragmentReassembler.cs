@@ -8,6 +8,7 @@ using System.IO;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.Surge.Tick;
+using Piot.Surge.Tick.Serialization;
 
 namespace Piot.Surge.SnapshotProtocol.Fragment
 {
@@ -29,6 +30,26 @@ namespace Piot.Surge.SnapshotProtocol.Fragment
         public SnapshotFragmentReAssembler(ILog log)
         {
             this.log = log;
+        }
+
+        public void Serialize(IOctetWriter writer)
+        {
+            writer.WriteUInt16((ushort)payloadAssembly.Length);
+            writer.WriteOctets(payloadAssembly.GetBuffer());
+            writer.WriteUInt8((byte)(tickIdRangeSet ? 0x01 : 0x00));
+            TickIdRangeWriter.Write(writer, assemblingTickIdRange);
+            writer.WriteUInt8((byte)nextDatagramIndex);
+        }
+
+        public void Deserialize(IOctetReader reader)
+        {
+            payloadAssembly.SetLength(0);
+            var octetLength = reader.ReadUInt16();
+            var octets = reader.ReadOctets(octetLength);
+            payloadAssembly.Write(octets);
+            tickIdRangeSet = reader.ReadUInt8() != 0;
+            assemblingTickIdRange = TickIdRangeReader.Read(reader);
+            nextDatagramIndex = reader.ReadUInt8();
         }
 
         public State Read(IOctetReader reader, out TickIdRange outTickIdRange, out ReadOnlySpan<byte> outPayload)
@@ -76,7 +97,7 @@ namespace Piot.Surge.SnapshotProtocol.Fragment
 
             nextDatagramIndex = (uint)datagramIndex + 1;
 
-            outPayload = fragmentPayload;
+            outPayload = payloadAssembly.GetBuffer();
 
             return isLastOne ? State.Done : State.Receiving;
         }

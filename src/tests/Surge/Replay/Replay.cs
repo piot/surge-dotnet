@@ -5,6 +5,7 @@
 
 using Piot.Clog;
 using Piot.Flood;
+using Piot.SerializableVersion;
 using Piot.Surge.Replay.Serialization;
 using Xunit.Abstractions;
 
@@ -65,9 +66,11 @@ public sealed class ReplayTests
     public void WriteAndReadReplay()
     {
         const string filename = "write_and_read_replay.temp";
+        var applicationVersion = new SemanticVersion(0, 1, 2);
+
         {
             using var fileStream = FileStreamCreator.Create(filename);
-            var versionInfo = new ReplayVersionInfo(new(0, 1, 2), new(3, 4, 5));
+            var versionInfo = new ReplayVersionInfo(applicationVersion, new(3, 4, 5));
 
             var replayRecorder = new ReplayWriter(new CompleteState(new(49200), new(42), new byte[] { 0xca, 0xba }),
                 versionInfo,
@@ -78,7 +81,7 @@ public sealed class ReplayTests
 
         {
             var fileStream = FileStreamCreator.OpenWithSeek(filename);
-            var replayPlayback = new ReplayReader(fileStream);
+            var replayPlayback = new ReplayReader(applicationVersion, fileStream);
             Assert.Equal(42u, replayPlayback.FirstCompleteStateTickId.tickId);
             Assert.Equal(1, replayPlayback.ApplicationVersion.minor);
             Assert.Equal(2, replayPlayback.ApplicationVersion.patch);

@@ -23,11 +23,17 @@ namespace Piot.Surge.Replay.Serialization
         private TimeMs lastReadTimeMs;
         private TimeMs lastTimeMsFromDeltaState;
 
-        public ReplayReader(IOctetReaderWithSeekAndSkip readerWithSeek)
+        public ReplayReader(SemanticVersion expectedApplicationVersion, IOctetReaderWithSeekAndSkip readerWithSeek)
         {
             this.readerWithSeek = readerWithSeek;
             raffReader = new(readerWithSeek);
             ReadVersionInfo();
+
+            if (!expectedApplicationVersion.IsEqualDisregardSuffix(ApplicationVersion))
+            {
+                throw new Exception(
+                    $"version mismatch, can not use this replay file {ApplicationVersion} vs expected {expectedApplicationVersion}");
+            }
 
             var positionBefore = readerWithSeek.Position;
 

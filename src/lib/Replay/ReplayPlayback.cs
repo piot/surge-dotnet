@@ -34,12 +34,7 @@ namespace Piot.Surge.Replay
             IEventProcessor eventProcessor, TimeMs now,
             SemanticVersion expectedApplicationVersion, IOctetReaderWithSeekAndSkip reader, ILog log)
         {
-            replayReader = new(reader);
-            if (!expectedApplicationVersion.IsEqualDisregardSuffix(replayReader.ApplicationVersion))
-            {
-                throw new Exception(
-                    $"version mismatch, can not use this replay file {replayReader.ApplicationVersion} vs expected {expectedApplicationVersion}");
-            }
+            replayReader = new(expectedApplicationVersion, reader);
 
             if (!replayReader.StateSerializationVersion.IsEqualDisregardSuffix(SurgeConstants
                     .SnapshotSerializationVersion))

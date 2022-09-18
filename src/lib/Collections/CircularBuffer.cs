@@ -12,8 +12,8 @@ namespace Piot.Collections
     public sealed class CircularBuffer<T> : IEnumerable<T>
     {
         private readonly T[] buffer;
-        private int head;
         private readonly bool overwrite;
+        private int head;
         private int tail;
 
         public CircularBuffer(int capacity, bool overwrite = true)
@@ -25,15 +25,15 @@ namespace Piot.Collections
         public int Capacity => buffer.Length;
 
         /// <summary>
-        ///     Length is recommended for contiguous elements in a collection
+        ///     Count is recommended for contiguous elements in a collection
         /// </summary>
-        public int Length { get; private set; }
+        public int Count { get; private set; }
 
         public IEnumerator<T> GetEnumerator()
         {
             var index = head;
 
-            for (var i = 0; i < Length; i++, index = (index + 1) % Capacity)
+            for (var i = 0; i < Count; i++, index = (index + 1) % Capacity)
             {
                 yield return buffer[index];
             }
@@ -53,12 +53,12 @@ namespace Piot.Collections
 
             head = 0;
             tail = 0;
-            Length = 0;
+            Count = 0;
         }
 
         public void Enqueue(T item)
         {
-            if (Length >= Capacity)
+            if (Count >= Capacity)
             {
                 if (overwrite)
                 {
@@ -71,23 +71,33 @@ namespace Piot.Collections
             }
             else
             {
-                Length++;
+                Count++;
             }
 
             buffer[tail] = item;
             tail = (tail + 1) % Capacity;
         }
 
+        public T Peek()
+        {
+            if (Count == 0)
+            {
+                throw new InvalidOperationException("Can not peek an empty buffer");
+            }
+
+            return buffer[head];
+        }
+
         public T Dequeue()
         {
-            if (Length == 0)
+            if (Count == 0)
             {
                 throw new InvalidOperationException("Can not dequeue empty buffer");
             }
 
             var item = buffer[head];
             head = (head + 1) % Capacity;
-            Length--;
+            Count--;
             return item;
         }
     }

@@ -45,6 +45,18 @@ namespace Piot.Surge.OrderedDatagrams
             return wasOk;
         }
 
+        public void Serialize(IOctetWriter writer)
+        {
+            writer.WriteUInt8((byte)(hasReceivedInitialValue ? 0x01 : 0x00));
+            writer.WriteUInt8(LastValue.Value);
+        }
+
+        public void Deserialize(IOctetReader reader)
+        {
+            hasReceivedInitialValue = reader.ReadUInt8() != 0;
+            LastValue = new(reader.ReadUInt8());
+        }
+
         public override string ToString()
         {
             return $"[OrderedDatagramsInCheck {LastValue} ({hasReceivedInitialValue})]";

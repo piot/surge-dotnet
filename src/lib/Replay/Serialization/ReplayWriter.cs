@@ -18,11 +18,14 @@ namespace Piot.Surge.Replay.Serialization
     {
         private readonly OctetWriter cachedStateWriter = new(16 * 1024);
         private readonly RaffWriter raffWriter;
+        private readonly uint framesBetweenCompleteState;
         private TickIdRange lastInsertedDeltaStateRange;
         private uint packCountSinceCompleteState;
 
-        public ReplayWriter(CompleteState completeState, ReplayVersionInfo replayVersionInfo, IOctetWriter writer)
+        public ReplayWriter(CompleteState completeState, ReplayVersionInfo replayVersionInfo, IOctetWriter writer,
+            uint framesUntilCompleteState = 60)
         {
+            framesBetweenCompleteState = framesUntilCompleteState;
             raffWriter = new RaffWriter(writer);
             WriteVersionChunk(replayVersionInfo);
             packCountSinceCompleteState = 60;
@@ -30,7 +33,8 @@ namespace Piot.Surge.Replay.Serialization
             AddCompleteState(completeState);
         }
 
-        public bool NeedsCompleteState => packCountSinceCompleteState >= 60;
+        public bool NeedsCompleteState => framesBetweenCompleteState != 0 &&
+                                          packCountSinceCompleteState >= framesBetweenCompleteState;
 
         private void WriteVersionChunk(ReplayVersionInfo replayVersionInfo)
         {

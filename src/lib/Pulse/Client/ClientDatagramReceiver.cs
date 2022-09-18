@@ -79,6 +79,18 @@ namespace Piot.Surge.Pulse.Client
             return roundTripTimeMs;
         }
 
+        public void Serialize(IOctetWriter writer)
+        {
+            orderedDatagramsInChecker.Serialize(writer);
+            snapshotFragmentReAssembler.Serialize(writer);
+        }
+
+        public void Deserialize(IOctetReader reader)
+        {
+            orderedDatagramsInChecker.Deserialize(reader);
+            snapshotFragmentReAssembler.Deserialize(reader);
+        }
+
         private void ReceiveSnapshot(IOctetReader reader, TimeMs now)
         {
             log.DebugLowLevel("receiving snapshot datagram from server");
