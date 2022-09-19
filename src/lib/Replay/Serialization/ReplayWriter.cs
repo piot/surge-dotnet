@@ -19,7 +19,7 @@ namespace Piot.Surge.Replay.Serialization
         private readonly OctetWriter cachedStateWriter = new(16 * 1024);
         private readonly uint framesBetweenCompleteState;
         private readonly RaffWriter raffWriter;
-        private TickIdRange lastInsertedDeltaStateRange;
+
         private uint packCountSinceCompleteState;
 
         public ReplayWriter(CompleteState completeState, ReplayVersionInfo replayVersionInfo, IOctetWriter writer,
@@ -29,7 +29,6 @@ namespace Piot.Surge.Replay.Serialization
             raffWriter = new RaffWriter(writer);
             WriteVersionChunk(replayVersionInfo);
             packCountSinceCompleteState = 60;
-            lastInsertedDeltaStateRange = TickIdRange.FromTickId(completeState.TickId);
             AddCompleteState(completeState);
         }
 
@@ -60,11 +59,6 @@ namespace Piot.Surge.Replay.Serialization
                 throw new Exception("Not allowed to insert complete state now");
             }
 
-            if (completeState.TickId != lastInsertedDeltaStateRange.Last)
-            {
-                throw new ArgumentOutOfRangeException(nameof(completeState),
-                    $"complete state must be {lastInsertedDeltaStateRange.Last}, but encountered {completeState.TickId}");
-            }
 
             packCountSinceCompleteState = 0;
 
@@ -91,16 +85,10 @@ namespace Piot.Surge.Replay.Serialization
                 throw new Exception($"needs complete state now, been {packCountSinceCompleteState} since last one");
             }
 
-            if (!lastInsertedDeltaStateRange.CanAppend(deltaState.TickIdRange))
-            {
-                throw new Exception($"not appendable {lastInsertedDeltaStateRange} and {deltaState.TickIdRange}");
-            }
-
             cachedStateWriter.Reset();
             WriteDeltaHeader(cachedStateWriter, deltaState.TimeProcessedMs, deltaState.TickIdRange);
             cachedStateWriter.WriteOctets(deltaState.Payload);
             raffWriter.WriteChunk(Constants.DeltaStateIcon, Constants.DeltaStateName, cachedStateWriter.Octets);
-            lastInsertedDeltaStateRange = deltaState.TickIdRange;
         }
 
         public void Close()

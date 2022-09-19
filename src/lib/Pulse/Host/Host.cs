@@ -95,6 +95,12 @@ namespace Piot.Surge.Pulse.Host
             log.DebugLowLevel("stats: {Stats}", transportWithStats.Stats);
         }
 
+        public void ResetTime(TimeMs now)
+        {
+            simulationTicker.Reset(now);
+            statsTicker.Reset(now);
+        }
+
         public void Update(TimeMs now)
         {
             clientConnections.ReceiveFromClients(authoritativeTickId);

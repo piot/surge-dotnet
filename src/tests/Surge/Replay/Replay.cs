@@ -31,8 +31,11 @@ public sealed class ReplayTests
             new ReplayWriter(new CompleteState(new(49200), new(42), new byte[] { 0xca, 0xba }), versionInfo,
                 fileStream);
 
+        // TODO: move to other tests
+        /*
         Assert.Throws<Exception>(() =>
             replayRecorder.AddDeltaState(new(new(42439), new(new(48), new(50)), new byte[] { 0xfe })));
+            */
     }
 
     [Fact]
@@ -45,8 +48,11 @@ public sealed class ReplayTests
             new ReplayWriter(new CompleteState(new(49200), new(42), new byte[] { 0xca, 0xba }), versionInfo,
                 fileStream);
 
+        // TODO: Move to snapshot tests
+        /*
         Assert.Throws<Exception>(() =>
             replayRecorder.AddDeltaState(new(new(4949), new(new(40), new(42)), new byte[] { 0xfe })));
+            */
     }
 
     [Fact]

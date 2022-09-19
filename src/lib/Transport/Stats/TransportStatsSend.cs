@@ -16,8 +16,8 @@ namespace Piot.Transport.Stats
         private readonly StatPerSecond datagramCountPerSecond;
         private readonly StatCountThreshold datagramOctetSize;
         private readonly CircularBuffer<int> datagramOctetSizes = new(Constants.CircularBufferSize);
-        private readonly ITransportSend wrappedTransport;
         private TransportStatsInDirection stats;
+        private ITransportSend wrappedTransport;
 
         public TransportStatsSend(TimeMs now, ITransportSend transportSend)
         {
@@ -34,6 +34,11 @@ namespace Piot.Transport.Stats
         }
 
         public TransportStatsInDirection Stats => stats;
+
+        public ITransportSend WrappedTransport
+        {
+            set => wrappedTransport = value;
+        }
 
         public void SendToEndpoint(EndpointId endpointId, ReadOnlySpan<byte> payload)
         {

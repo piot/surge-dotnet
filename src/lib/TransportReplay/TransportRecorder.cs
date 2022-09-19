@@ -25,7 +25,7 @@ namespace Piot.Surge.TransportReplay
             SemanticVersion applicationSemanticVersion,
             IMonotonicTimeMs timeProvider, TickId tickId, IOctetWriter target)
         {
-            this.wrappedTransport = wrappedTransport;
+            this.wrappedTransport = wrappedTransport ?? throw new ArgumentNullException(nameof(wrappedTransport));
             TickId = tickId;
             this.timeProvider = timeProvider;
             var stateWriter = new OctetWriter(32 * 1024);

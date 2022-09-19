@@ -4,13 +4,16 @@
  *--------------------------------------------------------------------------------------------*/
 
 using Piot.Clog;
+using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.Stats;
 using Piot.Surge.Corrections;
 using Piot.Surge.DeltaSnapshot.Pack;
 using Piot.Surge.Event;
+using Piot.Surge.Event.Serialization;
 using Piot.Surge.SnapshotProtocol.In;
 using Piot.Surge.Tick;
+using Piot.Surge.Tick.Serialization;
 using Piot.Surge.TimeTick;
 
 namespace Piot.Surge.Pulse.Client
@@ -19,7 +22,7 @@ namespace Piot.Surge.Pulse.Client
     ///     Enqueues delta snapshots and plays them back at varying delta time depending on number of delta snapshots in
     ///     snapshotsQueue.
     /// </summary>
-    public sealed class ClientDeltaSnapshotPlayback
+    public sealed class ClientDeltaSnapshotPlayback : IOctetSerializable
     {
         private readonly IEntityContainerWithGhostCreator clientWorld;
         private readonly IEventProcessor eventProcessor;
@@ -30,9 +33,9 @@ namespace Piot.Surge.Pulse.Client
         private readonly ISnapshotPlaybackNotify snapshotPlaybackNotify;
         private readonly TimeTicker snapshotPlaybackTicker;
         private readonly SnapshotDeltaPackIncludingCorrectionsQueue snapshotsQueue = new();
-        private readonly FixedDeltaTimeMs targetDeltaTimeMs;
         private EventSequenceId expectedEventSequenceId;
         private TickId playbackTick = new(0);
+        private FixedDeltaTimeMs targetDeltaTimeMs;
 
         public ClientDeltaSnapshotPlayback(TimeMs now, IEntityContainerWithGhostCreator clientWorld,
             IEventProcessor eventProcessor, IClientPredictorCorrections predictor,
@@ -57,6 +60,22 @@ namespace Piot.Surge.Pulse.Client
         public bool IsIncomingBufferStarving => lastBufferWasStarved.IsOrWasTrue;
 
         public TickId PlaybackTickId => playbackTick;
+
+        public void Deserialize(IOctetReader reader)
+        {
+            snapshotsQueue.Deserialize(reader);
+            targetDeltaTimeMs = new(reader.ReadUInt32());
+            expectedEventSequenceId = EventSequenceIdReader.Read(reader);
+            playbackTick = TickIdReader.Read(reader);
+        }
+
+        public void Serialize(IOctetWriter writer)
+        {
+            snapshotsQueue.Serialize(writer);
+            writer.WriteUInt32(targetDeltaTimeMs.ms);
+            EventSequenceIdWriter.Write(writer, expectedEventSequenceId);
+            TickIdWriter.Write(writer, playbackTick);
+        }
 
         public void Update(TimeMs now)
         {

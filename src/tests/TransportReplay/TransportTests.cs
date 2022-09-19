@@ -16,7 +16,7 @@ namespace Tests.TransportReplay;
 
 public sealed class TransportReplayTests
 {
-    public static readonly SemanticVersion applicationVersion = new(0, 2, 3);
+    private static readonly SemanticVersion applicationVersion = new(0, 2, 3);
     private readonly ILog log;
 
     public TransportReplayTests(ITestOutputHelper output)
@@ -78,7 +78,7 @@ public sealed class TransportReplayTests
         Assert.Equal(EndpointId.NoEndpoint, nextRemoteId);
     }
 
-    public class MockState : IOctetSerializable
+    private class MockState : IOctetSerializable
     {
         public uint counter;
 

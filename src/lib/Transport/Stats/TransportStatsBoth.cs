@@ -12,14 +12,27 @@ namespace Piot.Transport.Stats
     {
         private readonly TransportStatsReceive receive;
         private readonly TransportStatsSend send;
+        private ITransport bothTransport;
 
         public TransportStatsBoth(ITransport transport, TimeMs now)
         {
             receive = new(now, transport);
             send = new(now, transport);
+            bothTransport = transport;
         }
 
         public TransportStats Stats => new() { receive = receive.Stats, send = send.Stats };
+
+        public ITransport Transport
+        {
+            get => bothTransport;
+            set
+            {
+                bothTransport = value;
+                receive.WrappedTransport = value;
+                send.WrappedTransport = value;
+            }
+        }
 
         void ITransportSend.SendToEndpoint(EndpointId endpointId, ReadOnlySpan<byte> payload)
         {

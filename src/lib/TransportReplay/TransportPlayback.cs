@@ -14,6 +14,7 @@ namespace Piot.Surge.TransportReplay
 {
     public class TransportPlayback : ITransportReceive
     {
+        private readonly long adjustTimeMs;
         private readonly ReplayReader replayPlayback;
         private readonly IMonotonicTimeMs timeProvider;
         private bool isEndOfStream;
@@ -25,6 +26,7 @@ namespace Piot.Surge.TransportReplay
             this.timeProvider = timeProvider;
             replayPlayback = new(applicationSemanticVersion, readerWithSeekAndSkip);
             var completeState = replayPlayback.Seek(new(0));
+            InitialTimeMs = completeState.CapturedAtTimeMs;
 
             var reader = new OctetReader(completeState.Payload);
             state.Deserialize(reader);
@@ -33,6 +35,8 @@ namespace Piot.Surge.TransportReplay
 
             nextDeltaState = deltaState ?? throw new Exception("too short");
         }
+
+        public TimeMs InitialTimeMs { get; }
 
         public ReadOnlySpan<byte> Receive(out EndpointId endpointId)
         {

@@ -94,5 +94,11 @@ namespace Piot.Surge.TimeTick
                 Tick();
             }
         }
+
+        public void Reset(TimeMs now)
+        {
+            lastUpdateTime = now;
+            lastTick = now;
+        }
     }
 }

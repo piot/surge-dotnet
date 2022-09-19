@@ -5,11 +5,14 @@
 
 using System;
 using System.Collections.Generic;
+using Piot.Flood;
+using Piot.Surge.DeltaSnapshot.Pack;
 using Piot.Surge.Tick;
+using Piot.Surge.Tick.Serialization;
 
 namespace Piot.Surge.Corrections
 {
-    public sealed class SnapshotDeltaPackIncludingCorrectionsQueue : ISnapshotDeltaPackQueue
+    public sealed class SnapshotDeltaPackIncludingCorrectionsQueue : ISnapshotDeltaPackQueue, IOctetSerializable
     {
         private readonly Queue<SnapshotDeltaPackIncludingCorrectionsItem> packs = new();
 
@@ -23,6 +26,34 @@ namespace Piot.Surge.Corrections
         public TickIdRange LastInsertedTickIdRange => lastInsertedTickIdRange;
 
         public bool HasBeenInitialized { get; private set; }
+
+        public void Deserialize(IOctetReader reader)
+        {
+            var count = reader.ReadUInt8();
+            var queue = new Queue<SnapshotDeltaPackIncludingCorrectionsItem>(count);
+            for (var i = 0; i < count; ++i)
+            {
+                var newItem = new SnapshotDeltaPackIncludingCorrectionsItem(
+                    new(lastInsertedTickIdRange, ReadOnlySpan<byte>.Empty, ReadOnlySpan<byte>.Empty,
+                        SnapshotStreamType.BitStream, SnapshotType.CompleteState), new(0));
+                newItem.Deserialize(reader);
+                queue.Enqueue(newItem);
+            }
+        }
+
+        public void Serialize(IOctetWriter writer)
+        {
+            writer.WriteUInt8((byte)packs.Count);
+            foreach (var pack in packs)
+            {
+                pack.Serialize(writer);
+            }
+
+            TickIdRangeWriter.Write(writer, lastInsertedTickIdRange);
+            TickIdWriter.Write(writer, WantsTickId);
+            writer.WriteUInt8((byte)(LastInsertedIsMergedSnapshot ? 0x01 : 0x00));
+            writer.WriteUInt8((byte)(HasBeenInitialized ? 0x01 : 0x00));
+        }
 
         public void Enqueue(SnapshotDeltaPackIncludingCorrections pack)
         {
