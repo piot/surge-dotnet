@@ -24,7 +24,7 @@ namespace Piot.Surge.Pulse.Host
         private readonly OrderedDatagramsInChecker orderedDatagramsIn = new();
         private readonly SnapshotSyncerClient syncer;
 
-        public ConnectionToClient(RemoteEndpointId id, SnapshotSyncerClient syncer, ILog log)
+        public ConnectionToClient(EndpointId id, SnapshotSyncerClient syncer, ILog log)
         {
             Id = id;
             this.log = log;
@@ -33,7 +33,7 @@ namespace Piot.Surge.Pulse.Host
 
         public Dictionary<uint, ConnectionPlayer> ConnectionPlayers { get; } = new();
 
-        public RemoteEndpointId Id { get; }
+        public EndpointId Id { get; }
 
         public override string ToString()
         {

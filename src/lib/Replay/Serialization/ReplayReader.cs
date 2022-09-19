@@ -93,13 +93,18 @@ namespace Piot.Surge.Replay.Serialization
                 return closest;
             }
 
-            var previous = completeStateEntries[left - 1];
-            if (previous.tickId > tickIdValue)
+            if (left >= 1)
             {
-                throw new Exception("strange state in replay");
+                var previous = completeStateEntries[left - 1];
+                if (previous.tickId > tickIdValue)
+                {
+                    throw new Exception("strange state in replay");
+                }
+
+                return previous;
             }
 
-            return previous;
+            return closest;
         }
 
         public CompleteState Seek(TickId closestToTick)

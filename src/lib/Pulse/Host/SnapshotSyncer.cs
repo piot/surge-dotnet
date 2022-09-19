@@ -27,7 +27,7 @@ namespace Piot.Surge.Pulse.Host
     public sealed class SnapshotSyncer
     {
         private readonly BitWriter cachedBitWriterForSnapshots = new(Constants.MaxSnapshotOctetSize);
-        private readonly OctetWriter cachedDatagramsWriter = new(Constants.MaxDatagramOctetSize);
+        private readonly OctetWriter cachedDatagramsWriter = new(Transport.Constants.MaxDatagramOctetSize);
         private readonly OctetWriter cachedPhysicsCorrectionPackSubWriter = new(12 * 1024);
         private readonly OctetWriter cachedPhysicsCorrectionPackWriter = new(12 * 1024);
         private readonly OctetWriter cachedPhysicsCorrectionWriter = new(10 * 1024);
@@ -78,7 +78,7 @@ namespace Piot.Surge.Pulse.Host
             entityMasksHistory.DiscardUpTo(allClientsAreWaitingForAtLeastTickId);
         }
 
-        public SnapshotSyncerClient Create(RemoteEndpointId id)
+        public SnapshotSyncerClient Create(EndpointId id)
         {
             var client = new SnapshotSyncerClient(id, HandleNotifyExpectedTickId);
 

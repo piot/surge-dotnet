@@ -79,12 +79,12 @@ namespace Piot.Surge.Tick
 
         public bool CanAppend(TickIdRange other)
         {
-            return other.Last > Last && other.startTickId <= Last.Next();
+            return other.Last > Last && other.startTickId <= Last.Next;
         }
 
         public bool CanBeFollowing(TickId otherTickId)
         {
-            return Last > otherTickId && startTickId <= otherTickId.Next();
+            return Last > otherTickId && startTickId <= otherTickId.Next;
         }
 
         public bool IsOverlappingAndMerged(TickId tickId)

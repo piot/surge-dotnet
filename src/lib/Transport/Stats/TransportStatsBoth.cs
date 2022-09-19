@@ -21,14 +21,14 @@ namespace Piot.Transport.Stats
 
         public TransportStats Stats => new() { receive = receive.Stats, send = send.Stats };
 
-        void ITransportSend.SendToEndpoint(RemoteEndpointId remoteEndpointId, ReadOnlySpan<byte> payload)
+        void ITransportSend.SendToEndpoint(EndpointId endpointId, ReadOnlySpan<byte> payload)
         {
-            send.SendToEndpoint(remoteEndpointId, payload);
+            send.SendToEndpoint(endpointId, payload);
         }
 
-        ReadOnlySpan<byte> ITransportReceive.Receive(out RemoteEndpointId remoteEndpointId)
+        ReadOnlySpan<byte> ITransportReceive.Receive(out EndpointId endpointId)
         {
-            return receive.Receive(out remoteEndpointId);
+            return receive.Receive(out endpointId);
         }
 
         public void Update(TimeMs now)

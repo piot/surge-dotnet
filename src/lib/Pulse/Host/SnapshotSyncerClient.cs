@@ -15,12 +15,11 @@ namespace Piot.Surge.Pulse.Host
 {
     public sealed class SnapshotSyncerClient
     {
+        private readonly Action<TickId> OnNotifyExpectingTickId;
         public sbyte clientInputTickCountAheadOfServer;
         public MonotonicTimeLowerBits.MonotonicTimeLowerBits lastReceivedMonotonicTimeLowerBits;
 
-        private readonly Action<TickId> OnNotifyExpectingTickId;
-
-        public SnapshotSyncerClient(RemoteEndpointId id, Action<TickId> onNotifyExpectingTickId)
+        public SnapshotSyncerClient(EndpointId id, Action<TickId> onNotifyExpectingTickId)
         {
             OnNotifyExpectingTickId = onNotifyExpectingTickId;
             Endpoint = id;
@@ -34,7 +33,7 @@ namespace Piot.Surge.Pulse.Host
 
         public bool WantsResend { get; private set; }
 
-        public RemoteEndpointId Endpoint { get; }
+        public EndpointId Endpoint { get; }
         public OrderedDatagramsSequenceIdIncrease DatagramsSequenceIdIncrease { get; } = new();
 
         public void SetAssignedPredictedEntity(LocalPlayerIndex localPlayerIndex, IEntity entity)

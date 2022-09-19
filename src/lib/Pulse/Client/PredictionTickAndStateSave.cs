@@ -17,7 +17,7 @@ namespace Piot.Surge.Pulse.Client
         {
             PredictionTicker.Predict(predictedEntity, tickIdBeforePredictTick, rollbackStack, isRollforth,
                 undoScratchWriter);
-            var tickIdAfterPredict = tickIdBeforePredictTick.Next();
+            var tickIdAfterPredict = tickIdBeforePredictTick.Next;
             PredictStateSerializer.SavePredictedState(predictedEntity, tickIdAfterPredict, predictionStateHistory);
         }
     }

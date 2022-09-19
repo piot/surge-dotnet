@@ -23,14 +23,14 @@ namespace Piot.Hazy
             simulatorOut = new(wrapped, timeProvider, random, log);
         }
 
-        public ReadOnlySpan<byte> Receive(out RemoteEndpointId remoteEndpointId)
+        public ReadOnlySpan<byte> Receive(out EndpointId endpointId)
         {
-            return simulatorIn.Receive(out remoteEndpointId);
+            return simulatorIn.Receive(out endpointId);
         }
 
-        public void SendToEndpoint(RemoteEndpointId remoteEndpointId, ReadOnlySpan<byte> payload)
+        public void SendToEndpoint(EndpointId endpointId, ReadOnlySpan<byte> payload)
         {
-            simulatorOut.SendToEndpoint(remoteEndpointId, payload);
+            simulatorOut.SendToEndpoint(endpointId, payload);
         }
 
         public void Update()

@@ -35,9 +35,9 @@ namespace Piot.Transport.Stats
 
         public TransportStatsInDirection Stats => stats;
 
-        public ReadOnlySpan<byte> Receive(out RemoteEndpointId remoteEndpointId)
+        public ReadOnlySpan<byte> Receive(out EndpointId endpointId)
         {
-            var payload = wrappedTransport.Receive(out remoteEndpointId);
+            var payload = wrappedTransport.Receive(out endpointId);
             if (payload.Length > 0)
             {
                 bitsPerSecond.Add(payload.Length * 8);

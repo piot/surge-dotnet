@@ -100,7 +100,7 @@ public sealed class RollforthTests
 
             var undoWriter = new OctetWriter(1024);
             PredictionTicker.Predict(spawnedEntity, now, rollbackStack, PredictMode.Predicting, undoWriter);
-            now = now.Next();
+            now = now.Next;
             log.Debug("Prediction at {Now} {Position} {Ammo}", now, internalEntity.Self.position,
                 internalEntity.Self.ammoCount);
         }

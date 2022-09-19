@@ -8,7 +8,6 @@ using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.Surge.LogicalInput.Serialization;
 using Piot.Surge.OrderedDatagrams;
-using Piot.Surge.SnapshotProtocol;
 using Piot.Surge.Tick;
 using Piot.Transport;
 

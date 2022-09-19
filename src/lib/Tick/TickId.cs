@@ -28,10 +28,7 @@ namespace Piot.Surge.Tick
             this.tickId = tickId;
         }
 
-        public TickId Next()
-        {
-            return new(tickId + 1);
-        }
+        public TickId Next => new(tickId + 1);
 
         public TickId Previous()
         {

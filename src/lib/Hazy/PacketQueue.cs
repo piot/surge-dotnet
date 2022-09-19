@@ -75,7 +75,7 @@ namespace Piot.Hazy
         /// <param name="endpointId"></param>
         /// <param name="foundPacket"></param>
         /// <returns></returns>
-        public bool FindFirstPacketForEndpoint(RemoteEndpointId endpointId, out Packet foundPacket)
+        public bool FindFirstPacketForEndpoint(EndpointId endpointId, out Packet foundPacket)
         {
             foreach (var queuedPacket in queue)
             {

@@ -11,7 +11,7 @@ namespace Piot.Hazy
 {
     public sealed class Packet
     {
-        public RemoteEndpointId endPoint;
+        public EndpointId endPoint;
         public TimeMs monotonicTimeMs;
         public ReadOnlyMemory<byte> payload = Array.Empty<byte>();
 
@@ -19,7 +19,7 @@ namespace Piot.Hazy
         {
         }
 
-        public Packet(TimeMs monotonicTimeMs, RemoteEndpointId endPoint, ReadOnlySpan<byte> payload)
+        public Packet(TimeMs monotonicTimeMs, EndpointId endPoint, ReadOnlySpan<byte> payload)
         {
             this.monotonicTimeMs = monotonicTimeMs;
             this.endPoint = endPoint;

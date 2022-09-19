@@ -35,7 +35,7 @@ namespace Piot.Transport.Stats
 
         public TransportStatsInDirection Stats => stats;
 
-        public void SendToEndpoint(RemoteEndpointId remoteEndpointId, ReadOnlySpan<byte> payload)
+        public void SendToEndpoint(EndpointId endpointId, ReadOnlySpan<byte> payload)
         {
             if (payload.Length <= 0)
             {
@@ -46,7 +46,7 @@ namespace Piot.Transport.Stats
             datagramOctetSize.Add(payload.Length);
             datagramOctetSizes.Enqueue(payload.Length);
             datagramCountPerSecond.Add(1);
-            wrappedTransport.SendToEndpoint(remoteEndpointId, payload);
+            wrappedTransport.SendToEndpoint(endpointId, payload);
         }
 
         public void Update(TimeMs now)

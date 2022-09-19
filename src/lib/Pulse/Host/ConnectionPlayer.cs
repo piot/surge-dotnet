@@ -16,13 +16,13 @@ namespace Piot.Surge.Pulse.Host
     /// </summary>
     public sealed class ConnectionPlayer
     {
-        private readonly RemoteEndpointId connectionId;
+        private readonly EndpointId connectionId;
         public IEntity? AssignedPredictEntity;
 
-        public ConnectionPlayer(RemoteEndpointId connectionId, LocalPlayerIndex localPlayerIndex)
+        public ConnectionPlayer(EndpointId connectionId, LocalPlayerIndex localPlayerIndex)
         {
             this.connectionId = connectionId;
-            this.LocalPlayerIndex = localPlayerIndex;
+            LocalPlayerIndex = localPlayerIndex;
         }
 
         public LogicalInputQueue LogicalInputQueue { get; } = new();

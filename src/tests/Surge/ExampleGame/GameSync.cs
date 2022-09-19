@@ -91,7 +91,7 @@ public sealed class GameSync
         Assert.Equal(0, spawnedCalled);
         Assert.Equal(10, spawnedHostAvatar.Self.ammoCount);
 
-        hostGame.Host!.AssignPredictEntity(new RemoteEndpointId(2), new LocalPlayerIndex(0), spawnedEntity);
+        hostGame.Host!.AssignPredictEntity(new EndpointId(2), new LocalPlayerIndex(0), spawnedEntity);
 
         const int maxIteration = 9;
         for (var iteration = 0; iteration < maxIteration; iteration++)

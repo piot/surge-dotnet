@@ -131,7 +131,7 @@ namespace Piot.Surge.Pulse.Client
             }
 
             notifyLocalInputFetchAndSend.NextExpectedSnapshotTickId =
-                snapshotWithCorrections.tickIdRange.lastTickId.Next();
+                snapshotWithCorrections.tickIdRange.lastTickId.Next;
         }
 
         private void ReceiveDatagramFromHost(IOctetReader reader, TimeMs now)

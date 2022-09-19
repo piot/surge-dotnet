@@ -32,7 +32,7 @@ namespace Piot.Hazy
 
         public IPacketQueuePop PacketQueuePop => packetQueue;
 
-        public void HandlePacket(RemoteEndpointId endpointId, ReadOnlySpan<byte> octets)
+        public void HandlePacket(EndpointId endpointId, ReadOnlySpan<byte> octets)
         {
             var chance = (uint)random.Random((int)PartsPerTenThousand.Divisor);
             var packetAction = Decision.Decide(new PartsPerTenThousand(chance));

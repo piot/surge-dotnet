@@ -22,7 +22,7 @@ namespace Piot.Surge.CompleteSnapshot
             {
                 eventProcessor.ReadAndApply(reader);
 
-                sequenceId = sequenceId.Next();
+                sequenceId = sequenceId.Next;
                 nextExpectedShortLivedEventSequenceId = sequenceId;
             }
 

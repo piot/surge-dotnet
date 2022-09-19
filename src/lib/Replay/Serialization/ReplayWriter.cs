@@ -17,8 +17,8 @@ namespace Piot.Surge.Replay.Serialization
     public sealed class ReplayWriter
     {
         private readonly OctetWriter cachedStateWriter = new(16 * 1024);
-        private readonly RaffWriter raffWriter;
         private readonly uint framesBetweenCompleteState;
+        private readonly RaffWriter raffWriter;
         private TickIdRange lastInsertedDeltaStateRange;
         private uint packCountSinceCompleteState;
 
@@ -35,6 +35,8 @@ namespace Piot.Surge.Replay.Serialization
 
         public bool NeedsCompleteState => framesBetweenCompleteState != 0 &&
                                           packCountSinceCompleteState >= framesBetweenCompleteState;
+
+        private bool AllowedToAddCompleteState => framesBetweenCompleteState == 0 || NeedsCompleteState;
 
         private void WriteVersionChunk(ReplayVersionInfo replayVersionInfo)
         {
@@ -53,7 +55,7 @@ namespace Piot.Surge.Replay.Serialization
 
         public void AddCompleteState(CompleteState completeState)
         {
-            if (!NeedsCompleteState)
+            if (!AllowedToAddCompleteState)
             {
                 throw new Exception("Not allowed to insert complete state now");
             }

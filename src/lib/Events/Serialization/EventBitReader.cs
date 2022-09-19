@@ -19,13 +19,13 @@ namespace Piot.Surge.Event.Serialization
             {
                 if (!sequenceId.IsEqualOrSuccessor(nextExpectedSequenceId))
                 {
-                    sequenceId = sequenceId.Next();
+                    sequenceId = sequenceId.Next;
                     eventProcessor.SkipOneEvent(reader);
                     continue;
                 }
 
                 eventProcessor.ReadAndApply(reader);
-                sequenceId = sequenceId.Next();
+                sequenceId = sequenceId.Next;
                 nextExpectedSequenceId = sequenceId;
             }
 

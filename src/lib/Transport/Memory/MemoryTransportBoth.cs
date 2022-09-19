@@ -11,14 +11,14 @@ namespace Piot.Transport.Memory
     {
         private readonly MemoryTransportReceive receive = new();
         private ITransportEnqueue? enqueueTarget;
-        private RemoteEndpointId knownAsOnReceiver;
+        private EndpointId knownAsOnReceiver;
 
-        public ReadOnlySpan<byte> Receive(out RemoteEndpointId remoteEndpointId)
+        public ReadOnlySpan<byte> Receive(out EndpointId endpointId)
         {
-            return receive.Receive(out remoteEndpointId);
+            return receive.Receive(out endpointId);
         }
 
-        public void SendToEndpoint(RemoteEndpointId remoteEndpointId, ReadOnlySpan<byte> payload)
+        public void SendToEndpoint(EndpointId endpointId, ReadOnlySpan<byte> payload)
         {
             if (enqueueTarget is null)
             {
@@ -28,12 +28,12 @@ namespace Piot.Transport.Memory
             enqueueTarget.Feed(knownAsOnReceiver, payload);
         }
 
-        public void Feed(RemoteEndpointId remoteEndpointId, ReadOnlySpan<byte> payload)
+        public void Feed(EndpointId endpointId, ReadOnlySpan<byte> payload)
         {
-            receive.Feed(remoteEndpointId, payload);
+            receive.Feed(endpointId, payload);
         }
 
-        public void SetEnqueueTarget(ITransportEnqueue enqueueTarget, RemoteEndpointId knownAsOnReceiver)
+        public void SetEnqueueTarget(ITransportEnqueue enqueueTarget, EndpointId knownAsOnReceiver)
         {
             this.enqueueTarget = enqueueTarget;
             this.knownAsOnReceiver = knownAsOnReceiver;

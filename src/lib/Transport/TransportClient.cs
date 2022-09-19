@@ -18,7 +18,7 @@ namespace Piot.Transport
 
         public void SendToHost(ReadOnlySpan<byte> payload)
         {
-            wrappedTransport.SendToEndpoint(new RemoteEndpointId(0), payload);
+            wrappedTransport.SendToEndpoint(new EndpointId(0), payload);
         }
 
         public ReadOnlySpan<byte> ReceiveFromHost()

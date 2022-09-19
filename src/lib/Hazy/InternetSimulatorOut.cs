@@ -28,7 +28,7 @@ namespace Piot.Hazy
         public Decision Decision => internetSimulator.Decision;
         public LatencySimulator LatencySimulator => internetSimulator.LatencySimulator;
 
-        public void SendToEndpoint(RemoteEndpointId endpointId, ReadOnlySpan<byte> octets)
+        public void SendToEndpoint(EndpointId endpointId, ReadOnlySpan<byte> octets)
         {
             internetSimulator.HandlePacket(endpointId, octets);
         }

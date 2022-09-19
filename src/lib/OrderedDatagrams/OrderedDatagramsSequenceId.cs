@@ -17,10 +17,7 @@ namespace Piot.Surge.OrderedDatagrams
             Value = sequenceId;
         }
 
-        public OrderedDatagramsSequenceId Next()
-        {
-            return new OrderedDatagramsSequenceId((byte)(Value + 1));
-        }
+        public OrderedDatagramsSequenceId Next => new((byte)(Value + 1));
 
         public byte Value { get; }
 

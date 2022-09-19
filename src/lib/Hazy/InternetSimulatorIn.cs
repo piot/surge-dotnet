@@ -28,17 +28,17 @@ namespace Piot.Hazy
         public Decision Decision => internetSimulator.Decision;
         public LatencySimulator LatencySimulator => internetSimulator.LatencySimulator;
 
-        public ReadOnlySpan<byte> Receive(out RemoteEndpointId remoteEndpoint)
+        public ReadOnlySpan<byte> Receive(out EndpointId endpoint)
         {
             var now = timeProvider.TimeInMs;
             var wasFound = internetSimulator.PacketQueuePop.Dequeue(now, out var packet);
             if (!wasFound)
             {
-                remoteEndpoint = new RemoteEndpointId(0);
+                endpoint = new EndpointId(0);
                 return ReadOnlySpan<byte>.Empty;
             }
 
-            remoteEndpoint = packet.endPoint;
+            endpoint = packet.endPoint;
             return packet.payload.Span;
         }
 

@@ -10,7 +10,7 @@ namespace Piot.Transport.Memory
 {
     public struct Packet
     {
-        public RemoteEndpointId remoteEndpointId;
+        public EndpointId endpointId;
         public ReadOnlyMemory<byte> payload;
     }
 
@@ -18,26 +18,26 @@ namespace Piot.Transport.Memory
     {
         private readonly Queue<Packet> packets = new();
 
-        public void Feed(RemoteEndpointId remoteEndpointId, ReadOnlySpan<byte> payload)
+        public void Feed(EndpointId endpointId, ReadOnlySpan<byte> payload)
         {
             packets.Enqueue(new()
             {
                 payload = payload.ToArray(),
-                remoteEndpointId = remoteEndpointId
+                endpointId = endpointId
             });
         }
 
-        public ReadOnlySpan<byte> Receive(out RemoteEndpointId remoteEndpointId)
+        public ReadOnlySpan<byte> Receive(out EndpointId endpointId)
         {
             if (packets.Count <= 0)
             {
-                remoteEndpointId = new();
+                endpointId = new();
                 return ReadOnlySpan<byte>.Empty;
             }
 
             var packet = packets.Dequeue();
 
-            remoteEndpointId = packet.remoteEndpointId;
+            endpointId = packet.endpointId;
 
             return packet.payload.Span;
         }

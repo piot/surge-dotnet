@@ -64,7 +64,7 @@ namespace Piot.Surge.Pulse.Host
             Notifier.Notify(AuthoritativeWorld.AllEntities);
         }
 
-        public void AssignPredictEntity(RemoteEndpointId connectionId, LocalPlayerIndex localPlayerIndex,
+        public void AssignPredictEntity(EndpointId connectionId, LocalPlayerIndex localPlayerIndex,
             IEntity entity)
         {
             clientConnections.AssignPredictEntity(connectionId, localPlayerIndex, entity);
@@ -76,7 +76,7 @@ namespace Piot.Surge.Pulse.Host
 
             TickWorld();
 
-            authoritativeTickId = authoritativeTickId.Next();
+            authoritativeTickId = authoritativeTickId.Next;
             ShortLivedEventStream.EndOfTick(authoritativeTickId);
             //log.Debug("== Simulation Tick post! {TickId}", authoritativeTickId);
 

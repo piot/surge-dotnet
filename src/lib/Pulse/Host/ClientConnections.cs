@@ -30,7 +30,7 @@ namespace Piot.Surge.Pulse.Host
 
         public IEnumerable<ConnectionToClient> Connections => orderedConnections;
 
-        public void AssignPredictEntity(RemoteEndpointId connectionId, LocalPlayerIndex localPlayerIndex,
+        public void AssignPredictEntity(EndpointId connectionId, LocalPlayerIndex localPlayerIndex,
             IEntity entity)
         {
             if (!connections.ContainsKey(connectionId.Value))

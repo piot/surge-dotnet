@@ -22,7 +22,7 @@ namespace Piot.Surge.OrderedDatagrams
 
         public void Increase()
         {
-            value = value.Next();
+            value = value.Next;
         }
     }
 }

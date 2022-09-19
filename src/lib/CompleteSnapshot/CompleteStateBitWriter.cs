@@ -17,7 +17,7 @@ namespace Piot.Surge.CompleteSnapshot
         public static ReadOnlySpan<byte> CaptureCompleteSnapshotPack(IEntityContainer world,
             EventSequenceId expectedShortLivedEventSequenceId)
         {
-            var writer = new BitWriter(SnapshotProtocol.Constants.MaxDatagramOctetSize);
+            var writer = new BitWriter(Transport.Constants.MaxDatagramOctetSize);
 #if DEBUG
             BitMarker.WriteMarker(writer, Constants.CompleteSnapshotStartMarker);
 #endif

@@ -20,10 +20,7 @@ namespace Piot.Surge.Event
             this.sequenceId = sequenceId;
         }
 
-        public EventSequenceId Next()
-        {
-            return new((ushort)(sequenceId + 1));
-        }
+        public EventSequenceId Next => new((ushort)(sequenceId + 1));
 
         public bool IsValidSuccessor(EventSequenceId value)
         {

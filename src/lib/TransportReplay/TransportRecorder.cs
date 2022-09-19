@@ -7,43 +7,63 @@ using System;
 using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.SerializableVersion;
-using Piot.Surge.Pulse.Client;
 using Piot.Surge.Replay.Serialization;
 using Piot.Surge.Tick;
 using Piot.Transport;
+using Constants = Piot.Transport.Constants;
 
 namespace Piot.Surge.TransportReplay
 {
-    public class TransportRecorder : ITransportSend
+    public class TransportRecorder : ITransportReceive
     {
-        private readonly OctetWriter cachedBuffer = new(1800);
+        private readonly OctetWriter cachedBuffer = new(Constants.MaxDatagramOctetSize + 4);
         private readonly IMonotonicTimeMs timeProvider;
+        private readonly ITransportReceive wrappedTransport;
         private readonly ReplayWriter writer;
 
-        public TransportRecorder(ClientDatagramReceiver receiver, SemanticVersion applicationSemanticVersion,
+        public TransportRecorder(ITransportReceive wrappedTransport, IOctetSerializableWrite state,
+            SemanticVersion applicationSemanticVersion,
             IMonotonicTimeMs timeProvider, TickId tickId, IOctetWriter target)
         {
+            this.wrappedTransport = wrappedTransport;
             TickId = tickId;
             this.timeProvider = timeProvider;
             var stateWriter = new OctetWriter(32 * 1024);
-            receiver.Serialize(stateWriter);
+            state.Serialize(stateWriter);
             var complete = new CompleteState(timeProvider.TimeInMs, tickId, stateWriter.Octets);
-
+            const int framesBetweenCompleteState = 0;
             writer = new(complete, new(applicationSemanticVersion, SurgeConstants.SnapshotSerializationVersion),
-                target);
+                target, framesBetweenCompleteState);
         }
 
         public TickId TickId { get; set; }
 
-        public void SendToEndpoint(RemoteEndpointId remoteEndpointId, ReadOnlySpan<byte> datagram)
+        public ReadOnlySpan<byte> Receive(out EndpointId endpointId)
+        {
+            var octets = wrappedTransport.Receive(out endpointId);
+            if (octets.IsEmpty)
+            {
+                return octets;
+            }
+
+            Write(endpointId, octets);
+            return octets;
+        }
+
+        public void Write(EndpointId endpointId, ReadOnlySpan<byte> datagram)
         {
             cachedBuffer.Reset();
-            cachedBuffer.WriteUInt16(remoteEndpointId.Value);
+            cachedBuffer.WriteUInt16(endpointId.Value);
             cachedBuffer.WriteUInt16((ushort)datagram.Length);
             cachedBuffer.WriteOctets(datagram);
 
             var delta = new DeltaState(timeProvider.TimeInMs, TickIdRange.FromTickId(TickId), cachedBuffer.Octets);
             writer.AddDeltaState(delta);
+        }
+
+        public void Close()
+        {
+            writer.Close();
         }
     }
 }

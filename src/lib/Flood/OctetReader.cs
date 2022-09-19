@@ -8,7 +8,7 @@ using System.Buffers.Binary;
 
 namespace Piot.Flood
 {
-    public sealed class OctetReader : IOctetReader
+    public sealed class OctetReader : IOctetReaderWithSeekAndSkip
     {
         private readonly ReadOnlyMemory<byte> array;
         private int pos;
@@ -70,6 +70,31 @@ namespace Piot.Flood
         {
             pos += octetCount;
             return array.Span.Slice(pos - octetCount, octetCount);
+        }
+
+        public void Skip(int octetCount)
+        {
+            pos += octetCount;
+            if (pos >= array.Length)
+            {
+                throw new Exception("skipped too far");
+            }
+        }
+
+        public ulong Position => (ulong)pos;
+
+        public void Seek(ulong position)
+        {
+            pos = (int)position;
+            if (pos >= array.Length)
+            {
+                throw new Exception($"seek too far {pos} vs {array.Length}");
+            }
+        }
+
+        public void Dispose()
+        {
+            // Intentionally blank
         }
     }
 }
