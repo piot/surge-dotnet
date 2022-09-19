@@ -5,6 +5,7 @@
 
 using System.Linq;
 using Piot.Surge.Entities;
+using Piot.Surge.FieldMask;
 using Piot.Surge.Tick;
 
 namespace Piot.Surge.DeltaSnapshot.Scan
@@ -15,6 +16,7 @@ namespace Piot.Surge.DeltaSnapshot.Scan
         ///     Scans an entity container for all changes and creates a snapshot delta internal.
         /// </summary>
         /// <param name="world">entity container with change information</param>
+        /// <param name="tickId"></param>
         /// <returns></returns>
         public static DeltaSnapshotEntityIds Scan(IEntityContainerWithDetectChanges world, TickId tickId)
         {

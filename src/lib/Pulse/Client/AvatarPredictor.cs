@@ -55,10 +55,6 @@ namespace Piot.Surge.Pulse.Client
         ///     Handles incoming correction state
         ///     If checksum is not the same, it rollbacks, replicate, and rollforth.
         /// </summary>
-        /// <param name="correctionsForTickId"></param>
-        /// <param name="snapshotReader"></param>
-        /// <param name="world"></param>
-        /// <param name="log"></param>
         /// <exception cref="NotImplementedException"></exception>
         public void ReadCorrection(TickId correctionForTickId, ReadOnlySpan<byte> physicsCorrectionPayload)
         {

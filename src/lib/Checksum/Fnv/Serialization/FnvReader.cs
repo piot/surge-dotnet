@@ -5,7 +5,7 @@
 
 using Piot.Flood;
 
-namespace Piot.Surge.SnapshotDeltaPack.Serialization
+namespace Piot.Surge.Checksum.Fnv.Serialization
 {
     public static class FnvReader
     {

@@ -17,6 +17,7 @@ namespace Piot.Surge.TransportReplay
 
         public ITransportReceive StartRecordingToFile(ITransportReceive transportToWrap, IOctetSerializableWrite state,
             TickId nowTickId, string filename);
+
         public void StopRecording();
 
         (ITransportReceive, TimeMs) StartPlaybackFromFile(IOctetSerializableRead state, string filename);

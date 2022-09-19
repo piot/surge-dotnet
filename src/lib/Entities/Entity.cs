@@ -8,6 +8,7 @@ using Piot.Surge.LogicAction;
 
 namespace Piot.Surge.Entities
 {
+    /// <inheritdoc />
     /// <summary>
     ///     Representation of a network entity
     /// </summary>

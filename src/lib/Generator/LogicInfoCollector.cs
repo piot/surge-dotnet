@@ -15,7 +15,7 @@ namespace Piot.Surge.Generator
     {
         public CommandInfo(MethodBase methodInfo)
         {
-            CommandParameters = methodInfo.GetParameters().Select(arg => new CommandParameter(arg)).ToList();
+            CommandParameters = methodInfo.GetParameters().Select(static arg => new CommandParameter(arg)).ToList();
             MethodInfo = methodInfo;
         }
 
@@ -104,7 +104,7 @@ namespace Piot.Surge.Generator
                 throw new Exception($"Interface in Tick {type.Name} must inherit from {nameof(ILogicActions)}");
 */
                 var methodsInInterface = commandsInterface.GetMethods();
-                CommandInfos = methodsInInterface.Select(method => new CommandInfo(method)).ToList();
+                CommandInfos = methodsInInterface.Select(static method => new CommandInfo(method)).ToList();
                 CommandsInterface = commandsInterface;
             }
             else
@@ -156,8 +156,9 @@ namespace Piot.Surge.Generator
 
         public override string ToString()
         {
-            var commandInfosString = CommandInfos?.Aggregate("\n ", (current, command) => current + "\n " + command);
-            var fieldInfosString = FieldInfos.Aggregate("\n ", (current, command) => current + "\n " + command);
+            var commandInfosString =
+                CommandInfos.Aggregate("\n ", static (current, command) => current + "\n " + command);
+            var fieldInfosString = FieldInfos.Aggregate("\n ", static (current, command) => current + "\n " + command);
 
             return $"[logicInfo {Type} {TickMethod}  {fieldInfosString} {commandInfosString}]";
         }

@@ -12,16 +12,16 @@ namespace Piot.Surge.Types
         public int x;
         public int y;
         public int z;
-        
+
         internal const int UnitResolution = 256;
-        
+
         public UnitVector3(int x, int y, int z)
         {
             this.x = x;
             this.y = y;
             this.z = z;
         }
-        
+
         public static UnitVector3 FromFloats(float x, float y, float z)
         {
             return new ((int)(x * UnitResolution),
@@ -29,6 +29,6 @@ namespace Piot.Surge.Types
                 (int)(z * UnitResolution));
         }
 
-        public Vector2 xz => new(x / UnitResolution, z / UnitResolution);
+        public Vector2 xz => new(x / (float)UnitResolution, z / (float)UnitResolution);
     }
 }

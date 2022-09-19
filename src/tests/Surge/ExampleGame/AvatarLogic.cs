@@ -33,7 +33,7 @@ public struct AvatarLogic : ILogic
         aiming = input.aiming;
     }
 
-    public override string ToString()
+    public readonly override string ToString()
     {
         return
             $"[AvatarLogic pos:{position} ammo:{ammoCount} fireButton:{fireButtonIsDown} castButton:{castButtonIsDown}]";

@@ -22,12 +22,12 @@ namespace Piot.Surge.LogicalInput
     {
         public readonly LogicalInputArrayForPlayer[] inputForEachPlayerInSequence;
 
-        public readonly TickId debugFirstId => inputForEachPlayerInSequence.Length == 0 ||
+        public TickId debugFirstId => inputForEachPlayerInSequence.Length == 0 ||
                                                inputForEachPlayerInSequence[0].inputs.Length == 0
             ? new()
             : inputForEachPlayerInSequence[0].inputs[0].appliedAtTickId;
 
-        public readonly TickId debugLastId => inputForEachPlayerInSequence.Length == 0 ||
+        public TickId debugLastId => inputForEachPlayerInSequence.Length == 0 ||
                                               inputForEachPlayerInSequence[0].inputs.Length == 0
             ? new()
             : inputForEachPlayerInSequence[0].inputs[^1].appliedAtTickId;
@@ -55,11 +55,11 @@ namespace Piot.Surge.LogicalInput
     /// <summary>
     ///     Serialized Game specific input stored in the <see cref="LogicalInput.payload" />.
     /// </summary>
-    public struct LogicalInput
+    public readonly struct LogicalInput
     {
-        public LocalPlayerIndex localPlayerIndex;
-        public TickId appliedAtTickId;
-        public ReadOnlyMemory<byte> payload;
+        public readonly LocalPlayerIndex localPlayerIndex;
+        public readonly TickId appliedAtTickId;
+        public readonly ReadOnlyMemory<byte> payload;
 
         public LogicalInput(LocalPlayerIndex localPlayerIndex, TickId appliedAtTickId, ReadOnlySpan<byte> payload)
         {

@@ -50,11 +50,9 @@ public struct BenchmarkAvatarLogic : ILogic
 
         /// <summary>
         ///     Casts a fireball in the given direction. Starts playing the effects.
-        ///     If <paramref name="isAuthoritative" /> is true, then fireball is spawned as well.
         /// </summary>
         /// <param name="position"></param>
         /// <param name="direction"></param>
-        /// <param name="isAuthoritative"></param>
         public void CastFireball(Position3 position, UnitVector3 direction);
     }
 

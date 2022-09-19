@@ -28,7 +28,7 @@ namespace Piot.Surge.Generator
             }
 
             var logicClasses = allTypes
-                .Where(type => ScannerHelper.IsStruct(type) && ScannerHelper.HasAttribute<LogicAttribute>(type))
+                .Where(static type => ScannerHelper.IsStruct(type) && ScannerHelper.HasAttribute<LogicAttribute>(type))
                 .ToArray();
 
             return logicClasses;

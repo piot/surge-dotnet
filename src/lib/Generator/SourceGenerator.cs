@@ -1115,6 +1115,7 @@ public class GeneratedInputPackFetch : IInputPackFetch
         ///     Generates C# source code that handle the serialization of the user specific (game specific) types.
         /// </summary>
         /// <param name="infos"></param>
+        /// <param name="shortLivedEventInterface"></param>
         /// <returns></returns>
         public static string Generate(IEnumerable<LogicInfo> infos, GameInputInfo gameInputInfo,
             ShortLivedEventInterface shortLivedEventInterface)

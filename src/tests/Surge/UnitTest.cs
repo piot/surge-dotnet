@@ -32,9 +32,9 @@ using Tests.ExampleGame;
 using Xunit.Abstractions;
 using Constants = Piot.Surge.SnapshotProtocol.Constants;
 
-namespace Tests;
+namespace Tests.Surge;
 
-public sealed class CompareLogicalInputCollections : IEqualityComparer<ICollection<LogicalInput>>
+internal sealed class CompareLogicalInputCollections : IEqualityComparer<ICollection<LogicalInput>>
 {
     public bool Equals(ICollection<LogicalInput>? x, ICollection<LogicalInput>? y)
     {
@@ -109,8 +109,8 @@ public sealed class UnitTest1
     public void SerializeLogicalInput()
     {
         var logicalInputQueue = new LogicalInputQueue();
-        logicalInputQueue.AddLogicalInput(new LogicalInput
-            { appliedAtTickId = new TickId(20), payload = new byte[] { 0x0a, 0x0b } });
+        logicalInputQueue.AddLogicalInput(new LogicalInput(new LocalPlayerIndex(0), new TickId(20),
+            new byte[] { 0x0a, 0x0b }));
 
         var writer = new OctetWriter(23);
 
@@ -130,8 +130,8 @@ public sealed class UnitTest1
     public void SerializeLogicalInputDatagramPack()
     {
         var logicalInputQueue = new LogicalInputQueue();
-        logicalInputQueue.AddLogicalInput(new LogicalInput
-            { appliedAtTickId = new TickId(20), payload = new byte[] { 0x0a, 0x0b } });
+        logicalInputQueue.AddLogicalInput(new LogicalInput(new LocalPlayerIndex(0), new TickId(20),
+            new byte[] { 0x0a, 0x0b }));
 
         var now = new TimeMs(0x954299);
 
@@ -327,8 +327,8 @@ public sealed class UnitTest1
     [Fact]
     public void IllegalRange()
     {
-        Assert.Throws<ArgumentOutOfRangeException>(() => new TickIdRange(new TickId(24), new TickId(23)));
-        Assert.Throws<ArgumentOutOfRangeException>(() =>
+        Assert.Throws<ArgumentOutOfRangeException>(static () => new TickIdRange(new TickId(24), new TickId(23)));
+        Assert.Throws<ArgumentOutOfRangeException>(static () =>
             new TickIdRange(new TickId(uint.MaxValue), new TickId(uint.MaxValue)));
     }
 
@@ -511,8 +511,6 @@ public sealed class UnitTest1
 
         var (thirdDelta, thirdDeltaConverted, thirdDeltaPack) = ScanConvertAndCreate(world, thirdTickId, log);
 
-        var thirdInternalInfo = thirdDelta.FetchEntity(spawnedAvatar.Id);
-
         log.Info("Server fire happens at position", serverSpawnedAvatar.Self.position.x);
 
         Ticker.Tick(world);
@@ -576,7 +574,7 @@ public sealed class UnitTest1
         Assert.Equal(0, clientSpawnedEntity.Self.fireCooldown);
         Notifier.Notify(updateEntitiesInFirst);
 
-        notifyWorld.OnSpawnAvatarLogic += avatar => { log.Info("SPAWNED {Avatar}", clientSpawnedEntity); };
+        notifyWorld.OnSpawnAvatarLogic += _ => { log.Info("SPAWNED {Avatar}", clientSpawnedEntity); };
 
         clientSpawnedEntity.OutFacing.OnAmmoCountChanged += () =>
         {

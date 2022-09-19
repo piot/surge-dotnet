@@ -10,15 +10,15 @@ namespace Piot.Clog
 {
     public sealed class ConsoleOutputLogger : ILogTarget
     {
-        private const string resetColor = "\x1b[0m";
+        private const string ResetColor = "\x1b[0m";
 
         public void Log(LogLevel level, string prefix, string message, object[] args)
         {
-            var strings = args.Select(x => x.ToString());
+            var strings = args.Select(static x => x.ToString());
             var values = args.Length > 0 ? $"({string.Join(", ", strings)})" : "";
             var color = ColorStringFromLogLevel(level);
 
-            var line = $"{color}{level,8}{resetColor} : [{prefix}] {message} {values}";
+            var line = $"{color}{level,8}{ResetColor} : [{prefix}] {message} {values}";
 
             Console.WriteLine(line);
         }
@@ -41,7 +41,7 @@ namespace Piot.Clog
         {
             if (foregroundColor == Color.Default)
             {
-                return resetColor;
+                return ResetColor;
             }
 
             var prefix = bright ? "1" : "0";
@@ -55,8 +55,8 @@ namespace Piot.Clog
             for (var i = 0; i < 8; ++i)
             {
                 var colorName = colorStrings[i];
-                Console.WriteLine($"{i} {ForegroundColorString(false, (Color)i)}{colorName}{resetColor}");
-                Console.WriteLine($"{i} {ForegroundColorString(true, (Color)i)}bright {colorName}{resetColor}");
+                Console.WriteLine($"{i} {ForegroundColorString(false, (Color)i)}{colorName}{ResetColor}");
+                Console.WriteLine($"{i} {ForegroundColorString(true, (Color)i)}bright {colorName}{ResetColor}");
             }
         }
 

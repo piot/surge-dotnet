@@ -30,7 +30,7 @@ namespace Piot.Surge.Types
             };
         }
 
-        public bool Equals(Position3 other)
+        public readonly bool Equals(Position3 other)
         {
             return x == other.x && y == other.y && z == other.z;
         }

@@ -3,26 +3,24 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System.Numerics;
-
 namespace Piot.Surge.Types
 {
     public struct UnitVector2
     {
         public int x;
         public int y;
-        
+
         internal const int UnitResolution = 256;
-        
+
         public UnitVector2(int x, int y)
         {
             this.x = x;
             this.y = y;
         }
-        
+
         public static UnitVector2 FromFloats(float x, float y)
         {
-            return new ((int)(x * UnitResolution),
+            return new UnitVector2((int)(x * UnitResolution),
                 (int)(y * UnitResolution));
         }
     }

@@ -11,7 +11,6 @@ using Piot.SerializableVersion;
 using Piot.Surge.Tick;
 using Piot.Transport;
 
-
 namespace Piot.Surge.TransportReplay
 {
     public class TransportReplayControl : ITransportReplayControl
@@ -20,14 +19,14 @@ namespace Piot.Surge.TransportReplay
         private const int replayMemoryOctetThreshold = 28 * 1024;
         private readonly SemanticVersion applicationVersion;
         private readonly ILog log;
+        private readonly IMonotonicTimeMs timeProvider;
         private readonly OctetWriter writer = new(replayMemoryOctetSize);
-        
-        private IOctetReaderWithSeekAndSkip? seekableOctetReader;
+        private IDisposableOctetWriter? disposableOctetWriter;
         private TransportPlayback? playback;
         private TransportRecorder? recorder;
-        private IDisposableOctetWriter? disposableOctetWriter;
-        private readonly IMonotonicTimeMs timeProvider;
-        
+
+        private IOctetReaderWithSeekAndSkip? seekableOctetReader;
+
         public TransportReplayControl(SemanticVersion applicationVersion, IMonotonicTimeMs timeProvider, ILog log)
         {
             this.timeProvider = timeProvider;
@@ -35,19 +34,22 @@ namespace Piot.Surge.TransportReplay
             this.applicationVersion = applicationVersion;
         }
 
-        public ITransportReceive StartRecordingToMemory(ITransportReceive transportToWrap, IOctetSerializableWrite state, TickId nowTickId)
+        public ITransportReceive StartRecordingToMemory(ITransportReceive transportToWrap,
+            IOctetSerializableWrite state, TickId nowTickId)
         {
             if (recorder is not null)
             {
                 throw new Exception("is already recording");
             }
-            
-            recorder = new(transportToWrap, state, applicationVersion, timeProvider, nowTickId, writer);
+
+            recorder = new(transportToWrap, state, applicationVersion, timeProvider, nowTickId,
+                writer);
 
             return recorder;
         }
 
-        public ITransportReceive StartRecordingToFile(ITransportReceive transportToWrap, IOctetSerializableWrite state, TickId nowTickId, string filename)
+        public ITransportReceive StartRecordingToFile(ITransportReceive transportToWrap, IOctetSerializableWrite state,
+            TickId nowTickId, string filename)
         {
             log.Info("Start recording transport to {Filename}", filename);
             disposableOctetWriter = FileStreamCreator.Create(filename);
@@ -55,7 +57,9 @@ namespace Piot.Surge.TransportReplay
             {
                 throw new ArgumentNullException(nameof(transportToWrap));
             }
-            recorder = new(transportToWrap, state, applicationVersion, timeProvider, nowTickId, disposableOctetWriter);
+
+            recorder = new(transportToWrap, state, applicationVersion, timeProvider, nowTickId,
+                disposableOctetWriter);
 
             return recorder;
         }
@@ -68,7 +72,7 @@ namespace Piot.Surge.TransportReplay
             seekableOctetReader = FileStreamCreator.OpenWithSeek(filename);
 
             playback = new(state, applicationVersion, seekableOctetReader, timeProvider);
-            
+
 
             return (playback, playback.InitialTimeMs);
         }

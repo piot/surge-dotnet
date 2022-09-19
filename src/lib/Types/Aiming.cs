@@ -12,11 +12,11 @@ namespace Piot.Surge.Types
         public ushort yaw;
         public short pitch;
 
-        public float Yaw => yaw * (float)Math.PI * 2.0f / 65535.0f;
+        public readonly float Yaw => yaw * (float)Math.PI * 2.0f / 65535.0f;
 
-        public float YawDegrees => yaw * 360.0f / 65535.0f;
-        public float Pitch => pitch * PitchMax / 32768.0f;
-        public float PitchDegrees => pitch * 89.0f / 32768.0f;
+        public readonly float YawDegrees => yaw * 360.0f / 65535.0f;
+        public readonly float Pitch => pitch * PitchMax / 32768.0f;
+        public readonly float PitchDegrees => pitch * 89.0f / 32768.0f;
 
         public const float PitchMax = (float)Math.PI / 2.0f - 0.1f;
 

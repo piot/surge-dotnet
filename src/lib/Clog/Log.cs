@@ -334,6 +334,6 @@ namespace Piot.Clog
             return new Log(target, LogLevel, prefix != "" ? prefix + "/" + debugPrefix : debugPrefix);
         }
 
-        public LogLevel LogLevel { get; set; } = LogLevel.LowLevel;
+        public LogLevel LogLevel { get; set; }
     }
 }

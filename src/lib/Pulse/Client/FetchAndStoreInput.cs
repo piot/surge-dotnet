@@ -19,11 +19,8 @@ namespace Piot.Surge.Pulse.Client
             {
                 log.DebugLowLevel("Fetch input from {LocalPlayerIndex}", localPlayerInput.LocalPlayerIndex);
                 var inputOctets = inputPackFetch.Fetch(localPlayerInput.LocalPlayerIndex);
-                var logicalInput = new LogicalInput.LogicalInput
-                {
-                    appliedAtTickId = predictTickId,
-                    payload = inputOctets.ToArray()
-                };
+                var logicalInput = new LogicalInput.LogicalInput(localPlayerInput.LocalPlayerIndex, predictTickId,
+                    inputOctets);
 
                 log.DebugLowLevel("Adding logical input {LogicalInput} for {LocalPredictor}", logicalInput,
                     localPlayerInput);
