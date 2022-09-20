@@ -34,7 +34,7 @@ namespace Piot.Surge.Tick
         {
             if (tickId == 0)
             {
-                throw new Exception("can not go back from zero");
+                throw new("can not go back from zero");
             }
 
             return new(tickId - 1);

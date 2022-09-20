@@ -14,7 +14,7 @@ namespace Piot.Stats
         public int min;
         public int max;
 
-        private Func<int, string> formatter;
+        Func<int, string> formatter;
 
         public Func<int, string> Formatter
         {

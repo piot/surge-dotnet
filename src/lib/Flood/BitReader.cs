@@ -11,12 +11,12 @@ namespace Piot.Flood
 {
     public sealed class BitReader : IBitReader
     {
-        private readonly ReadOnlyMemory<byte> octets;
-        private readonly int totalBitCount;
-        private ulong accumulator;
-        private int bitPosition;
-        private int bitsInAccumulator;
-        private int octetPosition;
+        readonly ReadOnlyMemory<byte> octets;
+        readonly int totalBitCount;
+        ulong accumulator;
+        int bitPosition;
+        int bitsInAccumulator;
+        int octetPosition;
 
         public BitReader(ReadOnlySpan<byte> octets, int totalBitCount)
         {
@@ -34,7 +34,7 @@ namespace Piot.Flood
 
             if (octets.Length < minimalOctetCount)
             {
-                throw new Exception(
+                throw new(
                     $"wrong octets count compared to bit count, expected {minimalOctetCount} but received {octets.Length}");
             }
         }
@@ -45,12 +45,12 @@ namespace Piot.Flood
 #if DEBUG
             if (bitCount is < 1 or > 32)
             {
-                throw new Exception("must read between 1-32 bits");
+                throw new("must read between 1-32 bits");
             }
 
             if (bitPosition + bitCount > totalBitCount)
             {
-                throw new Exception("tried to read longer than buffer bit count");
+                throw new("tried to read longer than buffer bit count");
             }
 #endif
 
@@ -59,7 +59,7 @@ namespace Piot.Flood
 #if DEBUG
                 if (bitsInAccumulator is > 63 or < 0)
                 {
-                    throw new Exception("internal shift error in bitstream");
+                    throw new("internal shift error in bitstream");
                 }
 #endif
                 accumulator |= (ulong)BinaryPrimitives.ReadUInt32BigEndian(octets.Span.Slice(octetPosition, 4)) <<

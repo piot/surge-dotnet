@@ -16,9 +16,9 @@ namespace Piot.Surge.LogicalInput
     /// </summary>
     public sealed class LogicalInputQueue
     {
-        private readonly Queue<LogicalInput> queue = new();
+        readonly Queue<LogicalInput> queue = new();
 
-        private TickId waitingForTickId;
+        TickId waitingForTickId;
 
         public LogicalInput[] Collection => queue.ToArray();
 

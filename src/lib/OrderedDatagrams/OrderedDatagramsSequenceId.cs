@@ -3,8 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System;
-
 namespace Piot.Surge.OrderedDatagrams
 {
     /// <summary>
@@ -37,7 +35,7 @@ namespace Piot.Surge.OrderedDatagrams
 
             if (diff < 0)
             {
-                throw new Exception("delta is negative");
+                throw new("delta is negative");
             }
 
             return diff > 0 && diff <= 127;

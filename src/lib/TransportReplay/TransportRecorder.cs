@@ -16,10 +16,10 @@ namespace Piot.Surge.TransportReplay
 {
     public class TransportRecorder : ITransportReceive
     {
-        private readonly OctetWriter cachedBuffer = new(Constants.MaxDatagramOctetSize + 4);
-        private readonly IMonotonicTimeMs timeProvider;
-        private readonly ITransportReceive wrappedTransport;
-        private readonly ReplayWriter writer;
+        readonly OctetWriter cachedBuffer = new(Constants.MaxDatagramOctetSize + 4);
+        readonly IMonotonicTimeMs timeProvider;
+        readonly ITransportReceive wrappedTransport;
+        readonly ReplayWriter writer;
 
         public TransportRecorder(ITransportReceive wrappedTransport, IOctetSerializableWrite state,
             SemanticVersion applicationSemanticVersion,

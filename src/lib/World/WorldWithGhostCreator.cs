@@ -10,8 +10,8 @@ namespace Piot.Surge
 {
     public sealed class WorldWithGhostCreator : AuthoritativeWorld, IEntityContainerWithGhostCreator
     {
-        private readonly IEntityGhostCreator creator;
-        private readonly INotifyEntityCreation notifyEntityCreation;
+        readonly IEntityGhostCreator creator;
+        readonly INotifyEntityCreation notifyEntityCreation;
 
         public WorldWithGhostCreator(IEntityGhostCreator creator, INotifyEntityCreation notifyEntityCreation,
             bool isAuthoritative)

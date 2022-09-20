@@ -11,7 +11,7 @@ namespace Tests.Pulse.Generator;
 
 public sealed class ScannerTests
 {
-    private readonly ILog log;
+    readonly ILog log;
 
     public ScannerTests(ITestOutputHelper output)
     {

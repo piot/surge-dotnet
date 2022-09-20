@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System;
 using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.Raff.Stream;
@@ -17,11 +16,11 @@ namespace Piot.Surge.Replay.Serialization
 {
     public sealed class ReplayReader
     {
-        private readonly CompleteStateEntry[] completeStateEntries;
-        private readonly RaffReader raffReader;
-        private readonly IOctetReaderWithSeekAndSkip readerWithSeek;
-        private TimeMs lastReadTimeMs;
-        private TimeMs lastTimeMsFromDeltaState;
+        readonly CompleteStateEntry[] completeStateEntries;
+        readonly RaffReader raffReader;
+        readonly IOctetReaderWithSeekAndSkip readerWithSeek;
+        TimeMs lastReadTimeMs;
+        TimeMs lastTimeMsFromDeltaState;
 
         public ReplayReader(SemanticVersion expectedApplicationVersion, IOctetReaderWithSeekAndSkip readerWithSeek)
         {
@@ -31,7 +30,7 @@ namespace Piot.Surge.Replay.Serialization
 
             if (!expectedApplicationVersion.IsEqualDisregardSuffix(ApplicationVersion))
             {
-                throw new Exception(
+                throw new(
                     $"version mismatch, can not use this replay file {ApplicationVersion} vs expected {expectedApplicationVersion}");
             }
 
@@ -48,7 +47,7 @@ namespace Piot.Surge.Replay.Serialization
 
         public TickId FirstCompleteStateTickId => new(completeStateEntries[0].tickId);
 
-        private void ReadVersionInfo()
+        void ReadVersionInfo()
         {
             var versionPack = raffReader.ReadExpectedChunk(Constants.ReplayIcon, Constants.ReplayName);
             var reader = new OctetReader(versionPack);
@@ -57,12 +56,12 @@ namespace Piot.Surge.Replay.Serialization
         }
 
 
-        private CompleteStateEntry FindClosestEntry(TickId tickId)
+        CompleteStateEntry FindClosestEntry(TickId tickId)
         {
             var tickIdValue = tickId.tickId;
             if (completeStateEntries.Length == 0)
             {
-                throw new Exception("unexpected that no complete states are found");
+                throw new("unexpected that no complete states are found");
             }
 
             var left = 0;
@@ -98,7 +97,7 @@ namespace Piot.Surge.Replay.Serialization
                 var previous = completeStateEntries[left - 1];
                 if (previous.tickId > tickIdValue)
                 {
-                    throw new Exception("strange state in replay");
+                    throw new("strange state in replay");
                 }
 
                 return previous;
@@ -134,7 +133,7 @@ namespace Piot.Surge.Replay.Serialization
             var type = readerWithSeek.ReadUInt8();
             if (type != 01)
             {
-                throw new Exception($"desync {type}");
+                throw new($"desync {type}");
             }
 
             var timeLowerBits = MonotonicTimeLowerBitsReader.Read(readerWithSeek);
@@ -149,7 +148,7 @@ namespace Piot.Surge.Replay.Serialization
                 readerWithSeek.ReadOctets((int)octetLength - headerOctetCount));
         }
 
-        private CompleteState ReadCompleteState()
+        CompleteState ReadCompleteState()
         {
             var octetLength =
                 raffReader.ReadExpectedChunkHeader(Constants.CompleteStateIcon, Constants.CompleteStateName);
@@ -158,7 +157,7 @@ namespace Piot.Surge.Replay.Serialization
             var type = readerWithSeek.ReadUInt8();
             if (type != 02)
             {
-                throw new Exception("desync");
+                throw new("desync");
             }
 
             var time = new TimeMs((long)readerWithSeek.ReadUInt64());

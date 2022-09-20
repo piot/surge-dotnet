@@ -13,7 +13,7 @@ namespace Tests.Hazy;
 
 public sealed class LatencySimulationTests
 {
-    private readonly ILog log;
+    readonly ILog log;
 
     public LatencySimulationTests(ITestOutputHelper output)
     {
@@ -26,7 +26,7 @@ public sealed class LatencySimulationTests
     {
         var random = new PseudoRandom(42);
 
-        var latencySimulation = new LatencySimulator(20, 95, new TimeMs(), random, log);
+        var latencySimulation = new LatencySimulator(20, 95, new(), random, log);
 
         for (var i = 0; i < 1000; i += 16)
         {

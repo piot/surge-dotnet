@@ -26,7 +26,7 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
             EntityIdWriter.Write(writer, entityId);
             if (archetypeId.id == 0)
             {
-                throw new Exception("illegal archetype id");
+                throw new("illegal archetype id");
             }
 
             writer.WriteUInt16(archetypeId.id);
@@ -39,7 +39,7 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
             EntityIdWriter.Write(writer, entityId);
             if (archetypeId.id == 0)
             {
-                throw new Exception("illegal archetype id");
+                throw new("illegal archetype id");
             }
 
             writer.WriteBits(archetypeId.id, 10);

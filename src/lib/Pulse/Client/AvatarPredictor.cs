@@ -13,14 +13,14 @@ namespace Piot.Surge.Pulse.Client
 {
     public sealed class AvatarPredictor
     {
-        private readonly IEntity assignedAvatar;
-        private readonly OctetWriter cachedUndoWriter = new(1024);
-        private readonly ILog log;
+        readonly IEntity assignedAvatar;
+        readonly OctetWriter cachedUndoWriter = new(1024);
+        readonly ILog log;
 
-        private readonly PredictionStateChecksumQueue predictionStateChecksumHistory = new();
-        private readonly RollbackStack rollbackStack = new();
-        private readonly bool shouldPredictGoingForward = true;
-        private bool shouldPredict = true;
+        readonly PredictionStateChecksumQueue predictionStateChecksumHistory = new();
+        readonly RollbackStack rollbackStack = new();
+        readonly bool shouldPredictGoingForward = true;
+        bool shouldPredict = true;
 
         public AvatarPredictor(LocalPlayerInput localPlayerInput, IEntity assignedAvatar, ILog log)
         {
@@ -102,7 +102,7 @@ namespace Piot.Surge.Pulse.Client
 
             if (assignedAvatar.CompleteEntity is not IInputDeserialize inputDeserialize)
             {
-                throw new Exception(
+                throw new(
                     $"It is not possible to control Entity {assignedAvatar.Id}, it has no IDeserializeInput interface");
             }
 

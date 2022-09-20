@@ -10,7 +10,7 @@ namespace Tests.Flood;
 
 public sealed class ClogTests
 {
-    private readonly ILog log;
+    readonly ILog log;
 
     public ClogTests(ITestOutputHelper output)
     {

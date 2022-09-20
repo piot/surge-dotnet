@@ -12,13 +12,13 @@ namespace Piot.Transport.Stats
 {
     public sealed class TransportStatsReceive : ITransportReceive
     {
-        private readonly StatPerSecond bitsPerSecond;
-        private readonly StatPerSecond datagramCountPerSecond;
-        private readonly StatCountThreshold datagramOctetSize;
-        private readonly CircularBuffer<int> datagramOctetSizes = new(Constants.CircularBufferSize);
+        readonly StatPerSecond bitsPerSecond;
+        readonly StatPerSecond datagramCountPerSecond;
+        readonly StatCountThreshold datagramOctetSize;
+        readonly CircularBuffer<int> datagramOctetSizes = new(Constants.CircularBufferSize);
 
-        private TransportStatsInDirection stats;
-        private ITransportReceive wrappedTransport;
+        TransportStatsInDirection stats;
+        ITransportReceive wrappedTransport;
 
         public TransportStatsReceive(TimeMs now, ITransportReceive transportReceive)
         {

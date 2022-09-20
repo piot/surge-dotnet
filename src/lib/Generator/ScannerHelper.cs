@@ -41,12 +41,12 @@ namespace Piot.Surge.Generator
             var methodInfo = t.GetMethod(methodName);
             if (methodInfo == null)
             {
-                throw new Exception($"method {methodName} was not found in {t.Name}");
+                throw new($"method {methodName} was not found in {t.Name}");
             }
 
             if (methodInfo.IsAbstract)
             {
-                throw new Exception($"method {methodName} can not be abstract in {t.Name}");
+                throw new($"method {methodName} can not be abstract in {t.Name}");
             }
 
             return methodInfo;

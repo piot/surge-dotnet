@@ -17,20 +17,20 @@ namespace Piot.Hazy
     /// </summary>
     public sealed class LatencySimulator
     {
-        private readonly ILog log;
-        private readonly IRandom random;
-        private bool isSpiking;
-        private long lastUpdate;
-        private long latencyInMs;
-        private long longTermTargetInMs;
+        readonly ILog log;
+        readonly IRandom random;
+        bool isSpiking;
+        long lastUpdate;
+        long latencyInMs;
+        long longTermTargetInMs;
 
-        private long maxLatency;
-        private long minLatency;
-        private long nextLongTermTargetTime;
-        private int nextSpikeDuration;
-        private long nextSpikeTime;
-        private long savedLatencyBeforeSpike;
-        private long targetLatencyInMs;
+        long maxLatency;
+        long minLatency;
+        long nextLongTermTargetTime;
+        int nextSpikeDuration;
+        long nextSpikeTime;
+        long savedLatencyBeforeSpike;
+        long targetLatencyInMs;
 
         public LatencySimulator(int minimumLatency, int maximumLatency, TimeMs now, IRandom random, ILog log)
         {
@@ -51,7 +51,7 @@ namespace Piot.Hazy
         {
             if (minLatency > maxLatency)
             {
-                throw new Exception("illegal min or max latency");
+                throw new("illegal min or max latency");
             }
 
             minLatency = minimumLatency;

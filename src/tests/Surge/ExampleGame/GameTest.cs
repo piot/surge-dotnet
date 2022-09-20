@@ -15,7 +15,7 @@ namespace Tests.ExampleGame;
 
 public sealed class GameTests
 {
-    private readonly ILog log;
+    readonly ILog log;
 
     public GameTests(ITestOutputHelper output)
     {
@@ -42,7 +42,7 @@ public sealed class GameTests
         {
             var randomizer = new PseudoRandom(0x48019422);
             internetSimulatedHostTransport =
-                new InternetSimulatorTransport(hostTransport, timeProvider, randomizer,
+                new(hostTransport, timeProvider, randomizer,
                     log.SubLog("InternetSimulator"));
             hostTransportToUse = internetSimulatedHostTransport;
         }

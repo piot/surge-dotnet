@@ -12,7 +12,7 @@ namespace Tests.Stats;
 
 public sealed class StatsTests
 {
-    private readonly ILog log;
+    readonly ILog log;
 
     public StatsTests(ITestOutputHelper output)
     {

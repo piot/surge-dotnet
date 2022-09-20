@@ -12,7 +12,7 @@ namespace Piot.Surge.LogicAction
     /// </summary>
     public sealed class ActionsContainer : IActionsContainer
     {
-        private readonly List<IAction> actions = new();
+        readonly List<IAction> actions = new();
 
         public void Add(IAction action)
         {

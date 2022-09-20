@@ -12,7 +12,7 @@ namespace Tests;
 
 public sealed class MonotonicTimeLowerBitsTests
 {
-    private readonly ILog log;
+    readonly ILog log;
 
     public MonotonicTimeLowerBitsTests(ITestOutputHelper output)
     {
@@ -20,7 +20,7 @@ public sealed class MonotonicTimeLowerBitsTests
         log = new Log(logTarget);
     }
 
-    private static void TestLowerBits(ushort lowerBitsValue, ulong nowValue, ulong expectedResult)
+    static void TestLowerBits(ushort lowerBitsValue, ulong nowValue, ulong expectedResult)
     {
         var lowerBits = new MonotonicTimeLowerBits(lowerBitsValue);
         var now = new TimeMs((long)nowValue);

@@ -18,7 +18,7 @@ namespace Tests.ExampleGame;
 
 public sealed class RollforthTests
 {
-    private readonly ILog log;
+    readonly ILog log;
 
     public RollforthTests(ITestOutputHelper output)
     {

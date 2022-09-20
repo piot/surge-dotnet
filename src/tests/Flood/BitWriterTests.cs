@@ -11,7 +11,7 @@ namespace Tests.Flood;
 
 public sealed class BitWriterTests
 {
-    private readonly ILog log;
+    readonly ILog log;
 
     public BitWriterTests(ITestOutputHelper output)
     {

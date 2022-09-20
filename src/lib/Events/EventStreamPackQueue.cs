@@ -17,13 +17,13 @@ namespace Piot.Surge.Event
     /// </summary>
     public sealed class EventStreamPackQueue
     {
-        private readonly BitWriter bitWriterForCurrentTick = new(Constants.MaxEventQueueOctetSize);
-        private readonly Queue<EventStreamPackItem> events = new();
-        private TickId authoritativeTickId;
+        readonly BitWriter bitWriterForCurrentTick = new(Constants.MaxEventQueueOctetSize);
+        readonly Queue<EventStreamPackItem> events = new();
+        TickId authoritativeTickId;
 
-        private bool isInitialized;
-        private TickId lastInsertedTickId;
-        private ushort sequenceId;
+        bool isInitialized;
+        TickId lastInsertedTickId;
+        ushort sequenceId;
 
         public EventStreamPackQueue(TickId authoritativeTickId)
         {

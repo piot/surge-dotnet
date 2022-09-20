@@ -7,7 +7,6 @@ using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.SerializableVersion;
-using Piot.Surge.Tick;
 using Piot.Surge.TransportReplay;
 using Piot.Transport;
 using Piot.Transport.Memory;
@@ -17,8 +16,8 @@ namespace Tests.TransportReplay;
 
 public sealed class TransportReplayTests
 {
-    private static readonly SemanticVersion ApplicationVersion = new(0, 2, 3);
-    private readonly ILog log;
+    static readonly SemanticVersion ApplicationVersion = new(0, 2, 3);
+    readonly ILog log;
 
     public TransportReplayTests(ITestOutputHelper output)
     {
@@ -28,7 +27,7 @@ public sealed class TransportReplayTests
         log = new Log(combinedLogTarget, LogLevel.LowLevel);
     }
 
-    private static ReadOnlySpan<byte> CreateReplayOctets()
+    static ReadOnlySpan<byte> CreateReplayOctets()
     {
         var state = new MockState(0xF00D);
         var recordTarget = new OctetWriter(32 * 1024);
@@ -36,11 +35,11 @@ public sealed class TransportReplayTests
         var mockTransportReceive = new MemoryTransportReceive();
 
         var record = new TransportRecorder(mockTransportReceive, state, ApplicationVersion,
-            new MonotonicTimeMockMs(new TimeMs(23)),
-            new TickId(99), recordTarget);
+            new MonotonicTimeMockMs(new(23)),
+            new(99), recordTarget);
 
         record.TickId = record.TickId.Next;
-        mockTransportReceive.Feed(new EndpointId(21), new byte[] { 0xca, 0xfe });
+        mockTransportReceive.Feed(new(21), new byte[] { 0xca, 0xfe });
 
         var foundOctets = record.Receive(out var foundRemote);
         Assert.Equal(21, foundRemote.Value);
@@ -60,7 +59,7 @@ public sealed class TransportReplayTests
 
         var state = new MockState(0);
 
-        var mockReceiveTimeProvider = new MonotonicTimeMockMs(new TimeMs(22));
+        var mockReceiveTimeProvider = new MonotonicTimeMockMs(new(22));
         var playback = new TransportPlayback(state, ApplicationVersion, playbackSource, mockReceiveTimeProvider);
         Assert.Equal(0xf00dU, state.counter);
 
@@ -68,7 +67,7 @@ public sealed class TransportReplayTests
         Assert.Empty(firstReadOctets.ToArray());
         Assert.Equal(EndpointId.NoEndpoint, firstEndpointId);
 
-        mockReceiveTimeProvider.TimeInMs = new TimeMs(23);
+        mockReceiveTimeProvider.TimeInMs = new(23);
 
         var readOctets = playback.Receive(out var readRemoteId);
         Assert.Equal(21, readRemoteId.Value);
@@ -79,7 +78,7 @@ public sealed class TransportReplayTests
         Assert.Equal(EndpointId.NoEndpoint, nextRemoteId);
     }
 
-    private class MockState : IOctetSerializable
+    class MockState : IOctetSerializable
     {
         public uint counter;
 

@@ -17,7 +17,6 @@ using Piot.Surge.Internal.Generated;
 using Piot.Surge.Replay;
 using Piot.Surge.SnapshotProtocol;
 using Piot.Surge.Tick;
-using Tests.ExampleGame;
 using Tests.Surge.ExampleGame;
 using Xunit.Abstractions;
 
@@ -25,7 +24,7 @@ namespace Tests.Replay;
 
 public sealed class ReplayRecorderTests
 {
-    private readonly ILog log;
+    readonly ILog log;
 
     public ReplayRecorderTests(ITestOutputHelper output)
     {
@@ -34,7 +33,7 @@ public sealed class ReplayRecorderTests
         log = new Log(combinedLogTarget, LogLevel.LowLevel);
     }
 
-    private static DeltaSnapshotPack TickHost(IEntityContainerWithDetectChanges authoritativeWorld, TickId hostTickId)
+    static DeltaSnapshotPack TickHost(IEntityContainerWithDetectChanges authoritativeWorld, TickId hostTickId)
     {
         ChangeClearer.OverwriteAuthoritative(authoritativeWorld);
         Ticker.Tick(authoritativeWorld);
@@ -74,7 +73,7 @@ public sealed class ReplayRecorderTests
 
             using var outputStream = FileStreamCreator.Create("replay.temp");
 
-            (spawnedAvatarEntityOnHost, spawnedAvatarInternalOnHost) = entitySpawner.SpawnAvatarLogic(new AvatarLogic
+            (spawnedAvatarEntityOnHost, spawnedAvatarInternalOnHost) = entitySpawner.SpawnAvatarLogic(new()
             {
                 fireButtonIsDown = true,
                 castButtonIsDown = false,

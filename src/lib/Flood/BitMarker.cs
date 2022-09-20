@@ -3,8 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System;
-
 namespace Piot.Flood
 {
     public static class BitMarker
@@ -19,7 +17,7 @@ namespace Piot.Flood
             var value = reader.ReadBits(bitCount);
             if (value != expectedValue)
             {
-                throw new Exception("wrong marker encountered");
+                throw new("wrong marker encountered");
             }
         }
     }

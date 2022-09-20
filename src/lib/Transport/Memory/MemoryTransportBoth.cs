@@ -9,9 +9,9 @@ namespace Piot.Transport.Memory
 {
     public sealed class MemoryTransportBoth : ITransport, ITransportEnqueue
     {
-        private readonly MemoryTransportReceive receive = new();
-        private ITransportEnqueue? enqueueTarget;
-        private EndpointId knownAsOnReceiver;
+        readonly MemoryTransportReceive receive = new();
+        ITransportEnqueue? enqueueTarget;
+        EndpointId knownAsOnReceiver;
 
         public ReadOnlySpan<byte> Receive(out EndpointId endpointId)
         {
@@ -22,7 +22,7 @@ namespace Piot.Transport.Memory
         {
             if (enqueueTarget is null)
             {
-                throw new Exception("EnqueueTarget is not set");
+                throw new("EnqueueTarget is not set");
             }
 
             enqueueTarget.Feed(knownAsOnReceiver, payload);

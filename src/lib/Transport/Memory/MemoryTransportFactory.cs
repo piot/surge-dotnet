@@ -12,9 +12,9 @@ namespace Piot.Transport.Memory
             var client = new MemoryTransportBoth();
             var host = new MemoryTransportBoth();
 
-            host.SetEnqueueTarget(client, new EndpointId(0));
+            host.SetEnqueueTarget(client, new(0));
 
-            client.SetEnqueueTarget(host, new EndpointId(2));
+            client.SetEnqueueTarget(host, new(2));
 
             return (client, host);
         }

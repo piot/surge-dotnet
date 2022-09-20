@@ -11,12 +11,12 @@ namespace Piot.Surge.TimeTick
 {
     public sealed class TimeTicker : ITimeTicker
     {
-        private readonly ILog log;
-        private readonly Action Tick;
-        private long deltaTimeMs;
-        private TimeMs lastTick;
+        readonly ILog log;
+        readonly Action Tick;
+        long deltaTimeMs;
+        TimeMs lastTick;
 #if DEBUG
-        private TimeMs lastUpdateTime;
+        TimeMs lastUpdateTime;
 #endif
 
         public TimeTicker(TimeMs now, Action action, FixedDeltaTimeMs deltaTimeMs, ILog log)

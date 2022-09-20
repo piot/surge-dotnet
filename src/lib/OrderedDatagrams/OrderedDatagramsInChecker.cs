@@ -12,7 +12,7 @@ namespace Piot.Surge.OrderedDatagrams
     /// </summary>
     public sealed class OrderedDatagramsInChecker
     {
-        private bool hasReceivedInitialValue;
+        bool hasReceivedInitialValue;
 
         public OrderedDatagramsInChecker()
         {

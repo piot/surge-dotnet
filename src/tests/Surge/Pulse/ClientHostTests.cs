@@ -25,7 +25,7 @@ public class FetchInput
 {
     public GameInput ReadFromDevice(LocalPlayerIndex localPlayerIndex)
     {
-        return new GameInput
+        return new()
         {
             primaryAbility = true,
             secondaryAbility = false
@@ -35,8 +35,8 @@ public class FetchInput
 
 public sealed class ClientHostTests
 {
-    private readonly ILog log;
-    private readonly FetchInput mockInput = new();
+    readonly ILog log;
+    readonly FetchInput mockInput = new();
 
     public ClientHostTests(ITestOutputHelper output)
     {
@@ -45,7 +45,7 @@ public sealed class ClientHostTests
         log = new Log(combinedLogTarget, LogLevel.LowLevel);
     }
 
-    private Client CreateClient(TimeMs now, ITransport transport)
+    Client CreateClient(TimeMs now, ITransport transport)
     {
         var clientDeltaTime = new FixedDeltaTimeMs(16);
         var inputFetch = new GeneratedInputPackFetch();
@@ -62,7 +62,7 @@ public sealed class ClientHostTests
         return client;
     }
 
-    private Host CreateHost(TimeMs now, ITransport transport)
+    Host CreateHost(TimeMs now, ITransport transport)
     {
         var worldWithDetectChanges = new AuthoritativeWorld();
         var host = new Host(transport, DefaultMultiCompressor.Create(), DefaultMultiCompressor.DeflateCompressionIndex,
@@ -87,7 +87,7 @@ public sealed class ClientHostTests
         {
             var randomizer = new PseudoRandom(0x48019422);
             internetSimulatedHostTransport =
-                new InternetSimulatorTransport(hostTransport, timeProvider, randomizer,
+                new(hostTransport, timeProvider, randomizer,
                     log.SubLog("InternetSimulator"));
             hostTransportToUse = internetSimulatedHostTransport;
         }

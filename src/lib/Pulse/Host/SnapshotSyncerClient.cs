@@ -15,7 +15,7 @@ namespace Piot.Surge.Pulse.Host
 {
     public sealed class SnapshotSyncerClient
     {
-        private readonly Action<TickId> OnNotifyExpectingTickId;
+        readonly Action<TickId> OnNotifyExpectingTickId;
         public sbyte clientInputTickCountAheadOfServer;
         public MonotonicTimeLowerBits.MonotonicTimeLowerBits lastReceivedMonotonicTimeLowerBits;
 

@@ -18,7 +18,7 @@ namespace Piot.Surge.Types
 
         public static Position2 operator +(Velocity2 a, Velocity2 b)
         {
-            return new Position2
+            return new()
             {
                 x = a.x += b.x,
                 y = a.y + b.y
@@ -53,7 +53,7 @@ namespace Piot.Surge.Types
 
         public static Velocity2 FromFloats(float x, float y)
         {
-            return new Velocity2((int)(x * Velocity3.VelocityResolution),
+            return new((int)(x * Velocity3.VelocityResolution),
                 (int)(y * Velocity3.VelocityResolution));
         }
 

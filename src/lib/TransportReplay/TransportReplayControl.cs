@@ -15,17 +15,17 @@ namespace Piot.Surge.TransportReplay
 {
     public class TransportReplayControl : ITransportReplayControl
     {
-        private const int replayMemoryOctetSize = 600 * 1024;
-        private const int replayMemoryOctetThreshold = 28 * 1024;
-        private readonly SemanticVersion applicationVersion;
-        private readonly ILog log;
-        private readonly IMonotonicTimeMs timeProvider;
-        private readonly OctetWriter writer = new(replayMemoryOctetSize);
-        private IDisposableOctetWriter? disposableOctetWriter;
-        private TransportPlayback? playback;
-        private TransportRecorder? recorder;
+        const int replayMemoryOctetSize = 600 * 1024;
+        const int replayMemoryOctetThreshold = 28 * 1024;
+        readonly SemanticVersion applicationVersion;
+        readonly ILog log;
+        readonly IMonotonicTimeMs timeProvider;
+        readonly OctetWriter writer = new(replayMemoryOctetSize);
+        IDisposableOctetWriter? disposableOctetWriter;
+        TransportPlayback? playback;
+        TransportRecorder? recorder;
 
-        private IOctetReaderWithSeekAndSkip? seekableOctetReader;
+        IOctetReaderWithSeekAndSkip? seekableOctetReader;
 
         public TransportReplayControl(SemanticVersion applicationVersion, IMonotonicTimeMs timeProvider, ILog log)
         {
@@ -39,7 +39,7 @@ namespace Piot.Surge.TransportReplay
         {
             if (recorder is not null)
             {
-                throw new Exception("is already recording");
+                throw new("is already recording");
             }
 
             recorder = new(transportToWrap, state, applicationVersion, timeProvider, nowTickId,

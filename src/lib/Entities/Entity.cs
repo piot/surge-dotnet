@@ -14,7 +14,7 @@ namespace Piot.Surge.Entities
     /// </summary>
     public sealed class Entity : IEntity
     {
-        private readonly ICompleteEntity completeEntity;
+        readonly ICompleteEntity completeEntity;
 
         public Entity(EntityId id, ICompleteEntity completeEntity)
         {

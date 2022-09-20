@@ -16,7 +16,7 @@ namespace Piot.Transport.Memory
 
     public sealed class MemoryTransportReceive : ITransportReceive, ITransportEnqueue
     {
-        private readonly Queue<Packet> packets = new();
+        readonly Queue<Packet> packets = new();
 
         public void Feed(EndpointId endpointId, ReadOnlySpan<byte> payload)
         {

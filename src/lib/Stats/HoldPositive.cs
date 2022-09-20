@@ -7,9 +7,9 @@ namespace Piot.Stats
 {
     public sealed class HoldPositive
     {
-        private readonly uint thresholdCount;
-        private uint continuousOffCount;
-        private bool lastValue;
+        readonly uint thresholdCount;
+        uint continuousOffCount;
+        bool lastValue;
 
         public HoldPositive(uint threshold)
         {

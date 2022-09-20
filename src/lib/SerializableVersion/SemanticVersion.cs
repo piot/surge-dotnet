@@ -15,7 +15,7 @@ namespace Piot.SerializableVersion
         public readonly ushort patch;
         public readonly string suffix;
 
-        private static bool IsOnlyAsciiString(string str)
+        static bool IsOnlyAsciiString(string str)
         {
             return Encoding.ASCII.GetByteCount(str) == str.Length;
         }

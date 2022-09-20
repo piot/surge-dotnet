@@ -17,10 +17,10 @@ namespace Piot.Surge.Pulse.Client
 
     public class SnapshotPackStack
     {
-        private readonly Stack<SnapshotPack> stack = new();
+        readonly Stack<SnapshotPack> stack = new();
 
-        private bool isInitialized;
-        private TickId lastInsertedTickId;
+        bool isInitialized;
+        TickId lastInsertedTickId;
 
         protected int Count => stack.Count;
 
@@ -28,7 +28,7 @@ namespace Piot.Surge.Pulse.Client
         {
             if (isInitialized && !tickId.IsImmediateFollowing(lastInsertedTickId))
             {
-                throw new Exception($"must have stack without gaps last:{lastInsertedTickId} want to add: {tickId}");
+                throw new($"must have stack without gaps last:{lastInsertedTickId} want to add: {tickId}");
             }
 
             stack.Push(new() { tickId = tickId, payload = payload.ToArray() });

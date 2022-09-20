@@ -10,7 +10,7 @@ namespace Piot.Raff.Stream
 {
     public sealed class RaffReader
     {
-        private readonly IOctetReader reader;
+        readonly IOctetReader reader;
 
         public RaffReader(IOctetReader reader)
         {

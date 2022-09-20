@@ -10,8 +10,8 @@ namespace Piot.Flood
 {
     public sealed class OctetReader : IOctetReaderWithSeekAndSkip
     {
-        private readonly ReadOnlyMemory<byte> array;
-        private int pos;
+        readonly ReadOnlyMemory<byte> array;
+        int pos;
 
         public OctetReader(ReadOnlySpan<byte> span)
         {
@@ -77,7 +77,7 @@ namespace Piot.Flood
             pos += octetCount;
             if (pos >= array.Length)
             {
-                throw new Exception("skipped too far");
+                throw new("skipped too far");
             }
         }
 
@@ -88,7 +88,7 @@ namespace Piot.Flood
             pos = (int)position;
             if (pos >= array.Length)
             {
-                throw new Exception($"seek too far {pos} vs {array.Length}");
+                throw new($"seek too far {pos} vs {array.Length}");
             }
         }
 

@@ -11,7 +11,6 @@ using Piot.Surge.Internal.Generated;
 using Piot.Surge.LocalPlayer;
 using Piot.Surge.Pulse.Client;
 using Piot.Surge.Pulse.Host;
-using Piot.Surge.Types;
 using Piot.Transport;
 using Tests.Surge.ExampleGame;
 
@@ -19,9 +18,9 @@ namespace Tests.ExampleGame;
 
 public sealed class Game
 {
-    private readonly FetchInput inputFetch = new();
-    private readonly ILog log;
-    private readonly WorldWithGhostCreator world;
+    readonly FetchInput inputFetch = new();
+    readonly ILog log;
+    readonly WorldWithGhostCreator world;
 
     public Game(ITransport transport, IMultiCompressor compression, bool isHosting, ILog log)
     {
@@ -30,13 +29,13 @@ public sealed class Game
         var delta = new FixedDeltaTimeMs(16);
 
         var entityCreation = new GeneratedEntityGhostCreator();
-        GeneratedNotifyEntityCreation = new GeneratedNotifyEntityCreation();
+        GeneratedNotifyEntityCreation = new();
         world = new(entityCreation, GeneratedNotifyEntityCreation, isHosting);
         var generatedEventTarget = new GeneratedEventProcessor(new ShortEvents(log.SubLog("ShortEvents")));
 
         if (isHosting)
         {
-            Host = new Host(transport, compression, DefaultMultiCompressor.DeflateCompressionIndex,
+            Host = new(transport, compression, DefaultMultiCompressor.DeflateCompressionIndex,
                 world, now, log.SubLog("Host"));
         }
         else
@@ -47,7 +46,7 @@ public sealed class Game
                 transport, compression, gameInputFetch, new MockPlaybackNotify());
         }
 
-        GeneratedHostEntitySpawner = new GeneratedHostEntitySpawner(world, GeneratedNotifyEntityCreation);
+        GeneratedHostEntitySpawner = new(world, GeneratedNotifyEntityCreation);
 
         GeneratedNotifyEntityCreation.OnSpawnFireballLogic += fireball =>
         {
@@ -76,7 +75,7 @@ public sealed class Game
                 var fireballLogic = new FireballLogic
                 {
                     position = position,
-                    velocity = new Velocity3(200, 300, 400)
+                    velocity = new(200, 300, 400)
                 };
 
                 GeneratedHostEntitySpawner.SpawnFireballLogic(fireballLogic);
@@ -112,7 +111,7 @@ public sealed class Game
     {
         public GameInput ReadFromDevice(LocalPlayerIndex localPlayerIndex)
         {
-            return new GameInput
+            return new()
             {
                 primaryAbility = true,
                 secondaryAbility = false

@@ -120,7 +120,7 @@ namespace Piot.Surge.Generator
             }
             else
             {
-                throw new Exception($"unknown type {type.Name}");
+                throw new($"unknown type {type.Name}");
             }
 
             var castString = includeCast ? $"({type.Name})" : "";

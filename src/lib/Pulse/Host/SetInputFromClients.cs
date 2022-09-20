@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System;
 using System.Collections.Generic;
 using Piot.Clog;
 using Piot.Flood;
@@ -50,7 +49,7 @@ namespace Piot.Surge.Pulse.Host
 
                         if (targetEntity.CompleteEntity is not IInputDeserialize inputDeserialize)
                         {
-                            throw new Exception(
+                            throw new(
                                 $"It is not possible to control Entity {targetEntity}, it has no IDeserializeInput interface");
                         }
 

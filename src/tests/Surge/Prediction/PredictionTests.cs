@@ -16,7 +16,7 @@ namespace Tests.ExampleGame;
 
 public sealed class PredictionTests
 {
-    private readonly ILog log;
+    readonly ILog log;
 
     public PredictionTests(ITestOutputHelper output)
     {

@@ -11,10 +11,10 @@ namespace Piot.Collections
 {
     public sealed class CircularBuffer<T> : IEnumerable<T>
     {
-        private readonly T[] buffer;
-        private readonly bool overwrite;
-        private int head;
-        private int tail;
+        readonly T[] buffer;
+        readonly bool overwrite;
+        int head;
+        int tail;
 
         public CircularBuffer(int capacity, bool overwrite = true)
         {

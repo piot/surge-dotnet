@@ -11,7 +11,7 @@ namespace Tests.Pulse.SnapshotEntityMasks;
 
 public sealed class SnapshotDeltaEntityMaskMergeBits
 {
-    private readonly ILog log;
+    readonly ILog log;
 
     public SnapshotDeltaEntityMaskMergeBits(ITestOutputHelper output)
     {

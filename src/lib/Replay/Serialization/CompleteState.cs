@@ -11,7 +11,7 @@ namespace Piot.Surge.Replay.Serialization
 {
     public sealed class CompleteState
     {
-        private readonly ReadOnlyMemory<byte> payload;
+        readonly ReadOnlyMemory<byte> payload;
 
         public CompleteState(TimeMs capturedAtTimeMs, TickId tickId, ReadOnlySpan<byte> payload)
         {

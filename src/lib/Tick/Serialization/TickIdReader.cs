@@ -16,7 +16,7 @@ namespace Piot.Surge.Tick.Serialization
         /// <returns></returns>
         public static TickId Read(IOctetReader reader)
         {
-            return new TickId(reader.ReadUInt32());
+            return new(reader.ReadUInt32());
         }
     }
 }

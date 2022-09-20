@@ -18,7 +18,6 @@ using Piot.Surge.DeltaSnapshot.Pack.Convert;
 using Piot.Surge.DeltaSnapshot.Scan;
 using Piot.Surge.FieldMask;
 using Piot.Surge.Internal.Generated;
-using Piot.Surge.LocalPlayer;
 using Piot.Surge.LogicalInput;
 using Piot.Surge.LogicalInput.Serialization;
 using Piot.Surge.MonotonicTimeLowerBits;
@@ -34,7 +33,7 @@ using Constants = Piot.Surge.SnapshotProtocol.Constants;
 
 namespace Tests.Surge;
 
-internal sealed class CompareLogicalInputCollections : IEqualityComparer<ICollection<LogicalInput>>
+sealed class CompareLogicalInputCollections : IEqualityComparer<ICollection<LogicalInput>>
 {
     public bool Equals(ICollection<LogicalInput>? x, ICollection<LogicalInput>? y)
     {
@@ -69,7 +68,7 @@ internal sealed class CompareLogicalInputCollections : IEqualityComparer<ICollec
 
 public sealed class UnitTest1
 {
-    private readonly ILog log;
+    readonly ILog log;
 
     public UnitTest1(ITestOutputHelper output)
     {
@@ -109,14 +108,14 @@ public sealed class UnitTest1
     public void SerializeLogicalInput()
     {
         var logicalInputQueue = new LogicalInputQueue();
-        logicalInputQueue.AddLogicalInput(new LogicalInput(new LocalPlayerIndex(0), new TickId(20),
+        logicalInputQueue.AddLogicalInput(new(new(0), new(20),
             new byte[] { 0x0a, 0x0b }));
 
         var writer = new OctetWriter(23);
 
         LogicalInputSerialize.Serialize(writer,
-            new LogicalInputsForAllLocalPlayers(new LogicalInputArrayForPlayer[]
-                { new(new LocalPlayerIndex(0), logicalInputQueue.Collection) }));
+            new(new LogicalInputArrayForPlayer[]
+                { new(new(0), logicalInputQueue.Collection) }));
 
         var reader = new OctetReader(writer.Octets);
         var encounteredLogicalPositions = LogicalInputDeserialize.Deserialize(reader);
@@ -130,17 +129,17 @@ public sealed class UnitTest1
     public void SerializeLogicalInputDatagramPack()
     {
         var logicalInputQueue = new LogicalInputQueue();
-        logicalInputQueue.AddLogicalInput(new LogicalInput(new LocalPlayerIndex(0), new TickId(20),
+        logicalInputQueue.AddLogicalInput(new(new(0), new(20),
             new byte[] { 0x0a, 0x0b }));
 
         var now = new TimeMs(0x954299);
 
         var datagramsOut = new OrderedDatagramsSequenceId();
         var octetWriter = new OctetWriter(1024);
-        LogicInputDatagramSerialize.Serialize(octetWriter, datagramsOut, new TickId(42), 0,
+        LogicInputDatagramSerialize.Serialize(octetWriter, datagramsOut, new(42), 0,
             now,
-            new LogicalInputsForAllLocalPlayers(new LogicalInputArrayForPlayer[]
-                { new(new LocalPlayerIndex(0), logicalInputQueue.Collection) }));
+            new(new LogicalInputArrayForPlayer[]
+                { new(new(0), logicalInputQueue.Collection) }));
 
         var reader = new OctetReader(octetWriter.Octets);
         var datagramsSequenceIn = OrderedDatagramsSequenceIdReader.Read(reader);
@@ -168,8 +167,8 @@ public sealed class UnitTest1
         var writer = new OctetWriter(23);
 
         LogicalInputSerialize.Serialize(writer,
-            new LogicalInputsForAllLocalPlayers(new LogicalInputArrayForPlayer[]
-                { new(new LocalPlayerIndex(0), logicalInputQueue.Collection) }));
+            new(new LogicalInputArrayForPlayer[]
+                { new(new(0), logicalInputQueue.Collection) }));
 
         Assert.Equal(2, writer.Octets.Length);
 
@@ -194,7 +193,7 @@ public sealed class UnitTest1
     public void EntitySerializeAll()
     {
         var someAvatar = new AvatarLogicEntityInternal
-            { Current = new AvatarLogic { position = new Position3(100, 200, 300), ammoCount = 1234 } };
+            { Current = new() { position = new(100, 200, 300), ammoCount = 1234 } };
 
         var writer = new OctetWriter(64);
         someAvatar.SerializeAll(writer);
@@ -213,7 +212,7 @@ public sealed class UnitTest1
     public void EntitySerializeMask()
     {
         var someAvatar = new AvatarLogicEntityInternal
-            { Current = new AvatarLogic { position = new Position3(100, 200, 300), ammoCount = 1234 } };
+            { Current = new() { position = new(100, 200, 300), ammoCount = 1234 } };
         var readAvatar = new AvatarLogicEntityInternal();
 
         {
@@ -250,7 +249,7 @@ public sealed class UnitTest1
     {
         var avatarBefore = new AvatarLogicEntityInternal
         {
-            Current = new AvatarLogic { ammoCount = 100 }
+            Current = new() { ammoCount = 100 }
         };
 
         var changes = avatarBefore.Changes();
@@ -266,12 +265,12 @@ public sealed class UnitTest1
     {
         var avatarBeforeInfo = new AvatarLogicEntityInternal
         {
-            Current = new AvatarLogic { ammoCount = 100, fireButtonIsDown = false }
+            Current = new() { ammoCount = 100, fireButtonIsDown = false }
         };
 
         var avatarButtonDown = new AvatarLogicEntityInternal
         {
-            Current = new AvatarLogic { ammoCount = 100, fireButtonIsDown = true }
+            Current = new() { ammoCount = 100, fireButtonIsDown = true }
         };
 
         var writerButtonDown = new OctetWriter(100);
@@ -302,7 +301,7 @@ public sealed class UnitTest1
     {
         var avatar = new AvatarLogicEntityInternal
         {
-            Current = new AvatarLogic { ammoCount = 100, fireButtonIsDown = false }
+            Current = new() { ammoCount = 100, fireButtonIsDown = false }
         };
         avatar.ClearChanges();
 
@@ -317,19 +316,19 @@ public sealed class UnitTest1
     [Fact]
     public void SnapshotIdRanges()
     {
-        var first = new TickIdRange(new TickId(23), new TickId(24));
-        var illegalAfter = new TickIdRange(new TickId(26), new TickId(28));
+        var first = new TickIdRange(new(23), new(24));
+        var illegalAfter = new TickIdRange(new(26), new(28));
         Assert.False(illegalAfter.IsImmediateFollowing(first));
-        var legalAfter = new TickIdRange(new TickId(25), new TickId(31));
+        var legalAfter = new TickIdRange(new(25), new(31));
         Assert.True(legalAfter.IsImmediateFollowing(first));
     }
 
     [Fact]
     public void IllegalRange()
     {
-        Assert.Throws<ArgumentOutOfRangeException>(static () => new TickIdRange(new TickId(24), new TickId(23)));
+        Assert.Throws<ArgumentOutOfRangeException>(static () => new TickIdRange(new(24), new(23)));
         Assert.Throws<ArgumentOutOfRangeException>(static () =>
-            new TickIdRange(new TickId(uint.MaxValue), new TickId(uint.MaxValue)));
+            new TickIdRange(new(uint.MaxValue), new(uint.MaxValue)));
     }
 
 
@@ -338,7 +337,7 @@ public sealed class UnitTest1
     {
         var avatarInfo = new AvatarLogicEntityInternal
         {
-            Current = new AvatarLogic { ammoCount = 100, fireButtonIsDown = false }
+            Current = new() { ammoCount = 100, fireButtonIsDown = false }
         };
 
         var typeInformation = avatarInfo.TypeInformation;
@@ -439,7 +438,7 @@ public sealed class UnitTest1
     }
 
 
-    private static (EntityMasks, DeltaSnapshotEntityIds, DeltaSnapshotPack) ScanConvertAndCreate(
+    static (EntityMasks, DeltaSnapshotEntityIds, DeltaSnapshotPack) ScanConvertAndCreate(
         AuthoritativeWorld worldToScan,
         TickId tickId, ILog log)
     {
@@ -454,11 +453,11 @@ public sealed class UnitTest1
         return (entityMasks, deltaSnapshotEntityIds, deltaPack);
     }
 
-    private (DeltaSnapshotPack[], EntityId) PrepareThreeServerSnapshotDeltas()
+    (DeltaSnapshotPack[], EntityId) PrepareThreeServerSnapshotDeltas()
     {
         var avatarInfo = new AvatarLogicEntityInternal
         {
-            Current = new AvatarLogic { ammoCount = 100, fireButtonIsDown = false }
+            Current = new() { ammoCount = 100, fireButtonIsDown = false }
         };
 
         var world = new AuthoritativeWorld();
@@ -659,7 +658,7 @@ public sealed class UnitTest1
             notifyEntity.CompleteEntity.ClearChanges();
         }
 
-        var makeSure = clientWorld.FetchEntity(new EntityId(151));
+        var makeSure = clientWorld.FetchEntity(new(151));
         Assert.NotNull(makeSure);
 
         Assert.True(clientAvatar.IsAlive);

@@ -11,7 +11,7 @@ namespace Tests.Flood;
 
 public sealed class FileStreams
 {
-    private readonly ILog log;
+    readonly ILog log;
 
     public FileStreams(ITestOutputHelper output)
     {

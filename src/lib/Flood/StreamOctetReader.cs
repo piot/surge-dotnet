@@ -10,7 +10,7 @@ namespace Piot.Flood
 {
     public sealed class StreamOctetReader : IOctetReaderWithSeekAndSkip
     {
-        private readonly Stream stream;
+        readonly Stream stream;
 
         public StreamOctetReader(Stream stream)
         {

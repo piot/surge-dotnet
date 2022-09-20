@@ -18,7 +18,7 @@ namespace Piot.Surge.SnapshotProtocol.Out
     {
         public delegate void SendDelegate(ReadOnlySpan<byte> datagram);
 
-        private const uint PayloadOctetCountPerDatagram = 1100;
+        const uint PayloadOctetCountPerDatagram = 1100;
 
         public static void Write(SendDelegate send, SnapshotProtocolPack pack,
             MonotonicTimeLowerBits.MonotonicTimeLowerBits monotonicTimeLowerBits, sbyte clientInputTicksAhead,

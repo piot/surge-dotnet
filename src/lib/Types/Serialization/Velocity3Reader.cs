@@ -11,7 +11,7 @@ namespace Piot.Surge.Types.Serialization
     {
         public static Velocity3 Read(IOctetReader reader)
         {
-            return new Velocity3
+            return new()
             {
                 x = reader.ReadInt16(),
                 y = reader.ReadInt16(),
@@ -21,7 +21,7 @@ namespace Piot.Surge.Types.Serialization
 
         public static Velocity3 Read(IBitReader reader)
         {
-            return new Velocity3
+            return new()
             {
                 x = BitReaderUtils.ReadSignedBits(reader, 12),
                 y = BitReaderUtils.ReadSignedBits(reader, 12),

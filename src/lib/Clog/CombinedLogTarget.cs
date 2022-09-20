@@ -9,7 +9,7 @@ namespace Piot.Clog
 {
     public sealed class CombinedLogTarget : ILogTarget
     {
-        private readonly IEnumerable<ILogTarget> logTargets;
+        readonly IEnumerable<ILogTarget> logTargets;
 
         public CombinedLogTarget(IEnumerable<ILogTarget> logTargets)
         {

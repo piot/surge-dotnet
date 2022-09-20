@@ -13,16 +13,16 @@ namespace Piot.Hazy
 {
     public sealed class InternetSimulatorOut : ITransportSend
     {
-        private readonly InternetSimulator internetSimulator;
-        private readonly IMonotonicTimeMs timeProvider;
-        private readonly ITransportSend wrappedTransport;
+        readonly InternetSimulator internetSimulator;
+        readonly IMonotonicTimeMs timeProvider;
+        readonly ITransportSend wrappedTransport;
 
         public InternetSimulatorOut(ITransportSend wrappedTransport, IMonotonicTimeMs timeProvider,
             IRandom random, ILog log)
         {
             this.timeProvider = timeProvider;
             this.wrappedTransport = wrappedTransport;
-            internetSimulator = new InternetSimulator(timeProvider, random, log);
+            internetSimulator = new(timeProvider, random, log);
         }
 
         public Decision Decision => internetSimulator.Decision;

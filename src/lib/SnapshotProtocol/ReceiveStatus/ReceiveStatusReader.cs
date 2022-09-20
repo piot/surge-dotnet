@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System;
 using Piot.Flood;
 using Piot.Surge.Tick;
 using Piot.Surge.Tick.Serialization;
@@ -26,7 +25,7 @@ namespace Piot.Surge.SnapshotProtocol.ReceiveStatus
 #if DEBUG
             if (reader.ReadUInt8() != Constants.SnapshotReceiveStatusSync)
             {
-                throw new Exception("desync");
+                throw new("desync");
             }
 #endif
             expectingTickId = TickIdReader.Read(reader);

@@ -9,7 +9,7 @@ namespace Piot.Transport
 {
     public sealed class TransportClient : ITransportClient
     {
-        private readonly ITransport wrappedTransport;
+        readonly ITransport wrappedTransport;
 
         public TransportClient(ITransport wrappedTransport)
         {
@@ -18,7 +18,7 @@ namespace Piot.Transport
 
         public void SendToHost(ReadOnlySpan<byte> payload)
         {
-            wrappedTransport.SendToEndpoint(new EndpointId(0), payload);
+            wrappedTransport.SendToEndpoint(new(0), payload);
         }
 
         public ReadOnlySpan<byte> ReceiveFromHost()
@@ -26,7 +26,7 @@ namespace Piot.Transport
             var payload = wrappedTransport.Receive(out var remoteEndpointId);
             if (remoteEndpointId.Value != 0)
             {
-                throw new Exception($"should only have a connection with a single host {remoteEndpointId}");
+                throw new($"should only have a connection with a single host {remoteEndpointId}");
             }
 
             return payload;

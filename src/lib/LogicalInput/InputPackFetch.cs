@@ -11,9 +11,9 @@ namespace Piot.Surge.LogicalInput
 {
     public sealed class InputPackFetch<GameInputT> : IInputPackFetch
     {
-        private readonly OctetWriter cachedWriter = new(256);
-        private readonly Func<LocalPlayerIndex, GameInputT> gameSpecificFetch;
-        private readonly Action<IOctetWriter, GameInputT> writer;
+        readonly OctetWriter cachedWriter = new(256);
+        readonly Func<LocalPlayerIndex, GameInputT> gameSpecificFetch;
+        readonly Action<IOctetWriter, GameInputT> writer;
 
         public InputPackFetch(Func<LocalPlayerIndex, GameInputT> gameSpecificFetch,
             Action<IOctetWriter, GameInputT> writer)

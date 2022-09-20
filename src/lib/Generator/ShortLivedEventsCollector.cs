@@ -31,12 +31,12 @@ namespace Piot.Surge.Generator
             {
                 if (method.ReturnType != typeof(void))
                 {
-                    throw new Exception("Short lived events interface is only allowed to have void as return");
+                    throw new("Short lived events interface is only allowed to have void as return");
                 }
 
                 if (method.IsStatic)
                 {
-                    throw new Exception("static makes no sense for the interface");
+                    throw new("static makes no sense for the interface");
                 }
 
                 methods.Add(method);

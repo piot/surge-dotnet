@@ -13,7 +13,7 @@ namespace Tests.Replay;
 
 public sealed class ReplayTests
 {
-    private readonly ILog log;
+    readonly ILog log;
 
     public ReplayTests(ITestOutputHelper output)
     {
@@ -28,7 +28,7 @@ public sealed class ReplayTests
         var fileStream = FileStreamCreator.Create("write_replay_with_gap_fail.temp");
         var versionInfo = new ReplayVersionInfo(new(0, 1, 2), new(3, 4, 5));
         var replayRecorder =
-            new ReplayWriter(new CompleteState(new(49200), new(42), new byte[] { 0xca, 0xba }), versionInfo,
+            new ReplayWriter(new(new(49200), new(42), new byte[] { 0xca, 0xba }), versionInfo,
                 fileStream);
 
         // TODO: move to other tests
@@ -45,7 +45,7 @@ public sealed class ReplayTests
         var versionInfo = new ReplayVersionInfo(new(0, 1, 2), new(3, 4, 5));
 
         var replayRecorder =
-            new ReplayWriter(new CompleteState(new(49200), new(42), new byte[] { 0xca, 0xba }), versionInfo,
+            new ReplayWriter(new(new(49200), new(42), new byte[] { 0xca, 0xba }), versionInfo,
                 fileStream);
 
         // TODO: Move to snapshot tests
@@ -62,7 +62,7 @@ public sealed class ReplayTests
         var versionInfo = new ReplayVersionInfo(new(0, 1, 2), new(3, 4, 5));
 
         var replayRecorder =
-            new ReplayWriter(new CompleteState(new(49200), new(42), new byte[] { 0xca, 0xba }), versionInfo,
+            new ReplayWriter(new(new(49200), new(42), new byte[] { 0xca, 0xba }), versionInfo,
                 fileStream);
 
         replayRecorder.AddDeltaState(new(new(10459), new(new(43), new(45)), new byte[] { 0xfe }));
@@ -78,7 +78,7 @@ public sealed class ReplayTests
             using var fileStream = FileStreamCreator.Create(filename);
             var versionInfo = new ReplayVersionInfo(applicationVersion, new(3, 4, 5));
 
-            var replayRecorder = new ReplayWriter(new CompleteState(new(49200), new(42), new byte[] { 0xca, 0xba }),
+            var replayRecorder = new ReplayWriter(new(new(49200), new(42), new byte[] { 0xca, 0xba }),
                 versionInfo,
                 fileStream);
             replayRecorder.AddDeltaState(new(new(49200), new(new(42), new(43)), new byte[] { 0xfe }));

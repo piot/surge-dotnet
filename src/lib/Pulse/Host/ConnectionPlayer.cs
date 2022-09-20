@@ -16,7 +16,7 @@ namespace Piot.Surge.Pulse.Host
     /// </summary>
     public sealed class ConnectionPlayer
     {
-        private readonly EndpointId connectionId;
+        readonly EndpointId connectionId;
         public IEntity? AssignedPredictEntity;
 
         public ConnectionPlayer(EndpointId connectionId, LocalPlayerIndex localPlayerIndex)

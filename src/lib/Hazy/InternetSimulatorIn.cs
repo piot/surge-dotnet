@@ -13,15 +13,15 @@ namespace Piot.Hazy
 {
     public sealed class InternetSimulatorIn : ITransportReceive
     {
-        private readonly InternetSimulator internetSimulator;
-        private readonly IMonotonicTimeMs timeProvider;
-        private readonly ITransportReceive wrappedTransport;
+        readonly InternetSimulator internetSimulator;
+        readonly IMonotonicTimeMs timeProvider;
+        readonly ITransportReceive wrappedTransport;
 
         public InternetSimulatorIn(ITransportReceive wrappedTransport, IMonotonicTimeMs timeProvider, IRandom random,
             ILog log)
         {
             this.wrappedTransport = wrappedTransport;
-            internetSimulator = new InternetSimulator(timeProvider, random, log);
+            internetSimulator = new(timeProvider, random, log);
             this.timeProvider = timeProvider;
         }
 
@@ -34,7 +34,7 @@ namespace Piot.Hazy
             var wasFound = internetSimulator.PacketQueuePop.Dequeue(now, out var packet);
             if (!wasFound)
             {
-                endpoint = new EndpointId(0);
+                endpoint = new(0);
                 return ReadOnlySpan<byte>.Empty;
             }
 

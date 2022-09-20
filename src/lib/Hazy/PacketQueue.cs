@@ -16,7 +16,7 @@ namespace Piot.Hazy
 
     public sealed class PacketQueue : IPacketQueuePop
     {
-        private readonly LinkedList<Packet> queue = new();
+        readonly LinkedList<Packet> queue = new();
 
         public int Count => queue.Count;
 

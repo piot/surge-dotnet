@@ -13,7 +13,7 @@ namespace Piot.Surge.OrderedDatagrams
         {
             var encounteredId = reader.ReadUInt8();
 
-            return new OrderedDatagramsSequenceId(encounteredId);
+            return new(encounteredId);
         }
     }
 }

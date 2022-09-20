@@ -13,9 +13,9 @@ namespace Piot.Hazy
 {
     public sealed class InternetSimulator
     {
-        private readonly PacketQueue packetQueue = new();
-        private readonly IRandom random;
-        private readonly IMonotonicTimeMs timeProvider;
+        readonly PacketQueue packetQueue = new();
+        readonly IRandom random;
+        readonly IMonotonicTimeMs timeProvider;
 
         public InternetSimulator(IMonotonicTimeMs timeProvider,
             IRandom random, ILog log)
@@ -23,7 +23,7 @@ namespace Piot.Hazy
             this.random = random;
             this.timeProvider = timeProvider;
             LatencySimulator =
-                new LatencySimulator(20, 125, timeProvider.TimeInMs, random, log.SubLog("InternetSimLatency"));
+                new(20, 125, timeProvider.TimeInMs, random, log.SubLog("InternetSimLatency"));
         }
 
         public LatencySimulator LatencySimulator { get; }
@@ -35,7 +35,7 @@ namespace Piot.Hazy
         public void HandlePacket(EndpointId endpointId, ReadOnlySpan<byte> octets)
         {
             var chance = (uint)random.Random((int)PartsPerTenThousand.Divisor);
-            var packetAction = Decision.Decide(new PartsPerTenThousand(chance));
+            var packetAction = Decision.Decide(new(chance));
 
             var now = timeProvider.TimeInMs;
             var withLatency = new TimeMs(now.ms + LatencySimulator.LatencyInMs.ms);
@@ -53,7 +53,7 @@ namespace Piot.Hazy
                         insertTime = foundPacket.monotonicTimeMs.ms - 5;
                     }
 
-                    packetQueue.AddPacket(new(new TimeMs(insertTime), endpointId, octets));
+                    packetQueue.AddPacket(new(new(insertTime), endpointId, octets));
                 }
                     break;
                 case PacketAction.Duplicate:
@@ -75,7 +75,7 @@ namespace Piot.Hazy
             }
         }
 
-        private static byte[] RandomOctetArray(int octetSize, IRandom random)
+        static byte[] RandomOctetArray(int octetSize, IRandom random)
         {
             var octets = new byte[octetSize];
             for (var i = 0; i < octetSize; ++i)

@@ -22,7 +22,7 @@ namespace Piot.Surge.Pulse.Client
             var octetCompareEqual = incomingPayload.SequenceEqual(payload.Span);
             if (checksumCompareEqual != octetCompareEqual)
             {
-                throw new Exception("internal error, checksum compare and octet compare is not the same");
+                throw new("internal error, checksum compare and octet compare is not the same");
             }
 
             return octetCompareEqual;
@@ -52,11 +52,11 @@ namespace Piot.Surge.Pulse.Client
 
     public sealed class PredictionStateChecksumQueue
     {
-        private readonly Queue<PredictionStateAllChecksums> queue = new();
+        readonly Queue<PredictionStateAllChecksums> queue = new();
 
-        private bool isInitialized;
+        bool isInitialized;
 
-        private TickId lastInsertedTickId;
+        TickId lastInsertedTickId;
 
         public TickId FirstTickId => queue.Peek().tickId;
 
@@ -66,7 +66,7 @@ namespace Piot.Surge.Pulse.Client
         {
             if (isInitialized && !tickId.IsImmediateFollowing(lastInsertedTickId))
             {
-                throw new Exception("must have PredictionStateChecksumQueue without gaps");
+                throw new("must have PredictionStateChecksumQueue without gaps");
             }
 
             var logicFnv = Fnv.Fnv.ToFnv(logicPayload);
@@ -90,7 +90,7 @@ namespace Piot.Surge.Pulse.Client
             var predictionState = queue.Dequeue();
             if (predictionState.tickId.tickId != requiredTickId.tickId)
             {
-                throw new Exception(
+                throw new(
                     $"wrong internal state. prediction state dequeued is the wrong one required: {requiredTickId} encountered: {predictionState.tickId}");
             }
 

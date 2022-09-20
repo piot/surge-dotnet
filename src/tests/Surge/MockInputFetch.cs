@@ -14,11 +14,11 @@ namespace Tests;
 
 public sealed class MockInputFetch : IInputPackFetch
 {
-    private readonly ILog log;
-    private readonly OctetWriter cachedWriter = new(30);
-    private bool primaryAbility;
+    readonly OctetWriter cachedWriter = new(30);
+    readonly ILog log;
+    bool primaryAbility;
 
-    private bool secondaryAbility;
+    bool secondaryAbility;
 
     public MockInputFetch(ILog log)
     {

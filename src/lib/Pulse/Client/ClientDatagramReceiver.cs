@@ -22,18 +22,18 @@ namespace Piot.Surge.Pulse.Client
 {
     public sealed class ClientDatagramReceiver
     {
-        private readonly IMultiCompressor compression;
-        private readonly HoldPositive isReceivingMergedSnapshots = new(20);
-        private readonly ILog log;
-        private readonly ClientLocalInputFetchAndSend notifyLocalInputFetchAndSend;
-        private readonly ClientDeltaSnapshotPlayback notifyPlayback;
-        private readonly OrderedDatagramsInChecker orderedDatagramsInChecker = new();
-        private readonly SnapshotFragmentReAssembler snapshotFragmentReAssembler;
-        private readonly CircularBuffer<int> snapshotLatencies = new(128);
-        private readonly StatCountThreshold statsHostInputQueueCount = new(60);
-        private readonly StatCountThreshold statsRoundTripTime = new(10);
-        private readonly ITransportClient transportClient;
-        private readonly HoldPositive weAreSkippingAhead = new(25);
+        readonly IMultiCompressor compression;
+        readonly HoldPositive isReceivingMergedSnapshots = new(20);
+        readonly ILog log;
+        readonly ClientLocalInputFetchAndSend notifyLocalInputFetchAndSend;
+        readonly ClientDeltaSnapshotPlayback notifyPlayback;
+        readonly OrderedDatagramsInChecker orderedDatagramsInChecker = new();
+        readonly SnapshotFragmentReAssembler snapshotFragmentReAssembler;
+        readonly CircularBuffer<int> snapshotLatencies = new(128);
+        readonly StatCountThreshold statsHostInputQueueCount = new(60);
+        readonly StatCountThreshold statsRoundTripTime = new(10);
+        readonly ITransportClient transportClient;
+        readonly HoldPositive weAreSkippingAhead = new(25);
 
         public ClientDatagramReceiver(ITransportClient transportClient, IMultiCompressor compression,
             ClientDeltaSnapshotPlayback notifyPlayback, ClientLocalInputFetchAndSend notifyLocalInputFetchAndSend,
@@ -58,7 +58,7 @@ namespace Piot.Surge.Pulse.Client
 
         public IEnumerable<int> SnapshotLatencies => snapshotLatencies;
 
-        private long ReceiveSnapshotExtraData(IOctetReader reader, TimeMs now)
+        long ReceiveSnapshotExtraData(IOctetReader reader, TimeMs now)
         {
             var pongTimeLowerBits = MonotonicTimeLowerBitsReader.Read(reader);
             var pongTime = LowerBitsToMonotonic.LowerBitsToMonotonicMs(now, pongTimeLowerBits);
@@ -91,7 +91,7 @@ namespace Piot.Surge.Pulse.Client
             snapshotFragmentReAssembler.Deserialize(reader);
         }
 
-        private void ReceiveSnapshot(IOctetReader reader, TimeMs now)
+        void ReceiveSnapshot(IOctetReader reader, TimeMs now)
         {
             log.DebugLowLevel("receiving snapshot datagram from server");
             var lastRoundTripTime = ReceiveSnapshotExtraData(reader, now);
@@ -134,7 +134,7 @@ namespace Piot.Surge.Pulse.Client
                 snapshotWithCorrections.tickIdRange.lastTickId.Next;
         }
 
-        private void ReceiveDatagramFromHost(IOctetReader reader, TimeMs now)
+        void ReceiveDatagramFromHost(IOctetReader reader, TimeMs now)
         {
             if (!orderedDatagramsInChecker.ReadAndCheck(reader))
             {

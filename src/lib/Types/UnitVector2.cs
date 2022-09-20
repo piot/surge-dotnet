@@ -20,7 +20,7 @@ namespace Piot.Surge.Types
 
         public static UnitVector2 FromFloats(float x, float y)
         {
-            return new UnitVector2((int)(x * UnitResolution),
+            return new((int)(x * UnitResolution),
                 (int)(y * UnitResolution));
         }
     }

@@ -10,8 +10,8 @@ namespace Piot.Raff.Stream
 {
     public sealed class RaffWriter
     {
-        private readonly IOctetWriter writer;
-        private bool isClosed;
+        readonly IOctetWriter writer;
+        bool isClosed;
 
         public RaffWriter(IOctetWriter writer)
         {
@@ -23,7 +23,7 @@ namespace Piot.Raff.Stream
         {
             if (isClosed)
             {
-                throw new Exception("can not write, has already been closed");
+                throw new("can not write, has already been closed");
             }
 
             Serialize.WriteChunk(writer, icon, name, octets);
@@ -33,7 +33,7 @@ namespace Piot.Raff.Stream
         {
             if (isClosed)
             {
-                throw new Exception("has already been closed");
+                throw new("has already been closed");
             }
 
             Serialize.WriteChunk(writer, new(0), new(0), ReadOnlySpan<byte>.Empty);

@@ -17,10 +17,10 @@ namespace Piot.Surge.Replay
 {
     public sealed class ReplayRecorder
     {
-        private readonly ILog log;
-        private readonly ReplayWriter replayWriter;
-        private readonly IEntityContainer world;
-        private TickIdRange lastInsertedDeltaStateRange;
+        readonly ILog log;
+        readonly ReplayWriter replayWriter;
+        readonly IEntityContainer world;
+        TickIdRange lastInsertedDeltaStateRange;
 
         public ReplayRecorder(IEntityContainer world, TimeMs timeNowMs, TickId nowTickId,
             SemanticVersion applicationVersion, IOctetWriter writer, ILog log)
@@ -33,7 +33,7 @@ namespace Piot.Surge.Replay
             replayWriter = new(completeState, versionInfo, writer);
         }
 
-        private CompleteState CaptureCompleteState(TimeMs timeNow, TickId tickId)
+        CompleteState CaptureCompleteState(TimeMs timeNow, TickId tickId)
         {
             var payload = CompleteStateBitWriter.CaptureCompleteSnapshotPack(world, new(0));
             var completeState = new CompleteState(timeNow, tickId, payload);
@@ -45,12 +45,12 @@ namespace Piot.Surge.Replay
         {
             if (pack.TickIdRange.Last != worldTickIdNow)
             {
-                throw new Exception($"wrong order for complete state {pack.TickIdRange} {worldTickIdNow}");
+                throw new($"wrong order for complete state {pack.TickIdRange} {worldTickIdNow}");
             }
 
             if (!lastInsertedDeltaStateRange.CanAppend(pack.TickIdRange))
             {
-                throw new Exception($"not appendable {lastInsertedDeltaStateRange} and {pack.TickIdRange}");
+                throw new($"not appendable {lastInsertedDeltaStateRange} and {pack.TickIdRange}");
             }
 
             log.Info("Add delta state {TickIdRange}", pack.tickIdRange);

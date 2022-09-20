@@ -11,8 +11,8 @@ namespace Piot.Clog
 {
     public sealed class Log : ILog, ILogConfiguration
     {
-        private readonly string prefix;
-        private readonly ILogTarget target;
+        readonly string prefix;
+        readonly ILogTarget target;
 
         public Log(ILogTarget target, LogLevel logLevel = LogLevel.Debug, string prefix = "")
         {

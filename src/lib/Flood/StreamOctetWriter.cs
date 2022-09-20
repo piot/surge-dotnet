@@ -10,7 +10,7 @@ namespace Piot.Flood
 {
     public sealed class StreamOctetWriter : IDisposableOctetWriter
     {
-        private readonly Stream stream;
+        readonly Stream stream;
 
         public StreamOctetWriter(Stream stream)
         {

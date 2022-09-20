@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System;
 using Piot.Flood;
 
 namespace Piot.Surge.DeltaSnapshot.Pack
@@ -15,7 +14,7 @@ namespace Piot.Surge.DeltaSnapshot.Pack
             var count = reader.ReadUInt16();
             if (count > 128)
             {
-                throw new Exception($"suspicious count {count}");
+                throw new($"suspicious count {count}");
             }
 
             return count;
@@ -26,7 +25,7 @@ namespace Piot.Surge.DeltaSnapshot.Pack
             var count = reader.ReadBits(16);
             if (count > 128)
             {
-                throw new Exception($"suspicious count {count}");
+                throw new($"suspicious count {count}");
             }
 
             return count;

@@ -13,8 +13,8 @@ namespace Piot.Hazy
 {
     public sealed class InternetSimulatorTransport : ITransport
     {
-        private readonly InternetSimulatorIn simulatorIn;
-        private readonly InternetSimulatorOut simulatorOut;
+        readonly InternetSimulatorIn simulatorIn;
+        readonly InternetSimulatorOut simulatorOut;
 
         public InternetSimulatorTransport(ITransport wrapped, IMonotonicTimeMs timeProvider, IRandom random,
             ILog log)

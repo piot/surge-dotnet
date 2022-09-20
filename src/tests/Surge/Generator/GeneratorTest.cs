@@ -11,7 +11,7 @@ namespace Tests.Generator;
 
 public sealed class GeneratorTests
 {
-    private readonly ILog log;
+    readonly ILog log;
 
     public GeneratorTests(ITestOutputHelper output)
     {

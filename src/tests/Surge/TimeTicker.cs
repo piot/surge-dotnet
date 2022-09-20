@@ -12,7 +12,7 @@ namespace Tests;
 
 public sealed class TimeTickerTests
 {
-    private readonly ILog log;
+    readonly ILog log;
 
     public TimeTickerTests(ITestOutputHelper output)
     {
@@ -25,9 +25,9 @@ public sealed class TimeTickerTests
     {
         var tickCount = 0;
         var deltaTimeMs = new FixedDeltaTimeMs(32);
-        var ticker = new TimeTicker(new TimeMs(10), () => { tickCount++; }, deltaTimeMs, log);
+        var ticker = new TimeTicker(new(10), () => { tickCount++; }, deltaTimeMs, log);
 
-        ticker.Update(new TimeMs(10));
+        ticker.Update(new(10));
 
         Assert.Equal(0, tickCount);
     }
@@ -41,7 +41,7 @@ public sealed class TimeTickerTests
 
         var ticker = new TimeTicker(now, () => { tickCount++; }, deltaTimeMs, log);
 
-        ticker.Update(new TimeMs(10 + 32 + 31));
+        ticker.Update(new(10 + 32 + 31));
 
         Assert.Equal(1, tickCount);
     }
@@ -55,7 +55,7 @@ public sealed class TimeTickerTests
 
         var ticker = new TimeTicker(now, () => { tickCount++; }, deltaTimeMs, log.SubLog("TwoTimes"));
 
-        ticker.Update(new TimeMs(10 + 32 + 32));
+        ticker.Update(new(10 + 32 + 32));
 
         Assert.Equal(2, tickCount);
     }
@@ -90,10 +90,10 @@ public sealed class TimeTickerTests
 
         var ticker = new TimeTicker(now, () => { tickCount++; }, deltaTimeMs, log.SubLog("IllegalUpdateTime"));
 
-        ticker.Update(new TimeMs(10 + 32 + 31));
+        ticker.Update(new(10 + 32 + 31));
         Assert.Equal(1, tickCount);
 
-        var exception = Assert.Throws<ArgumentOutOfRangeException>(() => { ticker.Update(new TimeMs(10 + 32 + 30)); });
+        var exception = Assert.Throws<ArgumentOutOfRangeException>(() => { ticker.Update(new(10 + 32 + 30)); });
 
         Assert.Equal("now", exception.ParamName);
         Assert.Equal(1, tickCount);
@@ -109,10 +109,10 @@ public sealed class TimeTickerTests
 
         var ticker = new TimeTicker(now, () => { tickCount++; }, deltaTimeMs, log.SubLog("CheckThatRestIsUsed"));
 
-        ticker.Update(new TimeMs(10 + 32 + 31));
+        ticker.Update(new(10 + 32 + 31));
         Assert.Equal(1, tickCount);
 
-        ticker.Update(new TimeMs(10 + 32 + 33));
+        ticker.Update(new(10 + 32 + 33));
         Assert.Equal(2, tickCount);
     }
 }

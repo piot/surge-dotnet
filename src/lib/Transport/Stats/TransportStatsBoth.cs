@@ -10,9 +10,9 @@ namespace Piot.Transport.Stats
 {
     public sealed class TransportStatsBoth : ITransport
     {
-        private readonly TransportStatsReceive receive;
-        private readonly TransportStatsSend send;
-        private ITransport bothTransport;
+        readonly TransportStatsReceive receive;
+        readonly TransportStatsSend send;
+        ITransport bothTransport;
 
         public TransportStatsBoth(ITransport transport, TimeMs now)
         {

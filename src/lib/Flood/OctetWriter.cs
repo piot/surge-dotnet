@@ -10,7 +10,7 @@ namespace Piot.Flood
 {
     public sealed class OctetWriter : IOctetWriterWithResult
     {
-        private readonly Memory<byte> array;
+        readonly Memory<byte> array;
 
         public OctetWriter(uint size)
         {

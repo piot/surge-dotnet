@@ -20,14 +20,14 @@ namespace Piot.Raff
             var readHeader = reader.ReadOctets(Constants.fileHeader.Length);
             if (!readHeader.SequenceEqual(Constants.fileHeader))
             {
-                throw new Exception("illegal header");
+                throw new("illegal header");
             }
         }
 
-        private static FourCC ReadFourCC(IOctetReader reader)
+        static FourCC ReadFourCC(IOctetReader reader)
         {
             var octets = reader.ReadOctets(4);
-            return new FourCC(octets.ToArray());
+            return new(octets.ToArray());
         }
 
         public static uint ReadChunkHeader(IOctetReader reader, out FourCC icon, out FourCC name)
@@ -49,12 +49,12 @@ namespace Piot.Raff
             var octetCount = ReadChunkHeader(reader, out var readIcon, out var readName);
             if (!readIcon.Value.Equals(expectedIcon.Value))
             {
-                throw new Exception("not equal");
+                throw new("not equal");
             }
 
             if (!readName.Value.Equals(expectedName.Value))
             {
-                throw new Exception("not equal");
+                throw new("not equal");
             }
 
             return octetCount;
@@ -72,12 +72,12 @@ namespace Piot.Raff
             var octets = ReadChunk(reader, out var icon, out var name);
             if (!icon.Value.Equals(expectedIcon.Value))
             {
-                throw new Exception("not equal");
+                throw new("not equal");
             }
 
             if (!name.Value.Equals(expectedName.Value))
             {
-                throw new Exception("not equal");
+                throw new("not equal");
             }
 
             return octets;

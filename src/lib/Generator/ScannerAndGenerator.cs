@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System;
 using System.IO;
 using System.Linq;
 using Piot.Clog;
@@ -22,13 +21,13 @@ namespace Piot.Surge.Generator
             var gameInputInfos = GameInputInfoCollector.Collect(allInputs, log);
             if (gameInputInfos.Count() != 1)
             {
-                throw new Exception("must have at least one game input struct");
+                throw new("must have at least one game input struct");
             }
 
             var eventInterfaces = ShortLivedEventsScanner.ScanForEventInterfaces(log);
             if (eventInterfaces.Count() > 1)
             {
-                throw new Exception("must not have more than one short lived events interface");
+                throw new("must not have more than one short lived events interface");
             }
 
             var shortLivedEventsInfo = ShortLivedEventsCollector.Collect(eventInterfaces.First());

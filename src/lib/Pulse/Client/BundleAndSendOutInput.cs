@@ -15,13 +15,13 @@ namespace Piot.Surge.Pulse.Client
 {
     public sealed class BundleAndSendOutInput
     {
-        private readonly OctetWriter cachedDatagramWriter = new(Constants.MaxDatagramOctetSize);
-        private readonly OrderedDatagramsSequenceIdIncrease datagramsOut = new();
-        private readonly ILog log;
-        private readonly ITransportClient transportClient;
+        readonly OctetWriter cachedDatagramWriter = new(Constants.MaxDatagramOctetSize);
+        readonly OrderedDatagramsSequenceIdIncrease datagramsOut = new();
+        readonly ILog log;
+        readonly ITransportClient transportClient;
 
-        private TickId lastSeenSnapshotTickId;
-        private TickId nextExpectedSnapshotTickId;
+        TickId lastSeenSnapshotTickId;
+        TickId nextExpectedSnapshotTickId;
 
         public BundleAndSendOutInput(ITransportClient transportClient, ILog log)
         {

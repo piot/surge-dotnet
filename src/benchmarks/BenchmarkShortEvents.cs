@@ -10,7 +10,7 @@ namespace Benchmark.Surge.ExampleGame;
 
 public sealed class BenchmarkShortEvents : IBenchmarkShortEvents
 {
-    private readonly ILog log;
+    readonly ILog log;
 
     public BenchmarkShortEvents(ILog log)
     {

@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System;
 using System.Collections.Generic;
 using Piot.Flood;
 using Piot.Surge.DeltaSnapshot.Pack;
@@ -27,7 +26,7 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
 #if DEBUG
             if (reader.ReadUInt8() != Constants.SnapshotDeltaSync)
             {
-                throw new Exception("out of sync");
+                throw new("out of sync");
             }
 #endif
             var deletedEntities = new List<IEntity>();
@@ -44,7 +43,7 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
 #if DEBUG
             if (reader.ReadUInt8() != Constants.SnapshotDeltaCreatedSync)
             {
-                throw new Exception("out of sync");
+                throw new("out of sync");
             }
 #endif
             var createdEntities = new List<IEntity>();
@@ -62,7 +61,7 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
 #if DEBUG
             if (reader.ReadUInt8() != Constants.SnapshotDeltaUpdatedSync)
             {
-                throw new Exception("out of sync");
+                throw new("out of sync");
             }
 #endif
 
@@ -73,7 +72,7 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
                 var entityId = EntityIdReader.Read(reader);
                 var entityToDeserialize = entityGhostContainerWithCreator.FetchEntity(entityId);
                 var serializeMask = entityToDeserialize.CompleteEntity.Deserialize(reader);
-                updatedEntities.Add(new SnapshotDeltaReaderInfoEntity(entityToDeserialize, serializeMask));
+                updatedEntities.Add(new(entityToDeserialize, serializeMask));
             }
 
             return (deletedEntities.ToArray(), createdEntities.ToArray(), updatedEntities.ToArray());

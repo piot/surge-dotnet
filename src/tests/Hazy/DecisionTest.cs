@@ -12,7 +12,7 @@ namespace Tests.Hazy;
 
 public sealed class DecisionTests
 {
-    private readonly ILog log;
+    readonly ILog log;
 
     public DecisionTests(ITestOutputHelper output)
     {

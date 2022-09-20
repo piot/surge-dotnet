@@ -11,7 +11,7 @@ namespace Piot.Surge.Compress
 {
     public sealed class MultiCompressor : IMultiCompressor
     {
-        private readonly Dictionary<uint, Compressor> selection = new();
+        readonly Dictionary<uint, Compressor> selection = new();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlySpan<byte> Compress(uint index, ReadOnlySpan<byte> payload)

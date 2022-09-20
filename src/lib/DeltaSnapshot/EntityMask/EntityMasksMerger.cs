@@ -37,7 +37,7 @@ namespace Piot.Surge.DeltaSnapshot.EntityMask
 #if DEBUG
                 if (container.TickId.tickId != nextExpectedTickValue)
                 {
-                    throw new Exception(
+                    throw new(
                         $"containers are in wrong order. expected {nextExpectedTickValue} but got {container.TickId}");
                 }
 #endif

@@ -11,7 +11,7 @@ namespace Tests.Flood;
 
 public sealed class OctetWriterTests
 {
-    private readonly ILog log;
+    readonly ILog log;
 
     public OctetWriterTests(ITestOutputHelper output)
     {

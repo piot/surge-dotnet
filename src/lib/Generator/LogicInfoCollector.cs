@@ -33,7 +33,7 @@ namespace Piot.Surge.Generator
         public sealed class CommandParameter
         {
             public string name;
-            private ParameterInfo parameterInfo;
+            ParameterInfo parameterInfo;
             public Type type;
 
             public CommandParameter(ParameterInfo parameterInfo)
@@ -87,7 +87,7 @@ namespace Piot.Surge.Generator
             var parameters = tickMethod.GetParameters();
             if (parameters.Length > 1)
             {
-                throw new Exception(
+                throw new(
                     "we can only allow zero or one parameter to Tick(). The game specific actions container");
             }
 
@@ -96,7 +96,7 @@ namespace Piot.Surge.Generator
                 var commandsInterface = parameters.First().ParameterType;
                 if (!commandsInterface.IsInterface)
                 {
-                    throw new Exception("Tick() must take an interface as a single parameter");
+                    throw new("Tick() must take an interface as a single parameter");
                 }
 
 /*
@@ -184,7 +184,7 @@ namespace Piot.Surge.Generator
                 {
                     if (setInputMethod.IsAbstract)
                     {
-                        throw new Exception($"SetInput can not be abstract in type {type.Name}");
+                        throw new($"SetInput can not be abstract in type {type.Name}");
                     }
                 }
 

@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System;
 using System.Runtime.CompilerServices;
 using Piot.Flood;
 using Piot.Surge.Tick.Serialization;
@@ -27,7 +26,7 @@ namespace Piot.Surge.LogicalInput.Serialization
                 var tickCount = inputsForPlayer.inputs.Length;
                 if (tickCount > 255)
                 {
-                    throw new Exception("too many inputs to serialize");
+                    throw new("too many inputs to serialize");
                 }
 
                 writer.WriteUInt8((byte)tickCount);
@@ -44,7 +43,7 @@ namespace Piot.Surge.LogicalInput.Serialization
                 {
                     if (logicalInput.appliedAtTickId.tickId != expectedTickIdValue)
                     {
-                        throw new Exception("logical input in wrong order in collection");
+                        throw new("logical input in wrong order in collection");
                     }
 
                     writer.WriteUInt8((byte)logicalInput.payload.Length);

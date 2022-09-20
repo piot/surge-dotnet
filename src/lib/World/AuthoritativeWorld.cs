@@ -16,7 +16,7 @@ namespace Piot.Surge
         protected readonly List<IEntity> created = new();
         protected readonly List<IEntity> deleted = new();
 
-        private ushort lastEntityId;
+        ushort lastEntityId;
         public Dictionary<ulong, IEntity> Entities { get; } = new();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -24,7 +24,7 @@ namespace Piot.Surge
         {
             var freeEntityId = FindFreeEntityId();
 
-            var createdEntity = AddEntity(new EntityId(freeEntityId), completeEntity);
+            var createdEntity = AddEntity(new(freeEntityId), completeEntity);
 
             return createdEntity;
         }
@@ -69,7 +69,7 @@ namespace Piot.Surge
             Entities.TryGetValue(entityId.Value, out var completeNetworkEntity);
             if (completeNetworkEntity == null)
             {
-                throw new Exception($"could not find entity {entityId}");
+                throw new($"could not find entity {entityId}");
             }
 
             return completeNetworkEntity;
@@ -81,7 +81,7 @@ namespace Piot.Surge
             var existingEntity = Entities[entityId.Value];
             if (existingEntity == null)
             {
-                throw new Exception($"unknown entity id {entityId}");
+                throw new($"unknown entity id {entityId}");
             }
 
             DeleteEntity(existingEntity);
@@ -117,7 +117,7 @@ namespace Piot.Surge
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private ushort FindFreeEntityId()
+        ushort FindFreeEntityId()
         {
             for (var i = 0; i < 200; ++i)
             {
@@ -133,7 +133,7 @@ namespace Piot.Surge
                 }
             }
 
-            throw new Exception("Could not find free entity id");
+            throw new("Could not find free entity id");
         }
     }
 }

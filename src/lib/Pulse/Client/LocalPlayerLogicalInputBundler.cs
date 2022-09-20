@@ -21,7 +21,7 @@ namespace Piot.Surge.Pulse.Client
                 index++;
             }
 
-            return new LogicalInputsForAllLocalPlayers(inputForAllPlayers);
+            return new(inputForAllPlayers);
         }
     }
 }

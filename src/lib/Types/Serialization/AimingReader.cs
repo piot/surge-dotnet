@@ -14,7 +14,7 @@ namespace Piot.Surge.Types.Serialization
             var yaw = reader.ReadUInt16();
             var pitch = reader.ReadInt16();
 
-            return new Aiming(yaw, pitch);
+            return new(yaw, pitch);
         }
 
         public static Aiming Read(IBitReader reader)

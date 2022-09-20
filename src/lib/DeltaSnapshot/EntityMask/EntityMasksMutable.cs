@@ -24,7 +24,7 @@ namespace Piot.Surge.DeltaSnapshot.EntityMask
 
         public TickIdRange TickIdRange { get; }
 
-        private ulong Mask(ushort entityIdValue)
+        ulong Mask(ushort entityIdValue)
         {
             Masks.TryGetValue(entityIdValue, out var mask);
             return mask;
@@ -48,7 +48,7 @@ namespace Piot.Surge.DeltaSnapshot.EntityMask
             SetMask(entityId, mask);
         }
 
-        private void SetMask(EntityId entityId, ulong mask)
+        void SetMask(EntityId entityId, ulong mask)
         {
             Masks[entityId.Value] = mask;
         }

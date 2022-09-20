@@ -28,7 +28,7 @@ namespace Piot.Surge.LogicalInput.Serialization
             OrderedDatagramsSequenceIdWriter.Write(writer, sequenceOut);
             DatagramTypeWriter.Write(writer, DatagramType.DatagramType.PredictedInputs);
             MonotonicTimeLowerBitsWriter.Write(
-                new MonotonicTimeLowerBits.MonotonicTimeLowerBits((ushort)(now.ms & 0xffff)), writer);
+                new((ushort)(now.ms & 0xffff)), writer);
             SnapshotReceiveStatusWriter.Write(writer, lastReceivedSnapshot, droppedSnapshotCount);
             LogicalInputSerialize.Serialize(writer, inputs);
         }

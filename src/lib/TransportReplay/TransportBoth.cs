@@ -10,8 +10,8 @@ namespace Piot.Surge.TransportReplay
 {
     public class TransportBoth : ITransport
     {
-        private readonly ITransportReceive transportReceive;
-        private readonly ITransportSend transportSend;
+        readonly ITransportReceive transportReceive;
+        readonly ITransportSend transportSend;
 
         public TransportBoth(ITransportSend transportSend, ITransportReceive transportReceive)
         {

@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System;
 using System.Text;
 
 namespace Piot.Raff
@@ -19,7 +18,7 @@ namespace Piot.Raff
         {
             if (x.Length != 4)
             {
-                throw new Exception("FourCC must have exactly four octets");
+                throw new("FourCC must have exactly four octets");
             }
 
             Value = ((uint)x[0] << 24) | ((uint)x[1] << 16) | ((uint)x[2] << 8) | x[3];
@@ -34,16 +33,16 @@ namespace Piot.Raff
         {
             if (s.Length != 4)
             {
-                throw new Exception("FourCC must have exactly four octets");
+                throw new("FourCC must have exactly four octets");
             }
 
             var octets = Encoding.ASCII.GetBytes(s);
             if (octets.Length != 4)
             {
-                throw new Exception("FourCC must have exactly four octets");
+                throw new("FourCC must have exactly four octets");
             }
 
-            return new FourCC(octets);
+            return new(octets);
         }
     }
 }

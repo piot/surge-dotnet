@@ -11,7 +11,7 @@ namespace Piot.Surge.Replay.Serialization
 {
     public sealed class DeltaState
     {
-        private readonly ReadOnlyMemory<byte> payload;
+        readonly ReadOnlyMemory<byte> payload;
 
         public DeltaState(TimeMs timeProcessedMs, TickIdRange tickId, ReadOnlySpan<byte> payload)
         {

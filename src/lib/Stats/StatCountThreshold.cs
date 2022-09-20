@@ -9,12 +9,12 @@ namespace Piot.Stats
 {
     public sealed class StatCountThreshold
     {
-        private readonly uint countThreshold;
-        private uint count;
-        private int max;
-        private int min;
-        private Stat stat;
-        private long total;
+        readonly uint countThreshold;
+        uint count;
+        int max;
+        int min;
+        Stat stat;
+        long total;
 
         public StatCountThreshold(uint countThreshold)
         {
@@ -66,7 +66,7 @@ namespace Piot.Stats
             Reset();
         }
 
-        private void Reset()
+        void Reset()
         {
             min = int.MaxValue;
             max = int.MinValue;

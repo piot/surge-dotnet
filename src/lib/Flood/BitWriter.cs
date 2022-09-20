@@ -11,11 +11,11 @@ namespace Piot.Flood
 {
     public sealed class BitWriter : IBitWriterWithResult
     {
-        private readonly Memory<byte> array;
-        private ulong accumulator;
-        private int bitPosition;
-        private int bitsInAccumulator;
-        private int octetPosition;
+        readonly Memory<byte> array;
+        ulong accumulator;
+        int bitPosition;
+        int bitsInAccumulator;
+        int octetPosition;
 
         public BitWriter(uint octetSize)
         {
@@ -48,7 +48,7 @@ namespace Piot.Flood
 
             if (bitsInAccumulator is > 63 or < 0)
             {
-                throw new Exception("internal error, shift is too high");
+                throw new("internal error, shift is too high");
             }
 #endif
 

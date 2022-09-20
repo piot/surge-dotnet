@@ -9,8 +9,8 @@ namespace Piot.Transport
 {
     public sealed class WrappedSender
     {
-        private readonly EndpointId id;
-        private readonly ITransportSend sender;
+        readonly EndpointId id;
+        readonly ITransportSend sender;
 
         public WrappedSender(ITransportSend sender, EndpointId id)
         {

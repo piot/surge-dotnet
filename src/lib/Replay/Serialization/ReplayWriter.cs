@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System;
 using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.Raff.Stream;
@@ -16,17 +15,17 @@ namespace Piot.Surge.Replay.Serialization
 {
     public sealed class ReplayWriter
     {
-        private readonly OctetWriter cachedStateWriter = new(16 * 1024);
-        private readonly uint framesBetweenCompleteState;
-        private readonly RaffWriter raffWriter;
+        readonly OctetWriter cachedStateWriter = new(16 * 1024);
+        readonly uint framesBetweenCompleteState;
+        readonly RaffWriter raffWriter;
 
-        private uint packCountSinceCompleteState;
+        uint packCountSinceCompleteState;
 
         public ReplayWriter(CompleteState completeState, ReplayVersionInfo replayVersionInfo, IOctetWriter writer,
             uint framesUntilCompleteState = 60)
         {
             framesBetweenCompleteState = framesUntilCompleteState;
-            raffWriter = new RaffWriter(writer);
+            raffWriter = new(writer);
             WriteVersionChunk(replayVersionInfo);
             packCountSinceCompleteState = 60;
             AddCompleteState(completeState);
@@ -35,9 +34,9 @@ namespace Piot.Surge.Replay.Serialization
         public bool NeedsCompleteState => framesBetweenCompleteState != 0 &&
                                           packCountSinceCompleteState >= framesBetweenCompleteState;
 
-        private bool AllowedToAddCompleteState => framesBetweenCompleteState == 0 || NeedsCompleteState;
+        bool AllowedToAddCompleteState => framesBetweenCompleteState == 0 || NeedsCompleteState;
 
-        private void WriteVersionChunk(ReplayVersionInfo replayVersionInfo)
+        void WriteVersionChunk(ReplayVersionInfo replayVersionInfo)
         {
             var writer = new OctetWriter(100);
             VersionWriter.Write(writer, replayVersionInfo.applicationSemanticVersion);
@@ -45,7 +44,7 @@ namespace Piot.Surge.Replay.Serialization
             raffWriter.WriteChunk(Constants.ReplayIcon, Constants.ReplayName, writer.Octets);
         }
 
-        private static void WriteCompleteStateHeader(IOctetWriter writer, TimeMs timeNowMs, TickId tickId)
+        static void WriteCompleteStateHeader(IOctetWriter writer, TimeMs timeNowMs, TickId tickId)
         {
             writer.WriteUInt8(0x02);
             writer.WriteUInt64((ulong)timeNowMs.ms);
@@ -56,7 +55,7 @@ namespace Piot.Surge.Replay.Serialization
         {
             if (!AllowedToAddCompleteState)
             {
-                throw new Exception("Not allowed to insert complete state now");
+                throw new("Not allowed to insert complete state now");
             }
 
 
@@ -70,7 +69,7 @@ namespace Piot.Surge.Replay.Serialization
             raffWriter.WriteChunk(Constants.CompleteStateIcon, Constants.CompleteStateName, cachedStateWriter.Octets);
         }
 
-        private static void WriteDeltaHeader(IOctetWriter writer, TimeMs timeNowMs, TickIdRange tickIdRange)
+        static void WriteDeltaHeader(IOctetWriter writer, TimeMs timeNowMs, TickIdRange tickIdRange)
         {
             writer.WriteUInt8(0x01);
             var lowerBits = MonotonicTimeLowerBits.MonotonicTimeLowerBits.FromTime(timeNowMs);
@@ -82,7 +81,7 @@ namespace Piot.Surge.Replay.Serialization
         {
             if (NeedsCompleteState)
             {
-                throw new Exception($"needs complete state now, been {packCountSinceCompleteState} since last one");
+                throw new($"needs complete state now, been {packCountSinceCompleteState} since last one");
             }
 
             cachedStateWriter.Reset();

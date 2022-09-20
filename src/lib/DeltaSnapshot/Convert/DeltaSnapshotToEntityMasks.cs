@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System;
 using System.Collections.Generic;
 using Piot.Surge.DeltaSnapshot.EntityMask;
 using Piot.Surge.FieldMask;
@@ -26,7 +25,7 @@ namespace Piot.Surge.DeltaSnapshot.Convert
             {
                 if (entities.ContainsKey(deletedId.Value))
                 {
-                    throw new Exception("EntityId can only be included once");
+                    throw new("EntityId can only be included once");
                 }
 
                 entities[deletedId.Value] = ChangedFieldsMask.DeletedMaskBit;
@@ -36,7 +35,7 @@ namespace Piot.Surge.DeltaSnapshot.Convert
             {
                 if (entities.ContainsKey(createdId.Value))
                 {
-                    throw new Exception("EntityId can only be included once");
+                    throw new("EntityId can only be included once");
                 }
 
                 entities[createdId.Value] = ChangedFieldsMask.AllFieldChangedMaskBits;
@@ -46,7 +45,7 @@ namespace Piot.Surge.DeltaSnapshot.Convert
             {
                 if (entities.ContainsKey(updatedEntity.entityId.Value))
                 {
-                    throw new Exception("EntityId can only be included once");
+                    throw new("EntityId can only be included once");
                 }
 
                 entities[updatedEntity.entityId.Value] = updatedEntity.changeMask.mask;

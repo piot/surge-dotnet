@@ -11,7 +11,7 @@ namespace Tests.Flood;
 
 public sealed class TestBits
 {
-    private readonly ILog log;
+    readonly ILog log;
 
     public TestBits(ITestOutputHelper output)
     {

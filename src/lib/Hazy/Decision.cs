@@ -47,7 +47,7 @@ namespace Piot.Hazy
 
     public sealed class Decision
     {
-        private readonly List<Threshold> thresholds = new();
+        readonly List<Threshold> thresholds = new();
 
         public Decision(double drop, double tamper, double duplicate, double reorder)
         {
@@ -64,7 +64,7 @@ namespace Piot.Hazy
             var sum = drop + tamper + duplicate + reorder;
             if (sum > PartsPerTenThousand.Divisor)
             {
-                throw new Exception("illegal sum");
+                throw new("illegal sum");
             }
 
             if (drop > 0)

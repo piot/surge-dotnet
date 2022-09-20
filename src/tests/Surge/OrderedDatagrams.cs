@@ -13,7 +13,7 @@ public sealed class OrderedDatagramsTests
     [Fact]
     public void OrderedDatagrams()
     {
-        OrderedDatagramsInChecker sequence = new(new OrderedDatagramsSequenceId(0));
+        OrderedDatagramsInChecker sequence = new(new(0));
         {
             OctetWriter writer = new(1);
             writer.WriteUInt8(128);

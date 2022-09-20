@@ -11,7 +11,7 @@ namespace Tests.Pulse;
 
 public sealed class TimeTickingTests
 {
-    private readonly ILog log;
+    readonly ILog log;
 
     public TimeTickingTests(ITestOutputHelper output)
     {

@@ -11,7 +11,7 @@ namespace Tests.Stats;
 
 public sealed class StatsFormatTest
 {
-    private readonly ILog log;
+    readonly ILog log;
 
     public StatsFormatTest(ITestOutputHelper output)
     {

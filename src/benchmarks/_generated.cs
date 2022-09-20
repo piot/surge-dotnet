@@ -43,7 +43,7 @@ public sealed class GeneratedEntityGhostCreator : IEntityGhostCreator
         {
             ArchetypeConstants.AvatarLogic => new AvatarLogicEntityInternal(),
             ArchetypeConstants.FireballLogic => new FireballLogicEntityInternal(),
-            _ => throw new Exception($"unknown entity to create {archetypeId}")
+            _ => throw new($"unknown entity to create {archetypeId}")
         };
 
         return new Entity(entityId, completeEntity);
@@ -67,15 +67,15 @@ public sealed class GeneratedNotifyEntityCreation : INotifyEntityCreation
                 break;
 
             default:
-                throw new Exception("Internal error");
+                throw new("Internal error");
         }
     }
 }
 
 public sealed class GeneratedHostEntitySpawner
 {
-    private readonly IAuthoritativeEntityContainer container;
-    private readonly INotifyEntityCreation notifyWorld;
+    readonly IAuthoritativeEntityContainer container;
+    readonly INotifyEntityCreation notifyWorld;
 
     public GeneratedHostEntitySpawner(IAuthoritativeEntityContainer container, INotifyEntityCreation notifyWorld)
     {
@@ -152,7 +152,7 @@ public static class EventArchetypeConstants
 
 public sealed class GeneratedEventEnqueue : IBenchmarkShortEvents
 {
-    private readonly EventStreamPackQueue eventStream;
+    readonly EventStreamPackQueue eventStream;
 
     public GeneratedEventEnqueue(EventStreamPackQueue eventStream)
     {
@@ -175,7 +175,7 @@ public sealed class GeneratedEventEnqueue : IBenchmarkShortEvents
 
 public sealed class GeneratedEventProcessor : IEventProcessor
 {
-    private readonly IBenchmarkShortEvents target;
+    readonly IBenchmarkShortEvents target;
 
     public GeneratedEventProcessor(IBenchmarkShortEvents target)
     {
@@ -197,7 +197,7 @@ public sealed class GeneratedEventProcessor : IEventProcessor
                 break;
 
             default:
-                throw new Exception($"Unknown event {archetypeValue}");
+                throw new($"Unknown event {archetypeValue}");
         }
     }
 
@@ -218,7 +218,7 @@ public sealed class GeneratedEventProcessor : IEventProcessor
                 break;
 
             default:
-                throw new Exception($"Unknown event to skip {archetypeValue}");
+                throw new($"Unknown event to skip {archetypeValue}");
         }
     }
 }
@@ -238,7 +238,7 @@ public struct CastFireball : IAction
 // --------------- Internal Action Implementation ---------------
 public sealed class AvatarLogicActions : BenchmarkAvatarLogic.IAvatarLogicActions
 {
-    private readonly IActionsContainer actionsContainer;
+    readonly IActionsContainer actionsContainer;
 
     public AvatarLogicActions(IActionsContainer actionsContainer)
     {
@@ -266,7 +266,7 @@ public sealed class AvatarLogicEntity
 
     public delegate void FireChainLightningDelegate(Vector3 direction);
 
-    private readonly AvatarLogicEntityInternal internalEntity;
+    readonly AvatarLogicEntityInternal internalEntity;
     public CastFireballDelegate? DoCastFireball;
     public FireChainLightningDelegate? DoFireChainLightning;
 
@@ -324,9 +324,9 @@ public sealed class AvatarLogicEntityInternal : ICompleteEntity, IInputDeseriali
     public const ulong CastCooldownMask = 0x00000080;
     public const ulong JumpTimeMask = 0x00000100;
 
-    private readonly ActionsContainer actionsContainer = new();
-    private BenchmarkAvatarLogic current;
-    private BenchmarkAvatarLogic last;
+    readonly ActionsContainer actionsContainer = new();
+    BenchmarkAvatarLogic current;
+    BenchmarkAvatarLogic last;
 
 
     public AvatarLogicEntityInternal()
@@ -809,7 +809,7 @@ public sealed class AvatarLogicEntityInternal : ICompleteEntity, IInputDeseriali
     {
         get
         {
-            return new TypeInformation(new TypeInformationField[]
+            return new(new TypeInformationField[]
             {
                 new()
                 {
@@ -855,7 +855,7 @@ public struct Explode : IAction
 // --------------- Internal Action Implementation ---------------
 public sealed class FireballLogicActions : IFireballLogicActions
 {
-    private readonly IActionsContainer actionsContainer;
+    readonly IActionsContainer actionsContainer;
 
     public FireballLogicActions(IActionsContainer actionsContainer)
     {
@@ -872,7 +872,7 @@ public sealed class FireballLogicEntity
 {
     public delegate void ExplodeDelegate();
 
-    private readonly FireballLogicEntityInternal internalEntity;
+    readonly FireballLogicEntityInternal internalEntity;
     public ExplodeDelegate? DoExplode;
 
     public Action? OnDestroyed;
@@ -907,9 +907,9 @@ public sealed class FireballLogicEntityInternal : ICompleteEntity
     public const ulong PositionMask = 0x00000001;
     public const ulong VelocityMask = 0x00000002;
 
-    private readonly ActionsContainer actionsContainer = new();
-    private BenchmarkFireballLogic current;
-    private BenchmarkFireballLogic last;
+    readonly ActionsContainer actionsContainer = new();
+    BenchmarkFireballLogic current;
+    BenchmarkFireballLogic last;
 
 
     public FireballLogicEntityInternal()
@@ -1135,7 +1135,7 @@ public sealed class FireballLogicEntityInternal : ICompleteEntity
     {
         get
         {
-            return new TypeInformation(new TypeInformationField[]
+            return new(new TypeInformationField[]
             {
                 new() { mask = PositionMask, name = new(nameof(current.position)), type = typeof(Position3) },
                 new() { mask = VelocityMask, name = new(nameof(current.velocity)), type = typeof(Velocity3) }

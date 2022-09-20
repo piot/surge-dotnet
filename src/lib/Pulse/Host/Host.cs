@@ -21,23 +21,23 @@ namespace Piot.Surge.Pulse.Host
 {
     public sealed class Host
     {
-        private readonly BitWriter cachedSnapshotBitWriter = new(Constants.MaxSnapshotOctetSize);
-        private readonly OctetWriter cachedSnapshotWriter = new(Constants.MaxSnapshotOctetSize);
-        private readonly ClientConnections clientConnections;
-        private readonly ILog log;
-        private readonly TimeTicker simulationTicker;
-        private readonly SnapshotSyncer snapshotSyncer;
-        private readonly TimeTicker statsTicker;
-        private readonly ITransport transport;
-        private readonly TransportStatsBoth transportWithStats;
-        private TickId authoritativeTickId;
+        readonly BitWriter cachedSnapshotBitWriter = new(Constants.MaxSnapshotOctetSize);
+        readonly OctetWriter cachedSnapshotWriter = new(Constants.MaxSnapshotOctetSize);
+        readonly ClientConnections clientConnections;
+        readonly ILog log;
+        readonly TimeTicker simulationTicker;
+        readonly SnapshotSyncer snapshotSyncer;
+        readonly TimeTicker statsTicker;
+        readonly ITransport transport;
+        readonly TransportStatsBoth transportWithStats;
+        TickId authoritativeTickId;
 
         public Host(ITransport hostTransport, IMultiCompressor compression, CompressorIndex compressorIndex,
             IEntityContainerWithDetectChanges world, TimeMs now, ILog log)
         {
-            transportWithStats = new TransportStatsBoth(hostTransport, now);
+            transportWithStats = new(hostTransport, now);
             transport = transportWithStats;
-            snapshotSyncer = new SnapshotSyncer(transport, compression, compressorIndex, log.SubLog("SnapshotSyncer"));
+            snapshotSyncer = new(transport, compression, compressorIndex, log.SubLog("SnapshotSyncer"));
             AuthoritativeWorld = world;
             clientConnections = new(hostTransport, snapshotSyncer, log);
             this.log = log;
@@ -58,7 +58,7 @@ namespace Piot.Surge.Pulse.Host
 
         public TransportStats Stats => transportWithStats.Stats;
 
-        private void TickWorld()
+        void TickWorld()
         {
             Ticker.Tick(AuthoritativeWorld);
             Notifier.Notify(AuthoritativeWorld.AllEntities);
@@ -70,7 +70,7 @@ namespace Piot.Surge.Pulse.Host
             clientConnections.AssignPredictEntity(connectionId, localPlayerIndex, entity);
         }
 
-        private void SimulationTick()
+        void SimulationTick()
         {
             //log.Debug("== Simulation Tick! {TickId}", authoritativeTickId);
 
@@ -90,7 +90,7 @@ namespace Piot.Surge.Pulse.Host
             snapshotSyncer.SendSnapshot(masks, deltaSnapshotPack, AuthoritativeWorld, ShortLivedEventStream);
         }
 
-        private void StatsOutput()
+        void StatsOutput()
         {
             log.DebugLowLevel("stats: {Stats}", transportWithStats.Stats);
         }

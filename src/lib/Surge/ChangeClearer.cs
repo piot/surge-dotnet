@@ -9,7 +9,7 @@ namespace Piot.Surge
 {
     public static class ChangeClearer
     {
-        private static void ClearChanges(IEntity[] entities)
+        static void ClearChanges(IEntity[] entities)
         {
             foreach (var entity in entities)
             {

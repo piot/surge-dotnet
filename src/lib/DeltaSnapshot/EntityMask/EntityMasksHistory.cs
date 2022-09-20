@@ -11,7 +11,7 @@ namespace Piot.Surge.DeltaSnapshot.EntityMask
 {
     public sealed class EntityMasksHistory
     {
-        private readonly Queue<EntityMasks> masksQueue = new();
+        readonly Queue<EntityMasks> masksQueue = new();
 
         public EntityMasksUnion Fetch(TickIdRange range)
         {

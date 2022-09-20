@@ -3,8 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System;
-
 namespace Piot.Surge
 {
     public readonly struct ArchetypeId
@@ -15,7 +13,7 @@ namespace Piot.Surge
         {
             if (id == 0)
             {
-                throw new Exception("Illegal ID");
+                throw new("Illegal ID");
             }
 
             this.id = id;

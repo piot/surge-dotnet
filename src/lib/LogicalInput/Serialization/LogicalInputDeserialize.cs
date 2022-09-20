@@ -7,8 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Piot.Flood;
-using Piot.Surge.LocalPlayer;
-using Piot.Surge.Tick;
 using Piot.Surge.Tick.Serialization;
 
 namespace Piot.Surge.LogicalInput.Serialization
@@ -27,7 +25,7 @@ namespace Piot.Surge.LogicalInput.Serialization
             var localPlayerCount = reader.ReadUInt8();
             if (localPlayerCount == 0)
             {
-                return new LogicalInputsForAllLocalPlayers(Array.Empty<LogicalInputArrayForPlayer>());
+                return new(Array.Empty<LogicalInputArrayForPlayer>());
             }
 
             var players = new List<LogicalInputArrayForPlayer>();
@@ -48,21 +46,21 @@ namespace Piot.Surge.LogicalInput.Serialization
                     var payloadOctetCount = reader.ReadUInt8();
                     if (payloadOctetCount > 70)
                     {
-                        throw new Exception("suspicious input deltaSnapshotPackPayload octet count");
+                        throw new("suspicious input deltaSnapshotPackPayload octet count");
                     }
 
-                    LogicalInput input = new(new LocalPlayerIndex((byte)localPlayerIndex),
-                        new TickId((uint)(firstFrameId.tickId + i)),
+                    LogicalInput input = new(new((byte)localPlayerIndex),
+                        new((uint)(firstFrameId.tickId + i)),
                         reader.ReadOctets(payloadOctetCount));
 
                     array[i] = input;
                 }
 
-                var play = new LogicalInputArrayForPlayer(new LocalPlayerIndex((byte)localPlayerIndex), array);
+                var play = new LogicalInputArrayForPlayer(new((byte)localPlayerIndex), array);
                 players.Add(play);
             }
 
-            return new LogicalInputsForAllLocalPlayers(players.ToArray());
+            return new(players.ToArray());
         }
     }
 }

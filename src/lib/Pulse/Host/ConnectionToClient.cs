@@ -20,9 +20,9 @@ namespace Piot.Surge.Pulse.Host
 {
     public sealed class ConnectionToClient
     {
-        private readonly ILog log;
-        private readonly OrderedDatagramsInChecker orderedDatagramsIn = new();
-        private readonly SnapshotSyncerClient syncer;
+        readonly ILog log;
+        readonly OrderedDatagramsInChecker orderedDatagramsIn = new();
+        readonly SnapshotSyncerClient syncer;
 
         public ConnectionToClient(EndpointId id, SnapshotSyncerClient syncer, ILog log)
         {
@@ -63,7 +63,7 @@ namespace Piot.Surge.Pulse.Host
             syncer.SetAssignedPredictedEntity(localPlayerIndex, entity);
         }
 
-        private void ReceivePredictedInputs(IOctetReader reader, TickId serverIsAtTickId)
+        void ReceivePredictedInputs(IOctetReader reader, TickId serverIsAtTickId)
         {
             syncer.lastReceivedMonotonicTimeLowerBits = MonotonicTimeLowerBitsReader.Read(reader);
             log.Debug("received predicted inputs {LowerBits}", syncer.lastReceivedMonotonicTimeLowerBits);

@@ -57,7 +57,7 @@ public struct AvatarLogic : ILogic
         public void CastFireball(Position3 position, UnitVector3 direction);
     }
 
-    private void Fire(IAvatarLogicActions commands)
+    void Fire(IAvatarLogicActions commands)
     {
         ammoCount--;
         fireCooldown = 30;
@@ -70,7 +70,7 @@ public struct AvatarLogic : ILogic
         commands.FireChainLightning(fakeAiming); // aiming.ToDirection
     }
 
-    private void Cast(IAvatarLogicActions commands)
+    void Cast(IAvatarLogicActions commands)
     {
         manaAmount -= 10;
 
@@ -79,19 +79,19 @@ public struct AvatarLogic : ILogic
         castCooldown = 40;
     }
 
-    private bool CanFire => fireCooldown == 0 && ammoCount > 0;
+    bool CanFire => fireCooldown == 0 && ammoCount > 0;
 
-    private bool ShouldFire => fireButtonIsDown && CanFire;
+    bool ShouldFire => fireButtonIsDown && CanFire;
 
-    private bool CanCast => castCooldown == 0 && manaAmount > 10;
-    private bool ShouldCast => castButtonIsDown && CanCast;
+    bool CanCast => castCooldown == 0 && manaAmount > 10;
+    bool ShouldCast => castButtonIsDown && CanCast;
 
-    private void AlwaysMoveRight()
+    void AlwaysMoveRight()
     {
         position += new Position3(300, 0, 0);
     }
 
-    private void TickDownCoolDowns()
+    void TickDownCoolDowns()
     {
         if (fireCooldown > 0)
         {

@@ -7,9 +7,6 @@ using Piot.Clog;
 using Piot.MonotonicTime;
 using Piot.Surge.Compress;
 using Piot.Surge.Internal.Generated;
-using Piot.Surge.LocalPlayer;
-using Piot.Surge.Types;
-using Piot.Transport;
 using Piot.Transport.Memory;
 using Xunit.Abstractions;
 
@@ -17,7 +14,7 @@ namespace Tests.ExampleGame;
 
 public sealed class GameSync
 {
-    private readonly ILog log;
+    readonly ILog log;
 
     public GameSync(ITestOutputHelper output)
     {
@@ -49,7 +46,7 @@ public sealed class GameSync
         clientGame.Client!.InputFetch = mockInput;
 
         var entitySpawner = hostGame.GeneratedHostEntitySpawner;
-        var (spawnedEntity, spawnedHostAvatar) = entitySpawner.SpawnAvatarLogic(new AvatarLogic
+        var (spawnedEntity, spawnedHostAvatar) = entitySpawner.SpawnAvatarLogic(new()
         {
             ammoCount = 10,
             manaAmount = 16
@@ -91,7 +88,7 @@ public sealed class GameSync
         Assert.Equal(0, spawnedCalled);
         Assert.Equal(10, spawnedHostAvatar.Self.ammoCount);
 
-        hostGame.Host!.AssignPredictEntity(new EndpointId(2), new LocalPlayerIndex(0), spawnedEntity);
+        hostGame.Host!.AssignPredictEntity(new(2), new(0), spawnedEntity);
 
         const int maxIteration = 9;
         for (var iteration = 0; iteration < maxIteration; iteration++)
@@ -100,7 +97,7 @@ public sealed class GameSync
 
             if (iteration == 3)
             {
-                enqueue.Explode(new Position3(-200, 300, -400), 233);
+                enqueue.Explode(new(-200, 300, -400), 233);
             }
 
             var pressButtons = iteration >= 4;

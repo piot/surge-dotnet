@@ -37,7 +37,7 @@ public class BenchmarkGameTest
         {
             var randomizer = new PseudoRandom(0x48019422);
             internetSimulatedHostTransport =
-                new InternetSimulatorTransport(hostTransport, timeProvider, randomizer,
+                new(hostTransport, timeProvider, randomizer,
                     log.SubLog("InternetSimulator"));
             hostTransportToUse = internetSimulatedHostTransport;
         }

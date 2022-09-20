@@ -34,7 +34,7 @@ namespace Piot.Surge.SnapshotProtocol.In
 #if DEBUG
             if (headerReader.ReadUInt8() != Constants.DeltaSnapshotIncludingCorrectionsSync)
             {
-                throw new Exception("out of sync");
+                throw new("out of sync");
             }
 #endif
             var snapshotMode = headerReader.ReadUInt8();

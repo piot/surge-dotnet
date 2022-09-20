@@ -9,8 +9,8 @@ namespace Piot.Fnv
 {
     public static class Fnv
     {
-        private const uint Prime = 16777619u;
-        private const uint Initial = 2166136261u;
+        const uint Prime = 16777619u;
+        const uint Initial = 2166136261u;
 
         public static uint ToFnv(ReadOnlySpan<byte> payload)
         {

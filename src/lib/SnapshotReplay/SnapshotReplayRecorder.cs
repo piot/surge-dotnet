@@ -18,18 +18,18 @@ namespace Piot.Surge.SnapshotReplay
 {
     public class SnapshotReplayRecorder : IReplayControl, ISnapshotPlaybackNotify
     {
-        private const int replayMemoryOctetSize = 32 * 1024;
-        private const int replayMemoryOctetThreshold = 28 * 1024;
-        private readonly SemanticVersion applicationVersion;
-        private readonly IEntityContainer entityContainer;
-        private readonly IEventProcessor eventProcessor;
-        private readonly ILog log;
-        private readonly OctetWriter writer = new(replayMemoryOctetSize);
-        private IDisposableOctetWriter? disposableOctetWriter;
-        private ReplayPlayback? playback;
-        private readonly IEntityContainerWithGhostCreator playbackWorld;
-        private ReplayRecorder? recorder;
-        private IOctetReaderWithSeekAndSkip? seekableOctetReader;
+        const int replayMemoryOctetSize = 32 * 1024;
+        const int replayMemoryOctetThreshold = 28 * 1024;
+        readonly SemanticVersion applicationVersion;
+        readonly IEntityContainer entityContainer;
+        readonly IEventProcessor eventProcessor;
+        readonly ILog log;
+        readonly IEntityContainerWithGhostCreator playbackWorld;
+        readonly OctetWriter writer = new(replayMemoryOctetSize);
+        IDisposableOctetWriter? disposableOctetWriter;
+        ReplayPlayback? playback;
+        ReplayRecorder? recorder;
+        IOctetReaderWithSeekAndSkip? seekableOctetReader;
 
         public SnapshotReplayRecorder(SemanticVersion applicationVersion, IEntityContainer recordWorld,
             IEntityContainerWithGhostCreator playbackWorld, IEventProcessor eventProcessor, ILog log)

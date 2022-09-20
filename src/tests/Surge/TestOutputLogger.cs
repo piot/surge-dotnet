@@ -10,7 +10,7 @@ namespace Tests;
 
 public sealed class TestOutputLogger : ILogTarget
 {
-    private readonly ITestOutputHelper output;
+    readonly ITestOutputHelper output;
 
     public TestOutputLogger(ITestOutputHelper output)
     {

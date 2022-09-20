@@ -15,11 +15,11 @@ namespace Piot.Surge.Pulse.Host
 {
     public sealed class ClientConnections
     {
-        private readonly Dictionary<uint, ConnectionToClient> connections = new();
-        private readonly ITransport hostTransport;
-        private readonly ILog log;
-        private readonly SnapshotSyncer notifySnapshotSyncer;
-        private readonly List<ConnectionToClient> orderedConnections = new();
+        readonly Dictionary<uint, ConnectionToClient> connections = new();
+        readonly ITransport hostTransport;
+        readonly ILog log;
+        readonly SnapshotSyncer notifySnapshotSyncer;
+        readonly List<ConnectionToClient> orderedConnections = new();
 
         public ClientConnections(ITransport hostTransport, SnapshotSyncer notifySnapshotSyncer, ILog log)
         {
@@ -60,7 +60,7 @@ namespace Piot.Surge.Pulse.Host
                 {
                     var syncer = notifySnapshotSyncer.Create(clientId);
                     connectionToClient =
-                        new ConnectionToClient(clientId, syncer, log.SubLog($"Client/{clientId.Value}"));
+                        new(clientId, syncer, log.SubLog($"Client/{clientId.Value}"));
                     orderedConnections.Add(connectionToClient);
                     connections.Add(clientId.Value, connectionToClient);
                 }

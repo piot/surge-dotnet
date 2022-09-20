@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System;
 using Piot.MonotonicTime;
 
 namespace Piot.Surge.MonotonicTimeLowerBits
@@ -25,10 +24,10 @@ namespace Piot.Surge.MonotonicTimeLowerBits
             var diff = (ulong)now.ms - receivedMonotonic;
             if (diff > 3000)
             {
-                throw new Exception($"suspicious time lower bits diff {diff}");
+                throw new($"suspicious time lower bits diff {diff}");
             }
 
-            return new TimeMs((long)receivedMonotonic);
+            return new((long)receivedMonotonic);
         }
 
         public static TimeMs LowerBitsToPastMonotonicMs(TimeMs now, MonotonicTimeLowerBits lowerBits)
@@ -49,7 +48,7 @@ namespace Piot.Surge.MonotonicTimeLowerBits
 //                throw new Exception($"suspicious time lower bits diff {diff}");
             }
 
-            return new TimeMs((long)receivedMonotonic);
+            return new((long)receivedMonotonic);
         }
     }
 }

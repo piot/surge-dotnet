@@ -10,13 +10,13 @@ namespace Piot.Surge.TransportReplay
 {
     public class DiscardSendTransport : ITransport
     {
-        private readonly ITransportReceive transportReceive;
-        
+        readonly ITransportReceive transportReceive;
+
         public DiscardSendTransport(ITransportReceive transportReceive)
         {
             this.transportReceive = transportReceive ?? throw new ArgumentNullException(nameof(transportReceive));
         }
-        
+
         public ReadOnlySpan<byte> Receive(out EndpointId endpointId)
         {
             return transportReceive.Receive(out endpointId);

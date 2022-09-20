@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 using Piot.Clog;
-using Piot.Surge;
 using Piot.Surge.DeltaSnapshot.EntityMask;
 using Piot.Surge.FieldMask;
 using Piot.Surge.Tick;
@@ -14,7 +13,7 @@ namespace Tests.Pulse.SnapshotEntityMasks;
 
 public sealed class SnapshotDeltaEntityMasksMerger
 {
-    private readonly ILog log;
+    readonly ILog log;
 
     public SnapshotDeltaEntityMasksMerger(ITestOutputHelper output)
     {
@@ -23,7 +22,7 @@ public sealed class SnapshotDeltaEntityMasksMerger
         log = new Log(combinedLogTarget, LogLevel.LowLevel);
     }
 
-    private static TickIdRange ToTickIdRange(ushort tickIdValue)
+    static TickIdRange ToTickIdRange(ushort tickIdValue)
     {
         return new(new(tickIdValue), new(tickIdValue));
     }
@@ -32,19 +31,19 @@ public sealed class SnapshotDeltaEntityMasksMerger
     public void TestMerge()
     {
         var firstMutable = new EntityMasksMutable(ToTickIdRange(18));
-        firstMutable.Deleted(new EntityId(5));
-        firstMutable.SetChangedMask(new EntityId(1), 0x03);
+        firstMutable.Deleted(new(5));
+        firstMutable.SetChangedMask(new(1), 0x03);
         var first = new EntityMasks(firstMutable);
 
         var secondMutable = new EntityMasksMutable(ToTickIdRange(19));
-        secondMutable.SetChangedMask(new EntityId(2), 0xf01);
-        secondMutable.SetChangedMask(new EntityId(1), 0x80);
-        secondMutable.SetChangedMask(new EntityId(3), 0x23);
+        secondMutable.SetChangedMask(new(2), 0xf01);
+        secondMutable.SetChangedMask(new(1), 0x80);
+        secondMutable.SetChangedMask(new(3), 0x23);
         var second = new EntityMasks(secondMutable);
 
         var thirdMutable = new EntityMasksMutable(ToTickIdRange(20));
-        thirdMutable.Deleted(new EntityId(2));
-        thirdMutable.SetChangedMask(new EntityId(3), 0x01);
+        thirdMutable.Deleted(new(2));
+        thirdMutable.SetChangedMask(new(3), 0x01);
         var third = new EntityMasks(thirdMutable);
 
         var merged = EntityMasksMerger.Merge(new[] { first, second, third });

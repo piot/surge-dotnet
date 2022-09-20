@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System;
 using Piot.Flood;
 using Piot.Surge.DeltaSnapshot.Pack;
 using Piot.Surge.Types.Serialization;
@@ -17,7 +16,7 @@ namespace Piot.Surge.CompleteSnapshot
         {
             if (entityGhostContainerWithCreator.EntityCount != 0)
             {
-                throw new Exception("can not read complete state unless world is completely empty");
+                throw new("can not read complete state unless world is completely empty");
             }
 
             // var createdEntities = new List<IEntity>();

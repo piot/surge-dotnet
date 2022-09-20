@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System;
 using System.Collections.Generic;
 using Piot.Flood;
 using Piot.Raff.Stream;
@@ -33,7 +32,7 @@ namespace Piot.Surge.Replay.Serialization
                     var packType = readerWithSeek.ReadUInt8();
                     if (packType != 0x02)
                     {
-                        throw new Exception("wrong");
+                        throw new("wrong");
                     }
 
                     var time = readerWithSeek.ReadUInt64();

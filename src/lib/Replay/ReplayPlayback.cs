@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
@@ -20,15 +19,15 @@ namespace Piot.Surge.Replay
     // ReSharper disable once ClassNeverInstantiated.Global
     public sealed class ReplayPlayback
     {
-        private readonly IEventProcessor eventProcessor;
-        private readonly ILog log;
-        private readonly ReplayReader replayReader;
-        private readonly TimeTicker timeTicker;
-        private readonly IEntityContainerWithGhostCreator world;
-        private TickId lastAppliedTickId;
-        private DeltaState? nextDeltaState;
-        private EventSequenceId nextExpectedSequenceId;
-        private TickId playbackTickId;
+        readonly IEventProcessor eventProcessor;
+        readonly ILog log;
+        readonly ReplayReader replayReader;
+        readonly TimeTicker timeTicker;
+        readonly IEntityContainerWithGhostCreator world;
+        TickId lastAppliedTickId;
+        DeltaState? nextDeltaState;
+        EventSequenceId nextExpectedSequenceId;
+        TickId playbackTickId;
 
         public ReplayPlayback(IEntityContainerWithGhostCreator world,
             IEventProcessor eventProcessor, TimeMs now,
@@ -39,7 +38,7 @@ namespace Piot.Surge.Replay
             if (!replayReader.StateSerializationVersion.IsEqualDisregardSuffix(SurgeConstants
                     .SnapshotSerializationVersion))
             {
-                throw new Exception(
+                throw new(
                     $"replay file is unsupported by current surge version {SurgeConstants.SnapshotSerializationVersion} vs file {replayReader.StateSerializationVersion}");
             }
 
@@ -59,7 +58,7 @@ namespace Piot.Surge.Replay
             set => timeTicker.DeltaTime = value;
         }
 
-        private void ApplyCompleteState(CompleteState completeState)
+        void ApplyCompleteState(CompleteState completeState)
         {
             log.DebugLowLevel("applying complete state {CompleteState}", completeState);
             var bitReader = new BitReader(completeState.Payload, completeState.Payload.Length * 8);
@@ -67,13 +66,13 @@ namespace Piot.Surge.Replay
             lastAppliedTickId = completeState.TickId;
         }
 
-        private void ApplyDeltaState(DeltaState deltaState)
+        void ApplyDeltaState(DeltaState deltaState)
         {
             log.DebugLowLevel("applying delta state {DeltaState}", deltaState);
             var bitReader = new BitReader(deltaState.Payload, deltaState.Payload.Length * 8);
             if (!deltaState.TickIdRange.CanBeFollowing(lastAppliedTickId))
             {
-                throw new Exception(
+                throw new(
                     $"can not process this delta state, they are not in sequence {deltaState.TickIdRange} {lastAppliedTickId}");
             }
 
@@ -84,7 +83,7 @@ namespace Piot.Surge.Replay
             lastAppliedTickId = deltaState.TickIdRange.Last;
         }
 
-        private void PlaybackTick()
+        void PlaybackTick()
         {
             log.DebugLowLevel("===Playback Tick()=== {TickId}", playbackTickId);
             if (nextDeltaState is null)

@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System;
 using System.Collections.Generic;
 using Piot.Clog;
 using Piot.Flood;
@@ -26,19 +25,19 @@ namespace Piot.Surge.Pulse.Host
 {
     public sealed class SnapshotSyncer
     {
-        private readonly BitWriter cachedBitWriterForSnapshots = new(Constants.MaxSnapshotOctetSize);
-        private readonly OctetWriter cachedDatagramsWriter = new(Transport.Constants.MaxDatagramOctetSize);
-        private readonly OctetWriter cachedPhysicsCorrectionPackSubWriter = new(12 * 1024);
-        private readonly OctetWriter cachedPhysicsCorrectionPackWriter = new(12 * 1024);
-        private readonly OctetWriter cachedPhysicsCorrectionWriter = new(10 * 1024);
-        private readonly OctetWriter cachedSinglePhysicsCorrectionWriter = new(1024);
-        private readonly IMultiCompressor compression;
-        private readonly CompressorIndex compressorIndex;
-        private readonly EntityMasksHistory entityMasksHistory = new();
-        private readonly ILog log;
-        private readonly List<SnapshotSyncerClient> syncClients = new();
-        private readonly ITransportSend transportSend;
-        private TickId allClientsAreWaitingForAtLeastTickId;
+        readonly BitWriter cachedBitWriterForSnapshots = new(Constants.MaxSnapshotOctetSize);
+        readonly OctetWriter cachedDatagramsWriter = new(Transport.Constants.MaxDatagramOctetSize);
+        readonly OctetWriter cachedPhysicsCorrectionPackSubWriter = new(12 * 1024);
+        readonly OctetWriter cachedPhysicsCorrectionPackWriter = new(12 * 1024);
+        readonly OctetWriter cachedPhysicsCorrectionWriter = new(10 * 1024);
+        readonly OctetWriter cachedSinglePhysicsCorrectionWriter = new(1024);
+        readonly IMultiCompressor compression;
+        readonly CompressorIndex compressorIndex;
+        readonly EntityMasksHistory entityMasksHistory = new();
+        readonly ILog log;
+        readonly List<SnapshotSyncerClient> syncClients = new();
+        readonly ITransportSend transportSend;
+        TickId allClientsAreWaitingForAtLeastTickId;
 
 
         public SnapshotSyncer(ITransportSend transportSend, IMultiCompressor compression,
@@ -50,7 +49,7 @@ namespace Piot.Surge.Pulse.Host
             this.log = log;
         }
 
-        private void HandleNotifyExpectedTickId(TickId _)
+        void HandleNotifyExpectedTickId(TickId _)
         {
             TickId lowestTickId = new(0);
             var hasBeenSet = false;
@@ -87,7 +86,7 @@ namespace Piot.Surge.Pulse.Host
             return client;
         }
 
-        private DeltaSnapshotPack FindBestPack(SnapshotSyncerClient connection,
+        DeltaSnapshotPack FindBestPack(SnapshotSyncerClient connection,
             DeltaSnapshotPack precalculatedPackForThisTick, IEntityContainer world, EventStreamPackQueue eventStream,
             TickId serverTickId)
         {
@@ -123,10 +122,10 @@ namespace Piot.Surge.Pulse.Host
                 return precalculatedPackForThisTick;
             }
 
-            throw new Exception("internal error when finding best pack");
+            throw new("internal error when finding best pack");
         }
 
-        private void SendUsingContainers(SnapshotSyncerClient connection,
+        void SendUsingContainers(SnapshotSyncerClient connection,
             DeltaSnapshotPack precalculatedPackForThisTick, IEntityContainer world, EventStreamPackQueue eventStream,
             TickId hostTickId)
         {

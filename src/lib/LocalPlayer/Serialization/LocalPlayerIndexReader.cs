@@ -11,12 +11,12 @@ namespace Piot.Surge.LocalPlayer.Serialization
     {
         public static LocalPlayerIndex Read(IOctetReader reader)
         {
-            return new LocalPlayerIndex(reader.ReadUInt8());
+            return new(reader.ReadUInt8());
         }
 
         public static LocalPlayerIndex Read(IBitReader reader)
         {
-            return new LocalPlayerIndex((byte)reader.ReadBits(4));
+            return new((byte)reader.ReadBits(4));
         }
     }
 }

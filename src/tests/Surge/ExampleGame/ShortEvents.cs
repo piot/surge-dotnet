@@ -10,7 +10,7 @@ namespace Tests.Surge.ExampleGame;
 
 public sealed class ShortEvents : IShortEvents
 {
-    private readonly ILog log;
+    readonly ILog log;
 
     public ShortEvents(ILog log)
     {

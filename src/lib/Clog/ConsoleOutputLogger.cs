@@ -10,7 +10,7 @@ namespace Piot.Clog
 {
     public sealed class ConsoleOutputLogger : ILogTarget
     {
-        private const string ResetColor = "\x1b[0m";
+        const string ResetColor = "\x1b[0m";
 
         public void Log(LogLevel level, string prefix, string message, object[] args)
         {
@@ -23,7 +23,7 @@ namespace Piot.Clog
             Console.WriteLine(line);
         }
 
-        private static (bool, Color) ColorValuesFromLogLevel(LogLevel level)
+        static (bool, Color) ColorValuesFromLogLevel(LogLevel level)
         {
             return level switch
             {
@@ -33,11 +33,11 @@ namespace Piot.Clog
                 LogLevel.Notice => (false, Color.Magenta),
                 LogLevel.Warning => (true, Color.Yellow),
                 LogLevel.Error => (true, Color.Red),
-                _ => throw new Exception("illegal LogLevel")
+                _ => throw new("illegal LogLevel")
             };
         }
 
-        private static string ForegroundColorString(bool bright, Color foregroundColor)
+        static string ForegroundColorString(bool bright, Color foregroundColor)
         {
             if (foregroundColor == Color.Default)
             {
@@ -60,13 +60,13 @@ namespace Piot.Clog
             }
         }
 
-        private static string ColorStringFromLogLevel(LogLevel level)
+        static string ColorStringFromLogLevel(LogLevel level)
         {
             var (prefix, foregroundColor) = ColorValuesFromLogLevel(level);
             return ForegroundColorString(prefix, foregroundColor);
         }
 
-        private enum Color
+        enum Color
         {
             Default = -1,
             Black = 0,

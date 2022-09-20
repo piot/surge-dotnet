@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System;
 using Piot.Flood;
 using Piot.Surge.DeltaSnapshot.Pack;
 using Piot.Surge.SnapshotProtocol;
@@ -19,7 +18,7 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
 #if DEBUG
             if (reader.ReadBits(8) != Constants.SnapshotDeltaSync)
             {
-                throw new Exception("out of sync");
+                throw new("out of sync");
             }
 #endif
             //var deletedEntities = new List<IEntity>();
@@ -46,7 +45,7 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
 #if DEBUG
             if (reader.ReadBits(8) != Constants.SnapshotDeltaCreatedSync)
             {
-                throw new Exception("out of sync");
+                throw new("out of sync");
             }
 #endif
             //var createdEntities = new List<IEntity>();
@@ -76,7 +75,7 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
 #if DEBUG
             if (reader.ReadBits(8) != Constants.SnapshotDeltaUpdatedSync)
             {
-                throw new Exception("out of sync");
+                throw new("out of sync");
             }
 #endif
 
