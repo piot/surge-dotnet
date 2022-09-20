@@ -3,10 +3,9 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System;
 using System.Collections.Generic;
 using Piot.Flood;
-using Piot.Surge.DeltaSnapshot.Pack;
+using Piot.Surge.Corrections.Serialization;
 using Piot.Surge.Tick;
 using Piot.Surge.Tick.Serialization;
 
@@ -14,11 +13,11 @@ namespace Piot.Surge.Corrections
 {
     public sealed class SnapshotDeltaPackIncludingCorrectionsQueue : ISnapshotDeltaPackQueue, IOctetSerializable
     {
-        private readonly Queue<SnapshotDeltaPackIncludingCorrectionsItem> packs = new();
+        readonly Queue<SnapshotDeltaPackIncludingCorrectionsItem> packs = new();
 
-        private TickIdRange lastInsertedTickIdRange;
+        TickIdRange lastInsertedTickIdRange;
 
-        private uint wantsTickIdValue = 1;
+        uint wantsTickIdValue = 1;
 
         public TickId WantsTickId => new(wantsTickIdValue);
 
@@ -33,25 +32,25 @@ namespace Piot.Surge.Corrections
             var queue = new Queue<SnapshotDeltaPackIncludingCorrectionsItem>(count);
             for (var i = 0; i < count; ++i)
             {
-                var newItem = new SnapshotDeltaPackIncludingCorrectionsItem(
-                    new(lastInsertedTickIdRange, ReadOnlySpan<byte>.Empty, ReadOnlySpan<byte>.Empty,
-                        SnapshotStreamType.BitStream, SnapshotType.CompleteState), new(0));
-                newItem.Deserialize(reader);
+                var newItem = SnapshotDeltaPackIncludingCorrectionsItemReader.Read(reader);
                 queue.Enqueue(newItem);
             }
+
+            lastInsertedTickIdRange = TickIdRangeReader.Read(reader);
+            wantsTickIdValue = TickIdReader.Read(reader).tickId;
+            HasBeenInitialized = reader.ReadUInt8() != 0;
         }
 
         public void Serialize(IOctetWriter writer)
         {
             writer.WriteUInt8((byte)packs.Count);
-            foreach (var pack in packs)
+            foreach (var packItem in packs)
             {
-                pack.Serialize(writer);
+                SnapshotDeltaPackIncludingCorrectionsItemWriter.Write(packItem, writer);
             }
 
             TickIdRangeWriter.Write(writer, lastInsertedTickIdRange);
             TickIdWriter.Write(writer, WantsTickId);
-            writer.WriteUInt8((byte)(LastInsertedIsMergedSnapshot ? 0x01 : 0x00));
             writer.WriteUInt8((byte)(HasBeenInitialized ? 0x01 : 0x00));
         }
 
@@ -59,7 +58,7 @@ namespace Piot.Surge.Corrections
         {
             if (!IsValidPackToInsert(pack.tickIdRange))
             {
-                throw new Exception($"pack can not inserted {pack} {lastInsertedTickIdRange}");
+                throw new($"pack can not inserted {pack} {lastInsertedTickIdRange}");
             }
 
 

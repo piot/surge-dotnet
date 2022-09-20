@@ -23,16 +23,16 @@ namespace Piot.Surge.Pulse.Client
     /// </summary>
     public sealed class ClientLocalInputFetchAndSend : IClientPredictorCorrections
     {
-        private readonly BundleAndSendOutInput bundleAndSendOutInput;
-        private readonly TimeTicker fetchInputTicker;
-        private readonly FixedDeltaTimeMs fixedSimulationDeltaTimeMs;
-        private readonly ILog log;
-        private readonly ClientPredictor notifyPredictor;
-        private readonly bool usePrediction;
-        private readonly IEntityContainer world;
-        private IInputPackFetch inputPackFetch;
+        readonly BundleAndSendOutInput bundleAndSendOutInput;
+        readonly TimeTicker fetchInputTicker;
+        readonly FixedDeltaTimeMs fixedSimulationDeltaTimeMs;
+        readonly ILog log;
+        readonly ClientPredictor notifyPredictor;
+        readonly bool usePrediction;
+        readonly IEntityContainer world;
+        IInputPackFetch inputPackFetch;
 
-        private TickId inputTickId = new(1); // HACK: We need it to start ahead of the host
+        TickId inputTickId = new(1); // HACK: We need it to start ahead of the host
 
         public ClientLocalInputFetchAndSend(IInputPackFetch inputPackFetch, ClientPredictor notifyPredictor,
             bool usePrediction, ITransportClient transportClient,
@@ -126,7 +126,7 @@ namespace Piot.Surge.Pulse.Client
                     log.Debug("assigned an avatar to {LocalPlayer} {EntityId}", localPlayerIndex, targetEntityId);
                     var targetEntity = world.FetchEntity(targetEntityId);
 
-                    localPlayerInput = new LocalPlayerInput(localPlayerIndex, targetEntity);
+                    localPlayerInput = new(localPlayerIndex, targetEntity);
                     LocalPlayerInputs[localPlayerIndex.Value] = localPlayerInput;
                     wasCreatedNow = true;
                 }
@@ -181,7 +181,7 @@ namespace Piot.Surge.Pulse.Client
             fetchInputTicker.DeltaTime = new(newDeltaTimeMs);
         }
 
-        private int MaxPredictedInputQueueCount()
+        int MaxPredictedInputQueueCount()
         {
             var maxInputCount = 0;
             var localPlayerInputsArray = LocalPlayerInputs.Values.ToArray();
@@ -196,12 +196,17 @@ namespace Piot.Surge.Pulse.Client
             return maxInputCount;
         }
 
+        public void ResetTime(TimeMs now)
+        {
+            fetchInputTicker.Reset(now);
+        }
+
         public void Update(TimeMs now)
         {
             fetchInputTicker.Update(now);
         }
 
-        private void FetchAndStoreInputTick()
+        void FetchAndStoreInputTick()
         {
             var now = fetchInputTicker.Now;
 
@@ -217,6 +222,15 @@ namespace Piot.Surge.Pulse.Client
             else
             {
                 log.DebugLowLevel("We have no local players that give input");
+            }
+
+            foreach (var localPlayerInput in localPlayerInputsArray)
+            {
+                if (localPlayerInput.PredictedInputs.Count > 20)
+                {
+                    log.Notice("Input queue is full, so we discard input");
+                    return;
+                }
             }
 
             FetchAndStoreInput.FetchAndStore(inputTickId, inputPackFetch, localPlayerInputsArray,

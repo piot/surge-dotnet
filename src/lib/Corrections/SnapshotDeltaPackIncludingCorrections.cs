@@ -4,16 +4,14 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
-using Piot.Flood;
 using Piot.Surge.DeltaSnapshot.Pack;
 using Piot.Surge.Tick;
-using Piot.Surge.Tick.Serialization;
 
 namespace Piot.Surge.Corrections
 {
     /// <summary>
     /// </summary>
-    public sealed class SnapshotDeltaPackIncludingCorrections : IOctetSerializable
+    public sealed class SnapshotDeltaPackIncludingCorrections
     {
         public ReadOnlyMemory<byte> deltaSnapshotPackPayload;
         public ReadOnlyMemory<byte> physicsCorrections;
@@ -28,39 +26,16 @@ namespace Piot.Surge.Corrections
             this.physicsCorrections = physicsCorrections.ToArray();
             if (physicsCorrections.Length < 1)
             {
-                throw new Exception("invalid physics correction");
+                throw new("invalid physics correction");
             }
 
             StreamType = streamType;
             SnapshotType = snapshotType;
         }
 
-        public SnapshotStreamType StreamType { get; private set; }
-        public SnapshotType SnapshotType { get; private set; }
+        public SnapshotStreamType StreamType { get; }
+        public SnapshotType SnapshotType { get; }
 
-        public void Serialize(IOctetWriter writer)
-        {
-            writer.WriteUInt16((ushort)deltaSnapshotPackPayload.Length);
-            writer.WriteOctets(deltaSnapshotPackPayload.Span);
-            writer.WriteUInt16((ushort)physicsCorrections.Length);
-            writer.WriteOctets(physicsCorrections.Span);
-            TickIdRangeWriter.Write(writer, tickIdRange);
-            writer.WriteUInt8((byte)StreamType);
-            writer.WriteUInt8((byte)SnapshotType);
-        }
-
-        public void Deserialize(IOctetReader reader)
-        {
-            var packCount = reader.ReadUInt16();
-            deltaSnapshotPackPayload = reader.ReadOctets(packCount).ToArray();
-
-            var physicsOctetCount = reader.ReadUInt16();
-            physicsCorrections = reader.ReadOctets(physicsOctetCount).ToArray();
-
-            tickIdRange = TickIdRangeReader.Read(reader);
-            StreamType = (SnapshotStreamType)reader.ReadUInt8();
-            SnapshotType = (SnapshotType)reader.ReadUInt8();
-        }
 
         public override string ToString()
         {

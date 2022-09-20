@@ -5,13 +5,12 @@
 
 using Piot.Flood;
 using Piot.Surge.Tick;
-using Piot.Surge.Tick.Serialization;
 
 namespace Piot.Surge.Corrections
 {
-    public sealed class SnapshotDeltaPackIncludingCorrectionsItem : IOctetSerializable
+    public sealed class SnapshotDeltaPackIncludingCorrectionsItem
     {
-        private TickId? previousTickId;
+        internal TickId? previousTickId;
 
         public SnapshotDeltaPackIncludingCorrectionsItem(SnapshotDeltaPackIncludingCorrections pack,
             TickId? previousTickId)
@@ -50,30 +49,10 @@ namespace Piot.Surge.Corrections
 
         public void Deserialize(IOctetReader reader)
         {
-            var isSet = reader.ReadUInt8();
-            if (isSet == 0)
-            {
-                previousTickId = null;
-            }
-            else
-            {
-                previousTickId = TickIdReader.Read(reader);
-            }
         }
 
         public void Serialize(IOctetWriter writer)
         {
-            if (previousTickId is null)
-            {
-                writer.WriteUInt8(0);
-            }
-            else
-            {
-                writer.WriteUInt8(1);
-                TickIdWriter.Write(writer, previousTickId.Value);
-            }
-
-            Pack.Serialize(writer);
         }
     }
 }

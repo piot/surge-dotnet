@@ -24,18 +24,18 @@ namespace Piot.Surge.Pulse.Client
     /// </summary>
     public sealed class ClientDeltaSnapshotPlayback : IOctetSerializable
     {
-        private readonly IEntityContainerWithGhostCreator clientWorld;
-        private readonly IEventProcessor eventProcessor;
+        readonly IEntityContainerWithGhostCreator clientWorld;
+        readonly IEventProcessor eventProcessor;
 
-        private readonly HoldPositive lastBufferWasStarved = new(14);
-        private readonly ILog log;
-        private readonly IClientPredictorCorrections predictor;
-        private readonly ISnapshotPlaybackNotify snapshotPlaybackNotify;
-        private readonly TimeTicker snapshotPlaybackTicker;
-        private readonly SnapshotDeltaPackIncludingCorrectionsQueue snapshotsQueue = new();
-        private EventSequenceId expectedEventSequenceId;
-        private TickId playbackTick = new(0);
-        private FixedDeltaTimeMs targetDeltaTimeMs;
+        readonly HoldPositive lastBufferWasStarved = new(14);
+        readonly ILog log;
+        readonly IClientPredictorCorrections predictor;
+        readonly ISnapshotPlaybackNotify snapshotPlaybackNotify;
+        readonly TimeTicker snapshotPlaybackTicker;
+        readonly SnapshotDeltaPackIncludingCorrectionsQueue snapshotsQueue = new();
+        EventSequenceId expectedEventSequenceId;
+        TickId playbackTick = new(0);
+        FixedDeltaTimeMs targetDeltaTimeMs;
 
         public ClientDeltaSnapshotPlayback(TimeMs now, IEntityContainerWithGhostCreator clientWorld,
             IEventProcessor eventProcessor, IClientPredictorCorrections predictor,
@@ -77,6 +77,11 @@ namespace Piot.Surge.Pulse.Client
             TickIdWriter.Write(writer, playbackTick);
         }
 
+        public void ResetTime(TimeMs now)
+        {
+            snapshotPlaybackTicker.Reset(now);
+        }
+
         public void Update(TimeMs now)
         {
             snapshotPlaybackTicker.Update(now);
@@ -116,7 +121,7 @@ namespace Piot.Surge.Pulse.Client
             }
         }
 
-        private void NextSnapshotTick()
+        void NextSnapshotTick()
         {
             var targetDeltaTimeMsValue = targetDeltaTimeMs.ms;
             // Our goal is to have just two snapshots in the snapshotsQueue.

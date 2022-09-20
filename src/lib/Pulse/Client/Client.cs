@@ -21,13 +21,13 @@ namespace Piot.Surge.Pulse.Client
 {
     public sealed class Client : IOctetSerializable
     {
-        private readonly ClientDatagramReceiver datagramReceiver;
-        private readonly ClientDeltaSnapshotPlayback deltaSnapshotPlayback;
-        private readonly ClientLocalInputFetchAndSend localInputFetchAndSend;
-        private readonly ILog log;
-        private readonly TimeTicker statsTicker;
-        private readonly ITransportClient transportClient;
-        private readonly TransportStatsBoth transportWithStats;
+        readonly ClientDatagramReceiver datagramReceiver;
+        readonly ClientDeltaSnapshotPlayback deltaSnapshotPlayback;
+        readonly ClientLocalInputFetchAndSend localInputFetchAndSend;
+        readonly ILog log;
+        readonly TimeTicker statsTicker;
+        readonly ITransportClient transportClient;
+        readonly TransportStatsBoth transportWithStats;
 
         public Client(ILog log, TimeMs now, FixedDeltaTimeMs targetDeltaTimeMs,
             IEntityContainerWithGhostCreator worldWithGhostCreator, IEventProcessor eventProcessor,
@@ -42,17 +42,18 @@ namespace Piot.Surge.Pulse.Client
             transportClient = new TransportClient(transportWithStats);
             var clientPredictor = new ClientPredictor(log.SubLog("ClientPredictor"));
             const bool usePrediction = false;
-            localInputFetchAndSend = new ClientLocalInputFetchAndSend(fetch, clientPredictor, usePrediction,
+            localInputFetchAndSend = new(fetch, clientPredictor, usePrediction,
                 transportClient, now,
                 targetDeltaTimeMs,
                 worldWithGhostCreator,
                 log.SubLog("InputFetchAndSend"));
             deltaSnapshotPlayback =
-                new ClientDeltaSnapshotPlayback(now, worldWithGhostCreator, eventProcessor, localInputFetchAndSend,
+                new(now, worldWithGhostCreator, eventProcessor, localInputFetchAndSend,
                     snapshotPlaybackNotify, targetDeltaTimeMs,
                     log.SubLog("SnapshotPlayback"));
 
-            datagramReceiver = new(transportClient, compression, deltaSnapshotPlayback, localInputFetchAndSend, log);
+            datagramReceiver = new(transportClient, compression, deltaSnapshotPlayback,
+                localInputFetchAndSend, log);
             statsTicker = new(new(0), StatsOutput, new(1000), log.SubLog("Stats"));
         }
 
@@ -83,6 +84,7 @@ namespace Piot.Surge.Pulse.Client
 
         public void Deserialize(IOctetReader reader)
         {
+            OctetMarker.AssertMarker(reader, 0xd7);
             var count = EntityCountReader.ReadEntityCount(reader);
             for (var i = 0; i < count; ++i)
             {
@@ -92,12 +94,15 @@ namespace Piot.Surge.Pulse.Client
                 createdEntity.CompleteEntity.DeserializeAll(reader);
             }
 
+            OctetMarker.AssertMarker(reader, 0x1a);
             datagramReceiver.Deserialize(reader);
+            OctetMarker.AssertMarker(reader, 0xaf);
             deltaSnapshotPlayback.Deserialize(reader);
         }
 
         public void Serialize(IOctetWriter writer)
         {
+            OctetMarker.WriteMarker(writer, 0xd7);
             EntityCountWriter.WriteEntityCount(World.EntityCount, writer);
             foreach (var entityToSerialize in World.AllEntities)
             {
@@ -106,11 +111,13 @@ namespace Piot.Surge.Pulse.Client
                 entityToSerialize.CompleteEntity.SerializeAll(writer);
             }
 
+            OctetMarker.WriteMarker(writer, 0x1a);
             datagramReceiver.Serialize(writer);
+            OctetMarker.WriteMarker(writer, 0xaf);
             deltaSnapshotPlayback.Serialize(writer);
         }
 
-        private void StatsOutput()
+        void StatsOutput()
         {
             var readStats = transportWithStats.Stats;
             log.DebugLowLevel("stats: {Stats}", readStats);
@@ -119,6 +126,8 @@ namespace Piot.Surge.Pulse.Client
 
         public void ResetTime(TimeMs now)
         {
+            localInputFetchAndSend.ResetTime(now);
+            deltaSnapshotPlayback.ResetTime(now);
             statsTicker.Reset(now);
         }
 

@@ -21,11 +21,11 @@ namespace Piot.Surge.SnapshotProtocol.Fragment
             Discarded
         }
 
-        private readonly ILog log;
-        private readonly MemoryStream payloadAssembly = new();
-        private TickIdRange assemblingTickIdRange;
-        private uint nextDatagramIndex;
-        private bool tickIdRangeSet;
+        readonly ILog log;
+        readonly MemoryStream payloadAssembly = new();
+        TickIdRange assemblingTickIdRange;
+        uint nextDatagramIndex;
+        bool tickIdRangeSet;
 
         public SnapshotFragmentReAssembler(ILog log)
         {
@@ -34,8 +34,10 @@ namespace Piot.Surge.SnapshotProtocol.Fragment
 
         public void Serialize(IOctetWriter writer)
         {
-            writer.WriteUInt16((ushort)payloadAssembly.Length);
-            writer.WriteOctets(payloadAssembly.GetBuffer());
+            OctetMarker.WriteMarker(writer, 0x1e);
+            var bufferSoFar = payloadAssembly.GetBuffer();
+            writer.WriteUInt16((ushort)bufferSoFar.Length);
+            writer.WriteOctets(bufferSoFar);
             writer.WriteUInt8((byte)(tickIdRangeSet ? 0x01 : 0x00));
             TickIdRangeWriter.Write(writer, assemblingTickIdRange);
             writer.WriteUInt8((byte)nextDatagramIndex);
@@ -43,9 +45,10 @@ namespace Piot.Surge.SnapshotProtocol.Fragment
 
         public void Deserialize(IOctetReader reader)
         {
-            payloadAssembly.SetLength(0);
+            OctetMarker.AssertMarker(reader, 0x1e);
             var octetLength = reader.ReadUInt16();
             var octets = reader.ReadOctets(octetLength);
+            payloadAssembly.SetLength(0);
             payloadAssembly.Write(octets);
             tickIdRangeSet = reader.ReadUInt8() != 0;
             assemblingTickIdRange = TickIdRangeReader.Read(reader);
