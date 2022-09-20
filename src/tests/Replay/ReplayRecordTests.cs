@@ -6,6 +6,7 @@
 using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
+using Piot.Raff;
 using Piot.SerializableVersion;
 using Piot.Surge;
 using Piot.Surge.DeltaSnapshot.Pack;
@@ -15,12 +16,31 @@ using Piot.Surge.Entities;
 using Piot.Surge.Event;
 using Piot.Surge.Internal.Generated;
 using Piot.Surge.Replay;
-using Piot.Surge.SnapshotProtocol;
+using Piot.Surge.Replay.Serialization;
 using Piot.Surge.Tick;
 using Tests.Surge.ExampleGame;
 using Xunit.Abstractions;
 
 namespace Tests.Replay;
+
+public static class Constants
+{
+    public static FourCC ReplayName = FourCC.Make("qps1");
+    public static FourCC ReplayIcon = new(0xF09F8E9E); // Film frames
+
+    public static FourCC CompleteStateName = FourCC.Make("qst1");
+    public static FourCC CompleteStateIcon = new(0xF09F96BC); // Picture Frame
+
+    public static FourCC DeltaStateName = FourCC.Make("qds1");
+    public static FourCC DeltaStateIcon = new(0xF09FA096); // Right Arrow
+
+
+    public static ReplayFileSerializationInfo ReplayInfo = new(
+        new(ReplayIcon, ReplayName),
+        new(CompleteStateIcon, CompleteStateName),
+        new(DeltaStateIcon, DeltaStateName)
+    );
+}
 
 public sealed class ReplayRecorderTests
 {
@@ -50,7 +70,7 @@ public sealed class ReplayRecorderTests
 
         var shortLivedEvents = eventStream.FetchEventsForRange(TickIdRange.FromTickId(hostTickId));
 
-        var bitWriter = new BitWriter(Constants.MaxSnapshotOctetSize);
+        var bitWriter = new BitWriter(Piot.Surge.SnapshotProtocol.Constants.MaxSnapshotOctetSize);
         var deltaSnapshotEntityIds = Scanner.Scan(authoritativeWorld, hostTickId);
         return DeltaSnapshotToBitPack.ToDeltaSnapshotPack(authoritativeWorld,
             shortLivedEvents, deltaSnapshotEntityIds,
@@ -87,7 +107,7 @@ public sealed class ReplayRecorderTests
             });
 
             var replayRecorder = new ReplayRecorder(authoritative, new(14800), new(32), applicationVersion,
-                outputStream,
+                Constants.ReplayInfo, outputStream,
                 log.SubLog("replayRecorder"));
             TickId hostTickId = new(33);
             var deltaSnapshotPack = TickHost(authoritative, hostTickId);
@@ -104,7 +124,8 @@ public sealed class ReplayRecorderTests
 
             var fileStream = FileStreamCreator.OpenWithSeek("replay.temp");
             var now = new TimeMs(10);
-            var replayPlayback = new ReplayPlayback(clientWorld, eventTarget, now, applicationVersion, fileStream,
+            var replayPlayback = new ReplayPlayback(clientWorld, eventTarget, now, applicationVersion,
+                Constants.ReplayInfo, fileStream,
                 log.SubLog("replayPlayback"));
             var clientAvatar = clientWorld.FetchEntity<AvatarLogicEntityInternal>(spawnedAvatarEntityOnHost.Id);
 

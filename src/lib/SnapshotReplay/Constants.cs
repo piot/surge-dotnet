@@ -4,8 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 using Piot.Raff;
+using Piot.Surge.Replay.Serialization;
 
-namespace Piot.Surge.Replay.Serialization
+namespace Piot.Surge.SnapshotReplay
 {
     public static class Constants
     {
@@ -17,5 +18,12 @@ namespace Piot.Surge.Replay.Serialization
 
         public static FourCC DeltaStateName = FourCC.Make("rds1");
         public static FourCC DeltaStateIcon = new(0xF09FA096); // Right Arrow
+
+
+        public static ReplayFileSerializationInfo ReplayInfo = new(
+            new(ReplayIcon, ReplayName),
+            new(CompleteStateIcon, CompleteStateName),
+            new(DeltaStateIcon, DeltaStateName)
+        );
     }
 }

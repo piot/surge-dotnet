@@ -31,9 +31,10 @@ namespace Piot.Surge.Replay
 
         public ReplayPlayback(IEntityContainerWithGhostCreator world,
             IEventProcessor eventProcessor, TimeMs now,
-            SemanticVersion expectedApplicationVersion, IOctetReaderWithSeekAndSkip reader, ILog log)
+            SemanticVersion expectedApplicationVersion, ReplayFileSerializationInfo info,
+            IOctetReaderWithSeekAndSkip reader, ILog log)
         {
-            replayReader = new(expectedApplicationVersion, reader);
+            replayReader = new(expectedApplicationVersion, info, reader);
 
             if (!replayReader.StateSerializationVersion.IsEqualDisregardSuffix(SurgeConstants
                     .SnapshotSerializationVersion))

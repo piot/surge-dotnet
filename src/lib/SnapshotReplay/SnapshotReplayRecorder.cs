@@ -59,13 +59,15 @@ namespace Piot.Surge.SnapshotReplay
                 return;
             }
 
-            recorder = new(entityContainer, timeNowMs, nowTickId, applicationVersion, writer, log);
+            recorder = new(entityContainer, timeNowMs, nowTickId, applicationVersion, Constants.ReplayInfo, writer,
+                log);
         }
 
         public void StartRecordingToFile(TimeMs timeNowMs, TickId nowTickId, string filename)
         {
             disposableOctetWriter = FileStreamCreator.Create(filename);
-            recorder = new(entityContainer, timeNowMs, nowTickId, applicationVersion, disposableOctetWriter, log);
+            recorder = new(entityContainer, timeNowMs, nowTickId, applicationVersion, Constants.ReplayInfo,
+                disposableOctetWriter, log);
         }
 
         public void StartPlaybackFromFile(TimeMs now, string filename)
@@ -74,7 +76,8 @@ namespace Piot.Surge.SnapshotReplay
 
             playbackWorld.Reset();
             seekableOctetReader = FileStreamCreator.OpenWithSeek(filename);
-            playback = new(playbackWorld, eventProcessor, now, applicationVersion, seekableOctetReader,
+            playback = new(playbackWorld, eventProcessor, now, applicationVersion, Constants.ReplayInfo,
+                seekableOctetReader,
                 log);
         }
 

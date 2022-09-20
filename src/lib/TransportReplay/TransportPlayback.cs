@@ -24,7 +24,7 @@ namespace Piot.Surge.TransportReplay
             IOctetReaderWithSeekAndSkip readerWithSeekAndSkip, IMonotonicTimeMs timeProvider)
         {
             this.timeProvider = timeProvider;
-            replayPlayback = new(applicationSemanticVersion, readerWithSeekAndSkip);
+            replayPlayback = new(applicationSemanticVersion, Constants.ReplayInfo, readerWithSeekAndSkip);
             var completeState = replayPlayback.Seek(new(0));
             InitialTimeMs = completeState.CapturedAtTimeMs;
 

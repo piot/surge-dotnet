@@ -10,13 +10,12 @@ using Piot.SerializableVersion;
 using Piot.Surge.Replay.Serialization;
 using Piot.Surge.Tick;
 using Piot.Transport;
-using Constants = Piot.Transport.Constants;
 
 namespace Piot.Surge.TransportReplay
 {
     public class TransportRecorder : ITransportReceive
     {
-        readonly OctetWriter cachedBuffer = new(Constants.MaxDatagramOctetSize + 4);
+        readonly OctetWriter cachedBuffer = new(Transport.Constants.MaxDatagramOctetSize + 4);
         readonly IMonotonicTimeMs timeProvider;
         readonly ITransportReceive wrappedTransport;
         readonly ReplayWriter writer;
@@ -33,6 +32,7 @@ namespace Piot.Surge.TransportReplay
             var complete = new CompleteState(timeProvider.TimeInMs, tickId, stateWriter.Octets);
             const int framesBetweenCompleteState = 0;
             writer = new(complete, new(applicationSemanticVersion, SurgeConstants.SnapshotSerializationVersion),
+                Constants.ReplayInfo,
                 target, framesBetweenCompleteState);
         }
 

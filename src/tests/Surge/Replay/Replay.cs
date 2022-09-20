@@ -5,11 +5,31 @@
 
 using Piot.Clog;
 using Piot.Flood;
+using Piot.Raff;
 using Piot.SerializableVersion;
 using Piot.Surge.Replay.Serialization;
 using Xunit.Abstractions;
 
-namespace Tests.Replay;
+namespace Tests.Surge.Replay;
+
+public static class Constants
+{
+    public static FourCC ReplayName = FourCC.Make("qps1");
+    public static FourCC ReplayIcon = new(0xF09F8E9E); // Film frames
+
+    public static FourCC CompleteStateName = FourCC.Make("qst1");
+    public static FourCC CompleteStateIcon = new(0xF09F96BC); // Picture Frame
+
+    public static FourCC DeltaStateName = FourCC.Make("qds1");
+    public static FourCC DeltaStateIcon = new(0xF09FA096); // Right Arrow
+
+
+    public static ReplayFileSerializationInfo ReplayInfo = new(
+        new(ReplayIcon, ReplayName),
+        new(CompleteStateIcon, CompleteStateName),
+        new(DeltaStateIcon, DeltaStateName)
+    );
+}
 
 public sealed class ReplayTests
 {
@@ -22,6 +42,7 @@ public sealed class ReplayTests
         log = new Log(combinedLogTarget, LogLevel.LowLevel);
     }
 
+
     [Fact]
     public void WriteReplayWithGapFail()
     {
@@ -29,7 +50,7 @@ public sealed class ReplayTests
         var versionInfo = new ReplayVersionInfo(new(0, 1, 2), new(3, 4, 5));
         var replayRecorder =
             new ReplayWriter(new(new(49200), new(42), new byte[] { 0xca, 0xba }), versionInfo,
-                fileStream);
+                Constants.ReplayInfo, fileStream);
 
         // TODO: move to other tests
         /*
@@ -46,7 +67,7 @@ public sealed class ReplayTests
 
         var replayRecorder =
             new ReplayWriter(new(new(49200), new(42), new byte[] { 0xca, 0xba }), versionInfo,
-                fileStream);
+                Constants.ReplayInfo, fileStream);
 
         // TODO: Move to snapshot tests
         /*
@@ -63,7 +84,7 @@ public sealed class ReplayTests
 
         var replayRecorder =
             new ReplayWriter(new(new(49200), new(42), new byte[] { 0xca, 0xba }), versionInfo,
-                fileStream);
+                Constants.ReplayInfo, fileStream);
 
         replayRecorder.AddDeltaState(new(new(10459), new(new(43), new(45)), new byte[] { 0xfe }));
     }
@@ -80,14 +101,14 @@ public sealed class ReplayTests
 
             var replayRecorder = new ReplayWriter(new(new(49200), new(42), new byte[] { 0xca, 0xba }),
                 versionInfo,
-                fileStream);
+                Constants.ReplayInfo, fileStream);
             replayRecorder.AddDeltaState(new(new(49200), new(new(42), new(43)), new byte[] { 0xfe }));
             replayRecorder.Close();
         }
 
         {
             var fileStream = FileStreamCreator.OpenWithSeek(filename);
-            var replayPlayback = new ReplayReader(applicationVersion, fileStream);
+            var replayPlayback = new ReplayReader(applicationVersion, Constants.ReplayInfo, fileStream);
             Assert.Equal(42u, replayPlayback.FirstCompleteStateTickId.tickId);
             Assert.Equal(1, replayPlayback.ApplicationVersion.minor);
             Assert.Equal(2, replayPlayback.ApplicationVersion.patch);

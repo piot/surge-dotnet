@@ -11,7 +11,12 @@ namespace Piot.Flood
     {
         public static IDisposableOctetWriter Create(string path)
         {
-            var fileStream = new FileStream(path, FileMode.Create);
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+
+            var fileStream = new FileStream(path, FileMode.CreateNew);
             return new StreamOctetWriter(fileStream);
         }
 

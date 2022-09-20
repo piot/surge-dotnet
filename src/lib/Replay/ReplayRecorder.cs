@@ -23,14 +23,14 @@ namespace Piot.Surge.Replay
         TickIdRange lastInsertedDeltaStateRange;
 
         public ReplayRecorder(IEntityContainer world, TimeMs timeNowMs, TickId nowTickId,
-            SemanticVersion applicationVersion, IOctetWriter writer, ILog log)
+            SemanticVersion applicationVersion, ReplayFileSerializationInfo info, IOctetWriter writer, ILog log)
         {
             lastInsertedDeltaStateRange = TickIdRange.FromTickId(nowTickId);
             this.log = log.SubLog("ReplayRecorder");
             this.world = world;
             var completeState = CaptureCompleteState(timeNowMs, nowTickId);
             var versionInfo = new ReplayVersionInfo(applicationVersion, SurgeConstants.SnapshotSerializationVersion);
-            replayWriter = new(completeState, versionInfo, writer);
+            replayWriter = new(completeState, versionInfo, info, writer);
         }
 
         CompleteState CaptureCompleteState(TimeMs timeNow, TickId tickId)

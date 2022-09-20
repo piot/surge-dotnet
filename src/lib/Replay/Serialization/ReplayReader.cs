@@ -19,11 +19,14 @@ namespace Piot.Surge.Replay.Serialization
         readonly CompleteStateEntry[] completeStateEntries;
         readonly RaffReader raffReader;
         readonly IOctetReaderWithSeekAndSkip readerWithSeek;
+        readonly ReplayFileSerializationInfo info;
         TimeMs lastReadTimeMs;
         TimeMs lastTimeMsFromDeltaState;
 
-        public ReplayReader(SemanticVersion expectedApplicationVersion, IOctetReaderWithSeekAndSkip readerWithSeek)
+        public ReplayReader(SemanticVersion expectedApplicationVersion, ReplayFileSerializationInfo info,
+            IOctetReaderWithSeekAndSkip readerWithSeek)
         {
+            this.info = info;
             this.readerWithSeek = readerWithSeek;
             raffReader = new(readerWithSeek);
             ReadVersionInfo();
@@ -36,7 +39,9 @@ namespace Piot.Surge.Replay.Serialization
 
             var positionBefore = readerWithSeek.Position;
 
-            completeStateEntries = CompleteStateScanner.ScanForAllCompleteStatePositions(raffReader, readerWithSeek);
+            completeStateEntries =
+                CompleteStateScanner.ScanForAllCompleteStatePositions(raffReader, readerWithSeek,
+                    info.CompleteStateInfo);
 
             readerWithSeek.Seek(positionBefore);
         }
@@ -49,7 +54,7 @@ namespace Piot.Surge.Replay.Serialization
 
         void ReadVersionInfo()
         {
-            var versionPack = raffReader.ReadExpectedChunk(Constants.ReplayIcon, Constants.ReplayName);
+            var versionPack = raffReader.ReadExpectedChunk(info.FileInfo.Icon, info.FileInfo.Name);
             var reader = new OctetReader(versionPack);
             ApplicationVersion = VersionReader.Read(reader);
             StateSerializationVersion = VersionReader.Read(reader);
@@ -122,7 +127,7 @@ namespace Piot.Surge.Replay.Serialization
                 return null;
             }
 
-            if (icon.Value == Constants.CompleteStateIcon.Value)
+            if (icon.Value == info.CompleteStateInfo.Icon.Value)
             {
                 readerWithSeek.Seek(readerWithSeek.Position + octetLength);
                 return ReadDeltaState();
@@ -151,7 +156,7 @@ namespace Piot.Surge.Replay.Serialization
         CompleteState ReadCompleteState()
         {
             var octetLength =
-                raffReader.ReadExpectedChunkHeader(Constants.CompleteStateIcon, Constants.CompleteStateName);
+                raffReader.ReadExpectedChunkHeader(info.CompleteStateInfo.Icon, info.CompleteStateInfo.Name);
             var beforePosition = readerWithSeek.Position;
 
             var type = readerWithSeek.ReadUInt8();

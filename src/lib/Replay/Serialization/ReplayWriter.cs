@@ -18,12 +18,15 @@ namespace Piot.Surge.Replay.Serialization
         readonly OctetWriter cachedStateWriter = new(16 * 1024);
         readonly uint framesBetweenCompleteState;
         readonly RaffWriter raffWriter;
+        readonly ReplayFileSerializationInfo info;
 
         uint packCountSinceCompleteState;
 
-        public ReplayWriter(CompleteState completeState, ReplayVersionInfo replayVersionInfo, IOctetWriter writer,
+        public ReplayWriter(CompleteState completeState, ReplayVersionInfo replayVersionInfo,
+            ReplayFileSerializationInfo info, IOctetWriter writer,
             uint framesUntilCompleteState = 60)
         {
+            this.info = info;
             framesBetweenCompleteState = framesUntilCompleteState;
             raffWriter = new(writer);
             WriteVersionChunk(replayVersionInfo);
@@ -41,7 +44,7 @@ namespace Piot.Surge.Replay.Serialization
             var writer = new OctetWriter(100);
             VersionWriter.Write(writer, replayVersionInfo.applicationSemanticVersion);
             VersionWriter.Write(writer, replayVersionInfo.surgeProtocolSemanticVersion);
-            raffWriter.WriteChunk(Constants.ReplayIcon, Constants.ReplayName, writer.Octets);
+            raffWriter.WriteChunk(info.FileInfo.Icon, info.FileInfo.Name, writer.Octets);
         }
 
         static void WriteCompleteStateHeader(IOctetWriter writer, TimeMs timeNowMs, TickId tickId)
@@ -66,7 +69,7 @@ namespace Piot.Surge.Replay.Serialization
             //totalWriter.WriteUInt32((ushort)completeState.Payload.Length);
             cachedStateWriter.WriteOctets(completeState.Payload);
 
-            raffWriter.WriteChunk(Constants.CompleteStateIcon, Constants.CompleteStateName, cachedStateWriter.Octets);
+            raffWriter.WriteChunk(info.CompleteStateInfo.Icon, info.CompleteStateInfo.Name, cachedStateWriter.Octets);
         }
 
         static void WriteDeltaHeader(IOctetWriter writer, TimeMs timeNowMs, TickIdRange tickIdRange)
@@ -87,7 +90,7 @@ namespace Piot.Surge.Replay.Serialization
             cachedStateWriter.Reset();
             WriteDeltaHeader(cachedStateWriter, deltaState.TimeProcessedMs, deltaState.TickIdRange);
             cachedStateWriter.WriteOctets(deltaState.Payload);
-            raffWriter.WriteChunk(Constants.DeltaStateIcon, Constants.DeltaStateName, cachedStateWriter.Octets);
+            raffWriter.WriteChunk(info.DeltaStateInfo.Icon, info.DeltaStateInfo.Name, cachedStateWriter.Octets);
         }
 
         public void Close()
