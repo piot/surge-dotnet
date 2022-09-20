@@ -168,9 +168,11 @@ namespace Piot.Surge.Pulse.Host
 
             cachedDatagramsWriter.Reset();
             SnapshotPackIncludingCorrectionsWriter.Write(sender.Send, snapshotProtocolPack,
-                connection.lastReceivedMonotonicTimeLowerBits, connection.clientInputTickCountAheadOfServer,
+                connection.lastReceivedMonotonicTimeLowerBits, connection.hasLastReceivedMonotonicTimeLowerBits,
+                connection.clientInputTickCountAheadOfServer,
                 hostTickId,
                 connection.DatagramsSequenceIdIncrease, cachedDatagramsWriter);
+            connection.hasLastReceivedMonotonicTimeLowerBits = false;
         }
 
         public void SendSnapshot(EntityMasks masks, DeltaSnapshotPack deltaSnapshotPack, IEntityContainer world,

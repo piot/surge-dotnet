@@ -66,6 +66,8 @@ namespace Piot.Surge.Pulse.Host
         void ReceivePredictedInputs(IOctetReader reader, TickId serverIsAtTickId)
         {
             syncer.lastReceivedMonotonicTimeLowerBits = MonotonicTimeLowerBitsReader.Read(reader);
+            syncer.hasLastReceivedMonotonicTimeLowerBits = true;
+
             log.Debug("received predicted inputs {LowerBits}", syncer.lastReceivedMonotonicTimeLowerBits);
             SnapshotReceiveStatusReader.Read(reader, out var expectingTickId, out var droppedFrames);
 

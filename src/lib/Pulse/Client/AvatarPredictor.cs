@@ -55,7 +55,6 @@ namespace Piot.Surge.Pulse.Client
         ///     Handles incoming correction state
         ///     If checksum is not the same, it rollbacks, replicate, and rollforth.
         /// </summary>
-        /// <exception cref="NotImplementedException"></exception>
         public void ReadCorrection(TickId correctionForTickId, ReadOnlySpan<byte> physicsCorrectionPayload)
         {
             LocalPlayerInput.PredictedInputs.DiscardUpToAndExcluding(correctionForTickId);

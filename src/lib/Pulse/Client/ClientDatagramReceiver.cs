@@ -34,6 +34,7 @@ namespace Piot.Surge.Pulse.Client
         readonly StatCountThreshold statsRoundTripTime = new(10);
         readonly ITransportClient transportClient;
         readonly HoldPositive weAreSkippingAhead = new(25);
+        long lastReceivedRoundTripTimeMs;
 
         public ClientDatagramReceiver(ITransportClient transportClient, IMultiCompressor compression,
             ClientDeltaSnapshotPlayback notifyPlayback, ClientLocalInputFetchAndSend notifyLocalInputFetchAndSend,
@@ -60,13 +61,24 @@ namespace Piot.Surge.Pulse.Client
 
         long ReceiveSnapshotExtraData(IOctetReader reader, TimeMs now)
         {
-            var pongTimeLowerBits = MonotonicTimeLowerBitsReader.Read(reader);
-            var pongTime = LowerBitsToMonotonic.LowerBitsToMonotonicMs(now, pongTimeLowerBits);
-            var roundTripTimeMs = now.ms - pongTime.ms;
-            statsRoundTripTime.Add((int)roundTripTimeMs);
-            log.Debug("RoundTripTime {Now} {PongTime} {RoundTripTimeMs} {AverageRoundTripTimeMs}", now.ms, pongTime.ms,
-                roundTripTimeMs,
-                statsRoundTripTime.Stat.average);
+            var snapshotExtraBits = reader.ReadUInt8();
+            long roundTripTimeMs = 0;
+            if ((snapshotExtraBits & 0x01) == 0x01)
+            {
+                var pongTimeLowerBits = MonotonicTimeLowerBitsReader.Read(reader);
+                var pongTime = LowerBitsToMonotonic.LowerBitsToMonotonicMs(now, pongTimeLowerBits);
+                roundTripTimeMs = now.ms - pongTime.ms;
+                lastReceivedRoundTripTimeMs = roundTripTimeMs;
+                statsRoundTripTime.Add((int)roundTripTimeMs);
+                log.Debug("RoundTripTime {Now} {PongTime} {RoundTripTimeMs} {AverageRoundTripTimeMs}", now.ms,
+                    pongTime.ms,
+                    roundTripTimeMs,
+                    statsRoundTripTime.Stat.average);
+            }
+            else
+            {
+                roundTripTimeMs = lastReceivedRoundTripTimeMs;
+            }
 
             var numberOfInputInQueue = reader.ReadInt8();
             statsHostInputQueueCount.Add(numberOfInputInQueue);

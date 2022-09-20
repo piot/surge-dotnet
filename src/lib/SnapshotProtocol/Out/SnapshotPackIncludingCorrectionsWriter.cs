@@ -21,7 +21,8 @@ namespace Piot.Surge.SnapshotProtocol.Out
         const uint PayloadOctetCountPerDatagram = 1100;
 
         public static void Write(SendDelegate send, SnapshotProtocolPack pack,
-            MonotonicTimeLowerBits.MonotonicTimeLowerBits monotonicTimeLowerBits, sbyte clientInputTicksAhead,
+            MonotonicTimeLowerBits.MonotonicTimeLowerBits monotonicTimeLowerBits, bool hasLowerBits,
+            sbyte clientInputTicksAhead,
             TickId serverTickId,
             OrderedDatagramsSequenceIdIncrease orderedDatagramsIncrease, OctetWriter fullWriter)
         {
@@ -36,7 +37,18 @@ namespace Piot.Surge.SnapshotProtocol.Out
 
                 OrderedDatagramsSequenceIdWriter.Write(writer, orderedDatagramsIncrease.Value);
                 DatagramTypeWriter.Write(writer, DatagramType.DatagramType.DeltaSnapshots);
-                MonotonicTimeLowerBitsWriter.Write(monotonicTimeLowerBits, writer);
+                byte snapshotExtraInfoBits = 0;
+                if (hasLowerBits)
+                {
+                    snapshotExtraInfoBits |= 0x01;
+                }
+
+                writer.WriteUInt8(snapshotExtraInfoBits);
+                if (hasLowerBits)
+                {
+                    MonotonicTimeLowerBitsWriter.Write(monotonicTimeLowerBits, writer);
+                }
+
                 writer.WriteInt8(clientInputTicksAhead);
                 TickIdWriter.Write(writer, serverTickId);
 
