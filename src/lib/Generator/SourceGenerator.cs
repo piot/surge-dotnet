@@ -453,6 +453,10 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
             sb.Append(@"
         public void MovementSimulationTick()
         {
+            if (outFacing.OnMovementSimulation is null)
+            {
+                return;
+            }
             var movementSimulationInfo = OutFacing.OnMovementSimulation.Invoke(current);
         
 ");
