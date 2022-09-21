@@ -11,11 +11,14 @@ namespace Piot.Surge
     public sealed class WorldWithGhostCreator : AuthoritativeWorld, IEntityContainerWithGhostCreator
     {
         readonly IEntityGhostCreator creator;
+        readonly INotifyContainerReset notifyContainerReset;
         readonly INotifyEntityCreation notifyEntityCreation;
 
         public WorldWithGhostCreator(IEntityGhostCreator creator, INotifyEntityCreation notifyEntityCreation,
+            INotifyContainerReset notifyContainerReset,
             bool isAuthoritative)
         {
+            this.notifyContainerReset = notifyContainerReset;
             IsAuthoritative = isAuthoritative;
             this.creator = creator;
             this.notifyEntityCreation = notifyEntityCreation;
@@ -46,6 +49,8 @@ namespace Piot.Surge
             allEntities.Clear();
             created.Clear();
             deleted.Clear();
+
+            notifyContainerReset.NotifyReset();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

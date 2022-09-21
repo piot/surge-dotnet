@@ -54,7 +54,8 @@ namespace Piot.Surge.Generator
     public enum FieldSource
     {
         Logic,
-        Simulation
+        Simulation,
+        MovementSimulation
     }
 
     public sealed class LogicFieldInfo
@@ -119,16 +120,28 @@ namespace Piot.Surge.Generator
 
             var tempList = new List<LogicFieldInfo>();
             var simulationFields = new List<LogicFieldInfo>();
+            var movementSimulationFields = new List<LogicFieldInfo>();
             foreach (var fieldInLogic in fieldsInLogic)
             {
                 var source = ScannerHelper.HasAttribute<SimulatedAttribute>(fieldInLogic)
                     ? FieldSource.Simulation
-                    : FieldSource.Logic;
+                    : ScannerHelper.HasAttribute<MovementSimulatedAttribute>(fieldInLogic)
+                        ? FieldSource.MovementSimulation
+                        : FieldSource.Logic;
 
                 var fieldInfo = new LogicFieldInfo(fieldInLogic, mask, source);
-                if (source == FieldSource.Simulation)
+                switch (source)
                 {
-                    simulationFields.Add(fieldInfo);
+                    case FieldSource.Simulation:
+                        simulationFields.Add(fieldInfo);
+                        break;
+                    case FieldSource.MovementSimulation:
+                        movementSimulationFields.Add(fieldInfo);
+                        break;
+                    case FieldSource.Logic:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
 
                 tempList.Add(fieldInfo);
@@ -138,12 +151,14 @@ namespace Piot.Surge.Generator
 
             FieldInfos = tempList.ToList();
             SimulationFieldInfos = simulationFields.ToList();
+            MovementSimulationFieldInfos = movementSimulationFields.ToList();
         }
 
         public IEnumerable<CommandInfo> CommandInfos { get; }
 
         public IEnumerable<LogicFieldInfo> FieldInfos { get; }
         public IEnumerable<LogicFieldInfo> SimulationFieldInfos { get; }
+        public IEnumerable<LogicFieldInfo> MovementSimulationFieldInfos { get; }
 
         public Type? CommandsInterface { get; }
 

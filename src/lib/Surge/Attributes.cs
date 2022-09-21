@@ -24,6 +24,11 @@ namespace Piot.Surge
     {
     }
 
+    [AttributeUsage(AttributeTargets.Field)]
+    public sealed class MovementSimulatedAttribute : Attribute
+    {
+    }
+
     [AttributeUsage(AttributeTargets.Interface)]
     public sealed class ShortLivedEventsAttribute : Attribute
     {

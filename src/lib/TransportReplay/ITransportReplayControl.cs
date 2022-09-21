@@ -22,5 +22,7 @@ namespace Piot.Surge.TransportReplay
 
         (ITransportReceive, TimeMs) StartPlaybackFromFile(IOctetSerializableRead state, string filename);
         public void Update(TickId tickId);
+
+        public void Stop();
     }
 }

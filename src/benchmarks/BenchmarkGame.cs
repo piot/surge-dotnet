@@ -36,7 +36,7 @@ public sealed class BenchmarkGame
 
         var entityCreation = new GeneratedEntityGhostCreator();
         GeneratedNotifyEntityCreation = new();
-        world = new(entityCreation, GeneratedNotifyEntityCreation, isHosting);
+        world = new(entityCreation, GeneratedNotifyEntityCreation, GeneratedNotifyEntityCreation, isHosting);
         var generatedEventTarget =
             new GeneratedEventProcessor(new BenchmarkShortEvents(log.SubLog("BenchmarkShortEvents")));
 

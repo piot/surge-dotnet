@@ -67,6 +67,8 @@ namespace Piot.Surge.TransportReplay
         public (ITransportReceive, TimeMs) StartPlaybackFromFile(IOctetSerializableRead state, string filename)
         {
             log.Info("Start playback transport from {Filename}", filename);
+
+
             seekableOctetReader?.Dispose();
 
             seekableOctetReader = FileStreamCreator.OpenWithSeek(filename);
@@ -83,6 +85,17 @@ namespace Piot.Surge.TransportReplay
             {
                 recorder.TickId = tickId;
             }
+        }
+
+        public void Stop()
+        {
+            if (seekableOctetReader is null)
+            {
+                return;
+            }
+
+            seekableOctetReader.Dispose();
+            playback = null;
         }
 
         public void StopRecording()

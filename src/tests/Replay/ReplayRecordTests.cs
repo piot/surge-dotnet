@@ -120,7 +120,7 @@ public sealed class ReplayRecorderTests
             var notifyWorld = new GeneratedNotifyEntityCreation();
             var eventTarget =
                 new GeneratedEventProcessor(new ShortEvents(log.SubLog("EventTarget")));
-            var clientWorld = new WorldWithGhostCreator(ghostCreator, notifyWorld, false);
+            var clientWorld = new WorldWithGhostCreator(ghostCreator, notifyWorld, notifyWorld, false);
 
             var fileStream = FileStreamCreator.OpenWithSeek("replay.temp");
             var now = new TimeMs(10);

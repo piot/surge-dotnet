@@ -13,10 +13,15 @@ namespace Piot.Surge.Generator
         {
             Generator.AddClassDeclaration(sb, "GeneratedEventProcessor", "IEventProcessor", indent);
             sb.Append($@"
-    private readonly {Generator.FullName(messageInterface.eventInterface)} target;
+    private {Generator.FullName(messageInterface.eventInterface)} target;
     public GeneratedEventProcessor({Generator.FullName(messageInterface.eventInterface)} target)
     {{
         this.target = target;
+    }}
+
+    public {Generator.FullName(messageInterface.eventInterface)} Target
+    {{
+        set => target = value;
     }}
 
     public void ReadAndApply(IBitReader reader)

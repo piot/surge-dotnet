@@ -28,5 +28,23 @@ namespace Piot.Surge.CompleteSnapshot
 
             return nextExpectedShortLivedEventSequenceId;
         }
+
+        public static EventSequenceId Skip(IEventProcessor eventProcessor, IBitReader reader)
+        {
+            var nextExpectedShortLivedEventSequenceId = EventSequenceIdReader.Read(reader);
+
+            var (eventCount, firstSequenceId) = EventStreamHeaderReader.Read(reader);
+
+            var sequenceId = firstSequenceId;
+            for (var i = 0; i < eventCount; ++i)
+            {
+                eventProcessor.SkipOneEvent(reader);
+
+                sequenceId = sequenceId.Next;
+                nextExpectedShortLivedEventSequenceId = sequenceId;
+            }
+
+            return nextExpectedShortLivedEventSequenceId;
+        }
     }
 }

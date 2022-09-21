@@ -352,7 +352,7 @@ public sealed class UnitTest1
         var packetQueue = new SnapshotDeltaPackIncludingCorrectionsQueue();
         var notifyWorld = new GeneratedNotifyEntityCreation();
 
-        var world = new WorldWithGhostCreator(new GeneratedEntityGhostCreator(), notifyWorld, false);
+        var world = new WorldWithGhostCreator(new GeneratedEntityGhostCreator(), notifyWorld, notifyWorld, false);
 
         var spawnedAvatar = world.SpawnEntity(avatarInfo);
 
@@ -550,7 +550,7 @@ public sealed class UnitTest1
         var (allSerializedSnapshots, spawnedAvatarId) = PrepareThreeServerSnapshotDeltas();
         var notifyWorld = new GeneratedNotifyEntityCreation();
         var clientWorld =
-            new WorldWithGhostCreator(new GeneratedEntityGhostCreator(), notifyWorld, false) as
+            new WorldWithGhostCreator(new GeneratedEntityGhostCreator(), notifyWorld, notifyWorld, false) as
                 IEntityContainerWithGhostCreator;
 
         var undoWriter = new OctetWriter(1200);

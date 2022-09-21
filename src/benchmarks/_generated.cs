@@ -50,10 +50,15 @@ public sealed class GeneratedEntityGhostCreator : IEntityGhostCreator
     }
 }
 
-public sealed class GeneratedNotifyEntityCreation : INotifyEntityCreation
+public sealed class GeneratedNotifyEntityCreation : INotifyEntityCreation, INotifyContainerReset
 {
     public Action<AvatarLogicEntity>? OnSpawnAvatarLogic;
     public Action<FireballLogicEntity>? OnSpawnFireballLogic;
+
+    public void NotifyReset()
+    {
+        throw new NotImplementedException();
+    }
 
     void INotifyEntityCreation.NotifyCreation(ICompleteEntity entity)
     {
@@ -830,6 +835,11 @@ public sealed class AvatarLogicEntityInternal : ICompleteEntity, IInputDeseriali
         }
     }
 
+    public void MovementSimulationTick()
+    {
+        throw new NotImplementedException();
+    }
+
 
     public void SetInput(IOctetReader reader)
     {
@@ -1141,6 +1151,11 @@ public sealed class FireballLogicEntityInternal : ICompleteEntity
                 new() { mask = VelocityMask, name = new(nameof(current.velocity)), type = typeof(Velocity3) }
             });
         }
+    }
+
+    public void MovementSimulationTick()
+    {
+        throw new NotImplementedException();
     }
 
     public void Destroy()

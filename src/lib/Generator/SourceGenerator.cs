@@ -29,9 +29,24 @@ namespace Piot.Surge.Generator
             return Generator.Suffix(info.Type.Name, "EntityInternal");
         }
 
+        public static string EntityGeneratedInternalSimulationInfo(LogicInfo info)
+        {
+            return Generator.Suffix(EntityGeneratedInternal(info), "SimulationInfo");
+        }
+
         public static string EntityExternalFullName(LogicInfo info)
         {
             return Generator.Suffix(Generator.FullName(info.Type), "Entity");
+        }
+
+        public static string MovementSimulationInfoName(LogicInfo info)
+        {
+            return Generator.Suffix(Generator.FullName(info.Type), "MovementSimulationInfo");
+        }
+
+        public static string LogicFullName(LogicInfo info)
+        {
+            return Generator.FullName(info.Type);
         }
 
 
@@ -106,13 +121,23 @@ namespace Piot.Surge.Generator
 
         public static void AddEngineWorld(StringBuilder sb, IEnumerable<LogicInfo> infos)
         {
-            Generator.AddClassDeclaration(sb, "GeneratedNotifyEntityCreation", "INotifyEntityCreation");
+            Generator.AddClassDeclaration(sb, "GeneratedNotifyEntityCreation",
+                "INotifyEntityCreation, INotifyContainerReset");
 
             foreach (var info in infos)
             {
                 sb.Append($"public Action<{EntityExternal(info)}>? OnSpawn{info.Type.Name};").Append(@"
 ");
             }
+
+            sb.Append(@"
+            public Action? OnReset;
+
+            public void NotifyReset()
+            {
+                OnReset.Invoke();
+            }
+");
 
 
             sb.Append(@"
@@ -421,6 +446,38 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
 
 ");
             }
+        }
+
+        public static void AddMovementSimulationTick(StringBuilder sb, LogicInfo logicInfo)
+        {
+            sb.Append(@"
+        public void MovementSimulationTick()
+        {
+            var movementSimulationInfo = OutFacing.OnMovementSimulation.Invoke(current);
+        
+");
+
+            foreach (var fieldInfo in logicInfo.MovementSimulationFieldInfos)
+            {
+                sb.Append(
+                    $@"        current.{fieldInfo.FieldInfo.Name} = movementSimulationInfo.{fieldInfo.FieldInfo.Name};
+");
+            }
+
+            sb.Append(@"
+
+        }
+
+");
+        }
+
+        public static void AddEmptyMovementSimulationTick(StringBuilder sb)
+        {
+            sb.Append(@"
+        public void MovementSimulationTick()
+        {
+        }
+");
         }
 
         public static (string, string) SmallestPrimitiveForBitCount(int bitCount)
@@ -830,12 +887,20 @@ public sealed class ").Append(outFacingClassName).Append($@"
             if (logicInfo.SimulationFieldInfos.Any())
             {
                 sb.Append($@"
-    public Func<{EntityGeneratedInternal(logicInfo)}SimulationInfo> OnSnapshot
+    public Func<{EntityGeneratedInternalSimulationInfo(logicInfo)}> OnSnapshot
     {{
             set => internalEntity.OnSnapshot = value;
     }}
 ");
             }
+
+            if (logicInfo.MovementSimulationFieldInfos.Any())
+            {
+                sb.Append($@"
+        public Func<{LogicFullName(logicInfo)}, {MovementSimulationInfoName(logicInfo)}>? OnMovementSimulation;
+");
+            }
+
 
             AddChangeDelegates(sb, logicInfo, logicInfo.FieldInfos);
             AddActionDelegates(sb, logicInfo.CommandInfos);
@@ -860,7 +925,7 @@ public sealed class ").Append(outFacingClassName).Append($@"
         public static void SimulationCaptureInfo(StringBuilder sb, LogicInfo logicInfo)
         {
             sb.Append(@$"
-public struct {EntityGeneratedInternal(logicInfo)}SimulationInfo
+public struct {EntityGeneratedInternalSimulationInfo(logicInfo)}
 {{
 
 
@@ -876,11 +941,30 @@ public struct {EntityGeneratedInternal(logicInfo)}SimulationInfo
 ");
         }
 
+        public static void MovementSimulationInfo(StringBuilder sb, LogicInfo logicInfo)
+        {
+            sb.Append(@$"
+public struct {MovementSimulationInfoName(logicInfo)}
+{{
+
+
+");
+            foreach (var fieldInfo in logicInfo.MovementSimulationFieldInfos)
+            {
+                sb.Append($@"public {Generator.FullName(fieldInfo.FieldInfo.FieldType)} {fieldInfo.FieldInfo.Name};
+");
+            }
+
+            sb.Append(@"
+}
+");
+        }
+
         public static void CaptureSnapshot(StringBuilder sb, LogicInfo logicInfo)
         {
             sb.Append($@"             
 
-            public Func<{EntityGeneratedInternal(logicInfo)}SimulationInfo> OnSnapshot;
+            public Func<{EntityGeneratedInternalSimulationInfo(logicInfo)}> OnSnapshot;
 
             void IAuthoritativeEntityCaptureSnapshot.CaptureSnapshot()
             {{
@@ -964,6 +1048,7 @@ public sealed class ").Append(EntityGeneratedInternal(logicInfo)).Append($" : {i
 
 ");
 
+
             var fieldInfos = logicInfo.FieldInfos;
             AddArchetypeId(sb, logicInfo);
 
@@ -1015,6 +1100,14 @@ public sealed class ").Append(EntityGeneratedInternal(logicInfo)).Append($" : {i
 
 
             AddTick(sb, logicInfo);
+            if (logicInfo.MovementSimulationFieldInfos.Any())
+            {
+                AddMovementSimulationTick(sb, logicInfo);
+            }
+            else
+            {
+                AddEmptyMovementSimulationTick(sb);
+            }
 
             AddChanges(sb, fieldInfos);
             AddInvokeChanges(sb, fieldInfos);
@@ -1160,6 +1253,11 @@ namespace Piot.Surge.Internal.Generated
                 if (logicInfo.SimulationFieldInfos.Any())
                 {
                     SimulationCaptureInfo(sb, logicInfo);
+                }
+
+                if (logicInfo.MovementSimulationFieldInfos.Any())
+                {
+                    MovementSimulationInfo(sb, logicInfo);
                 }
             }
 

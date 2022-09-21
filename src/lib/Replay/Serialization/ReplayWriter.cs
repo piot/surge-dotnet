@@ -17,8 +17,8 @@ namespace Piot.Surge.Replay.Serialization
     {
         readonly OctetWriter cachedStateWriter = new(16 * 1024);
         readonly uint framesBetweenCompleteState;
-        readonly RaffWriter raffWriter;
         readonly ReplayFileSerializationInfo info;
+        readonly RaffWriter raffWriter;
 
         uint packCountSinceCompleteState;
 
@@ -91,6 +91,7 @@ namespace Piot.Surge.Replay.Serialization
             WriteDeltaHeader(cachedStateWriter, deltaState.TimeProcessedMs, deltaState.TickIdRange);
             cachedStateWriter.WriteOctets(deltaState.Payload);
             raffWriter.WriteChunk(info.DeltaStateInfo.Icon, info.DeltaStateInfo.Name, cachedStateWriter.Octets);
+            packCountSinceCompleteState++;
         }
 
         public void Close()

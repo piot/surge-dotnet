@@ -70,15 +70,50 @@ namespace Piot.Surge.SnapshotReplay
                 disposableOctetWriter, log);
         }
 
-        public void StartPlaybackFromFile(TimeMs now, string filename)
+        public void LoadPlaybackFromFile(TimeMs now, string filename)
         {
-            seekableOctetReader?.Dispose();
+            if (seekableOctetReader is not null)
+            {
+                seekableOctetReader?.Dispose();
+                playback = null;
+            }
 
             playbackWorld.Reset();
             seekableOctetReader = FileStreamCreator.OpenWithSeek(filename);
             playback = new(playbackWorld, eventProcessor, now, applicationVersion, Constants.ReplayInfo,
                 seekableOctetReader,
                 log);
+            playback.DeltaTime = new(0);
+        }
+
+        public TickId Seek(TickId tickId)
+        {
+            return playback?.Seek(tickId) ?? tickId;
+        }
+
+        public void Play()
+        {
+            if (playback is null)
+            {
+                return;
+            }
+
+            playback.DeltaTime = new(20);
+        }
+
+        public TickId MinTickId => playback?.MinTickId ?? new(0);
+        public TickId MaxTickId => playback?.MaxTickId ?? new(0);
+        public TickId TickId => playback?.TickId ?? new(0);
+
+        public void Stop()
+        {
+            if (seekableOctetReader is null)
+            {
+                return;
+            }
+
+            seekableOctetReader.Dispose();
+            playback = null;
         }
 
         public void Update(TimeMs timeNow)
@@ -100,6 +135,7 @@ namespace Piot.Surge.SnapshotReplay
             disposableOctetWriter?.Dispose();
             disposableOctetWriter = null;
         }
+
 
         public void SnapshotPlaybackNotify(TimeMs timeNowMs, TickId tickIdNow, DeltaSnapshotPack deltaSnapshotPack)
         {

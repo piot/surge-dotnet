@@ -53,7 +53,7 @@ public sealed class ClientHostTests
         var notifyWorld = new GeneratedNotifyEntityCreation();
         var generatedEvent = new GeneratedEventProcessor(new ShortEvents(log.SubLog("ShortEvents")));
         var entityContainerWithGhostCreator =
-            new WorldWithGhostCreator(new GeneratedEntityGhostCreator(), notifyWorld, false);
+            new WorldWithGhostCreator(new GeneratedEntityGhostCreator(), notifyWorld, notifyWorld, false);
 
         var client = new Client(log.SubLog("Client"), now, clientDeltaTime, entityContainerWithGhostCreator,
             generatedEvent, transport,

@@ -12,7 +12,8 @@ namespace Piot.Surge.Entities
     /// </summary>
     public interface ICompleteEntity : IEntityBothSerializer, IEntityDeserializer,
         IEntityBitDeserializer, IEntityChanges, IEntityClearChanges,
-        ISimpleLogic, IEntityFireChanges, IEntityActions, IEntityActionsDoUnDo, IAuthoritativeEntityCaptureSnapshot
+        ISimpleLogic, IMovementSimulation, IEntityFireChanges, IEntityActions, IEntityActionsDoUnDo,
+        IAuthoritativeEntityCaptureSnapshot
     {
         public ILogic Logic { get; }
 

@@ -3,22 +3,10 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-namespace Piot.Surge.Input
+namespace Piot.Surge
 {
-    public readonly struct Axis
+    public interface IMovementSimulation
     {
-        public readonly short value;
-
-        public override string ToString()
-        {
-            return $"[Axis {value}]";
-        }
-
-        public float ToFloat => value / 32768.0f;
-
-        public Axis(short v)
-        {
-            value = v;
-        }
+        public void MovementSimulationTick();
     }
 }

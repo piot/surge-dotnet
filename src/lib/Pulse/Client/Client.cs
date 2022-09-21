@@ -84,6 +84,8 @@ namespace Piot.Surge.Pulse.Client
 
         public void Deserialize(IOctetReader reader)
         {
+            log.Info("Deserialize and reset");
+            World.Reset();
             OctetMarker.AssertMarker(reader, 0xd7);
             var count = EntityCountReader.ReadEntityCount(reader);
             for (var i = 0; i < count; ++i)

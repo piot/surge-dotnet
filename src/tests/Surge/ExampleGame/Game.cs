@@ -30,7 +30,7 @@ public sealed class Game
 
         var entityCreation = new GeneratedEntityGhostCreator();
         GeneratedNotifyEntityCreation = new();
-        world = new(entityCreation, GeneratedNotifyEntityCreation, isHosting);
+        world = new(entityCreation, GeneratedNotifyEntityCreation, GeneratedNotifyEntityCreation, isHosting);
         var generatedEventTarget = new GeneratedEventProcessor(new ShortEvents(log.SubLog("ShortEvents")));
 
         if (isHosting)

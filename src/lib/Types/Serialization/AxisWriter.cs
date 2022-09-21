@@ -3,22 +3,21 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-namespace Piot.Surge.Input
-{
-    public readonly struct Axis
-    {
-        public readonly short value;
+using Piot.Flood;
+using Piot.Surge.Input;
 
-        public override string ToString()
+namespace Piot.Surge.Types.Serialization
+{
+    public static class AxisWriter
+    {
+        public static void Write(Axis axis, IOctetWriter writer)
         {
-            return $"[Axis {value}]";
+            writer.WriteInt16(axis.value);
         }
 
-        public float ToFloat => value / 32768.0f;
-
-        public Axis(short v)
+        public static void Write(Axis axis, IBitWriter writer)
         {
-            value = v;
+            BitWriterUtils.WriteSignedBits(writer, axis.value, 16);
         }
     }
 }

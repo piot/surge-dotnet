@@ -31,5 +31,28 @@ namespace Piot.Surge.Event.Serialization
 
             return nextExpectedSequenceId;
         }
+
+        public static EventSequenceId Skip(IBitReader reader, IEventProcessor eventProcessor,
+            EventSequenceId nextExpectedSequenceId)
+        {
+            var (count, startSequenceId) = EventStreamHeaderReader.Read(reader);
+            var sequenceId = startSequenceId;
+
+            for (var i = 0; i < count; ++i)
+            {
+                if (!sequenceId.IsEqualOrSuccessor(nextExpectedSequenceId))
+                {
+                    sequenceId = sequenceId.Next;
+                    eventProcessor.SkipOneEvent(reader);
+                    continue;
+                }
+
+                eventProcessor.SkipOneEvent(reader);
+                sequenceId = sequenceId.Next;
+                nextExpectedSequenceId = sequenceId;
+            }
+
+            return nextExpectedSequenceId;
+        }
     }
 }

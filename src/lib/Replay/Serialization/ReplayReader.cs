@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using System;
 using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.Raff.Stream;
@@ -17,9 +18,9 @@ namespace Piot.Surge.Replay.Serialization
     public sealed class ReplayReader
     {
         readonly CompleteStateEntry[] completeStateEntries;
+        readonly ReplayFileSerializationInfo info;
         readonly RaffReader raffReader;
         readonly IOctetReaderWithSeekAndSkip readerWithSeek;
-        readonly ReplayFileSerializationInfo info;
         TimeMs lastReadTimeMs;
         TimeMs lastTimeMsFromDeltaState;
 
@@ -43,8 +44,14 @@ namespace Piot.Surge.Replay.Serialization
                 CompleteStateScanner.ScanForAllCompleteStatePositions(raffReader, readerWithSeek,
                     info.CompleteStateInfo);
 
+            MinTickId = new(completeStateEntries[0].tickId);
+            MaxTickId = new(completeStateEntries[^1].tickId);
+
             readerWithSeek.Seek(positionBefore);
         }
+
+        public TickId MinTickId { get; }
+        public TickId MaxTickId { get; }
 
         public SemanticVersion ApplicationVersion { get; private set; }
 
@@ -72,9 +79,11 @@ namespace Piot.Surge.Replay.Serialization
             var left = 0;
             var right = completeStateEntries.Length - 1;
 
-            while (left != right)
+            var tryCount = 0;
+            while (left != right && Math.Abs(left - right) >= 1 && tryCount < 20)
             {
-                var middle = left + right / 2;
+                tryCount++;
+                var middle = (left + right) / 2;
                 var middleEntry = completeStateEntries[middle];
                 if (tickIdValue == middleEntry.tickId)
                 {
