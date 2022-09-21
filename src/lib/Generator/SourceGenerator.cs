@@ -135,7 +135,7 @@ namespace Piot.Surge.Generator
 
             public void NotifyReset()
             {
-                OnReset.Invoke();
+                OnReset?.Invoke();
             }
 ");
 
