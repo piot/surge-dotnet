@@ -28,7 +28,6 @@ namespace Piot.Surge.Pulse.Client
         readonly FixedDeltaTimeMs fixedSimulationDeltaTimeMs;
         readonly ILog log;
         readonly ClientPredictor notifyPredictor;
-        readonly bool usePrediction;
         readonly IEntityContainer world;
         IInputPackFetch inputPackFetch;
 
@@ -41,7 +40,7 @@ namespace Piot.Surge.Pulse.Client
             this.log = log;
             this.world = world;
             this.notifyPredictor = notifyPredictor;
-            this.usePrediction = usePrediction;
+            UsePrediction = usePrediction;
             this.inputPackFetch = inputPackFetch;
             fixedSimulationDeltaTimeMs = targetDeltaTimeMs;
             bundleAndSendOutInput = new(transportClient, log.SubLog("BundleInputAndSend"));
@@ -63,6 +62,8 @@ namespace Piot.Surge.Pulse.Client
         {
             set => inputPackFetch = value;
         }
+
+        public bool UsePrediction { set; get; }
 
         public Dictionary<byte, LocalPlayerInput> LocalPlayerInputs { get; } = new();
 
@@ -101,7 +102,7 @@ namespace Piot.Surge.Pulse.Client
                     notifyPredictor.CreateAvatarPredictor(correction.localPlayerInput);
                 }
 
-                if (usePrediction)
+                if (UsePrediction)
                 {
                     notifyPredictor.ReadCorrection(correction.localPlayerInput.LocalPlayerIndex, correctionsForTickId,
                         correction.payload.Span);
@@ -238,7 +239,7 @@ namespace Piot.Surge.Pulse.Client
 
             bundleAndSendOutInput.BundleAndSendInputDatagram(localPlayerInputsArray, now);
 
-            if (usePrediction)
+            if (UsePrediction)
             {
                 notifyPredictor.Predict(localPlayerInputsArray);
             }

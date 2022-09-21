@@ -61,6 +61,7 @@ namespace Piot.Surge.Pulse.Host
         void TickWorld()
         {
             Ticker.Tick(AuthoritativeWorld);
+            Ticker.TickMovementSimulation(AuthoritativeWorld);
             Notifier.Notify(AuthoritativeWorld.AllEntities);
         }
 

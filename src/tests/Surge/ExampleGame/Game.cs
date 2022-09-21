@@ -44,6 +44,7 @@ public sealed class Game
             gameInputFetch.GameSpecificInputFetch = inputFetch.ReadFromDevice;
             Client = new(log.SubLog("Client"), now, delta, world, generatedEventTarget,
                 transport, compression, gameInputFetch, new MockPlaybackNotify());
+            Client.UsePrediction = false;
         }
 
         GeneratedHostEntitySpawner = new(world, GeneratedNotifyEntityCreation);

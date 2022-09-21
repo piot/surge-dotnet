@@ -22,9 +22,9 @@ namespace Piot.Surge.Pulse.Client
 
             predictedEntity.CompleteEntity.ClearChanges();
             predictedEntity.CompleteEntity.Tick();
+            predictedEntity.CompleteEntity.MovementSimulationTick();
 
             var changes = predictedEntity.CompleteEntity.Changes();
-
 
             predictedEntity.CompleteEntity.SerializePrevious(changes, undoWriter);
 

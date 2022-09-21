@@ -41,7 +41,7 @@ namespace Piot.Surge.Pulse.Client
             transportWithStats = new(assignedTransport, now);
             transportClient = new TransportClient(transportWithStats);
             var clientPredictor = new ClientPredictor(log.SubLog("ClientPredictor"));
-            const bool usePrediction = false;
+            const bool usePrediction = true;
             localInputFetchAndSend = new(fetch, clientPredictor, usePrediction,
                 transportClient, now,
                 targetDeltaTimeMs,
@@ -55,6 +55,11 @@ namespace Piot.Surge.Pulse.Client
             datagramReceiver = new(transportClient, compression, deltaSnapshotPlayback,
                 localInputFetchAndSend, log);
             statsTicker = new(new(0), StatsOutput, new(1000), log.SubLog("Stats"));
+        }
+
+        public bool UsePrediction
+        {
+            set => localInputFetchAndSend.UsePrediction = value;
         }
 
         public ITransport Transport

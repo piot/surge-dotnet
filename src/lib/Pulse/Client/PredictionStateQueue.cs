@@ -85,13 +85,14 @@ namespace Piot.Surge.Pulse.Client
             lastInsertedTickId = tickId;
         }
 
-        public PredictionStateAllChecksums DequeueForTickId(TickId requiredTickId)
+        public PredictionStateAllChecksums? DequeueForTickId(TickId requiredTickId)
         {
             var predictionState = queue.Dequeue();
             if (predictionState.tickId.tickId != requiredTickId.tickId)
             {
-                throw new(
-                    $"wrong internal state. prediction state dequeued is the wrong one required: {requiredTickId} encountered: {predictionState.tickId}");
+                //                throw new(
+                //  $"wrong internal state. prediction state dequeued is the wrong one required: {requiredTickId} encountered: {predictionState.tickId}");
+                return null;
             }
 
             return predictionState;

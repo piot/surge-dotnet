@@ -48,7 +48,13 @@ namespace Piot.Surge.Pulse.Client
 
             var storedPredictionStateChecksum =
                 predictionStateChecksumHistory.DequeueForTickId(correctionForTickId);
-            return storedPredictionStateChecksum.IsEqual(logicPayload, physicsCorrectionPayload);
+
+            if (storedPredictionStateChecksum is null)
+            {
+                return true;
+            }
+
+            return storedPredictionStateChecksum.Value.IsEqual(logicPayload, physicsCorrectionPayload);
         }
 
         /// <summary>
