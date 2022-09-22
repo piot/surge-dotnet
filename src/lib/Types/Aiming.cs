@@ -72,6 +72,12 @@ namespace Piot.Surge.Types
             pitch = (short)(newPitch * 32767.0 / PitchMax);
         }
 
+        public UnitVector2 ToXZ()
+        {
+            var yawRad = Yaw;
+            return UnitVector2.FromFloats(MathF.Sin(yawRad), MathF.Cos(yawRad));
+        }
+
         public UnitVector3 ToDirection
         {
             get

@@ -60,9 +60,13 @@ namespace Piot.Surge.Pulse.Host
 
         void TickWorld()
         {
-            Ticker.Tick(AuthoritativeWorld);
-            Ticker.TickMovementSimulation(AuthoritativeWorld);
-            Notifier.Notify(AuthoritativeWorld.AllEntities);
+            foreach (var entity in AuthoritativeWorld.AllEntities)
+            {
+                entity.CompleteEntity.CaptureSnapshot();
+                entity.CompleteEntity.Tick();
+                entity.CompleteEntity.MovementSimulationTick();
+                Notifier.Notify(entity);
+            }
         }
 
         public void AssignPredictEntity(EndpointId connectionId, LocalPlayerIndex localPlayerIndex,

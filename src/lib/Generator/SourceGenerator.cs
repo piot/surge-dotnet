@@ -993,7 +993,6 @@ public struct {MovementSimulationInfoName(logicInfo)}
             sb.Append(@"
             void IAuthoritativeEntityCaptureSnapshot.CaptureSnapshot()
             {
-                throw new NotImplementedException();
             }
 ");
         }
