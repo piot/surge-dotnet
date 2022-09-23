@@ -67,7 +67,7 @@ public sealed class GameSync
                 log.Debug("Ammo Count changed to {AmmoCount}", avatar.Self.ammoCount);
                 ammoCountChanged++;
 
-                Assert.Equal(10 - ammoCountChanged, avatar.Self.ammoCount);
+                Assert.Equal(9, avatar.Self.ammoCount);
             };
 
             spawnedCalled++;

@@ -11,7 +11,7 @@ namespace Piot.Surge.Entities
     ///     Interfaces that a complete entity must support. Usually implementation is produced from a source code generator.
     /// </summary>
     public interface ICompleteEntity : IEntityBothSerializer, IEntityDeserializer,
-        IEntityBitDeserializer, IEntityChanges, IEntityClearChanges,
+        IEntityBitDeserializer, IEntityChanges, IEntityClearChanges, IEntityClearActions,
         ISimpleLogic, IMovementSimulation, IEntityFireChanges, IEntityActions, IEntityActionsDoUnDo,
         IAuthoritativeEntityCaptureSnapshot
     {

@@ -33,7 +33,7 @@ namespace Piot.Surge
                 notifyEntity.CompleteEntity.DoAction(action);
             }
 
-            notifyEntity.CompleteEntity.ClearChanges();
+            notifyEntity.CompleteEntity.ClearActions();
         }
 
         public static void Notify(IEntity[] entities)

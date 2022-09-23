@@ -5,11 +5,11 @@
 
 namespace Piot.Surge.Entities
 {
-    public interface IEntityClearChanges
+    public interface IEntityClearActions
     {
         /// <summary>
-        ///     Copies current state to previous
+        ///     Clearing all produced actions.
         /// </summary>
-        public void ClearChanges();
+        public void ClearActions();
     }
 }

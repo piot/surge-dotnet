@@ -684,6 +684,10 @@ private readonly ActionsContainer actionsContainer = new();
     public void ClearChanges()
     {
         last = current;
+    }
+    
+    public void ClearActions()
+    {
         actionsContainer.Clear();
     }
 

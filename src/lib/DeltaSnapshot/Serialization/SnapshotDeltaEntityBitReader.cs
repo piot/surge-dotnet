@@ -13,7 +13,8 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
     public static class SnapshotDeltaEntityBitReader
     {
         public static void ReadAndApply(IBitReader reader,
-            IEntityContainerWithGhostCreator entityGhostContainerWithCreator, bool isOverlappingMergedSnapshot)
+            IEntityContainerWithGhostCreator entityGhostContainerWithCreator, bool isOverlappingMergedSnapshot,
+            bool notifyWorldSync)
         {
 #if DEBUG
             if (reader.ReadBits(8) != Constants.SnapshotDeltaSync)
@@ -68,7 +69,10 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
                     entityGhostContainerWithCreator.CreateGhostEntity(entityArchetype, entityId);
                 entityToDeserialize.CompleteEntity.DeserializeAll(reader);
                 //createdEntities.Add(entityToDeserialize);
-                entityGhostContainerWithCreator.AddGhostEntity(entityToDeserialize);
+                if (notifyWorldSync)
+                {
+                    entityGhostContainerWithCreator.AddGhostEntity(entityToDeserialize);
+                }
             }
 
 

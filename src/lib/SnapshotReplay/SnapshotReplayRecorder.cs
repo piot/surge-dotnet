@@ -27,17 +27,20 @@ namespace Piot.Surge.SnapshotReplay
         readonly IEntityContainerWithGhostCreator playbackWorld;
         readonly OctetWriter writer = new(replayMemoryOctetSize);
         IDisposableOctetWriter? disposableOctetWriter;
+        readonly INotifyEntityCreation notifyEntityCreation;
         ReplayPlayback? playback;
         ReplayRecorder? recorder;
         IOctetReaderWithSeekAndSkip? seekableOctetReader;
 
         public SnapshotReplayRecorder(SemanticVersion applicationVersion, IEntityContainer recordWorld,
-            IEntityContainerWithGhostCreator playbackWorld, IEventProcessor eventProcessor, ILog log)
+            IEntityContainerWithGhostCreator playbackWorld, INotifyEntityCreation notifyEntityCreation,
+            IEventProcessor eventProcessor, ILog log)
         {
             this.log = log;
             this.applicationVersion = applicationVersion;
             entityContainer = recordWorld ?? throw new ArgumentNullException(nameof(recordWorld));
             this.playbackWorld = playbackWorld;
+            this.notifyEntityCreation = notifyEntityCreation;
             this.eventProcessor = eventProcessor;
         }
 
@@ -80,7 +83,8 @@ namespace Piot.Surge.SnapshotReplay
 
             playbackWorld.Reset();
             seekableOctetReader = FileStreamCreator.OpenWithSeek(filename);
-            playback = new(playbackWorld, eventProcessor, now, applicationVersion, Constants.ReplayInfo,
+            playback = new(playbackWorld, notifyEntityCreation, eventProcessor, now, applicationVersion,
+                Constants.ReplayInfo,
                 seekableOctetReader,
                 log);
             playback.DeltaTime = new(0);

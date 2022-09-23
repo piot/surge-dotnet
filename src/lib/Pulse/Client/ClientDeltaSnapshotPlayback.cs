@@ -186,7 +186,7 @@ namespace Piot.Surge.Pulse.Client
 
             expectedEventSequenceId = ApplyDeltaSnapshotToWorld.Apply(deltaSnapshotPack, clientWorld,
                 eventProcessor, expectedEventSequenceId,
-                deltaSnapshotIncludingCorrectionsItem.IsMergedAndOverlapping);
+                deltaSnapshotIncludingCorrectionsItem.IsMergedAndOverlapping, true);
 
             predictor.AssignAvatarAndReadCorrections(deltaSnapshotIncludingCorrections.tickIdRange.Last,
                 deltaSnapshotIncludingCorrections.physicsCorrections.Span);

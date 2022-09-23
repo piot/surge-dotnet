@@ -12,7 +12,7 @@ namespace Piot.Surge.CompleteSnapshot
     public static class CompleteStateEntityBitReader
     {
         public static void Apply(IBitReader reader,
-            IEntityContainerWithGhostCreator entityGhostContainerWithCreator)
+            IEntityContainerWithGhostCreator entityGhostContainerWithCreator, bool notifyWorldSync)
         {
             if (entityGhostContainerWithCreator.EntityCount != 0)
             {
@@ -30,7 +30,10 @@ namespace Piot.Surge.CompleteSnapshot
                     entityGhostContainerWithCreator.CreateGhostEntity(entityArchetype, entityId);
                 entityToDeserialize.CompleteEntity.DeserializeAll(reader);
                 //createdEntities.Add(entityToDeserialize);
-                entityGhostContainerWithCreator.AddGhostEntity(entityToDeserialize);
+                if (notifyWorldSync)
+                {
+                    entityGhostContainerWithCreator.AddGhostEntity(entityToDeserialize);
+                }
             }
 
             //return createdEntities.ToArray();

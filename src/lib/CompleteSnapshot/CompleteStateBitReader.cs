@@ -12,12 +12,12 @@ namespace Piot.Surge.CompleteSnapshot
     {
         public static EventSequenceId ReadAndApply(IBitReader reader,
             IEntityContainerWithGhostCreator entityGhostContainerWithCreator,
-            IEventProcessor eventProcessor, bool useEvents = true)
+            IEventProcessor eventProcessor, bool notifyWorldSync, bool useEvents = true)
         {
 #if DEBUG
             BitMarker.AssertMarker(reader, Constants.CompleteSnapshotStartMarker);
 #endif
-            CompleteStateEntityBitReader.Apply(reader, entityGhostContainerWithCreator);
+            CompleteStateEntityBitReader.Apply(reader, entityGhostContainerWithCreator, notifyWorldSync);
 
             return useEvents
                 ? EventCompleteBitReader.ReadAndApply(eventProcessor, reader)

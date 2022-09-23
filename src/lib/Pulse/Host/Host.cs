@@ -93,6 +93,11 @@ namespace Piot.Surge.Pulse.Host
                 ShortLivedEventStream, authoritativeTickId, SnapshotStreamType.BitStream, cachedSnapshotWriter,
                 cachedSnapshotBitWriter);
             snapshotSyncer.SendSnapshot(masks, deltaSnapshotPack, AuthoritativeWorld, ShortLivedEventStream);
+
+            foreach (var entity in AuthoritativeWorld.AllEntities)
+            {
+                entity.CompleteEntity.ClearChanges();
+            }
         }
 
         void StatsOutput()
