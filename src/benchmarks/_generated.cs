@@ -840,6 +840,11 @@ public sealed class AvatarLogicEntityInternal : ICompleteEntity, IInputDeseriali
         throw new NotImplementedException();
     }
 
+    public void ClearActions()
+    {
+        throw new NotImplementedException();
+    }
+
 
     public void SetInput(IOctetReader reader)
     {
@@ -1154,6 +1159,11 @@ public sealed class FireballLogicEntityInternal : ICompleteEntity
     }
 
     public void MovementSimulationTick()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void ClearActions()
     {
         throw new NotImplementedException();
     }
