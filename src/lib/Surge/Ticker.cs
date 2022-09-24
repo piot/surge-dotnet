@@ -25,22 +25,5 @@ namespace Piot.Surge
         {
             Tick(world.AllEntities);
         }
-
-        public static void TickMovementSimulation(IEntity[] entities)
-        {
-            foreach (var entity in entities)
-            {
-                entity.CompleteEntity.MovementSimulationTick();
-            }
-        }
-
-        /// <summary>
-        ///     Calls Tick() on all entities in the <paramref name="world" />.
-        /// </summary>
-        /// <param name="world"></param>
-        public static void TickMovementSimulation(IEntityContainer world)
-        {
-            TickMovementSimulation(world.AllEntities);
-        }
     }
 }

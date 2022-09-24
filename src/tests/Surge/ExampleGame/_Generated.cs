@@ -56,12 +56,12 @@ public sealed class GeneratedNotifyEntityCreation : INotifyEntityCreation, INoti
     public Action<AvatarLogicEntity>? OnSpawnAvatarLogic;
     public Action<FireballLogicEntity>? OnSpawnFireballLogic;
 
-    public void NotifyReset()
+    public void NotifyGameEngineResetNetworkEntities()
     {
         OnReset?.Invoke();
     }
 
-    void INotifyEntityCreation.NotifyCreation(ICompleteEntity entity)
+    void INotifyEntityCreation.CreateGameEngineEntity(ICompleteEntity entity)
     {
         switch (entity)
         {
@@ -95,7 +95,7 @@ public sealed class GeneratedHostEntitySpawner
         {
             Current = logic
         };
-        notifyWorld.NotifyCreation(internalEntity);
+        notifyWorld.CreateGameEngineEntity(internalEntity);
         return (container.SpawnEntity(internalEntity), internalEntity);
     }
 
@@ -105,7 +105,7 @@ public sealed class GeneratedHostEntitySpawner
         {
             Current = logic
         };
-        notifyWorld.NotifyCreation(internalEntity);
+        notifyWorld.CreateGameEngineEntity(internalEntity);
         return (container.SpawnEntity(internalEntity), internalEntity);
     }
 }

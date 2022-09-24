@@ -16,11 +16,11 @@ namespace Piot.Surge.Entities
                 entity.CompleteEntity.FireDestroyed();
             }
 
-            //worldReset.NotifyReset();
+            //worldReset.NotifyGameEngineResetNetworkEntities();
 
             foreach (var entity in world.AllEntities)
             {
-                notifyEntityCreation.NotifyCreation(entity.CompleteEntity);
+                notifyEntityCreation.CreateGameEngineEntity(entity.CompleteEntity);
             }
         }
     }

@@ -40,7 +40,7 @@ namespace Piot.Surge
 
         public void AddGhostEntity(IEntity entity)
         {
-            notifyEntityCreation.NotifyCreation(entity.CompleteEntity);
+            notifyEntityCreation.CreateGameEngineEntity(entity.CompleteEntity);
         }
 
         public void Reset()
@@ -50,7 +50,7 @@ namespace Piot.Surge
             created.Clear();
             deleted.Clear();
 
-            notifyContainerReset.NotifyReset();
+            notifyContainerReset.NotifyGameEngineResetNetworkEntities();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

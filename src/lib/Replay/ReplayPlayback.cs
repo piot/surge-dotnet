@@ -108,7 +108,7 @@ namespace Piot.Surge.Replay
 
                     foreach (var entity in world.AllEntities)
                     {
-                        notifyEntityCreation.NotifyCreation(entity.CompleteEntity);
+                        notifyEntityCreation.CreateGameEngineEntity(entity.CompleteEntity);
                     }
 
                     return TickId;

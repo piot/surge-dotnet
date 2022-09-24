@@ -7,6 +7,6 @@ namespace Piot.Surge
 {
     public interface INotifyContainerReset
     {
-        public void NotifyReset();
+        public void NotifyGameEngineResetNetworkEntities();
     }
 }

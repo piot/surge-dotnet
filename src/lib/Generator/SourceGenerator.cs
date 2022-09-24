@@ -110,7 +110,7 @@ namespace Piot.Surge.Generator
         {{
             Current = logic
         }};
-        notifyWorld.NotifyCreation(internalEntity);
+        notifyWorld.CreateGameEngineEntity(internalEntity);
         return (container.SpawnEntity(internalEntity), internalEntity);
      }}
 ");
@@ -133,7 +133,7 @@ namespace Piot.Surge.Generator
             sb.Append(@"
             public Action? OnReset;
 
-            public void NotifyReset()
+            public void NotifyGameEngineResetNetworkEntities()
             {
                 OnReset?.Invoke();
             }
@@ -141,7 +141,7 @@ namespace Piot.Surge.Generator
 
 
             sb.Append(@"
-        void INotifyEntityCreation.NotifyCreation(ICompleteEntity entity)
+        void INotifyEntityCreation.CreateGameEngineEntity(ICompleteEntity entity)
         {
             switch (entity)
             {
@@ -171,7 +171,7 @@ namespace Piot.Surge.Generator
 {
     public Action<AvatarLogicEntity>? OnSpawnAvatarLogic;
     public Action<FireballLogicEntity>? OnSpawnFireballLogic;
-        public void NotifyCreation(IEntity entity)
+        public void CreateGameEngineEntity(IEntity entity)
         {
             switch (entity)
             {
