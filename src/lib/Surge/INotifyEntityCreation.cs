@@ -9,6 +9,6 @@ namespace Piot.Surge
 {
     public interface INotifyEntityCreation
     {
-        public void CreateGameEngineEntity(ICompleteEntity entity);
+        public void CreateGameEngineEntity(IEntity entity);
     }
 }

@@ -40,7 +40,7 @@ namespace Piot.Surge
 
         public void AddGhostEntity(IEntity entity)
         {
-            notifyEntityCreation.CreateGameEngineEntity(entity.CompleteEntity);
+            notifyEntityCreation.CreateGameEngineEntity(entity);
         }
 
         public void Reset()

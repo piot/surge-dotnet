@@ -60,20 +60,8 @@ public sealed class GeneratedNotifyEntityCreation : INotifyEntityCreation, INoti
         throw new NotImplementedException();
     }
 
-    void INotifyEntityCreation.CreateGameEngineEntity(ICompleteEntity entity)
+    void INotifyEntityCreation.CreateGameEngineEntity(IEntity entity)
     {
-        switch (entity)
-        {
-            case AvatarLogicEntityInternal internalEntity:
-                OnSpawnAvatarLogic?.Invoke(internalEntity.OutFacing);
-                break;
-            case FireballLogicEntityInternal internalEntity:
-                OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
-                break;
-
-            default:
-                throw new("Internal error");
-        }
     }
 }
 
@@ -94,7 +82,8 @@ public sealed class GeneratedHostEntitySpawner
         {
             Current = logic
         };
-        notifyWorld.CreateGameEngineEntity(internalEntity);
+        var entity = container.SpawnEntity(internalEntity);
+        notifyWorld.CreateGameEngineEntity(entity);
         return (container.SpawnEntity(internalEntity), internalEntity);
     }
 
@@ -104,7 +93,8 @@ public sealed class GeneratedHostEntitySpawner
         {
             Current = logic
         };
-        notifyWorld.CreateGameEngineEntity(internalEntity);
+        var entity = container.SpawnEntity(internalEntity);
+        notifyWorld.CreateGameEngineEntity(entity);
         return (container.SpawnEntity(internalEntity), internalEntity);
     }
 }

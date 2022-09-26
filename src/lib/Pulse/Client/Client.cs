@@ -126,7 +126,7 @@ namespace Piot.Surge.Pulse.Client
             deltaSnapshotPlayback.Serialize(writer);
         }
 
-        public EntityPredictor? FindPredictorFor(ICompleteEntity completeEntity)
+        public EntityPredictor? FindPredictorFor(IEntity completeEntity)
         {
             return clientPredictor.FindPredictorFor(completeEntity);
         }

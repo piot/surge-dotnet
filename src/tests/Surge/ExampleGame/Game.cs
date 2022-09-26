@@ -49,7 +49,7 @@ public sealed class Game
 
         GeneratedHostEntitySpawner = new(world, GeneratedNotifyEntityCreation);
 
-        GeneratedNotifyEntityCreation.OnSpawnFireballLogic += fireball =>
+        GeneratedNotifyEntityCreation.OnSpawnFireballLogic += (fireballEntity, fireball) =>
         {
             log.Debug($"a fireball has been spawned {fireball.Self}");
 
@@ -57,7 +57,7 @@ public sealed class Game
                 () => log.Debug("Fireball position changed {Position}", fireball.Self.position);
         };
 
-        GeneratedNotifyEntityCreation.OnSpawnAvatarLogic += avatar =>
+        GeneratedNotifyEntityCreation.OnSpawnAvatarLogic += (avatarEntity, avatar) =>
         {
             log.Debug("Avatar {Avatar} was spawned", avatar);
 

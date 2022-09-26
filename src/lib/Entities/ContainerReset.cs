@@ -20,7 +20,7 @@ namespace Piot.Surge.Entities
 
             foreach (var entity in world.AllEntities)
             {
-                notifyEntityCreation.CreateGameEngineEntity(entity.CompleteEntity);
+                notifyEntityCreation.CreateGameEngineEntity(entity);
             }
         }
     }

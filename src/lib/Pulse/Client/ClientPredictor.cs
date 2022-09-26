@@ -31,11 +31,11 @@ namespace Piot.Surge.Pulse.Client
             return avatarPredictor;
         }
 
-        public EntityPredictor? FindPredictorFor(ICompleteEntity completeEntity)
+        public EntityPredictor? FindPredictorFor(IEntity completeEntity)
         {
             foreach (var localPredictor in localAvatarPredictors.Values)
             {
-                if (localPredictor.EntityPredictor.AssignedAvatar.CompleteEntity == completeEntity)
+                if (localPredictor.EntityPredictor.AssignedAvatar.Id.Value == completeEntity.Id.Value)
                 {
                     return localPredictor.EntityPredictor;
                 }

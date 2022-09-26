@@ -59,7 +59,7 @@ public sealed class GameSync
         var ammoCountChanged = 0;
         var chainLightningCount = 0;
 
-        clientGame.GeneratedNotifyEntityCreation.OnSpawnAvatarLogic += avatar =>
+        clientGame.GeneratedNotifyEntityCreation.OnSpawnAvatarLogic += (avatarEntity, avatar) =>
         {
             log.Debug("Created an avatar! {Avatar}", avatar.Self);
             avatar.OnAmmoCountChanged += () =>

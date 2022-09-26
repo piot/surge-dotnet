@@ -91,8 +91,8 @@ namespace Piot.Surge.Generator
             const string className = "GeneratedHostEntitySpawner";
             Generator.AddClassDeclaration(sb, className);
             sb.Append($@"
-    private readonly IAuthoritativeEntityContainer container;
-    private readonly INotifyEntityCreation notifyWorld;
+            readonly IAuthoritativeEntityContainer container;
+    readonly INotifyEntityCreation notifyWorld;
 
     public {className}(IAuthoritativeEntityContainer container, INotifyEntityCreation notifyWorld)
     {{
@@ -110,8 +110,9 @@ namespace Piot.Surge.Generator
         {{
             Current = logic
         }};
-        notifyWorld.CreateGameEngineEntity(internalEntity);
-        return (container.SpawnEntity(internalEntity), internalEntity);
+        var entity = container.SpawnEntity(internalEntity);
+        notifyWorld.CreateGameEngineEntity(entity);
+        return (entity, internalEntity);
      }}
 ");
             }
@@ -126,7 +127,7 @@ namespace Piot.Surge.Generator
 
             foreach (var info in infos)
             {
-                sb.Append($"public Action<{EntityExternal(info)}>? OnSpawn{info.Type.Name};").Append(@"
+                sb.Append($"public Action<IEntity, {EntityExternal(info)}>? OnSpawn{info.Type.Name};").Append(@"
 ");
             }
 
@@ -141,16 +142,16 @@ namespace Piot.Surge.Generator
 
 
             sb.Append(@"
-        void INotifyEntityCreation.CreateGameEngineEntity(ICompleteEntity entity)
+        void INotifyEntityCreation.CreateGameEngineEntity(IEntity entity)
         {
-            switch (entity)
+            switch (entity.CompleteEntity)
             {
 ");
 
             foreach (var info in infos)
             {
                 sb.Append($"case {EntityGeneratedInternal(info)} internalEntity:").Append(@"
-").Append($"OnSpawn{info.Type.Name}?.Invoke(internalEntity.OutFacing);").Append(@"
+").Append($"OnSpawn{info.Type.Name}?.Invoke(entity, internalEntity.OutFacing);").Append(@"
     break;
 ");
             }
@@ -235,7 +236,7 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
 
             sb.Append($"public sealed class {actionsImplementationName} : {actionInterface}").Append(@"
 {
-    private readonly IActionsContainer actionsContainer;
+    readonly IActionsContainer actionsContainer;
 
 ").Append($"    public {actionsImplementationName}(IActionsContainer actionsContainer)").Append(@"
     {
@@ -668,7 +669,7 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
         public static void AddInternalMembers(StringBuilder sb)
         {
             sb.Append(@"
-private readonly ActionsContainer actionsContainer = new();
+        readonly ActionsContainer actionsContainer = new();
 
 
 ");
@@ -871,11 +872,13 @@ public sealed class ").Append(outFacingClassName).Append($@"
 {{
     public EntityRollMode RollMode => internalEntity.RollMode;
 
-    private readonly {EntityGeneratedInternal(logicInfo)} internalEntity;
+    readonly {EntityGeneratedInternal(logicInfo)} internalEntity;
     internal {outFacingClassName}({EntityGeneratedInternal(logicInfo)} internalEntity)
     {{
         this.internalEntity = internalEntity;
     }}
+
+    public {EntityGeneratedInternal(logicInfo)} Internal => internalEntity;
 
     public override string ToString()
     {{
@@ -1193,7 +1196,7 @@ public sealed class ").Append(EntityGeneratedInternal(logicInfo)).Append($" : {i
 
 public class GeneratedInputPackFetch : IInputPackFetch
 {{
-        private InputPackFetch<{fullGameInputTypeName}>? inputFetcher;
+        InputPackFetch<{fullGameInputTypeName}>? inputFetcher;
 
         public Func<LocalPlayerIndex, {fullGameInputTypeName}> GameSpecificInputFetch
         {{

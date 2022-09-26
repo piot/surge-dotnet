@@ -573,7 +573,7 @@ public sealed class UnitTest1
         Assert.Equal(0, clientSpawnedEntity.Self.fireCooldown);
         Notifier.Notify(updateEntitiesInFirst);
 
-        notifyWorld.OnSpawnAvatarLogic += _ => { log.Info("SPAWNED {Avatar}", clientSpawnedEntity); };
+        notifyWorld.OnSpawnAvatarLogic += (_, _) => { log.Info("SPAWNED {Avatar}", clientSpawnedEntity); };
 
         clientSpawnedEntity.OutFacing.OnAmmoCountChanged += () =>
         {
