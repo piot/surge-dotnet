@@ -24,7 +24,7 @@ namespace Piot.Surge.Pulse.Client
 
                 log.DebugLowLevel("Adding logical input {LogicalInput} for {LocalPredictor}", logicalInput,
                     localPlayerInput);
-                localPlayerInput.PredictedInputs.AddLogicalInput(logicalInput);
+                localPlayerInput.AvatarPredictor.EntityPredictor.PredictedInputs.AddLogicalInput(logicalInput);
             }
         }
     }

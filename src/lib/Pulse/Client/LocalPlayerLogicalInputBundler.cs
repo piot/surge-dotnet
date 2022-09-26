@@ -16,7 +16,7 @@ namespace Piot.Surge.Pulse.Client
             var index = 0;
             foreach (var localPlayerInput in localPlayerInputs)
             {
-                var inputForLocal = localPlayerInput.PredictedInputs.Collection;
+                var inputForLocal = localPlayerInput.AvatarPredictor.EntityPredictor.PredictedInputs.Collection;
                 inputForAllPlayers[index].inputs = inputForLocal;
                 index++;
             }

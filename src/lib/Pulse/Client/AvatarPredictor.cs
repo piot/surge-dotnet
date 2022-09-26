@@ -13,41 +13,38 @@ namespace Piot.Surge.Pulse.Client
 {
     public sealed class AvatarPredictor
     {
-        readonly IEntity assignedAvatar;
-        readonly OctetWriter cachedUndoWriter = new(1024);
         readonly ILog log;
-
-        readonly PredictionStateChecksumQueue predictionStateChecksumHistory = new();
-        readonly RollbackStack rollbackStack = new();
         readonly bool shouldPredictGoingForward = true;
         bool shouldPredict = true;
 
-        public AvatarPredictor(LocalPlayerInput localPlayerInput, IEntity assignedAvatar, ILog log)
+        public AvatarPredictor(uint debugIndex, IEntity assignedAvatar, ILog log)
         {
             this.log = log;
-            LocalPlayerInput = localPlayerInput;
-            this.assignedAvatar = assignedAvatar;
+            LocalPlayerIndex = debugIndex;
+            EntityPredictor = new(assignedAvatar, log.SubLog("EntityPredictor"));
         }
 
-        public LocalPlayerInput LocalPlayerInput { get; }
+        public uint LocalPlayerIndex { get; }
+
+        public EntityPredictor EntityPredictor { get; }
 
         public override string ToString()
         {
             return
-                $"[AvatarPredictor localPlayer:{LocalPlayerInput.LocalPlayerIndex} entity:{assignedAvatar.Id} predictedInputs:{LocalPlayerInput.PredictedInputs.Count}]";
+                $"[AvatarPredictor localPlayer:{LocalPlayerIndex} entity:{EntityPredictor.AssignedAvatar.Id} predictedInputs:{EntityPredictor.PredictedInputs.Count}]";
         }
 
         public bool WeDidPredictTheFutureCorrectly(TickId correctionForTickId, ReadOnlySpan<byte> logicPayload,
             ReadOnlySpan<byte> physicsCorrectionPayload)
         {
-            if (predictionStateChecksumHistory.Count == 0)
+            if (EntityPredictor.PredictionStateHistory.Count == 0)
             {
                 // We have nothing to compare with, so lets assume it was correct
                 return true;
             }
 
             var storedPredictionStateChecksum =
-                predictionStateChecksumHistory.DequeueForTickId(correctionForTickId);
+                EntityPredictor.PredictionStateHistory.DequeueForTickId(correctionForTickId);
 
             if (storedPredictionStateChecksum is null)
             {
@@ -63,10 +60,13 @@ namespace Piot.Surge.Pulse.Client
         /// </summary>
         public void ReadCorrection(TickId correctionForTickId, ReadOnlySpan<byte> physicsCorrectionPayload)
         {
-            LocalPlayerInput.PredictedInputs.DiscardUpToAndExcluding(correctionForTickId);
+            log.Info("got correction for {TickId}", correctionForTickId);
+            EntityPredictor.DiscardUpToAndExcluding(correctionForTickId);
 
+            var assignedAvatar = EntityPredictor.AssignedAvatar;
+            var rollbackStack = EntityPredictor.RollbackStack;
             log.DebugLowLevel("CorrectionsHeader {EntityId}, {LocalPlayerIndex} {Checksum}", assignedAvatar.Id,
-                LocalPlayerInput.LocalPlayerIndex, physicsCorrectionPayload.Length);
+                LocalPlayerIndex, physicsCorrectionPayload.Length);
 
             var logicNowReplicateWriter = new OctetWriter(1024);
             var changesThisSnapshot = assignedAvatar.CompleteEntity.Changes();
@@ -92,30 +92,12 @@ namespace Piot.Surge.Pulse.Client
 
             if (shouldPredict)
             {
-                cachedUndoWriter.Reset();
-                RollForth.Rollforth(assignedAvatar, LocalPlayerInput.PredictedInputs, rollbackStack,
-                    predictionStateChecksumHistory, cachedUndoWriter);
+                EntityPredictor.UndoWriter.Reset();
+                RollForth.Rollforth(assignedAvatar, EntityPredictor.PredictedInputs, rollbackStack,
+                    EntityPredictor.PredictionStateHistory, EntityPredictor.UndoWriter);
             }
 
             assignedAvatar.CompleteEntity.RollMode = EntityRollMode.Predict;
-        }
-
-
-        public void Predict(LogicalInput.LogicalInput logicalInput)
-        {
-            assignedAvatar.CompleteEntity.RollMode = EntityRollMode.Predict;
-
-            if (assignedAvatar.CompleteEntity is not IInputDeserialize inputDeserialize)
-            {
-                throw new(
-                    $"It is not possible to control Entity {assignedAvatar.Id}, it has no IDeserializeInput interface");
-            }
-
-            var inputReader = new OctetReader(logicalInput.payload.Span);
-            inputDeserialize.SetInput(inputReader);
-            cachedUndoWriter.Reset();
-            PredictionTickAndStateSave.PredictAndStateSave(assignedAvatar, logicalInput.appliedAtTickId, rollbackStack,
-                predictionStateChecksumHistory, PredictMode.Predicting, cachedUndoWriter);
         }
     }
 }

@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Piot.Surge.Tick;
@@ -72,6 +73,18 @@ namespace Piot.Surge.LogicalInput
             return tickId.tickId >= firstTickId && tickId.tickId <= lastTick;
         }
 
+        public LogicalInput GetInputFromTickId(TickId tickId)
+        {
+            foreach (var input in queue)
+            {
+                if (input.appliedAtTickId == tickId)
+                {
+                    return input;
+                }
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(tickId), "tick id is not found in queue");
+        }
 
         public void DiscardUpToAndExcluding(TickId tickId)
         {

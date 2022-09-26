@@ -4,22 +4,14 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
-using Piot.Surge.Tick;
 
 namespace Piot.Surge.Pulse.Client
 {
-    public sealed class RollbackStack : SnapshotPackStack
+    public struct CorrectionInfo
     {
-        public int Count => base.Count;
+        public bool wasCreatedNow;
+        public LocalPlayerInput localPlayerInput;
 
-        public void PushUndoPack(TickId tickId, ReadOnlySpan<byte> payload)
-        {
-            Push(tickId, payload);
-        }
-
-        public ReadOnlySpan<byte> GetUndoPackFromTickId(TickId tickId)
-        {
-            return GetPackFromTickId(tickId).payload.Span;
-        }
+        public Memory<byte> payload;
     }
 }

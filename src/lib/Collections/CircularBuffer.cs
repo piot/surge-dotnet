@@ -78,6 +78,42 @@ namespace Piot.Collections
             tail = (tail + 1) % Capacity;
         }
 
+        public void RemoveTail()
+        {
+            if (Count == 0)
+            {
+                throw new("can not remove head, buffer is empty");
+            }
+
+            tail = (tail + 1) % Capacity;
+            Count--;
+        }
+
+        public T PopTail()
+        {
+            if (Count == 0)
+            {
+                throw new("can not remove head, buffer is empty");
+            }
+
+            tail = (tail + 1) % Capacity;
+            Count--;
+
+            return buffer[tail];
+        }
+
+        public void Remove()
+        {
+            if (Count == 0)
+            {
+                throw new("can not remove head, buffer is empty");
+            }
+
+            head = (head + 1) % Capacity;
+            Count--;
+        }
+
+
         public T Peek()
         {
             if (Count == 0)
@@ -86,6 +122,16 @@ namespace Piot.Collections
             }
 
             return buffer[head];
+        }
+
+        public T PeekTail()
+        {
+            if (Count == 0)
+            {
+                throw new InvalidOperationException("Can not peek an empty buffer");
+            }
+
+            return buffer[tail];
         }
 
         public T Dequeue()

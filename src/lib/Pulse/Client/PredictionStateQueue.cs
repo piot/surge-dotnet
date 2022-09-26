@@ -4,7 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
-using System.Collections.Generic;
+using System.Linq;
+using Piot.Collections;
 using Piot.Surge.Tick;
 
 namespace Piot.Surge.Pulse.Client
@@ -52,13 +53,14 @@ namespace Piot.Surge.Pulse.Client
 
     public sealed class PredictionStateChecksumQueue
     {
-        readonly Queue<PredictionStateAllChecksums> queue = new();
+        readonly CircularBuffer<PredictionStateAllChecksums> queue = new(32);
 
         bool isInitialized;
 
         TickId lastInsertedTickId;
 
         public TickId FirstTickId => queue.Peek().tickId;
+        public TickId LastTickId => queue.Last().tickId;
 
         public int Count => queue.Count;
 

@@ -4,7 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
-using System.Collections.Generic;
+using System.Linq;
+using Piot.Collections;
 using Piot.Surge.Tick;
 
 namespace Piot.Surge.Pulse.Client
@@ -17,7 +18,7 @@ namespace Piot.Surge.Pulse.Client
 
     public class SnapshotPackStack
     {
-        readonly Stack<SnapshotPack> stack = new();
+        readonly FixedStack<SnapshotPack> stack = new(64);
 
         bool isInitialized;
         TickId lastInsertedTickId;
@@ -42,9 +43,40 @@ namespace Piot.Surge.Pulse.Client
             return stack.Pop();
         }
 
+        public SnapshotPack GetPackFromTickId(TickId tickId)
+        {
+            foreach (var pack in stack)
+            {
+                if (pack.tickId == tickId)
+                {
+                    return pack;
+                }
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(tickId), "is not in stack");
+        }
+
+        public void DiscardUpToAndExcluding(TickId correctionForTickId)
+        {
+            while (stack.Count > 0)
+            {
+                if (stack.PeekBottom().tickId > correctionForTickId)
+                {
+                    return;
+                }
+
+                stack.RemoveBottom();
+            }
+        }
+
         public TickId PeekTickId()
         {
             return stack.Peek().tickId;
+        }
+
+        public TickId EndTickId()
+        {
+            return stack.Last().tickId;
         }
 
         public void Clear()

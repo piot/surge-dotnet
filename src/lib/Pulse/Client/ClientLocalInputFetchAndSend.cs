@@ -48,6 +48,7 @@ namespace Piot.Surge.Pulse.Client
                 log.SubLog("FetchAndStoreInputTick"));
         }
 
+
         public TickId LastSeenSnapshotTickId
         {
             set => bundleAndSendOutInput.LastSeenSnapshotTickId = value;
@@ -79,18 +80,20 @@ namespace Piot.Surge.Pulse.Client
             if (LocalPlayerInputs.Values.Count > 0)
             {
                 var firstLocalPlayer = LocalPlayerInputs.Values.First();
-                if (firstLocalPlayer.PredictedInputs.Count > 0)
+                if (firstLocalPlayer.AvatarPredictor.EntityPredictor.PredictedInputs.Count > 0)
                 {
                     log.DebugLowLevel(
                         "we have corrections for {TickId}, clear old predicted inputs. Input in buffer {FirstTick} {LastTickId}",
-                        correctionsForTickId, firstLocalPlayer.PredictedInputs.Peek().appliedAtTickId,
-                        firstLocalPlayer.PredictedInputs.Last.appliedAtTickId);
+                        correctionsForTickId,
+                        firstLocalPlayer.AvatarPredictor.EntityPredictor.PredictedInputs.Peek().appliedAtTickId,
+                        firstLocalPlayer.AvatarPredictor.EntityPredictor.PredictedInputs.Last.appliedAtTickId);
                 }
             }
 
             foreach (var localPlayerInput in LocalPlayerInputs.Values)
             {
-                localPlayerInput.PredictedInputs.DiscardUpToAndExcluding(correctionsForTickId);
+                localPlayerInput.AvatarPredictor.EntityPredictor.PredictedInputs.DiscardUpToAndExcluding(
+                    correctionsForTickId);
             }
 
             var corrections = ReadCorrectionsAndAssignLocalPlayerInput(physicsCorrectionPayload);
@@ -127,7 +130,7 @@ namespace Piot.Surge.Pulse.Client
                     log.Debug("assigned an avatar to {LocalPlayer} {EntityId}", localPlayerIndex, targetEntityId);
                     var targetEntity = world.FetchEntity(targetEntityId);
 
-                    localPlayerInput = new(localPlayerIndex, targetEntity);
+                    localPlayerInput = new(localPlayerIndex, targetEntity, log);
                     LocalPlayerInputs[localPlayerIndex.Value] = localPlayerInput;
                     wasCreatedNow = true;
                 }
@@ -171,7 +174,7 @@ namespace Piot.Surge.Pulse.Client
                 var localPlayerInputsArray = LocalPlayerInputs.Values.ToArray();
                 foreach (var localPlayerInput in localPlayerInputsArray)
                 {
-                    localPlayerInput.PredictedInputs.Reset();
+                    localPlayerInput.AvatarPredictor.EntityPredictor.PredictedInputs.Reset();
                 }
             }
 
@@ -188,9 +191,9 @@ namespace Piot.Surge.Pulse.Client
             var localPlayerInputsArray = LocalPlayerInputs.Values.ToArray();
             foreach (var localPlayerInput in localPlayerInputsArray)
             {
-                if (localPlayerInput.PredictedInputs.Count > maxInputCount)
+                if (localPlayerInput.AvatarPredictor.EntityPredictor.PredictedInputs.Count > maxInputCount)
                 {
-                    maxInputCount = localPlayerInput.PredictedInputs.Count;
+                    maxInputCount = localPlayerInput.AvatarPredictor.EntityPredictor.PredictedInputs.Count;
                 }
             }
 
@@ -218,7 +221,7 @@ namespace Piot.Surge.Pulse.Client
             if (localPlayerInputsArray.Length > 0)
             {
                 log.DebugLowLevel("Have {InputCount} in queue for first player",
-                    localPlayerInputsArray[0].PredictedInputs.Collection.Length);
+                    localPlayerInputsArray[0].AvatarPredictor.EntityPredictor.PredictedInputs.Collection.Length);
             }
             else
             {
@@ -227,7 +230,7 @@ namespace Piot.Surge.Pulse.Client
 
             foreach (var localPlayerInput in localPlayerInputsArray)
             {
-                if (localPlayerInput.PredictedInputs.Count > 20)
+                if (localPlayerInput.AvatarPredictor.EntityPredictor.PredictedInputs.Count > 20)
                 {
                     log.Notice("Input queue is full, so we discard input");
                     return;
@@ -245,14 +248,6 @@ namespace Piot.Surge.Pulse.Client
             }
 
             inputTickId = inputTickId.Next;
-        }
-
-        public struct CorrectionInfo
-        {
-            public bool wasCreatedNow;
-            public LocalPlayerInput localPlayerInput;
-
-            public Memory<byte> payload;
         }
     }
 }

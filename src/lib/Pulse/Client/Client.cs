@@ -9,6 +9,7 @@ using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.Surge.Compress;
 using Piot.Surge.DeltaSnapshot.Pack;
+using Piot.Surge.Entities;
 using Piot.Surge.Event;
 using Piot.Surge.LogicalInput;
 using Piot.Surge.Tick;
@@ -21,6 +22,7 @@ namespace Piot.Surge.Pulse.Client
 {
     public sealed class Client : IOctetSerializable
     {
+        readonly ClientPredictor clientPredictor;
         readonly ClientDatagramReceiver datagramReceiver;
         readonly ClientDeltaSnapshotPlayback deltaSnapshotPlayback;
         readonly ClientLocalInputFetchAndSend localInputFetchAndSend;
@@ -40,7 +42,7 @@ namespace Piot.Surge.Pulse.Client
 
             transportWithStats = new(assignedTransport, now);
             transportClient = new TransportClient(transportWithStats);
-            var clientPredictor = new ClientPredictor(log.SubLog("ClientPredictor"));
+            clientPredictor = new(log.SubLog("ClientPredictor"));
             const bool usePrediction = true;
             localInputFetchAndSend = new(fetch, clientPredictor, usePrediction,
                 transportClient, now,
@@ -122,6 +124,11 @@ namespace Piot.Surge.Pulse.Client
             datagramReceiver.Serialize(writer);
             OctetMarker.WriteMarker(writer, 0xaf);
             deltaSnapshotPlayback.Serialize(writer);
+        }
+
+        public EntityPredictor? FindPredictorFor(ICompleteEntity completeEntity)
+        {
+            return clientPredictor.FindPredictorFor(completeEntity);
         }
 
         void StatsOutput()

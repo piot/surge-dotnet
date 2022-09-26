@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using Piot.Clog;
+using Piot.Surge.Entities;
 using Piot.Surge.LocalPlayer;
 using Piot.Surge.Tick;
 
@@ -23,10 +24,24 @@ namespace Piot.Surge.Pulse.Client
 
         public AvatarPredictor CreateAvatarPredictor(LocalPlayerInput localPlayerInput)
         {
-            var avatarPredictor = new AvatarPredictor(localPlayerInput, localPlayerInput.AssignedEntity, log);
+            var avatarPredictor = new AvatarPredictor(localPlayerInput.LocalPlayerIndex.Value,
+                localPlayerInput.AssignedEntity, log);
             localAvatarPredictors[localPlayerInput.LocalPlayerIndex.Value] = avatarPredictor;
 
             return avatarPredictor;
+        }
+
+        public EntityPredictor? FindPredictorFor(ICompleteEntity completeEntity)
+        {
+            foreach (var localPredictor in localAvatarPredictors.Values)
+            {
+                if (localPredictor.EntityPredictor.AssignedAvatar.CompleteEntity == completeEntity)
+                {
+                    return localPredictor.EntityPredictor;
+                }
+            }
+
+            return null;
         }
 
         public void Predict(LocalPlayerInput[] localPlayerInputs)
@@ -34,7 +49,8 @@ namespace Piot.Surge.Pulse.Client
             foreach (var localPlayerInput in localPlayerInputs)
             {
                 var localAvatarPredictor = localAvatarPredictors[localPlayerInput.LocalPlayerIndex.Value];
-                localAvatarPredictor.Predict(localPlayerInput.PredictedInputs.Last);
+                localAvatarPredictor.EntityPredictor.Predict(localPlayerInput.AvatarPredictor.EntityPredictor
+                    .PredictedInputs.Last);
             }
         }
 

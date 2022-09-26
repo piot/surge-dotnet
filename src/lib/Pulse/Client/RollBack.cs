@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using System;
 using Piot.Flood;
 using Piot.Surge.Entities;
 using Piot.Surge.Tick;
@@ -25,11 +26,7 @@ namespace Piot.Surge.Pulse.Client
             {
                 var undoPack = rollbackStack.Pop();
 
-                var reader = new OctetReader(undoPack.payload.Span);
-
-                targetEntity.CompleteEntity.ClearChanges();
-                var changes = targetEntity.CompleteEntity.Deserialize(reader);
-                targetEntity.CompleteEntity.FireChanges(changes);
+                RollBack(targetEntity, undoPack.payload.Span);
 
                 if (undoPack.tickId.tickId == tickId.tickId)
                 {
@@ -38,6 +35,15 @@ namespace Piot.Surge.Pulse.Client
             }
 
             rollbackStack.Clear();
+        }
+
+        public static void RollBack(IEntity targetEntity, ReadOnlySpan<byte> undoPack)
+        {
+            var reader = new OctetReader(undoPack);
+
+            targetEntity.CompleteEntity.ClearChanges();
+            var changes = targetEntity.CompleteEntity.Deserialize(reader);
+            targetEntity.CompleteEntity.FireChanges(changes);
         }
     }
 }
