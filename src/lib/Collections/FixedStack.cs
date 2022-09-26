@@ -46,7 +46,7 @@ namespace Piot.Collections
 
         public T PeekBottom()
         {
-            return entries.PeekTail();
+            return entries.Peek();
         }
 
         public void RemoveBottom()

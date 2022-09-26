@@ -18,10 +18,9 @@ namespace Piot.Surge.Pulse.Client
 
     public class SnapshotPackStack
     {
-        readonly FixedStack<SnapshotPack> stack = new(64);
-
         bool isInitialized;
         TickId lastInsertedTickId;
+        protected FixedStack<SnapshotPack> stack = new(64);
 
         protected int Count => stack.Count;
 
@@ -31,6 +30,7 @@ namespace Piot.Surge.Pulse.Client
             {
                 throw new($"must have stack without gaps last:{lastInsertedTickId} want to add: {tickId}");
             }
+
 
             stack.Push(new() { tickId = tickId, payload = payload.ToArray() });
             lastInsertedTickId = tickId;
@@ -60,7 +60,7 @@ namespace Piot.Surge.Pulse.Client
         {
             while (stack.Count > 0)
             {
-                if (stack.PeekBottom().tickId > correctionForTickId)
+                if (stack.PeekBottom().tickId >= correctionForTickId)
                 {
                     return;
                 }

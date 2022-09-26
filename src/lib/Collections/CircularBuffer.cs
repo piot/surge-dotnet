@@ -85,7 +85,7 @@ namespace Piot.Collections
                 throw new("can not remove head, buffer is empty");
             }
 
-            tail = (tail + 1) % Capacity;
+            tail = (tail - 1) % Capacity;
             Count--;
         }
 
@@ -96,7 +96,7 @@ namespace Piot.Collections
                 throw new("can not remove head, buffer is empty");
             }
 
-            tail = (tail + 1) % Capacity;
+            tail = (tail - 1) % Capacity;
             Count--;
 
             return buffer[tail];
@@ -131,7 +131,8 @@ namespace Piot.Collections
                 throw new InvalidOperationException("Can not peek an empty buffer");
             }
 
-            return buffer[tail];
+            var index = (tail - 1) % Capacity;
+            return buffer[index];
         }
 
         public T Dequeue()

@@ -14,12 +14,32 @@ namespace Piot.Surge.Pulse.Client
 
         public void PushUndoPack(TickId tickId, ReadOnlySpan<byte> payload)
         {
+            if (tickId.tickId == 0)
+            {
+                throw new("must be wrong");
+            }
+
             Push(tickId, payload);
         }
 
         public ReadOnlySpan<byte> GetUndoPackFromTickId(TickId tickId)
         {
             return GetPackFromTickId(tickId).payload.Span;
+        }
+
+        public override string ToString()
+        {
+            var s = "[RollbackStack ";
+
+            if (stack.Count > 0)
+            {
+                s += $" top: {PeekTickId()}";
+                s += $" bottom: {stack.PeekBottom().tickId}";
+            }
+
+            s += "]";
+
+            return s;
         }
     }
 }
