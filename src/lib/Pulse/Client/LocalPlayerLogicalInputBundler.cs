@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using System.Collections.Generic;
 using Piot.Surge.LogicalInput;
 
 namespace Piot.Surge.Pulse.Client
@@ -16,8 +17,19 @@ namespace Piot.Surge.Pulse.Client
             var index = 0;
             foreach (var localPlayerInput in localPlayerInputs)
             {
-                var inputForLocal = localPlayerInput.AvatarPredictor.EntityPredictor.PredictedInputs.Collection;
-                inputForAllPlayers[index].inputs = inputForLocal;
+                var allItems = localPlayerInput.AvatarPredictor.EntityPredictor.PredictCollection.Items;
+                var inputsForLocal = new List<LogicalInput.LogicalInput>();
+                foreach (var item in allItems)
+                {
+                    if (item.tickId.tickId == 0)
+                    {
+                        throw new("not good");
+                    }
+
+                    inputsForLocal.Add(new(localPlayerInput.LocalPlayerIndex, item.tickId, item.inputPack.Span));
+                }
+
+                inputForAllPlayers[index].inputs = inputsForLocal.ToArray();
                 index++;
             }
 

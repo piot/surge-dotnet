@@ -22,11 +22,10 @@ namespace Piot.Surge.Pulse.Client
             this.log = log;
         }
 
-        public AvatarPredictor CreateAvatarPredictor(LocalPlayerInput localPlayerInput)
+        public AvatarPredictor CreateAvatarPredictor(LocalPlayerIndex localPlayerIndex, IEntity assignedEntity)
         {
-            var avatarPredictor = new AvatarPredictor(localPlayerInput.LocalPlayerIndex.Value,
-                localPlayerInput.AssignedEntity, log);
-            localAvatarPredictors[localPlayerInput.LocalPlayerIndex.Value] = avatarPredictor;
+            var avatarPredictor = new AvatarPredictor(localPlayerIndex.Value, assignedEntity, log);
+            localAvatarPredictors[localPlayerIndex.Value] = avatarPredictor;
 
             return avatarPredictor;
         }
@@ -44,13 +43,15 @@ namespace Piot.Surge.Pulse.Client
             return null;
         }
 
-        public void Predict(LocalPlayerInput[] localPlayerInputs)
+        public void Predict(LocalPlayerInput[] localPlayerInputs, LogicalInput.LogicalInput[] inputThisFrame,
+            bool doActualPrediction)
         {
+            var index = 0;
             foreach (var localPlayerInput in localPlayerInputs)
             {
                 var localAvatarPredictor = localAvatarPredictors[localPlayerInput.LocalPlayerIndex.Value];
-                localAvatarPredictor.EntityPredictor.Predict(localPlayerInput.AvatarPredictor.EntityPredictor
-                    .PredictedInputs.Last);
+                localAvatarPredictor.EntityPredictor.AddInput(inputThisFrame[index], doActualPrediction);
+                index++;
             }
         }
 

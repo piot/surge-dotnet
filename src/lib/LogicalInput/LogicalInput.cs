@@ -51,6 +51,13 @@ namespace Piot.Surge.LogicalInput
         }
     }
 
+    public static class NullLogicalInput
+    {
+        public static LogicalInput CreateInput(TickId tickId)
+        {
+            return new(new(0), tickId, ReadOnlySpan<byte>.Empty);
+        }
+    }
 
     /// <summary>
     ///     Serialized Game specific input stored in the <see cref="LogicalInput.payload" />.

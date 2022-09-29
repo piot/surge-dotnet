@@ -51,6 +51,7 @@ namespace Piot.Surge.LogicalInput
                 Reset();
             }
 
+
             queue.Enqueue(logicalInput);
             waitingForTickId = new(logicalInput.appliedAtTickId.tickId + 1);
         }

@@ -197,7 +197,7 @@ public sealed class UnitTest1
 
         var writer = new OctetWriter(64);
         someAvatar.SerializeAll(writer);
-        Assert.Equal(28, writer.Octets.Length);
+        Assert.Equal(29, writer.Octets.Length);
 
         var readAvatar = new AvatarLogicEntityInternal();
 
@@ -218,7 +218,7 @@ public sealed class UnitTest1
         {
             var writer = new OctetWriter(64);
             someAvatar.SerializeAll(writer);
-            Assert.Equal(28, writer.Octets.Length);
+            Assert.Equal(29, writer.Octets.Length);
 
             var reader = new OctetReader(writer.Octets);
 

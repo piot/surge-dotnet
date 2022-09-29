@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
+using System.Reflection;
 
 namespace Piot.Surge.Generator
 {
@@ -59,6 +60,11 @@ namespace Piot.Surge.Generator
                 return PrimitiveDeSerializer("UInt64");
             }
 
+            if (type.IsEnum)
+            {
+                return PrimitiveDeSerializerEnum(type);
+            }
+
             return DeSerializeMethodForValueTypes(type);
         }
 
@@ -90,12 +96,74 @@ namespace Piot.Surge.Generator
                 return PrimitiveSerializer("UInt64", variableName);
             }
 
+            if (type.IsEnum)
+            {
+                return PrimitiveSerializerEnum(type, variableName);
+            }
+
             return SerializeMethodForValueTypes(type, variableName);
         }
 
         public static string PrimitiveBitSerializer(uint bitCount, string variableName)
         {
             return $"writer.WriteBits({variableName}, {bitCount})";
+        }
+
+        public static double Log2(double f)
+        {
+            return Math.Log(f) / Math.Log(2);
+        }
+
+        public static int GetBitsForEnum(Type enumType)
+        {
+            var values = Enum.GetValues(enumType);
+            var maxValue = 0;
+            var minValue = 256;
+            foreach (var fieldInfo in enumType.GetFields(BindingFlags.Public | BindingFlags.Static))
+            {
+                var enumValue = (int)fieldInfo.GetRawConstantValue()!;
+
+                if (enumValue > maxValue)
+                {
+                    maxValue = enumValue;
+                }
+
+                if (enumValue < minValue)
+                {
+                    minValue = enumValue;
+                    if (minValue < 0)
+                    {
+                        throw new("can not have negative numbers in enum");
+                    }
+                }
+            }
+
+            var optimalBits = (int)(Log2(values.Length) + 1);
+            var actualBits = (int)(Log2(maxValue) + 1);
+
+            if (actualBits > optimalBits + 2)
+            {
+                throw new($"too high values in enum {enumType.Name}");
+            }
+
+            if (actualBits > 8)
+            {
+                throw new($"too high values in enum {enumType.Name}");
+            }
+
+            return actualBits;
+        }
+
+        public static string PrimitiveBitSerializerEnum(Type enumType, string variableName)
+        {
+            var bitCount = GetBitsForEnum(enumType);
+            return $"writer.WriteBits((uint){variableName}, {bitCount})";
+        }
+
+        public static string PrimitiveSerializerEnum(Type enumType, string variableName)
+        {
+            var bitCount = GetBitsForEnum(enumType);
+            return $"writer.WriteUInt8((byte){variableName})";
         }
 
         public static string PrimitiveBitDeSerializer(Type type, bool includeCast)
@@ -128,6 +196,27 @@ namespace Piot.Surge.Generator
             return $"{castString}reader.ReadBits({bitCount})";
         }
 
+        public static string PrimitiveBitDeSerializerEnum(Type enumType, bool includeCast)
+        {
+            var bitCount = GetBitsForEnum(enumType);
+
+            var castString = "";
+            if (includeCast)
+            {
+                castString = $"({Generator.FullName(enumType)})";
+            }
+
+            return $"{castString} reader.ReadBits({bitCount})";
+        }
+
+        public static string PrimitiveDeSerializerEnum(Type enumType)
+        {
+            var bitCount = GetBitsForEnum(enumType);
+            var castString = Generator.FullName(enumType);
+            return $"({castString}) reader.ReadUInt8()";
+        }
+
+
         public static string BitSerializeMethod(Type type, string variableName)
         {
             if (type == typeof(bool))
@@ -153,6 +242,11 @@ namespace Piot.Surge.Generator
             if (type == typeof(ulong))
             {
                 return PrimitiveBitSerializer(64, variableName);
+            }
+
+            if (type.IsEnum)
+            {
+                return PrimitiveBitSerializerEnum(type, variableName);
             }
 
             return SerializeMethodForValueTypes(type, variableName);
@@ -184,6 +278,12 @@ namespace Piot.Surge.Generator
             {
                 return PrimitiveBitDeSerializer(type, includeCast);
             }
+
+            if (type.IsEnum)
+            {
+                return PrimitiveBitDeSerializerEnum(type, includeCast);
+            }
+
 
             return DeSerializeMethodForValueTypes(type);
         }

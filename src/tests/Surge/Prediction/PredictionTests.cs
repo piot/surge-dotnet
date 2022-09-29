@@ -7,6 +7,7 @@ using Piot.Clog;
 using Piot.Flood;
 using Piot.Surge.Entities;
 using Piot.Surge.Internal.Generated;
+using Piot.Surge.LogicalInput;
 using Piot.Surge.Pulse.Client;
 using Piot.Surge.Tick;
 using Piot.Surge.Types;
@@ -46,12 +47,8 @@ public sealed class PredictionTests
 
         var spawnedEntity = new Entity(new(99), internalEntity);
 
-        var rollbackQueue = new RollbackStack();
-        var now = new TickId(23);
-
         var undoWriter = new OctetWriter(1024);
-        PredictionTicker.Predict(spawnedEntity, now, rollbackQueue, PredictMode.Predicting, undoWriter);
-        Assert.Equal(1, rollbackQueue.Count);
+        PredictionTicker.Predict(spawnedEntity, PredictMode.Predicting, undoWriter);
         Assert.Equal(1, positionChangedCount);
     }
 
@@ -93,7 +90,7 @@ public sealed class PredictionTests
         };
 
         var spawnedEntity = new Entity(new(99), internalEntity);
-        var rollbackStack = new RollbackStack();
+        var rollbackStack = new PredictCollection();
         var now = new TickId(23);
 
         var positionBefore = internalEntity.Self.position;
@@ -114,7 +111,9 @@ public sealed class PredictionTests
             }
 
             var undoWriterScratch = new OctetWriter(1024);
-            PredictionTicker.Predict(spawnedEntity, now, rollbackStack, PredictMode.Predicting, undoWriterScratch);
+            var nullInput = NullLogicalInput.CreateInput(now);
+            PredictAndSaver.PredictAndSave(spawnedEntity, rollbackStack, nullInput, undoWriterScratch,
+                PredictMode.Predicting, true);
             now = now.Next;
             log.Debug("Prediction at {Now} {Position} {Ammo}", now, internalEntity.Self.position,
                 internalEntity.Self.ammoCount);
@@ -130,7 +129,7 @@ public sealed class PredictionTests
         const int expectedRollbackCount = 7;
         var rollbackTargetTickId = new TickId(26);
         log.Debug("rolling back to {TickId}", rollbackTargetTickId);
-        RollBacker.Rollback(spawnedEntity, rollbackStack, rollbackTargetTickId);
+        RollBacker.Rollback(spawnedEntity, rollbackStack, rollbackTargetTickId, log);
         log.Debug("Rolled back to at {TargetTickId} {Position} {Ammo}", rollbackTargetTickId,
             internalEntity.Self.position, internalEntity.Self.ammoCount);
         Assert.Equal(positionAt26, internalEntity.Self.position);

@@ -30,14 +30,17 @@ namespace Piot.Surge.Tick
 
         public TickId Next => new(tickId + 1);
 
-        public TickId Previous()
+        public TickId Previous
         {
-            if (tickId == 0)
+            get
             {
-                throw new("can not go back from zero");
-            }
+                if (tickId == 0)
+                {
+                    throw new("can not go back from zero");
+                }
 
-            return new(tickId - 1);
+                return new(tickId - 1);
+            }
         }
 
         public static bool operator !=(TickId a, TickId b)

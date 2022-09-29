@@ -8,6 +8,13 @@ using Piot.Surge.Types;
 
 namespace Tests.ExampleGame;
 
+public enum TestEnum
+{
+    First = 3,
+    Second = 4,
+    Third
+}
+
 [Logic]
 public struct AvatarLogic : ILogic
 {
@@ -24,6 +31,7 @@ public struct AvatarLogic : ILogic
     public ushort castCooldown;
 
     public ushort jumpTime;
+    public TestEnum testEnum;
 
 
     public void SetInput(GameInput input)

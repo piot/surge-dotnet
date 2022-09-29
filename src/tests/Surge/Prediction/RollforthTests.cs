@@ -66,7 +66,7 @@ public sealed class RollforthTests
         };
 
         var spawnedEntity = new Entity(new(99), internalEntity);
-        var rollbackStack = new RollbackStack();
+        var rollbackStack = new PredictCollection();
         var predictedInputs = new LogicalInputQueue();
         var mockInputFetch = new MockInputFetch(log.SubLog("MockInput"));
 
@@ -99,7 +99,9 @@ public sealed class RollforthTests
             predictedInputs.AddLogicalInput(logicalInputPack);
 
             var undoWriter = new OctetWriter(1024);
-            PredictionTicker.Predict(spawnedEntity, now, rollbackStack, PredictMode.Predicting, undoWriter);
+            var input = new LogicalInput(new(0), now, inputPack);
+            PredictAndSaver.PredictAndSave(spawnedEntity, rollbackStack, input, undoWriter, PredictMode.Predicting,
+                true);
             now = now.Next;
             log.Debug("Prediction at {Now} {Position} {Ammo}", now, internalEntity.Self.position,
                 internalEntity.Self.ammoCount);
@@ -115,7 +117,7 @@ public sealed class RollforthTests
         const int expectedRollbackCount = 7;
         var rollbackTargetTickId = new TickId(26);
         log.Debug("rolling back to {TickId}", rollbackTargetTickId);
-        RollBacker.Rollback(spawnedEntity, rollbackStack, rollbackTargetTickId);
+        RollBacker.Rollback(spawnedEntity, rollbackStack, rollbackTargetTickId, log);
         log.Debug("Rolled back to at {TargetTickId} {Position} {Ammo}", rollbackTargetTickId,
             internalEntity.Self.position, internalEntity.Self.ammoCount);
         Assert.Equal(positionAt26, internalEntity.Self.position);
@@ -127,14 +129,12 @@ public sealed class RollforthTests
 
         expectedRollMode = EntityRollMode.Rollforth;
         const int expectedRollforthCount = 7;
-        var predictionStateHistory = new PredictionStateChecksumQueue();
         Assert.Equal(20, internalEntity.Self.ammoCount);
         var undoWriterScratch = new OctetWriter(1024);
-        RollForth.Rollforth(spawnedEntity, predictedInputs, rollbackStack, predictionStateHistory, undoWriterScratch);
+        RollForth.Rollforth(spawnedEntity, rollbackStack, undoWriterScratch, log);
         Assert.Equal(positionAfter, internalEntity.Self.position);
         Assert.Equal(19, internalEntity.Self.ammoCount);
-        Assert.Equal(expectedRollforthCount, predictionStateHistory.Count);
-        Assert.Equal(27u, predictionStateHistory.FirstTickId.tickId);
+        Assert.Equal(24u, rollbackStack.FirstTickId.tickId);
         Assert.Equal(expectedPredictCount + expectedRollbackCount + expectedRollforthCount, positionChangedCount);
     }
 }

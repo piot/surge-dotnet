@@ -43,7 +43,8 @@ namespace Piot.Surge.LogicalInput.Serialization
                 {
                     if (logicalInput.appliedAtTickId.tickId != expectedTickIdValue)
                     {
-                        throw new("logical input in wrong order in collection");
+                        throw new(
+                            $"logical input in wrong order in collection. Expected {expectedTickIdValue} but received {logicalInput.appliedAtTickId.tickId}");
                     }
 
                     writer.WriteUInt8((byte)logicalInput.payload.Length);

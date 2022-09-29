@@ -15,18 +15,20 @@ namespace Piot.Surge.Pulse.Client
         {
             if (targetTickId < entityPredictor.FirstTickId)
             {
-                log.Debug("target tickId is too far away {TargetTickId} {RollbackStackId}", targetTickId, entityPredictor.FirstTickId);
+                log.Debug("target tickId is too far away {TargetTickId} {RollbackStackId}", targetTickId,
+                    entityPredictor.FirstTickId);
                 return;
             }
 
-            if (targetTickId > entityPredictor.EndTickId)
+            if (targetTickId > entityPredictor.LastTickId)
             {
                 // We need to predict more
-                log.Debug("target tickId is too far away {TargetTickId} {RollbackStackEndId}", targetTickId, entityPredictor.EndTickId);
+                log.Debug("target tickId is too far away {TargetTickId} {RollbackStackEndId}", targetTickId,
+                    entityPredictor.LastTickId);
                 return;
             }
 
-            if (targetTickId > entityPredictor.RollbackStack.PeekTickId())
+            if (targetTickId > entityPredictor.PredictCollection.TickId)
             {
                 Predict(entityPredictor, targetTickId);
             }
@@ -38,45 +40,58 @@ namespace Piot.Surge.Pulse.Client
 
         public static void Predict(EntityPredictor entityPredictor, TickId targetTickId)
         {
-            if (targetTickId > entityPredictor.EndTickId)
+            if (targetTickId > entityPredictor.LastTickId)
             {
                 return;
             }
-            
+
             if (targetTickId <= entityPredictor.TickId)
             {
-                throw new ("can not predict because target is less than current, we should rollback instead");
+                throw new("can not predict because target is less than current, we should rollback instead");
             }
 
-            var currentTickId = entityPredictor.RollbackStack.PeekTickId();
+            var currentTickId = entityPredictor.PredictCollection.TickId;
 
             while (currentTickId < targetTickId)
             {
-                var input = entityPredictor.PredictedInputs.GetInputFromTickId(currentTickId);
-                entityPredictor.Predict(input);
+                var item = entityPredictor.PredictCollection.FindFromTickId(currentTickId);
+                if (item is null)
+                {
+                    throw new("should have an item");
+                    return;
+                }
+
+                var itemValue = item.Value;
+                var temporaryInput = new LogicalInput.LogicalInput(new(0), itemValue.tickId, itemValue.inputPack.Span);
+                entityPredictor.AddInput(temporaryInput, true);
                 currentTickId = currentTickId.Next;
             }
         }
 
         public static void Rollback(EntityPredictor entityPredictor, TickId targetTickId)
         {
-            if (targetTickId > entityPredictor.EndTickId)
+            if (targetTickId > entityPredictor.LastTickId)
             {
                 return;
             }
 
             if (targetTickId >= entityPredictor.TickId)
             {
-                throw new Exception("can not go back in rollback because it is not less than current, we should predict instead");
+                throw new("can not go back in rollback because it is not less than current, we should predict instead");
             }
 
-            var currentTickId = entityPredictor.RollbackStack.PeekTickId();
+            var currentTickId = entityPredictor.PredictCollection.TickId;
 
             while (currentTickId < targetTickId)
             {
-                var undoPack = entityPredictor.RollbackStack.GetUndoPackFromTickId(currentTickId);
-                RollBacker.RollBack(entityPredictor.AssignedAvatar, undoPack);
-                currentTickId = currentTickId.Previous();
+                var undoPack = entityPredictor.PredictCollection.FindFromTickId(currentTickId);
+                if (undoPack is null)
+                {
+                    throw new InvalidOperationException($"could not find undo pack for {currentTickId}");
+                }
+
+                RollBacker.RollBack(entityPredictor.AssignedAvatar, undoPack.Value.undoPack.Span);
+                currentTickId = currentTickId.Previous;
             }
         }
     }

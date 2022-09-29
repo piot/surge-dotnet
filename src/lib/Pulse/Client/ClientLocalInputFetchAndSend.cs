@@ -10,6 +10,7 @@ using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.Surge.Corrections.Serialization;
+using Piot.Surge.LocalPlayer;
 using Piot.Surge.LogicalInput;
 using Piot.Surge.Tick;
 using Piot.Surge.TimeTick;
@@ -80,19 +81,19 @@ namespace Piot.Surge.Pulse.Client
             if (LocalPlayerInputs.Values.Count > 0)
             {
                 var firstLocalPlayer = LocalPlayerInputs.Values.First();
-                if (firstLocalPlayer.AvatarPredictor.EntityPredictor.PredictedInputs.Count > 0)
+                if (firstLocalPlayer.AvatarPredictor.EntityPredictor.Count > 0)
                 {
                     log.DebugLowLevel(
                         "we have corrections for {TickId}, clear old predicted inputs. Input in buffer {FirstTick} {LastTickId}",
                         correctionsForTickId,
-                        firstLocalPlayer.AvatarPredictor.EntityPredictor.PredictedInputs.Peek().appliedAtTickId,
-                        firstLocalPlayer.AvatarPredictor.EntityPredictor.PredictedInputs.Last.appliedAtTickId);
+                        firstLocalPlayer.AvatarPredictor.EntityPredictor.FirstTickId,
+                        firstLocalPlayer.AvatarPredictor.EntityPredictor.LastTickId);
                 }
             }
 
             foreach (var localPlayerInput in LocalPlayerInputs.Values)
             {
-                localPlayerInput.AvatarPredictor.EntityPredictor.PredictedInputs.DiscardUpToAndExcluding(
+                localPlayerInput.AvatarPredictor.EntityPredictor.DiscardUpToAndExcluding(
                     correctionsForTickId);
             }
 
@@ -100,11 +101,6 @@ namespace Piot.Surge.Pulse.Client
 
             foreach (var correction in corrections)
             {
-                if (correction.wasCreatedNow)
-                {
-                    notifyPredictor.CreateAvatarPredictor(correction.localPlayerInput);
-                }
-
                 if (UsePrediction)
                 {
                     notifyPredictor.ReadCorrection(correction.localPlayerInput.LocalPlayerIndex, correctionsForTickId,
@@ -130,7 +126,8 @@ namespace Piot.Surge.Pulse.Client
                     log.Debug("assigned an avatar to {LocalPlayer} {EntityId}", localPlayerIndex, targetEntityId);
                     var targetEntity = world.FetchEntity(targetEntityId);
 
-                    localPlayerInput = new(localPlayerIndex, targetEntity, log);
+                    var createdPredictor = notifyPredictor.CreateAvatarPredictor(localPlayerIndex, targetEntity);
+                    localPlayerInput = new(localPlayerIndex, createdPredictor, log);
                     LocalPlayerInputs[localPlayerIndex.Value] = localPlayerInput;
                     wasCreatedNow = true;
                 }
@@ -174,7 +171,7 @@ namespace Piot.Surge.Pulse.Client
                 var localPlayerInputsArray = LocalPlayerInputs.Values.ToArray();
                 foreach (var localPlayerInput in localPlayerInputsArray)
                 {
-                    localPlayerInput.AvatarPredictor.EntityPredictor.PredictedInputs.Reset();
+                    localPlayerInput.AvatarPredictor.EntityPredictor.Reset();
                 }
             }
 
@@ -191,9 +188,9 @@ namespace Piot.Surge.Pulse.Client
             var localPlayerInputsArray = LocalPlayerInputs.Values.ToArray();
             foreach (var localPlayerInput in localPlayerInputsArray)
             {
-                if (localPlayerInput.AvatarPredictor.EntityPredictor.PredictedInputs.Count > maxInputCount)
+                if (localPlayerInput.AvatarPredictor.EntityPredictor.Count > maxInputCount)
                 {
-                    maxInputCount = localPlayerInput.AvatarPredictor.EntityPredictor.PredictedInputs.Count;
+                    maxInputCount = localPlayerInput.AvatarPredictor.EntityPredictor.Count;
                 }
             }
 
@@ -221,7 +218,7 @@ namespace Piot.Surge.Pulse.Client
             if (localPlayerInputsArray.Length > 0)
             {
                 log.DebugLowLevel("Have {InputCount} in queue for first player",
-                    localPlayerInputsArray[0].AvatarPredictor.EntityPredictor.PredictedInputs.Collection.Length);
+                    localPlayerInputsArray[0].AvatarPredictor.EntityPredictor.PredictCollection.Count);
             }
             else
             {
@@ -230,22 +227,22 @@ namespace Piot.Surge.Pulse.Client
 
             foreach (var localPlayerInput in localPlayerInputsArray)
             {
-                if (localPlayerInput.AvatarPredictor.EntityPredictor.PredictedInputs.Count > 20)
+                if (localPlayerInput.AvatarPredictor.EntityPredictor.PredictCollection.Count > 20)
                 {
                     log.Notice("Input queue is full, so we discard input");
                     return;
                 }
             }
 
-            FetchAndStoreInput.FetchAndStore(inputTickId, inputPackFetch, localPlayerInputsArray,
+            var localPlayerIndicesArray = LocalPlayerInputs.Keys.Select(key => new LocalPlayerIndex(key)).ToArray();
+
+            var inputsThisTick = FetchInputPackToLogicalInput.FetchLogicalInputs(inputTickId, inputPackFetch,
+                localPlayerIndicesArray,
                 log);
 
-            bundleAndSendOutInput.BundleAndSendInputDatagram(localPlayerInputsArray, now);
+            notifyPredictor.Predict(localPlayerInputsArray, inputsThisTick, UsePrediction);
 
-            if (UsePrediction)
-            {
-                notifyPredictor.Predict(localPlayerInputsArray);
-            }
+            bundleAndSendOutInput.BundleAndSendInputDatagram(localPlayerInputsArray, now);
 
             inputTickId = inputTickId.Next;
         }

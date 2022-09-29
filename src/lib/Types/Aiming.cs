@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
+using Piot.Maths;
 
 namespace Piot.Surge.Types
 {
@@ -21,11 +22,6 @@ namespace Piot.Surge.Types
         public const float PitchMax = (float)Math.PI / 2.0f - 0.1f;
 
         public UnitVector2 YawDirection => UnitVector2.FromFloats((float)Math.Cos(Yaw), (float)Math.Sin(Yaw));
-
-        public static float RealMod(float x, float y)
-        {
-            return (x % y + y) % y;
-        }
 
         public bool Equals(Aiming other)
         {
@@ -66,7 +62,7 @@ namespace Piot.Surge.Types
                 newPitch = PitchMax;
             }
 
-            newYaw = RealMod(newYaw, 2.0f * (float)Math.PI);
+            newYaw = BaseMath.Modulus(newYaw, 2.0f * (float)Math.PI);
 
             yaw = (ushort)(newYaw / (2.0f * Math.PI) * 65535.0f);
             pitch = (short)(newPitch * 32767.0 / PitchMax);

@@ -31,27 +31,33 @@ namespace Piot.Surge.Pulse.Client
         public override string ToString()
         {
             return
-                $"[AvatarPredictor localPlayer:{LocalPlayerIndex} entity:{EntityPredictor.AssignedAvatar.Id} predictedInputs:{EntityPredictor.PredictedInputs.Count}]";
+                $"[AvatarPredictor localPlayer:{LocalPlayerIndex} entity:{EntityPredictor.AssignedAvatar.Id} predictedInputs:{EntityPredictor.Count}]";
         }
 
         public bool WeDidPredictTheFutureCorrectly(TickId correctionForTickId, ReadOnlySpan<byte> logicPayload,
             ReadOnlySpan<byte> physicsCorrectionPayload)
         {
-            if (EntityPredictor.PredictionStateHistory.Count == 0)
+            if (EntityPredictor.PredictCollection.Count == 0)
             {
                 // We have nothing to compare with, so lets assume it was correct
                 return true;
             }
 
-            var storedPredictionStateChecksum =
-                EntityPredictor.PredictionStateHistory.DequeueForTickId(correctionForTickId);
+            var item =
+                EntityPredictor.PredictCollection.FindFromTickId(correctionForTickId);
 
-            if (storedPredictionStateChecksum is null)
+            if (item is null)
             {
                 return true;
             }
 
-            return storedPredictionStateChecksum.Value.IsEqual(logicPayload, physicsCorrectionPayload);
+            var v = item.Value;
+
+            return PredictionStateChecksum.IsEqual(v.logicStateFnvChecksum, v.logicStatePack.Length,
+                v.logicStatePack.Span,
+                logicPayload) && PredictionStateChecksum.IsEqual(v.physicsStateFnvChecksum, v.physicsStatePack.Length,
+                v.physicsStatePack.Span,
+                physicsCorrectionPayload);
         }
 
         /// <summary>
@@ -64,7 +70,7 @@ namespace Piot.Surge.Pulse.Client
             EntityPredictor.DiscardUpToAndExcluding(correctionForTickId);
 
             var assignedAvatar = EntityPredictor.AssignedAvatar;
-            var rollbackStack = EntityPredictor.RollbackStack;
+            var rollbackStack = EntityPredictor.PredictCollection;
             log.DebugLowLevel("CorrectionsHeader {EntityId}, {LocalPlayerIndex} {Checksum}", assignedAvatar.Id,
                 LocalPlayerIndex, physicsCorrectionPayload.Length);
 
@@ -87,14 +93,15 @@ namespace Piot.Surge.Pulse.Client
 
             log.Notice("Mis-predict at {TickId} for entity {EntityId}", correctionForTickId, assignedAvatar.Id);
 
-            RollBacker.Rollback(assignedAvatar, rollbackStack, correctionForTickId);
+            RollBacker.Rollback(assignedAvatar, rollbackStack, correctionForTickId, log);
+
             Replicator.Replicate(assignedAvatar, logicNowReplicateWriter.Octets, physicsCorrectionPayload);
 
             if (shouldPredict)
             {
-                EntityPredictor.UndoWriter.Reset();
-                RollForth.Rollforth(assignedAvatar, EntityPredictor.PredictedInputs, rollbackStack,
-                    EntityPredictor.PredictionStateHistory, EntityPredictor.UndoWriter);
+                EntityPredictor.CachedUndoWriter.Reset();
+                RollForth.Rollforth(assignedAvatar, EntityPredictor.PredictCollection,
+                    EntityPredictor.CachedUndoWriter, log);
             }
 
             assignedAvatar.CompleteEntity.RollMode = EntityRollMode.Predict;

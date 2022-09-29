@@ -13,23 +13,26 @@ namespace Piot.Surge.Pulse.Client
     {
         readonly ILog log;
 
-        public LocalPlayerInput(LocalPlayerIndex localPlayerIndex, IEntity assignedEntity, ILog log)
+        public LocalPlayerInput(LocalPlayerIndex localPlayerIndex, AvatarPredictor avatarPredictor, ILog log)
         {
             LocalPlayerIndex = localPlayerIndex;
-            AssignedEntity = assignedEntity;
             this.log = log;
-            AvatarPredictor = new(localPlayerIndex.Value, assignedEntity, log.SubLog("AvatarPredictor"));
+            AvatarPredictor = avatarPredictor;
         }
 
-        public AvatarPredictor AvatarPredictor { get; private set; }
-
-        public IEntity AssignedEntity { get; }
+        public AvatarPredictor AvatarPredictor { get; }
 
         public LocalPlayerIndex LocalPlayerIndex { get; }
 
-        public void SwitchEntity(IEntity assignedEntity)
+        public void SwitchEntity(IEntity assignedEntity, AvatarPredictor avatarPredictor)
         {
-            AvatarPredictor = new(LocalPlayerIndex.Value, assignedEntity, log.SubLog("AvatarPredictor"));
+            //AvatarPredictor = new(LocalPlayerIndex.Value, assignedEntity, log.SubLog("AvatarPredictor"));
+        }
+
+        public override string ToString()
+        {
+            return
+                $"[LocalPlayerInput {LocalPlayerIndex} Entity:{AvatarPredictor.EntityPredictor.AssignedAvatar.Id} predictBuffer:{AvatarPredictor.EntityPredictor.Count} ]";
         }
     }
 }

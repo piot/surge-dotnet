@@ -6,6 +6,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Piot.Maths;
 
 namespace Piot.Collections
 {
@@ -13,8 +14,8 @@ namespace Piot.Collections
     {
         readonly T[] buffer;
         readonly bool overwrite;
-        int head;
-        int tail;
+        internal int head;
+        internal int tail;
 
         public CircularBuffer(int capacity, bool overwrite = true)
         {
@@ -29,6 +30,13 @@ namespace Piot.Collections
         /// </summary>
         public int Count { get; private set; }
 
+
+        public T this[int key]
+        {
+            get => GetAt(key);
+            set => SetAt(key, value);
+        }
+
         public IEnumerator<T> GetEnumerator()
         {
             var index = head;
@@ -42,6 +50,46 @@ namespace Piot.Collections
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
+        }
+
+        public T GetAt(int index)
+        {
+            if (index < 0 || index >= Capacity)
+            {
+                throw new ArgumentOutOfRangeException(nameof(index));
+            }
+
+            var internalIndex = (head + index) % Capacity;
+            return buffer[internalIndex];
+        }
+
+        public void SetAt(int index, T item)
+        {
+            if (index < 0 || index >= Capacity)
+            {
+                throw new ArgumentOutOfRangeException(nameof(index));
+            }
+
+            var internalIndex = (head + index) % Capacity;
+            buffer[internalIndex] = item;
+        }
+
+
+        public void SetAndAdvance(int index, T item)
+        {
+            if (index < 0 || index > Count)
+            {
+                throw new ArgumentOutOfRangeException(nameof(index));
+            }
+
+            SetAt(index, item);
+
+            var internalIndex = (head + index) % Capacity;
+            if (internalIndex == tail)
+            {
+                Count++;
+                tail = (tail + 1) % Capacity;
+            }
         }
 
         public void Clear()
@@ -85,7 +133,7 @@ namespace Piot.Collections
                 throw new("can not remove head, buffer is empty");
             }
 
-            tail = (tail - 1) % Capacity;
+            tail = BaseMath.Modulus(tail - 1, Capacity);
             Count--;
         }
 
@@ -96,7 +144,7 @@ namespace Piot.Collections
                 throw new("can not remove head, buffer is empty");
             }
 
-            tail = (tail - 1) % Capacity;
+            tail = BaseMath.Modulus(tail - 1, Capacity);
             Count--;
 
             return buffer[tail];
@@ -131,7 +179,7 @@ namespace Piot.Collections
                 throw new InvalidOperationException("Can not peek an empty buffer");
             }
 
-            var index = (tail - 1) % Capacity;
+            var index = BaseMath.Modulus(tail - 1, Capacity);
             return buffer[index];
         }
 

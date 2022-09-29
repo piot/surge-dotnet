@@ -5,14 +5,12 @@
 
 using Piot.Flood;
 using Piot.Surge.Entities;
-using Piot.Surge.Tick;
 
 namespace Piot.Surge.Pulse.Client
 {
     public static class PredictionTicker
     {
-        public static void Predict(IEntity predictedEntity, TickId tickIdBeforePredictTick, RollbackStack rollbackStack,
-            PredictMode predictMode, IOctetWriterWithResult undoWriter)
+        public static void Predict(IEntity predictedEntity, PredictMode predictMode, IOctetWriter undoWriter)
         {
             predictedEntity.CompleteEntity.RollMode = predictMode switch
             {
@@ -29,8 +27,6 @@ namespace Piot.Surge.Pulse.Client
             predictedEntity.CompleteEntity.SerializePrevious(changes, undoWriter);
 
             Notifier.Notify(predictedEntity); // Notify also clear changes
-
-            rollbackStack.PushUndoPack(tickIdBeforePredictTick, undoWriter.Octets);
         }
     }
 }

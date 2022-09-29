@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
+using Piot.Clog;
 using Piot.Flood;
 using Piot.Surge.Entities;
 using Piot.Surge.Tick;
@@ -18,23 +19,25 @@ namespace Piot.Surge.Pulse.Client
         /// <param name="targetEntity"></param>
         /// <param name="rollbackStack"></param>
         /// <param name="tickId"></param>
-        public static void Rollback(IEntity targetEntity, RollbackStack rollbackStack, TickId tickId)
+        public static void Rollback(IEntity targetEntity, PredictCollection rollbackStack, TickId tickId, ILog log)
         {
             targetEntity.CompleteEntity.RollMode = EntityRollMode.Rollback;
-
-            while (rollbackStack.PeekTickId() >= tickId)
+            if (rollbackStack.TickId < tickId)
             {
-                var undoPack = rollbackStack.Pop();
+                throw new($"suspicious want to rollback to {tickId}, but stack is at {rollbackStack.TickId}");
+            }
 
-                RollBack(targetEntity, undoPack.payload.Span);
-
-                if (undoPack.tickId.tickId == tickId.tickId)
+            while (rollbackStack.TickId >= tickId)
+            {
+                var predictItem = rollbackStack.GoRollback();
+                if (predictItem.tickId.tickId == tickId.tickId)
                 {
                     break;
                 }
-            }
 
-            rollbackStack.Clear();
+                log.DebugLowLevel("Rolling back {TickId}", predictItem.tickId);
+                RollBack(targetEntity, predictItem.undoPack.Span);
+            }
         }
 
         public static void RollBack(IEntity targetEntity, ReadOnlySpan<byte> undoPack)
