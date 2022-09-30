@@ -4,18 +4,16 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
-using System.Linq;
-using Piot.Collections;
-using Piot.Surge.Tick;
 
 namespace Piot.Surge.Pulse.Client
 {
     public static class PredictionStateChecksum
     {
-        public static bool IsEqual(uint expectedFnvChecksum, int expectedPayloadLength, ReadOnlySpan<byte> expectedPayload, ReadOnlySpan<byte> encounteredPayload)
+        public static bool IsEqual(uint expectedFnvChecksum, ReadOnlySpan<byte> expectedPayload,
+            ReadOnlySpan<byte> encounteredPayload, uint encounteredChecksum)
         {
-            var encounteredChecksum = Fnv.Fnv.ToFnv(encounteredPayload);
-            var checksumCompareEqual = encounteredChecksum == expectedFnvChecksum && expectedPayloadLength == encounteredPayload.Length;
+            var checksumCompareEqual = encounteredChecksum == expectedFnvChecksum &&
+                                       expectedPayload.Length == encounteredPayload.Length;
             var octetCompareEqual = encounteredPayload.SequenceEqual(expectedPayload);
             if (checksumCompareEqual != octetCompareEqual)
             {

@@ -227,7 +227,7 @@ namespace Piot.Surge.Pulse.Client
 
             foreach (var localPlayerInput in localPlayerInputsArray)
             {
-                if (localPlayerInput.AvatarPredictor.EntityPredictor.PredictCollection.Count > 20)
+                if (localPlayerInput.AvatarPredictor.EntityPredictor.PredictCollection.Count > 50)
                 {
                     log.Notice("Input queue is full, so we discard input");
                     return;

@@ -39,6 +39,7 @@ namespace Piot.Surge.LogicalInput.Serialization
                 TickIdWriter.Write(writer, first.appliedAtTickId);
 
                 var expectedTickIdValue = first.appliedAtTickId.tickId;
+
                 foreach (var logicalInput in inputsForPlayer.inputs)
                 {
                     if (logicalInput.appliedAtTickId.tickId != expectedTickIdValue)

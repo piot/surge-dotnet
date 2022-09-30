@@ -67,7 +67,6 @@ public sealed class RollforthTests
 
         var spawnedEntity = new Entity(new(99), internalEntity);
         var rollbackStack = new PredictCollection();
-        var predictedInputs = new LogicalInputQueue();
         var mockInputFetch = new MockInputFetch(log.SubLog("MockInput"));
 
         var now = new TickId(23);
@@ -83,7 +82,7 @@ public sealed class RollforthTests
                 mockInputFetch.PrimaryAbility = true;
             }
 
-            if (i == 3)
+            if (now.tickId == 26)
             {
                 positionAt26 = internalEntity.Self.position;
                 ammoAt26 = internalEntity.Self.ammoCount;
@@ -96,7 +95,6 @@ public sealed class RollforthTests
             internalEntity.SetInput(new OctetReader(inputPack));
 
             var logicalInputPack = new LogicalInput(localPlayerIndex, now, inputPack);
-            predictedInputs.AddLogicalInput(logicalInputPack);
 
             var undoWriter = new OctetWriter(1024);
             var input = new LogicalInput(new(0), now, inputPack);
@@ -117,7 +115,7 @@ public sealed class RollforthTests
         const int expectedRollbackCount = 7;
         var rollbackTargetTickId = new TickId(26);
         log.Debug("rolling back to {TickId}", rollbackTargetTickId);
-        RollBacker.Rollback(spawnedEntity, rollbackStack, rollbackTargetTickId, log);
+        RollBacker.Rollback(spawnedEntity, rollbackStack, now, rollbackTargetTickId, log);
         log.Debug("Rolled back to at {TargetTickId} {Position} {Ammo}", rollbackTargetTickId,
             internalEntity.Self.position, internalEntity.Self.ammoCount);
         Assert.Equal(positionAt26, internalEntity.Self.position);
@@ -125,7 +123,7 @@ public sealed class RollforthTests
         Assert.Equal(expectedPredictCount + expectedRollbackCount, positionChangedCount);
         Assert.Equal(expectedRollbackCount, rollbackPositionChangedCount);
         Assert.Equal(2, ammoChangedCount);
-        predictedInputs.DiscardUpToAndExcluding(rollbackTargetTickId);
+        rollbackStack.DiscardUpToAndExcluding(rollbackTargetTickId);
 
         expectedRollMode = EntityRollMode.Rollforth;
         const int expectedRollforthCount = 7;
@@ -134,7 +132,7 @@ public sealed class RollforthTests
         RollForth.Rollforth(spawnedEntity, rollbackStack, undoWriterScratch, log);
         Assert.Equal(positionAfter, internalEntity.Self.position);
         Assert.Equal(19, internalEntity.Self.ammoCount);
-        Assert.Equal(24u, rollbackStack.FirstTickId.tickId);
+        Assert.Equal(26u, rollbackStack.FirstTickId.tickId);
         Assert.Equal(expectedPredictCount + expectedRollbackCount + expectedRollforthCount, positionChangedCount);
     }
 }

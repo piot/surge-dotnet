@@ -62,7 +62,8 @@ namespace Piot.Surge.Pulse.Client
                 }
 
                 var itemValue = item.Value;
-                var temporaryInput = new LogicalInput.LogicalInput(new(0), itemValue.tickId, itemValue.inputPack.Span);
+                var temporaryInput = new LogicalInput.LogicalInput(new(0), itemValue.tickId,
+                    itemValue.inputPackSetBeforeThisTick.Span);
                 entityPredictor.AddInput(temporaryInput, true);
                 currentTickId = currentTickId.Next;
             }

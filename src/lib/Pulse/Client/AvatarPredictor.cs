@@ -53,11 +53,28 @@ namespace Piot.Surge.Pulse.Client
 
             var v = item.Value;
 
-            return PredictionStateChecksum.IsEqual(v.logicStateFnvChecksum, v.logicStatePack.Length,
-                v.logicStatePack.Span,
-                logicPayload) && PredictionStateChecksum.IsEqual(v.physicsStateFnvChecksum, v.physicsStatePack.Length,
+            var encounteredLogicPayloadChecksum = Fnv.Fnv.ToFnv(logicPayload);
+            var isLogicEqual = PredictionStateChecksum.IsEqual(v.logicStateFnvChecksum, v.logicStatePack.Span,
+                logicPayload, encounteredLogicPayloadChecksum);
+            if (!isLogicEqual)
+            {
+                log.Notice("Logic: {StateChecksum:x4} {StateLength} {EncounteredChecksum:x4} {EncounteredLength}",
+                    v.logicStateFnvChecksum, v.logicStatePack.Length, encounteredLogicPayloadChecksum,
+                    logicPayload.Length);
+            }
+
+            var encounteredPhysicsChecksum = Fnv.Fnv.ToFnv(physicsCorrectionPayload);
+            var isPhysicsEqual = PredictionStateChecksum.IsEqual(v.physicsStateFnvChecksum,
                 v.physicsStatePack.Span,
-                physicsCorrectionPayload);
+                physicsCorrectionPayload, encounteredPhysicsChecksum);
+            if (!isPhysicsEqual)
+            {
+                log.Notice("Physics: {StateChecksum:x4} {StateLength} {EncounteredChecksum:x4} {EncounteredLength}",
+                    v.physicsStateFnvChecksum, v.physicsStatePack.Length, encounteredPhysicsChecksum,
+                    physicsCorrectionPayload.Length);
+            }
+
+            return isLogicEqual && isPhysicsEqual;
         }
 
         /// <summary>
@@ -66,7 +83,7 @@ namespace Piot.Surge.Pulse.Client
         /// </summary>
         public void ReadCorrection(TickId correctionForTickId, ReadOnlySpan<byte> physicsCorrectionPayload)
         {
-            log.Info("got correction for {TickId}", correctionForTickId);
+            log.DebugLowLevel("got correction for {TickId}", correctionForTickId);
             EntityPredictor.DiscardUpToAndExcluding(correctionForTickId);
 
             var assignedAvatar = EntityPredictor.AssignedAvatar;
@@ -93,8 +110,9 @@ namespace Piot.Surge.Pulse.Client
 
             log.Notice("Mis-predict at {TickId} for entity {EntityId}", correctionForTickId, assignedAvatar.Id);
 
-            RollBacker.Rollback(assignedAvatar, rollbackStack, correctionForTickId, log);
+            RollBacker.Rollback(assignedAvatar, rollbackStack, rollbackStack.FirstTickId, correctionForTickId, log);
 
+            log.DebugLowLevel("Replicating new fresh state to {TickId}", correctionForTickId);
             Replicator.Replicate(assignedAvatar, logicNowReplicateWriter.Octets, physicsCorrectionPayload);
 
             if (shouldPredict)

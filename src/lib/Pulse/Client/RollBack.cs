@@ -19,12 +19,18 @@ namespace Piot.Surge.Pulse.Client
         /// <param name="targetEntity"></param>
         /// <param name="rollbackStack"></param>
         /// <param name="tickId"></param>
-        public static void Rollback(IEntity targetEntity, PredictCollection rollbackStack, TickId tickId, ILog log)
+        public static void Rollback(IEntity targetEntity, PredictCollection rollbackStack, TickId expectedFirstTickId,
+            TickId tickId, ILog log)
         {
             targetEntity.CompleteEntity.RollMode = EntityRollMode.Rollback;
             if (rollbackStack.TickId < tickId)
             {
                 throw new($"suspicious want to rollback to {tickId}, but stack is at {rollbackStack.TickId}");
+            }
+
+            if (rollbackStack.TickId != expectedFirstTickId)
+            {
+                throw new($"unexpected first tickId {expectedFirstTickId} but encountered {rollbackStack.TickId}");
             }
 
             while (rollbackStack.TickId >= tickId)
@@ -35,7 +41,7 @@ namespace Piot.Surge.Pulse.Client
                     break;
                 }
 
-                log.DebugLowLevel("Rolling back {TickId}", predictItem.tickId);
+                log.DebugLowLevel("Rolling back so we get to state {TickId}", predictItem.tickId.Previous);
                 RollBack(targetEntity, predictItem.undoPack.Span);
             }
         }

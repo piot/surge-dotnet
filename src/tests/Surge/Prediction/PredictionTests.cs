@@ -129,7 +129,7 @@ public sealed class PredictionTests
         const int expectedRollbackCount = 7;
         var rollbackTargetTickId = new TickId(26);
         log.Debug("rolling back to {TickId}", rollbackTargetTickId);
-        RollBacker.Rollback(spawnedEntity, rollbackStack, rollbackTargetTickId, log);
+        RollBacker.Rollback(spawnedEntity, rollbackStack, now, rollbackTargetTickId, log);
         log.Debug("Rolled back to at {TargetTickId} {Position} {Ammo}", rollbackTargetTickId,
             internalEntity.Self.position, internalEntity.Self.ammoCount);
         Assert.Equal(positionAt26, internalEntity.Self.position);

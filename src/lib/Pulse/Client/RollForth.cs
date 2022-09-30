@@ -17,7 +17,7 @@ namespace Piot.Surge.Pulse.Client
         {
             predictedEntity.CompleteEntity.RollMode = EntityRollMode.Rollforth;
 
-            log.DebugLowLevel("Rollforth to end");
+            log.Info("Rollforth to end");
 
             foreach (var predictedInput in predictCollection.RemainingItems())
             {
@@ -26,11 +26,13 @@ namespace Piot.Surge.Pulse.Client
                     throw new("should be able to set input and rollforth to target entity");
                 }
 
-                var inputReader = new OctetReader(predictedInput.inputPack.Span);
+                var inputReader = new OctetReader(predictedInput.inputPackSetBeforeThisTick.Span);
                 inputDeserialize.SetInput(inputReader);
 
                 var tempInput =
-                    new LogicalInput.LogicalInput(new(0), predictedInput.tickId, predictedInput.inputPack.Span);
+                    new LogicalInput.LogicalInput(new(0), predictedInput.tickId.Previous,
+                        predictedInput.inputPackSetBeforeThisTick.Span);
+                log.DebugLowLevel("Set input and about to rollforth to {TickId}", predictedInput.tickId);
                 PredictAndSaver.PredictAndSave(predictedEntity, predictCollection, tempInput, undoScratchWriter,
                     PredictMode.RollingForth, true);
             }

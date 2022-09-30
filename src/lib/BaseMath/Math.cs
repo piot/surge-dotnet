@@ -12,15 +12,15 @@ namespace Piot.Maths
             // Alternative code, but I think it is slower
             // var r = x % y;
             // return r < 0 ? r + y : r;
-            return ((x % y) + y) % y;
+            return (x % y + y) % y;
         }
-        
+
         public static int Modulus(int x, int y)
         {
             // Alternative code, but I think it is slower
             // var r = x % y;
             // return r < 0 ? r + y : r;
-            return ((x % y) + y) % y;
+            return (x % y + y) % y;
         }
     }
 }

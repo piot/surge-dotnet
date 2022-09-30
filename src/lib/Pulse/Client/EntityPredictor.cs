@@ -39,6 +39,7 @@ namespace Piot.Surge.Pulse.Client
 
         public void DiscardUpToAndExcluding(TickId correctionForTickId)
         {
+            log.Info("discard up to {correctionForTickId}", correctionForTickId);
             PredictCollection.DiscardUpToAndExcluding(correctionForTickId);
         }
 
@@ -54,7 +55,7 @@ namespace Piot.Surge.Pulse.Client
 
             var inputReader = new OctetReader(logicalInput.payload.Span);
             inputDeserialize.SetInput(inputReader);
-            log.Info("AddInput and save for {TickId}", logicalInput.appliedAtTickId);
+            log.Info("Set input so it can result in {TickId}", logicalInput.appliedAtTickId.Next);
 
             CachedUndoWriter.Reset();
             PredictAndSaver.PredictAndSave(AssignedAvatar, PredictCollection, logicalInput, CachedUndoWriter,

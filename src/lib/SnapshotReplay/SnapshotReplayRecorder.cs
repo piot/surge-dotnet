@@ -24,10 +24,10 @@ namespace Piot.Surge.SnapshotReplay
         readonly IEntityContainer entityContainer;
         readonly IEventProcessor eventProcessor;
         readonly ILog log;
+        readonly INotifyEntityCreation notifyEntityCreation;
         readonly IEntityContainerWithGhostCreator playbackWorld;
         readonly OctetWriter writer = new(replayMemoryOctetSize);
         IDisposableOctetWriter? disposableOctetWriter;
-        readonly INotifyEntityCreation notifyEntityCreation;
         ReplayPlayback? playback;
         ReplayRecorder? recorder;
         IOctetReaderWithSeekAndSkip? seekableOctetReader;

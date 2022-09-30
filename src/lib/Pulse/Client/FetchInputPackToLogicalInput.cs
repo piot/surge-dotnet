@@ -13,7 +13,8 @@ namespace Piot.Surge.Pulse.Client
 {
     public static class FetchInputPackToLogicalInput
     {
-        public static LogicalInput.LogicalInput[] FetchLogicalInputs(TickId predictTickId, IInputPackFetch inputPackFetch,
+        public static LogicalInput.LogicalInput[] FetchLogicalInputs(TickId predictTickId,
+            IInputPackFetch inputPackFetch,
             IEnumerable<LocalPlayerIndex> localPlayerIndices, ILog log)
         {
             var logicalInputs = new List<LogicalInput.LogicalInput>();

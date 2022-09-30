@@ -26,7 +26,8 @@ namespace Piot.Surge.Pulse.Client
                         throw new("not good");
                     }
 
-                    inputsForLocal.Add(new(localPlayerInput.LocalPlayerIndex, item.tickId, item.inputPack.Span));
+                    inputsForLocal.Add(new(localPlayerInput.LocalPlayerIndex, item.tickId,
+                        item.inputPackSetBeforeThisTick.Span));
                 }
 
                 inputForAllPlayers[index].inputs = inputsForLocal.ToArray();

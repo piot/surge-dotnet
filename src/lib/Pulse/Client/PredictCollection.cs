@@ -19,7 +19,7 @@ namespace Piot.Surge.Pulse.Client
         public ReadOnlyMemory<byte> undoPack;
         public ReadOnlyMemory<byte> logicStatePack;
         public ReadOnlyMemory<byte> physicsStatePack;
-        public ReadOnlyMemory<byte> inputPack;
+        public ReadOnlyMemory<byte> inputPackSetBeforeThisTick;
         public uint logicStateFnvChecksum;
         public uint physicsStateFnvChecksum;
     }
@@ -31,10 +31,31 @@ namespace Piot.Surge.Pulse.Client
 
         public PredictItem[] Items => items.ToArray();
 
+        public TickId FirstTickId => items.Peek().tickId;
+        public TickId LastTickId => items.PeekTail().tickId;
+
+        public TickId TickId => Count == 0
+            ? throw new("can not read tick id from empty predict collection")
+            : items.GetAt(indexInCircularBuffer).tickId;
+
+        public int Count => items.Count;
+
+        public PredictItem Current => items.GetAt(indexInCircularBuffer);
+
+        public IEnumerator<PredictItem> GetEnumerator()
+        {
+            return items.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
         public PredictItem[] RemainingItems()
         {
             var list = new List<PredictItem>();
-            for (var i = indexInCircularBuffer + 1; i < Count - 1; ++i)
+            for (var i = indexInCircularBuffer + 1; i < Count; ++i)
             {
                 list.Add(items[i]);
             }
@@ -55,12 +76,21 @@ namespace Piot.Surge.Pulse.Client
                 //throw new ArgumentOutOfRangeException(nameof(undoPack));
             }
 
+            var before = indexInCircularBuffer;
             indexInCircularBuffer++;
             indexInCircularBuffer = BaseMath.Modulus(indexInCircularBuffer, items.Capacity);
 
             if (tickId.tickId == 0)
             {
-                throw new Exception("Suspicious");
+                throw new("Suspicious");
+            }
+
+            if (items.Count > 0)
+            {
+                if (items[before].tickId != tickId.Previous)
+                {
+                    throw new($"Must have increasing previous {items[before].tickId} but expected {tickId.Previous}");
+                }
             }
 
             items.SetAndAdvance(indexInCircularBuffer, new()
@@ -69,20 +99,11 @@ namespace Piot.Surge.Pulse.Client
                 undoPack = undoPack.ToArray(),
                 logicStatePack = logicStatePack.ToArray(),
                 physicsStatePack = physicsStatePack.ToArray(),
-                inputPack = inputPack.ToArray(),
+                inputPackSetBeforeThisTick = inputPack.ToArray(),
                 logicStateFnvChecksum = Fnv.Fnv.ToFnv(logicStatePack),
                 physicsStateFnvChecksum = Fnv.Fnv.ToFnv(physicsStatePack)
             });
         }
-
-        public TickId FirstTickId => items.Peek().tickId;
-        public TickId LastTickId => items.PeekTail().tickId;
-
-        public TickId TickId => Count == 0
-            ? throw new("can not read tick id from empty predict collection")
-            : items.GetAt(indexInCircularBuffer).tickId;
-
-        public int Count => items.Count;
 
         public void Reset()
         {
@@ -97,7 +118,11 @@ namespace Piot.Surge.Pulse.Client
         public PredictItem GoRollback()
         {
             var v = Current;
-            MovePrevious();
+            if (indexInCircularBuffer > 0)
+            {
+                MovePrevious();
+            }
+
             return v;
         }
 
@@ -105,19 +130,17 @@ namespace Piot.Surge.Pulse.Client
         {
             if (indexInCircularBuffer <= 0)
             {
-                throw new InvalidOperationException($"can not go back");
+                throw new InvalidOperationException("can not go back");
             }
 
             indexInCircularBuffer--;
         }
 
-        public PredictItem Current => items.GetAt(indexInCircularBuffer);
-
         public void MoveNext()
         {
             if (indexInCircularBuffer + 1 >= Count)
             {
-                throw new InvalidOperationException($"can not go forward");
+                throw new InvalidOperationException("can not go forward");
             }
 
             indexInCircularBuffer++;
@@ -134,16 +157,6 @@ namespace Piot.Surge.Pulse.Client
             }
 
             return null;
-        }
-
-        public IEnumerator<PredictItem> GetEnumerator()
-        {
-            return items.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
         }
 
         public void DiscardUpToAndExcluding(TickId targetTickId)
