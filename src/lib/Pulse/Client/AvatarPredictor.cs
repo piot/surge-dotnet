@@ -110,7 +110,7 @@ namespace Piot.Surge.Pulse.Client
 
             log.Notice("Mis-predict at {TickId} for entity {EntityId}", correctionForTickId, assignedAvatar.Id);
 
-            RollBacker.Rollback(assignedAvatar, rollbackStack, rollbackStack.FirstTickId, correctionForTickId, log);
+            RollBacker.Rollback(assignedAvatar, rollbackStack, rollbackStack.TickId, correctionForTickId, log);
 
             log.DebugLowLevel("Replicating new fresh state to {TickId}", correctionForTickId);
             Replicator.Replicate(assignedAvatar, logicNowReplicateWriter.Octets, physicsCorrectionPayload);

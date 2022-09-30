@@ -17,7 +17,7 @@ namespace Piot.Surge.Pulse.Client
         {
             predictedEntity.CompleteEntity.RollMode = EntityRollMode.Rollforth;
 
-            log.Info("Rollforth to end");
+            log.DebugLowLevel("Rollforth to end");
 
             foreach (var predictedInput in predictCollection.RemainingItems())
             {
