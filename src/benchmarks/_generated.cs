@@ -359,6 +359,11 @@ public sealed class AvatarLogicEntityInternal : ICompleteEntity, IInputDeseriali
         OutFacing.OnDestroyed?.Invoke();
     }
 
+    public void FireReplicate()
+    {
+        throw new NotImplementedException();
+    }
+
     void IAuthoritativeEntityCaptureSnapshot.CaptureSnapshot()
     {
         throw new NotImplementedException();
@@ -535,6 +540,11 @@ public sealed class AvatarLogicEntityInternal : ICompleteEntity, IInputDeseriali
         {
             writer.WriteUInt16(last.jumpTime);
         }
+    }
+
+    public void SerializePreviousAll(IOctetWriter writer)
+    {
+        throw new NotImplementedException();
     }
 
     public void SerializePrevious(ulong serializeFlags, IBitWriter writer)
@@ -952,6 +962,11 @@ public sealed class FireballLogicEntityInternal : ICompleteEntity
         OutFacing.OnDestroyed?.Invoke();
     }
 
+    public void FireReplicate()
+    {
+        throw new NotImplementedException();
+    }
+
 
     void IAuthoritativeEntityCaptureSnapshot.CaptureSnapshot()
     {
@@ -1018,6 +1033,11 @@ public sealed class FireballLogicEntityInternal : ICompleteEntity
         {
             Velocity3Writer.Write(last.velocity, writer);
         }
+    }
+
+    public void SerializePreviousAll(IOctetWriter writer)
+    {
+        throw new NotImplementedException();
     }
 
     public void SerializePrevious(ulong serializeFlags, IBitWriter writer)

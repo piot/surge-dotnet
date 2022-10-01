@@ -5,12 +5,11 @@
 
 namespace Piot.Surge.Entities
 {
-    public interface IEntityFireChanges
+    public static class Constants
     {
-        public void FireChanges(ulong changeMask);
-
-        public void FireDestroyed();
-
-        public void FireReplicate();
+        public static readonly byte BitSerializeAllMarker = 0x51;
+        public static readonly byte OctetsSerializeAllMarker = 0x52;
+        public static readonly byte BitSerializeMarker = 0x41;
+        public static readonly byte OctetsSerializeMarker = 0x42;
     }
 }

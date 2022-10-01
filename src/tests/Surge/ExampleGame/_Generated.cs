@@ -300,6 +300,7 @@ public sealed class AvatarLogicEntity
 
     public Action? OnPositionChanged;
     public Action? OnPostUpdate;
+    public Action? OnReplicated;
 
     public Action? OnTestEnumChanged;
     public CastFireballDelegate? UnDoCastFireball;
@@ -384,6 +385,11 @@ public sealed class AvatarLogicEntityInternal : ICompleteEntity, IInputDeseriali
         OutFacing.OnDestroyed?.Invoke();
     }
 
+    public void FireReplicate()
+    {
+        OutFacing.OnReplicated?.Invoke();
+    }
+
     void IAuthoritativeEntityCaptureSnapshot.CaptureSnapshot()
     {
     }
@@ -416,6 +422,10 @@ public sealed class AvatarLogicEntityInternal : ICompleteEntity, IInputDeseriali
 
     public void Serialize(ulong serializeFlags, IOctetWriter writer)
     {
+#if DEBUG
+        OctetMarker.WriteMarker(writer, Constants.OctetsSerializeMarker);
+#endif
+
         writer.WriteUInt16((ushort)serializeFlags);
         if ((serializeFlags & FireButtonIsDownMask) != 0)
         {
@@ -470,6 +480,10 @@ public sealed class AvatarLogicEntityInternal : ICompleteEntity, IInputDeseriali
 
     public void Serialize(ulong serializeFlags, IBitWriter writer)
     {
+#if DEBUG
+        BitMarker.WriteMarker(writer, Constants.BitSerializeMarker);
+#endif
+
         writer.WriteBits((uint)serializeFlags, 10);
         if ((serializeFlags & FireButtonIsDownMask) != 0)
         {
@@ -524,6 +538,10 @@ public sealed class AvatarLogicEntityInternal : ICompleteEntity, IInputDeseriali
 
     public void SerializePrevious(ulong serializeFlags, IOctetWriter writer)
     {
+#if DEBUG
+        OctetMarker.WriteMarker(writer, Constants.OctetsSerializeMarker);
+#endif
+
         writer.WriteUInt16((ushort)serializeFlags);
         if ((serializeFlags & FireButtonIsDownMask) != 0)
         {
@@ -578,6 +596,10 @@ public sealed class AvatarLogicEntityInternal : ICompleteEntity, IInputDeseriali
 
     public void SerializePrevious(ulong serializeFlags, IBitWriter writer)
     {
+#if DEBUG
+        BitMarker.WriteMarker(writer, Constants.BitSerializeMarker);
+#endif
+
         writer.WriteBits((uint)serializeFlags, 10);
         if ((serializeFlags & FireButtonIsDownMask) != 0)
         {
@@ -632,6 +654,9 @@ public sealed class AvatarLogicEntityInternal : ICompleteEntity, IInputDeseriali
 
     public void SerializeAll(IOctetWriter writer)
     {
+#if DEBUG
+        OctetMarker.WriteMarker(writer, Constants.OctetsSerializeAllMarker);
+#endif
         writer.WriteUInt8(current.fireButtonIsDown ? (byte)1 : (byte)0);
         writer.WriteUInt8(current.castButtonIsDown ? (byte)1 : (byte)0);
         AimingWriter.Write(current.aiming, writer);
@@ -646,6 +671,10 @@ public sealed class AvatarLogicEntityInternal : ICompleteEntity, IInputDeseriali
 
     public void SerializeAll(IBitWriter writer)
     {
+#if DEBUG
+        BitMarker.WriteMarker(writer, Constants.BitSerializeAllMarker);
+#endif
+
         writer.WriteBits(current.fireButtonIsDown ? 1U : 0U, 1);
         writer.WriteBits(current.castButtonIsDown ? 1U : 0U, 1);
         AimingWriter.Write(current.aiming, writer);
@@ -658,8 +687,29 @@ public sealed class AvatarLogicEntityInternal : ICompleteEntity, IInputDeseriali
         writer.WriteBits((uint)current.testEnum, 3);
     }
 
+    public void SerializePreviousAll(IOctetWriter writer)
+    {
+#if DEBUG
+        OctetMarker.WriteMarker(writer, Constants.OctetsSerializeAllMarker);
+#endif
+        writer.WriteUInt8(last.fireButtonIsDown ? (byte)1 : (byte)0);
+        writer.WriteUInt8(last.castButtonIsDown ? (byte)1 : (byte)0);
+        AimingWriter.Write(last.aiming, writer);
+        Position3Writer.Write(last.position, writer);
+        writer.WriteUInt16(last.ammoCount);
+        writer.WriteUInt16(last.fireCooldown);
+        writer.WriteUInt16(last.manaAmount);
+        writer.WriteUInt16(last.castCooldown);
+        writer.WriteUInt16(last.jumpTime);
+        writer.WriteUInt8((byte)last.testEnum);
+    }
+
     public void DeserializeAll(IOctetReader reader)
     {
+#if DEBUG
+        OctetMarker.AssertMarker(reader, Constants.OctetsSerializeAllMarker);
+#endif
+
         current.fireButtonIsDown = reader.ReadUInt8() != 0;
         current.castButtonIsDown = reader.ReadUInt8() != 0;
         current.aiming = AimingReader.Read(reader);
@@ -674,6 +724,9 @@ public sealed class AvatarLogicEntityInternal : ICompleteEntity, IInputDeseriali
 
     public void DeserializeAll(IBitReader reader)
     {
+#if DEBUG
+        BitMarker.AssertMarker(reader, Constants.BitSerializeAllMarker);
+#endif
         current.fireButtonIsDown = reader.ReadBits(1) != 0;
         current.castButtonIsDown = reader.ReadBits(1) != 0;
         current.aiming = AimingReader.Read(reader);
@@ -704,6 +757,9 @@ public sealed class AvatarLogicEntityInternal : ICompleteEntity, IInputDeseriali
 
     public ulong Deserialize(IOctetReader reader)
     {
+#if DEBUG
+        OctetMarker.AssertMarker(reader, Constants.OctetsSerializeMarker);
+#endif
         var serializeFlags = (ulong)reader.ReadUInt16();
         if ((serializeFlags & FireButtonIsDownMask) != 0)
         {
@@ -760,6 +816,10 @@ public sealed class AvatarLogicEntityInternal : ICompleteEntity, IInputDeseriali
 
     public ulong Deserialize(IBitReader reader)
     {
+#if DEBUG
+        BitMarker.AssertMarker(reader, Constants.BitSerializeMarker);
+#endif
+
         var serializeFlags = (ulong)reader.ReadBits(10);
         if ((serializeFlags & FireButtonIsDownMask) != 0)
         {
@@ -938,6 +998,7 @@ public sealed class FireballLogicEntity
     public Action? OnDestroyed;
     public Action? OnPositionChanged;
     public Action? OnPostUpdate;
+    public Action? OnReplicated;
 
     public Action? OnVelocityChanged;
     public ExplodeDelegate? UnDoExplode;
@@ -1013,6 +1074,11 @@ public sealed class FireballLogicEntityInternal : ICompleteEntity
         OutFacing.OnDestroyed?.Invoke();
     }
 
+    public void FireReplicate()
+    {
+        OutFacing.OnReplicated?.Invoke();
+    }
+
 
     void IAuthoritativeEntityCaptureSnapshot.CaptureSnapshot()
     {
@@ -1040,6 +1106,10 @@ public sealed class FireballLogicEntityInternal : ICompleteEntity
 
     public void Serialize(ulong serializeFlags, IOctetWriter writer)
     {
+#if DEBUG
+        OctetMarker.WriteMarker(writer, Constants.OctetsSerializeMarker);
+#endif
+
         writer.WriteUInt8((byte)serializeFlags);
         if ((serializeFlags & PositionMask) != 0)
         {
@@ -1054,6 +1124,10 @@ public sealed class FireballLogicEntityInternal : ICompleteEntity
 
     public void Serialize(ulong serializeFlags, IBitWriter writer)
     {
+#if DEBUG
+        BitMarker.WriteMarker(writer, Constants.BitSerializeMarker);
+#endif
+
         writer.WriteBits((uint)serializeFlags, 2);
         if ((serializeFlags & PositionMask) != 0)
         {
@@ -1068,6 +1142,10 @@ public sealed class FireballLogicEntityInternal : ICompleteEntity
 
     public void SerializePrevious(ulong serializeFlags, IOctetWriter writer)
     {
+#if DEBUG
+        OctetMarker.WriteMarker(writer, Constants.OctetsSerializeMarker);
+#endif
+
         writer.WriteUInt8((byte)serializeFlags);
         if ((serializeFlags & PositionMask) != 0)
         {
@@ -1082,6 +1160,10 @@ public sealed class FireballLogicEntityInternal : ICompleteEntity
 
     public void SerializePrevious(ulong serializeFlags, IBitWriter writer)
     {
+#if DEBUG
+        BitMarker.WriteMarker(writer, Constants.BitSerializeMarker);
+#endif
+
         writer.WriteBits((uint)serializeFlags, 2);
         if ((serializeFlags & PositionMask) != 0)
         {
@@ -1096,24 +1178,47 @@ public sealed class FireballLogicEntityInternal : ICompleteEntity
 
     public void SerializeAll(IOctetWriter writer)
     {
+#if DEBUG
+        OctetMarker.WriteMarker(writer, Constants.OctetsSerializeAllMarker);
+#endif
         Position3Writer.Write(current.position, writer);
         Velocity3Writer.Write(current.velocity, writer);
     }
 
     public void SerializeAll(IBitWriter writer)
     {
+#if DEBUG
+        BitMarker.WriteMarker(writer, Constants.BitSerializeAllMarker);
+#endif
+
         Position3Writer.Write(current.position, writer);
         Velocity3Writer.Write(current.velocity, writer);
     }
 
+    public void SerializePreviousAll(IOctetWriter writer)
+    {
+#if DEBUG
+        OctetMarker.WriteMarker(writer, Constants.OctetsSerializeAllMarker);
+#endif
+        Position3Writer.Write(last.position, writer);
+        Velocity3Writer.Write(last.velocity, writer);
+    }
+
     public void DeserializeAll(IOctetReader reader)
     {
+#if DEBUG
+        OctetMarker.AssertMarker(reader, Constants.OctetsSerializeAllMarker);
+#endif
+
         current.position = Position3Reader.Read(reader);
         current.velocity = Velocity3Reader.Read(reader);
     }
 
     public void DeserializeAll(IBitReader reader)
     {
+#if DEBUG
+        BitMarker.AssertMarker(reader, Constants.BitSerializeAllMarker);
+#endif
         current.position = Position3Reader.Read(reader);
         current.velocity = Velocity3Reader.Read(reader);
     }
@@ -1136,6 +1241,9 @@ public sealed class FireballLogicEntityInternal : ICompleteEntity
 
     public ulong Deserialize(IOctetReader reader)
     {
+#if DEBUG
+        OctetMarker.AssertMarker(reader, Constants.OctetsSerializeMarker);
+#endif
         var serializeFlags = (ulong)reader.ReadUInt8();
         if ((serializeFlags & PositionMask) != 0)
         {
@@ -1152,6 +1260,10 @@ public sealed class FireballLogicEntityInternal : ICompleteEntity
 
     public ulong Deserialize(IBitReader reader)
     {
+#if DEBUG
+        BitMarker.AssertMarker(reader, Constants.BitSerializeMarker);
+#endif
+
         var serializeFlags = (ulong)reader.ReadBits(2);
         if ((serializeFlags & PositionMask) != 0)
         {

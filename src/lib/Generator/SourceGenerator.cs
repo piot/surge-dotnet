@@ -327,6 +327,10 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
         {
             sb.Append(@"    public ulong Deserialize(IOctetReader reader)
     {
+
+#if DEBUG
+        OctetMarker.AssertMarker(reader, Constants.OctetsSerializeMarker);
+#endif
 ");
             var (typeForSerializeFlagString, _) = SmallestPrimitiveForBitCount(fieldInfos.Count());
             var castString = typeForSerializeFlagString == "UInt64" ? "" : "(ulong)";
@@ -351,6 +355,10 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
         {
             sb.Append(@"    public ulong Deserialize(IBitReader reader)
     {
+#if DEBUG
+        BitMarker.AssertMarker(reader, Constants.BitSerializeMarker);
+#endif
+
 ");
 
             var fieldCount = fieldInfos.Count();
@@ -386,6 +394,11 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
         {
             sb.Append(@"    public void DeserializeAll(IOctetReader reader)
     {
+
+#if DEBUG
+            OctetMarker.AssertMarker(reader, Constants.OctetsSerializeAllMarker);
+#endif
+
 ");
 
             foreach (var fieldInfo in fieldInfos)
@@ -405,6 +418,10 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
         {
             sb.Append(@"    public void DeserializeAll(IBitReader reader)
     {
+
+#if DEBUG
+            BitMarker.AssertMarker(reader, Constants.BitSerializeAllMarker);
+#endif
 ");
 
             foreach (var fieldInfo in fieldInfos)
@@ -503,6 +520,10 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
         {
             sb.Append($@"    public void {methodName}(ulong serializeFlags, IOctetWriter writer)
     {{
+#if DEBUG
+        OctetMarker.WriteMarker(writer, Constants.OctetsSerializeMarker);
+#endif
+
 ");
 
             var (typeForSerializeFlagString, castTypeString) = SmallestPrimitiveForBitCount(fieldInfos.Count());
@@ -539,6 +560,10 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
         {
             sb.Append($@"    public void {methodName}(ulong serializeFlags, IBitWriter writer)
     {{
+#if DEBUG
+        BitMarker.WriteMarker(writer, Constants.BitSerializeMarker);
+#endif
+
 ");
             var fieldCount = fieldInfos.Count();
             var firstCount = fieldCount > 32 ? 32 : fieldCount;
@@ -582,16 +607,20 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
             AddSerializeHelper(sb, fieldInfos, "SerializePrevious", "last");
         }
 
-        public static void AddSerializeAll(StringBuilder sb, IEnumerable<LogicFieldInfo> fieldInfos)
+        public static void AddSerializeAllHelper(StringBuilder sb, IEnumerable<LogicFieldInfo> fieldInfos,
+            string methodName, string targetName)
         {
-            sb.Append(@"    public void SerializeAll(IOctetWriter writer)
-    {
+            sb.Append(@$"    public void {methodName}(IOctetWriter writer)
+    {{
+#if DEBUG
+            OctetMarker.WriteMarker(writer, Constants.OctetsSerializeAllMarker);
+#endif
 ");
 
             foreach (var fieldInfo in fieldInfos)
             {
                 var fieldName = fieldInfo.FieldInfo.Name;
-                var completeVariable = $"current.{fieldName}";
+                var completeVariable = $"{targetName}.{fieldName}";
                 sb.Append(
                     $@"        {GenerateSerializers.SerializeMethod(fieldInfo.FieldInfo.FieldType, completeVariable)};
 ");
@@ -602,10 +631,24 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
 ");
         }
 
+        public static void AddSerializeAll(StringBuilder sb, IEnumerable<LogicFieldInfo> fieldInfos)
+        {
+            AddSerializeAllHelper(sb, fieldInfos, "SerializeAll", "current");
+        }
+
+        public static void AddSerializePreviousAll(StringBuilder sb, IEnumerable<LogicFieldInfo> fieldInfos)
+        {
+            AddSerializeAllHelper(sb, fieldInfos, "SerializePreviousAll", "last");
+        }
+
         public static void AddBitSerializeAll(StringBuilder sb, IEnumerable<LogicFieldInfo> fieldInfos)
         {
             sb.Append(@"    public void SerializeAll(IBitWriter writer)
     {
+#if DEBUG
+            BitMarker.WriteMarker(writer, Constants.BitSerializeAllMarker);
+#endif
+
 ");
 
             foreach (var fieldInfo in fieldInfos)
@@ -697,6 +740,10 @@ OnSpawnFireballLogic?.Invoke(internalEntity.OutFacing);
         outFacing.OnDestroyed?.Invoke();
     }
 
+    public void FireReplicate()
+    {
+        outFacing.OnReplicated?.Invoke();
+    }
 
 ");
         }
@@ -893,6 +940,7 @@ public sealed class ").Append(outFacingClassName).Append($@"
     public {Generator.FullName(logicInfo.Type)} Self => internalEntity.Self;
 
     public Action? OnDestroyed;
+    public Action? OnReplicated;
     public Action? OnPostUpdate;
 ");
             if (logicInfo.SimulationFieldInfos.Any())
@@ -1094,6 +1142,8 @@ public sealed class ").Append(EntityGeneratedInternal(logicInfo)).Append($" : {i
 
             AddSerializeAll(sb, fieldInfos);
             AddBitSerializeAll(sb, fieldInfos);
+
+            AddSerializePreviousAll(sb, fieldInfos);
 
             AddDeserializeAll(sb, fieldInfos);
             AddBitDeserializeAll(sb, fieldInfos);

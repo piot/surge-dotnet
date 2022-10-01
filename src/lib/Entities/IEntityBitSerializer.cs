@@ -24,6 +24,8 @@ namespace Piot.Surge.Entities
         /// <param name="writer"></param>
         public void SerializeAll(IBitWriter writer);
 
+        //public void SerializePreviousAll(IBitWriter writer);
+
         public void SerializePrevious(ulong changedFieldsMask, IBitWriter writer);
 
         /// <summary>

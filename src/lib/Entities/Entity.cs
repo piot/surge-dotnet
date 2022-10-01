@@ -32,6 +32,7 @@ namespace Piot.Surge.Entities
         public IAction[] Actions => completeEntity.Actions;
 
         public bool IsAlive => Mode != EntityMode.Deleted;
+        public bool IsLocallyPredicted { get; set; }
 
         public EntityMode Mode { get; set; }
 

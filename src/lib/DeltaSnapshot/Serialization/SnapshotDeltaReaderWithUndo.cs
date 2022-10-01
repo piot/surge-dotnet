@@ -7,8 +7,8 @@ using System.Collections.Generic;
 using Piot.Flood;
 using Piot.Surge.DeltaSnapshot.Pack;
 using Piot.Surge.Entities;
-using Piot.Surge.SnapshotProtocol;
 using Piot.Surge.Types.Serialization;
+using Constants = Piot.Surge.SnapshotProtocol.Constants;
 
 namespace Piot.Surge.SnapshotDeltaPack.Serialization
 {

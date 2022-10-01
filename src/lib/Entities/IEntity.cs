@@ -27,6 +27,8 @@ namespace Piot.Surge.Entities
 
         public bool IsAlive { get; }
 
+        public bool IsLocallyPredicted { get; set; }
+
         public EntityId Id { get; }
 
         public ArchetypeId ArchetypeId { get; }

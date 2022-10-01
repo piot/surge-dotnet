@@ -34,6 +34,8 @@ namespace Piot.Surge.Pulse.Client
         public TickId FirstTickId => items.Peek().tickId;
         public TickId LastTickId => items.PeekTail().tickId;
 
+        public PredictItem? LastItem => items.PeekTail();
+
         public TickId TickId => Count == 0
             ? throw new("can not read tick id from empty predict collection")
             : items.GetAt(indexInCircularBuffer).tickId;

@@ -4,6 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
+using System.Reflection;
+using System.Text;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.Surge.Entities;
@@ -34,25 +36,23 @@ namespace Piot.Surge.Pulse.Client
                 $"[AvatarPredictor localPlayer:{LocalPlayerIndex} entity:{EntityPredictor.AssignedAvatar.Id} predictedInputs:{EntityPredictor.Count}]";
         }
 
-        public bool WeDidPredictTheFutureCorrectly(TickId correctionForTickId, ReadOnlySpan<byte> logicPayload,
-            ReadOnlySpan<byte> physicsCorrectionPayload)
+        public PredictItem? FetchItemFromTickId(TickId correctionForTickId)
         {
             if (EntityPredictor.PredictCollection.Count == 0)
             {
                 // We have nothing to compare with, so lets assume it was correct
-                return true;
+                return null;
             }
 
             var item =
                 EntityPredictor.PredictCollection.FindFromTickId(correctionForTickId);
 
-            if (item is null)
-            {
-                return true;
-            }
+            return item;
+        }
 
-            var v = item.Value;
-
+        public bool WeDidPredictTheFutureCorrectly(PredictItem v, ReadOnlySpan<byte> logicPayload,
+            ReadOnlySpan<byte> physicsCorrectionPayload)
+        {
             var encounteredLogicPayloadChecksum = Fnv.Fnv.ToFnv(logicPayload);
             var isLogicEqual = PredictionStateChecksum.IsEqual(v.logicStateFnvChecksum, v.logicStatePack.Span,
                 logicPayload, encounteredLogicPayloadChecksum);
@@ -77,6 +77,30 @@ namespace Piot.Surge.Pulse.Client
             return isLogicEqual && isPhysicsEqual;
         }
 
+        public static string EntityToDebugString(IEntity entity)
+        {
+            var s = "";
+            foreach (var fieldInfo in entity.CompleteEntity.Logic.GetType()
+                         .GetFields(BindingFlags.Instance | BindingFlags.Public))
+            {
+                s += $"{fieldInfo.Name}={fieldInfo.GetValue(entity.CompleteEntity.Logic)}\n";
+            }
+
+            return s;
+        }
+
+
+        public static string OctetsToString(ReadOnlySpan<byte> ba)
+        {
+            var hex = new StringBuilder(ba.Length * 2);
+            foreach (var b in ba)
+            {
+                hex.AppendFormat("{0:x2}", b);
+            }
+
+            return hex.ToString();
+        }
+
         /// <summary>
         ///     Handles incoming correction state
         ///     If checksum is not the same, it rollbacks, replicate, and rollforth.
@@ -91,30 +115,64 @@ namespace Piot.Surge.Pulse.Client
             log.DebugLowLevel("CorrectionsHeader {EntityId}, {LocalPlayerIndex} {Checksum}", assignedAvatar.Id,
                 LocalPlayerIndex, physicsCorrectionPayload.Length);
 
-            var logicNowReplicateWriter = new OctetWriter(1024);
+            /*
+            var logicBeforeOnlyChanges = new OctetWriter(1024);
             var changesThisSnapshot = assignedAvatar.CompleteEntity.Changes();
-            assignedAvatar.CompleteEntity.Serialize(changesThisSnapshot, logicNowReplicateWriter);
+            assignedAvatar.CompleteEntity.Serialize(changesThisSnapshot, logicBeforeOnlyChanges);
+            */
+
+            var correctedFullSerialization = new OctetWriter(1024);
+            assignedAvatar.CompleteEntity.SerializeAll(correctedFullSerialization);
 
             if (!shouldPredictGoingForward)
             {
                 shouldPredict = false;
             }
 
-            var logicNowWriter = new OctetWriter(1024);
-            assignedAvatar.CompleteEntity.SerializeAll(logicNowWriter);
+            var before = EntityToDebugString(assignedAvatar);
+            //var octetsBefore = OctetsToString(correctedFullSerialization.Octets);
 
-            if (WeDidPredictTheFutureCorrectly(correctionForTickId, logicNowWriter.Octets, physicsCorrectionPayload))
+            var predictItem = FetchItemFromTickId(correctionForTickId);
+            if (predictItem is null)
             {
+                // We haven't predicted this earlier, so just return
                 return;
             }
 
+            var v = predictItem.Value;
+
+            if (correctedFullSerialization.Octets.Length != v.logicStatePack.Length)
+            {
+                log.Info($"complete {correctedFullSerialization.Octets.Length} {v.logicStatePack.Length}");
+            }
+
+            if (WeDidPredictTheFutureCorrectly(v, correctedFullSerialization.Octets, physicsCorrectionPayload))
+            {
+                var reader = new OctetReader(EntityPredictor.LastItem!.Value.logicStatePack.Span);
+                assignedAvatar.CompleteEntity.DeserializeAll(reader);
+                return;
+            }
+
+            var predictedOctetsString = OctetsToString(v.logicStatePack.Span);
+            var correctionOctetsString = OctetsToString(correctedFullSerialization.Octets);
+
+            var setToOldPredictionReader = new OctetReader(v.logicStatePack.Span);
+            assignedAvatar.CompleteEntity.DeserializeAll(setToOldPredictionReader);
+            var predictedEntityString = EntityToDebugString(assignedAvatar);
+
             log.Notice("Mis-predict at {TickId} for entity {EntityId}", correctionForTickId, assignedAvatar.Id);
+            log.Notice("Mis-predict predicted {BeforeLocal} for correction {Correction}", predictedOctetsString,
+                correctionOctetsString);
+
+            var setToLastStateReader = new OctetReader(EntityPredictor.LastItem!.Value.logicStatePack.Span);
+            assignedAvatar.CompleteEntity.DeserializeAll(setToLastStateReader);
 
             RollBacker.Rollback(assignedAvatar, rollbackStack, rollbackStack.TickId, correctionForTickId, log);
 
             log.DebugLowLevel("Replicating new fresh state to {TickId}", correctionForTickId);
-            Replicator.Replicate(assignedAvatar, logicNowReplicateWriter.Octets, physicsCorrectionPayload);
-
+            Replicator.Replicate(assignedAvatar, correctedFullSerialization.Octets, physicsCorrectionPayload);
+            var replicate = EntityToDebugString(assignedAvatar);
+            log.Notice("Mis-predict entity {before} for entity {Correction}", predictedEntityString, replicate);
             if (shouldPredict)
             {
                 EntityPredictor.CachedUndoWriter.Reset();

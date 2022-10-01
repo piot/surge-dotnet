@@ -30,6 +30,8 @@ namespace Piot.Surge.Pulse.Client
         public TickId FirstTickId => PredictCollection.FirstTickId;
         public TickId LastTickId => PredictCollection.LastTickId;
 
+        public PredictItem? LastItem => PredictCollection.LastItem;
+
         public int Count => PredictCollection.Count;
 
         public void Reset()

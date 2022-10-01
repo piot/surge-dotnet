@@ -14,13 +14,15 @@ namespace Piot.Surge.Pulse.Client
         {
             var checksumCompareEqual = encounteredChecksum == expectedFnvChecksum &&
                                        expectedPayload.Length == encounteredPayload.Length;
+#if DEBUG
             var octetCompareEqual = encounteredPayload.SequenceEqual(expectedPayload);
             if (checksumCompareEqual != octetCompareEqual)
             {
                 throw new("internal error, checksum compare and octet compare is not the same");
             }
+#endif
 
-            return octetCompareEqual;
+            return checksumCompareEqual;
         }
     }
 }

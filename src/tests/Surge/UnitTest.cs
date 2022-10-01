@@ -197,7 +197,7 @@ public sealed class UnitTest1
 
         var writer = new OctetWriter(64);
         someAvatar.SerializeAll(writer);
-        Assert.Equal(29, writer.Octets.Length);
+        Assert.Equal(30, writer.Octets.Length);
 
         var readAvatar = new AvatarLogicEntityInternal();
 
@@ -218,7 +218,7 @@ public sealed class UnitTest1
         {
             var writer = new OctetWriter(64);
             someAvatar.SerializeAll(writer);
-            Assert.Equal(29, writer.Octets.Length);
+            Assert.Equal(30, writer.Octets.Length);
 
             var reader = new OctetReader(writer.Octets);
 
@@ -276,7 +276,7 @@ public sealed class UnitTest1
         var writerButtonDown = new OctetWriter(100);
         avatarButtonDown.Serialize(AvatarLogicEntityInternal.FireButtonIsDownMask,
             writerButtonDown);
-        Assert.Equal(3, writerButtonDown.Octets.Length);
+        Assert.Equal(4, writerButtonDown.Octets.Length);
         Assert.Equal(1, writerButtonDown.Octets[2]);
 
         var readerButtonDown = new OctetReader(writerButtonDown.Octets);
@@ -286,8 +286,8 @@ public sealed class UnitTest1
             AvatarLogicEntityInternal.FireButtonIsDownMask,
             readerButtonDown, writerButtonHistory);
 
-        Assert.Equal(3, writerButtonHistory.Octets.Length);
-        Assert.Equal(0, writerButtonHistory.Octets[2]);
+        Assert.Equal(4, writerButtonHistory.Octets.Length);
+        Assert.Equal(1, writerButtonHistory.Octets[2]);
 
         var rollbackReader = new OctetReader(writerButtonHistory.Octets);
 
@@ -414,9 +414,9 @@ public sealed class UnitTest1
         Assert.Equal(packetQueue.Peek().Pack.tickIdRange.Last, firstTickId);
 
 #if DEBUG
-        Assert.Equal(25, packetQueue.Peek().Pack.deltaSnapshotPackPayload.Length);
+        Assert.Equal(26, packetQueue.Peek().Pack.deltaSnapshotPackPayload.Length);
 #else
-        Assert.Equal(22, packetQueue.Peek().Pack.deltaSnapshotPackPayload.Length);
+        Assert.Equal(23, packetQueue.Peek().Pack.deltaSnapshotPackPayload.Length);
 #endif
 
         Assert.Equal(600, ((AvatarLogic)spawnedAvatar.Logic).position.x);
@@ -636,9 +636,9 @@ public sealed class UnitTest1
             SnapshotStreamType.OctetStream, SnapshotType.DeltaSnapshot);
 
 #if DEBUG
-        Assert.Equal(31, undoWriter.Octets.Length);
+        Assert.Equal(32, undoWriter.Octets.Length);
 #else
-        Assert.Equal(28, undoWriter.Octets.Length);
+        Assert.Equal(29, undoWriter.Octets.Length);
 #endif
 
         Assert.Equal(1200, clientSpawnedEntity.Self.position.x);

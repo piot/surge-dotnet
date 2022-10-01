@@ -25,6 +25,7 @@ namespace Piot.Surge.Entities
         public void SerializeAll(IOctetWriter writer);
 
         public void SerializePrevious(ulong changedFieldsMask, IOctetWriter writer);
+        public void SerializePreviousAll(IOctetWriter writer);
 
         /// <summary>
         ///     Serializes correction state. If nothing extra is needed to serialize beside the logic fields,

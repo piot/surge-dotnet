@@ -85,5 +85,10 @@ namespace Piot.Surge.Types
                     MathF.Cos(pitchRad) * MathF.Cos(yawRad));
             }
         }
+
+        public override string ToString()
+        {
+            return $"[Aiming {yaw} {pitch} ({YawDegrees}, {PitchDegrees}]";
+        }
     }
 }
