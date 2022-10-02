@@ -20,6 +20,18 @@ using Piot.Transport.Stats;
 
 namespace Piot.Surge.Pulse.Client
 {
+    public struct ClientInfo
+    {
+        public TimeMs now;
+        public FixedDeltaTimeMs targetDeltaTimeMs;
+        public IEntityContainerWithGhostCreator worldWithGhostCreator;
+        public IEventProcessor eventProcessor;
+        public ITransport assignedTransport;
+        public IMultiCompressor compression;
+        public IInputPackFetch fetch;
+        public ISnapshotPlaybackNotify snapshotPlaybackNotify;
+    }
+
     public sealed class Client : IOctetSerializable
     {
         readonly ClientPredictor clientPredictor;
@@ -31,30 +43,27 @@ namespace Piot.Surge.Pulse.Client
         readonly ITransportClient transportClient;
         readonly TransportStatsBoth transportWithStats;
 
-        public Client(ILog log, TimeMs now, FixedDeltaTimeMs targetDeltaTimeMs,
-            IEntityContainerWithGhostCreator worldWithGhostCreator, IEventProcessor eventProcessor,
-            ITransport assignedTransport, IMultiCompressor compression, IInputPackFetch fetch,
-            ISnapshotPlaybackNotify snapshotPlaybackNotify)
+        public Client(ClientInfo info, ILog log)
         {
             this.log = log;
 
-            World = worldWithGhostCreator;
+            World = info.worldWithGhostCreator;
 
-            transportWithStats = new(assignedTransport, now);
+            transportWithStats = new(info.assignedTransport, info.now);
             transportClient = new TransportClient(transportWithStats);
             clientPredictor = new(log.SubLog("ClientPredictor"));
             const bool usePrediction = true;
-            localInputFetchAndSend = new(fetch, clientPredictor, usePrediction,
-                transportClient, now,
-                targetDeltaTimeMs,
-                worldWithGhostCreator,
+            localInputFetchAndSend = new(info.fetch, clientPredictor, usePrediction,
+                transportClient, info.now,
+                info.targetDeltaTimeMs,
+                info.worldWithGhostCreator,
                 log.SubLog("InputFetchAndSend"));
             deltaSnapshotPlayback =
-                new(now, worldWithGhostCreator, eventProcessor, localInputFetchAndSend,
-                    snapshotPlaybackNotify, targetDeltaTimeMs,
+                new(info.now, info.worldWithGhostCreator, info.eventProcessor, localInputFetchAndSend,
+                    info.snapshotPlaybackNotify, info.targetDeltaTimeMs,
                     log.SubLog("SnapshotPlayback"));
 
-            datagramReceiver = new(transportClient, compression, deltaSnapshotPlayback,
+            datagramReceiver = new(transportClient, info.compression, deltaSnapshotPlayback,
                 localInputFetchAndSend, log);
             statsTicker = new(new(0), StatsOutput, new(1000), log.SubLog("Stats"));
         }

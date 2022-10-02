@@ -55,9 +55,19 @@ public sealed class ClientHostTests
         var entityContainerWithGhostCreator =
             new WorldWithGhostCreator(new GeneratedEntityGhostCreator(), notifyWorld, notifyWorld, false);
 
-        var client = new Client(log.SubLog("Client"), now, clientDeltaTime, entityContainerWithGhostCreator,
-            generatedEvent, transport,
-            DefaultMultiCompressor.Create(), inputFetch, new MockPlaybackNotify());
+        var clientInfo = new ClientInfo
+        {
+            now = now,
+            targetDeltaTimeMs = clientDeltaTime,
+            worldWithGhostCreator = entityContainerWithGhostCreator,
+            eventProcessor = generatedEvent,
+            assignedTransport = transport,
+            compression = DefaultMultiCompressor.Create(),
+            fetch = inputFetch,
+            snapshotPlaybackNotify = new MockPlaybackNotify()
+        };
+
+        var client = new Client(clientInfo, log.SubLog("Client"));
 
         return client;
     }
@@ -65,8 +75,16 @@ public sealed class ClientHostTests
     Host CreateHost(TimeMs now, ITransport transport)
     {
         var worldWithDetectChanges = new AuthoritativeWorld();
-        var host = new Host(transport, DefaultMultiCompressor.Create(), DefaultMultiCompressor.DeflateCompressionIndex,
-            worldWithDetectChanges, now, log.SubLog("Host"));
+
+        var hostInfo = new HostInfo
+        {
+            hostTransport = transport,
+            compression = DefaultMultiCompressor.Create(),
+            compressorIndex = DefaultMultiCompressor.DeflateCompressionIndex,
+            authoritativeWorld = worldWithDetectChanges,
+            now = now
+        };
+        var host = new Host(hostInfo, log.SubLog("Host"));
         return host;
     }
 

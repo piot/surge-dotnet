@@ -19,6 +19,15 @@ using Constants = Piot.Surge.SnapshotProtocol.Constants;
 
 namespace Piot.Surge.Pulse.Host
 {
+    public struct HostInfo
+    {
+        public ITransport hostTransport;
+        public IMultiCompressor compression;
+        public CompressorIndex compressorIndex;
+        public IEntityContainerWithDetectChanges authoritativeWorld;
+        public TimeMs now;
+    }
+
     public sealed class Host
     {
         readonly BitWriter cachedSnapshotBitWriter = new(Constants.MaxSnapshotOctetSize);
@@ -32,14 +41,13 @@ namespace Piot.Surge.Pulse.Host
         readonly TransportStatsBoth transportWithStats;
         TickId authoritativeTickId;
 
-        public Host(ITransport hostTransport, IMultiCompressor compression, CompressorIndex compressorIndex,
-            IEntityContainerWithDetectChanges world, TimeMs now, ILog log)
+        public Host(HostInfo info, ILog log)
         {
-            transportWithStats = new(hostTransport, now);
+            transportWithStats = new(info.hostTransport, info.now);
             transport = transportWithStats;
-            snapshotSyncer = new(transport, compression, compressorIndex, log.SubLog("SnapshotSyncer"));
-            AuthoritativeWorld = world;
-            clientConnections = new(hostTransport, snapshotSyncer, log);
+            snapshotSyncer = new(transport, info.compression, info.compressorIndex, log.SubLog("SnapshotSyncer"));
+            AuthoritativeWorld = info.authoritativeWorld;
+            clientConnections = new(info.hostTransport, snapshotSyncer, log);
             this.log = log;
             simulationTicker = new(new(0), SimulationTick, new(16),
                 log.SubLog("SimulationTick"));

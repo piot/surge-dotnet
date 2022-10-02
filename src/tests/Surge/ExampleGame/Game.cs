@@ -35,16 +35,36 @@ public sealed class Game
 
         if (isHosting)
         {
-            Host = new(transport, compression, DefaultMultiCompressor.DeflateCompressionIndex,
-                world, now, log.SubLog("Host"));
+            var hostInfo = new HostInfo
+            {
+                hostTransport = transport,
+                compression = compression,
+                compressorIndex = DefaultMultiCompressor.DeflateCompressionIndex,
+                authoritativeWorld = world,
+                now = now
+            };
+            Host = new(hostInfo, log.SubLog("Host"));
         }
         else
         {
             var gameInputFetch = new GeneratedInputPackFetch();
             gameInputFetch.GameSpecificInputFetch = inputFetch.ReadFromDevice;
-            Client = new(log.SubLog("Client"), now, delta, world, generatedEventTarget,
-                transport, compression, gameInputFetch, new MockPlaybackNotify());
-            Client.UsePrediction = false;
+            var clientInfo = new ClientInfo
+            {
+                now = now,
+                targetDeltaTimeMs = delta,
+                worldWithGhostCreator = world,
+                eventProcessor = generatedEventTarget,
+                assignedTransport = transport,
+                compression = compression,
+                fetch = gameInputFetch,
+                snapshotPlaybackNotify = new MockPlaybackNotify()
+            };
+
+            Client = new(clientInfo, log.SubLog("Client"))
+            {
+                UsePrediction = false
+            };
         }
 
         GeneratedHostEntitySpawner = new(world, GeneratedNotifyEntityCreation);

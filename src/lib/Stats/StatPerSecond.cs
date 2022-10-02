@@ -92,6 +92,10 @@ namespace Piot.Stats
             }
 
             var deltaMilliseconds = now.ms - lastTime.ms;
+            if (deltaMilliseconds == 0)
+            {
+                return;
+            }
 
             var a = (int)(total * 1000 / deltaMilliseconds);
             if (a < min)

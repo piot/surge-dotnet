@@ -31,6 +31,7 @@ public sealed class BenchmarkGame
     public BenchmarkGame(ITransport transport, IMultiCompressor compression, bool isHosting, ILog log)
     {
         this.log = log;
+        /*
         var now = new TimeMs(0);
         var delta = new FixedDeltaTimeMs(16);
 
@@ -94,6 +95,7 @@ public sealed class BenchmarkGame
                 }
             };
         };
+        */
     }
 
 
