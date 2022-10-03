@@ -23,6 +23,7 @@ namespace Piot.Surge.Tick.Serialization
             if (tickIdRange.startTickId.tickId != 0)
             {
                 count = (uint)((int)tickIdRange.lastTickId.tickId - (int)tickIdRange.startTickId.tickId);
+                count = tickIdRange.Length;
 #if DEBUG
                 if (count > 255)
                 {

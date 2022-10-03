@@ -22,8 +22,10 @@ namespace Surge.Game
         public ITransport clientTransport;
         public IEventProcessor eventProcessor;
         public IEntityContainerWithDetectChanges authoritativeWorld;
+
         public IEntityContainerWithGhostCreator clientWorld;
-        public IEntityContainerWithGhostCreator playbackWorld;
+
+        //public IEntityContainerWithGhostCreator playbackWorld;
         public IMonotonicTimeMs timeProvider;
         public FixedDeltaTimeMs targetDeltaTimeMs;
         public IInputPackFetch inputFetch;
@@ -78,7 +80,7 @@ namespace Surge.Game
             Client = new(clientInfo, log.SubLog("Client"))
             {
                 ShouldApplyIncomingSnapshotsToWorld = mode == GameMode.ClientOnly,
-                UsePrediction = mode == GameMode.ClientOnly
+                UsePrediction = false // mode == GameMode.ClientOnly
             };
         }
 

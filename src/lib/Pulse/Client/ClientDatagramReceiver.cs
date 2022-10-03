@@ -29,6 +29,7 @@ namespace Piot.Surge.Pulse.Client
         readonly ILog log;
         readonly ClientLocalInputFetchAndSend notifyLocalInputFetchAndSend;
         readonly ClientDeltaSnapshotPlayback notifyPlayback;
+        readonly Action<TickId> onFirstSnapshot;
         readonly OrderedDatagramsInChecker orderedDatagramsInChecker = new();
         readonly SnapshotFragmentReAssembler snapshotFragmentReAssembler;
         readonly CircularBuffer<int> snapshotLatencies = new(128);
@@ -38,7 +39,6 @@ namespace Piot.Surge.Pulse.Client
         readonly HoldPositive weAreSkippingAhead = new(25);
         bool hasReceivedFirstSnapshot;
         long lastReceivedRoundTripTimeMs;
-        readonly Action<TickId> onFirstSnapshot;
 
         public ClientDatagramReceiver(ITransportClient transportClient, IMultiCompressor compression,
             ClientDeltaSnapshotPlayback notifyPlayback, Action<TickId> onFirstSnapshot,

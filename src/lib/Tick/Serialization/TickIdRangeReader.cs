@@ -17,18 +17,18 @@ namespace Piot.Surge.Tick.Serialization
         public static TickIdRange Read(IOctetReader reader)
         {
             var currentId = TickIdReader.Read(reader);
-            var countBackwards = reader.ReadUInt8();
+            var numberOfTicks = reader.ReadUInt8();
             var startValue = 0u;
 
-            if (countBackwards != 0)
+            if (numberOfTicks != 0)
             {
-                startValue = (uint)((int)currentId.tickId - countBackwards);
+                startValue = (uint)((int)currentId.tickId - numberOfTicks + 1);
             }
 
             return new()
             {
-                lastTickId = currentId,
-                startTickId = new(startValue)
+                startTickId = new(startValue),
+                lastTickId = currentId
             };
         }
     }

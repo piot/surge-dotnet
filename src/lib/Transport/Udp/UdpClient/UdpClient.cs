@@ -13,10 +13,10 @@ namespace Piot.UdpServer
 {
     public class Client : ITransport
     {
+        readonly ILog log;
         readonly byte[] octetsArray = new byte[1200];
         readonly EndPoint serverEndPoint;
         readonly Socket socket;
-        readonly ILog log;
 
         public Client(string hostname, ushort listenPort, ILog log)
         {

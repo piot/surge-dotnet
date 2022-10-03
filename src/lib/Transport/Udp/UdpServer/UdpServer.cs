@@ -16,10 +16,10 @@ namespace Piot.UdpServer
     {
         readonly Dictionary<EndPoint, ushort> endpointToInfo = new();
         readonly Dictionary<ushort, EndPoint> infoToEndpoint = new();
+        readonly ILog log;
         readonly byte[] octetsArray = new byte[1200];
         readonly Socket socket;
         ushort connectionId;
-        readonly ILog log;
 
         public Server(ushort listenPort, ILog log)
         {

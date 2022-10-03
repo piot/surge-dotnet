@@ -75,7 +75,6 @@ namespace Surge.Game
                 eventProcessor = controlInfo.eventProcessor,
                 authoritativeWorld = controlInfo.authoritativeWorld,
                 clientWorld = controlInfo.clientWorld,
-                playbackWorld = controlInfo.playbackWorld,
                 timeProvider = controlInfo.timeProvider,
                 targetDeltaTimeMs = controlInfo.targetDeltaTimeMs,
                 inputFetch = controlInfo.inputFetch,
@@ -101,7 +100,10 @@ namespace Surge.Game
                 throw new("Game has already been started");
             }
 
-            Game = new(CreateGameInfo(), Tools.RawSnapshotReplayRecorder, null, GameMode.ClientOnly,
+            var gameInfo = CreateGameInfo();
+            gameInfo.clientWorld = controlInfo.playbackWorld;
+
+            Game = new(gameInfo, Tools.RawSnapshotReplayRecorder, null, GameMode.ClientOnly,
                 log.SubLog("Game"));
         }
 
