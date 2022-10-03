@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using System;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
@@ -26,6 +27,8 @@ namespace Piot.Surge.Pulse.Host
         public CompressorIndex compressorIndex;
         public IEntityContainerWithDetectChanges authoritativeWorld;
         public TimeMs now;
+        public Action<ConnectionToClient> onConnectionCreated;
+        public FixedDeltaTimeMs targetDeltaTimeMs;
     }
 
     public sealed class Host
@@ -47,11 +50,11 @@ namespace Piot.Surge.Pulse.Host
             transport = transportWithStats;
             snapshotSyncer = new(transport, info.compression, info.compressorIndex, log.SubLog("SnapshotSyncer"));
             AuthoritativeWorld = info.authoritativeWorld;
-            clientConnections = new(info.hostTransport, snapshotSyncer, log);
+            clientConnections = new(info.hostTransport, snapshotSyncer, info.onConnectionCreated, log);
             this.log = log;
-            simulationTicker = new(new(0), SimulationTick, new(16),
+            simulationTicker = new(info.now, SimulationTick, info.targetDeltaTimeMs,
                 log.SubLog("SimulationTick"));
-            statsTicker = new(new(0), StatsOutput, new(1000), log.SubLog("Stats"));
+            statsTicker = new(info.now, StatsOutput, new(1000), log.SubLog("Stats"));
             ShortLivedEventStream = new(authoritativeTickId);
         }
 
@@ -85,7 +88,7 @@ namespace Piot.Surge.Pulse.Host
 
         void SimulationTick()
         {
-            //log.Debug("== Simulation Tick! {TickId}", authoritativeTickId);
+            log.DebugLowLevel("== Simulation Tick! {TickId}", authoritativeTickId);
 
             TickWorld();
 

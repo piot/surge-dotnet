@@ -39,6 +39,11 @@ namespace Piot.Surge.Pulse.Host
 
         public void SetAssignedPredictedEntity(LocalPlayerIndex localPlayerIndex, IEntity entity)
         {
+            if (entity is null)
+            {
+                throw new("entity must be set");
+            }
+
             AssignedPredictedEntityForLocalPlayers[localPlayerIndex.Value] = entity;
         }
 

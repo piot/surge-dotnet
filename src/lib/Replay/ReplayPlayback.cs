@@ -126,7 +126,7 @@ namespace Piot.Surge.Replay
             log.DebugLowLevel("applying complete state {CompleteState}", completeState);
             var bitReader = new BitReader(completeState.Payload, completeState.Payload.Length * 8);
             nextExpectedSequenceId =
-                CompleteStateBitReader.ReadAndApply(bitReader, world, eventProcessor, false, false);
+                CompleteStateBitReader.ReadAndApply(bitReader, world, eventProcessor, false, log, false);
             TickId = completeState.TickId;
         }
 

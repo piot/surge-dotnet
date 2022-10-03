@@ -10,18 +10,17 @@ using System.Net.Sockets;
 using Piot.Clog;
 using Piot.Transport;
 
-
 namespace Piot.UdpServer
 {
     public class Server : ITransport
     {
-        readonly byte[] octetsArray = new byte[1200];
-        readonly Socket socket;
         readonly Dictionary<EndPoint, ushort> endpointToInfo = new();
         readonly Dictionary<ushort, EndPoint> infoToEndpoint = new();
+        readonly byte[] octetsArray = new byte[1200];
+        readonly Socket socket;
         ushort connectionId;
-        ILog log;
-        
+        readonly ILog log;
+
         public Server(ushort listenPort, ILog log)
         {
             this.log = log;
@@ -49,7 +48,7 @@ namespace Piot.UdpServer
             var foundPoint = new IPEndPoint(IPAddress.IPv6Any, 0);
             var castFoundPoint = (EndPoint)foundPoint;
 
-            int octetCountReceived = 0;
+            var octetCountReceived = 0;
             try
             {
                 octetCountReceived = socket.ReceiveFrom(octetsArray, ref castFoundPoint);
@@ -84,7 +83,7 @@ namespace Piot.UdpServer
                 endpointToInfo.Add(castFoundPoint, connectionId);
                 infoToEndpoint.Add(connectionId, castFoundPoint);
                 foundConnectionId = connectionId;
-                log.Info("Created connection {ConnectionId}", connectionId);
+                log.DebugLowLevel("Created connection {ConnectionId} {castFoundPoint}", connectionId, castFoundPoint);
             }
 
             endpointId = new(foundConnectionId);
@@ -100,6 +99,7 @@ namespace Piot.UdpServer
             }
 
             var existingEndpoint = infoToEndpoint[endpointId.Value];
+            log.DebugLowLevel("Sending to {ConnectionId} {existingEndpoint}", endpointId, existingEndpoint);
             socket.SendTo(payload.ToArray(), existingEndpoint);
         }
     }

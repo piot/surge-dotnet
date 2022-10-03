@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using Piot.Clog;
 using Piot.Flood;
 using Piot.Surge.Event;
 
@@ -12,12 +13,12 @@ namespace Piot.Surge.CompleteSnapshot
     {
         public static EventSequenceId ReadAndApply(IBitReader reader,
             IEntityContainerWithGhostCreator entityGhostContainerWithCreator,
-            IEventProcessor eventProcessor, bool notifyWorldSync, bool useEvents = true)
+            IEventProcessor eventProcessor, bool notifyWorldSync, ILog log, bool useEvents = true)
         {
 #if DEBUG
             BitMarker.AssertMarker(reader, Constants.CompleteSnapshotStartMarker);
 #endif
-            CompleteStateEntityBitReader.Apply(reader, entityGhostContainerWithCreator, notifyWorldSync);
+            CompleteStateEntityBitReader.Apply(reader, entityGhostContainerWithCreator, notifyWorldSync, log);
 
             return useEvents
                 ? EventCompleteBitReader.ReadAndApply(eventProcessor, reader)

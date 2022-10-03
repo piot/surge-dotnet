@@ -72,6 +72,10 @@ public sealed class ClientHostTests
         return client;
     }
 
+    void OnConnectionCreated(ConnectionToClient connectionToClient)
+    {
+    }
+
     Host CreateHost(TimeMs now, ITransport transport)
     {
         var worldWithDetectChanges = new AuthoritativeWorld();
@@ -82,6 +86,8 @@ public sealed class ClientHostTests
             compression = DefaultMultiCompressor.Create(),
             compressorIndex = DefaultMultiCompressor.DeflateCompressionIndex,
             authoritativeWorld = worldWithDetectChanges,
+            onConnectionCreated = OnConnectionCreated,
+            targetDeltaTimeMs = new(16),
             now = now
         };
         var host = new Host(hostInfo, log.SubLog("Host"));

@@ -59,7 +59,12 @@ namespace Piot.Surge.Pulse.Client
         public bool ShouldTickAndNotifySnapshots { get; set; } = true;
         public bool IsIncomingBufferStarving => lastBufferWasStarved.IsOrWasTrue;
 
-        public TickId PlaybackTickId => playbackTick;
+        public TickId PlaybackTickId
+        {
+            get => playbackTick;
+
+            set => playbackTick = value;
+        }
 
         public void Deserialize(IOctetReader reader)
         {
@@ -184,9 +189,16 @@ namespace Piot.Surge.Pulse.Client
             LastPlaybackSnapshotWasSkipAhead = deltaSnapshotIncludingCorrectionsItem.IsSkippedAheadSnapshot;
             LastPlaybackSnapshotWasMerged = deltaSnapshotIncludingCorrectionsItem.IsMergedAndOverlapping;
 
-            expectedEventSequenceId = ApplyDeltaSnapshotToWorld.Apply(deltaSnapshotPack, clientWorld,
-                eventProcessor, expectedEventSequenceId,
-                deltaSnapshotIncludingCorrectionsItem.IsMergedAndOverlapping, true);
+            try
+            {
+                expectedEventSequenceId = ApplyDeltaSnapshotToWorld.Apply(deltaSnapshotPack, clientWorld,
+                    eventProcessor, expectedEventSequenceId,
+                    deltaSnapshotIncludingCorrectionsItem.IsMergedAndOverlapping, ShouldTickAndNotifySnapshots, log);
+            }
+            catch (DeserializeException e)
+            {
+                log.Notice(e.Message);
+            }
 
             predictor.AssignAvatarAndReadCorrections(deltaSnapshotIncludingCorrections.tickIdRange.Last,
                 deltaSnapshotIncludingCorrections.physicsCorrections.Span);

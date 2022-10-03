@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using System;
 using Piot.Clog;
 using Piot.MonotonicTime;
 using Piot.Surge;
@@ -29,29 +30,38 @@ namespace Surge.Game
         public INotifyEntityCreation worldSync;
     }
 
+    public enum GameMode
+    {
+        HostAndClient,
+        ClientOnly
+    }
+
     public sealed class Game
     {
-        public Host? Host { get; }
-        public Client? Client { get; }
-
         ILog log;
 
-        public Game(GameInfo info, ISnapshotPlaybackNotify snapshotPlaybackNotify, ILog log)
+        public Game(GameInfo info, ISnapshotPlaybackNotify snapshotPlaybackNotify,
+            Action<ConnectionToClient>? onCreatedConnection, GameMode mode, ILog log)
         {
             this.log = log;
             var compressor = DefaultMultiCompressor.Create();
             var now = info.timeProvider.TimeInMs;
 
-            var hostInfo = new HostInfo
+            if (mode == GameMode.HostAndClient)
             {
-                hostTransport = info.hostTransport,
-                compression = compressor,
-                compressorIndex = DefaultMultiCompressor.DeflateCompressionIndex,
-                authoritativeWorld = info.authoritativeWorld,
-                now = now
-            };
+                var hostInfo = new HostInfo
+                {
+                    hostTransport = info.hostTransport,
+                    compression = compressor,
+                    compressorIndex = DefaultMultiCompressor.DeflateCompressionIndex,
+                    authoritativeWorld = info.authoritativeWorld,
+                    now = now,
+                    onConnectionCreated = onCreatedConnection!,
+                    targetDeltaTimeMs = info.targetDeltaTimeMs
+                };
 
-            Host = new(hostInfo, log.SubLog("Host"));
+                Host = new(hostInfo, log.SubLog("Host"));
+            }
 
             var clientInfo = new ClientInfo
             {
@@ -67,9 +77,13 @@ namespace Surge.Game
 
             Client = new(clientInfo, log.SubLog("Client"))
             {
-                ShouldApplyIncomingSnapshotsToWorld = false
+                ShouldApplyIncomingSnapshotsToWorld = mode == GameMode.ClientOnly,
+                UsePrediction = mode == GameMode.ClientOnly
             };
         }
+
+        public Host? Host { get; }
+        public Client? Client { get; }
 
         public void Update(TimeMs now)
         {

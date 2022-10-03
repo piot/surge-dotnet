@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using Piot.Clog;
 using Piot.Flood;
 using Piot.Surge.CompleteSnapshot;
 using Piot.Surge.DeltaSnapshot.Pack;
@@ -15,7 +16,7 @@ namespace Piot.Surge.SnapshotProtocol.In
     {
         public static EventSequenceId Apply(DeltaSnapshotPack pack, IEntityContainerWithGhostCreator world,
             IEventProcessor eventProcessor, EventSequenceId expectedEventSequenceId,
-            bool isOverlappingMergedSnapshot, bool notifyWorldSync)
+            bool isOverlappingMergedSnapshot, bool notifyWorldSync, ILog log)
         {
             switch (pack.StreamType)
             {
@@ -41,7 +42,7 @@ namespace Piot.Surge.SnapshotProtocol.In
                     {
                         expectedEventSequenceId =
                             CompleteStateBitReader.ReadAndApply(bitSnapshotReader, world, eventProcessor,
-                                notifyWorldSync);
+                                notifyWorldSync, log);
                     }
                 }
                     break;

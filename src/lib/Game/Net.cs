@@ -10,6 +10,7 @@ using Piot.SerializableVersion;
 using Piot.Surge;
 using Piot.Surge.Event;
 using Piot.Surge.LogicalInput;
+using Piot.Surge.Pulse.Host;
 using Piot.Transport;
 using Piot.UdpServer;
 
@@ -30,13 +31,8 @@ namespace Surge.Game
     public sealed class Net
     {
         readonly ControlInfo controlInfo;
-        SemanticVersion gameVersion;
-        Game? game;
-        readonly GameTools gameTools;
         readonly ILog log;
-
-        public GameTools Tools => gameTools;
-        public Game? Game => game;
+        SemanticVersion gameVersion;
 
         public Net(SemanticVersion gameVersion, ControlInfo controlInfo, ILog log)
         {
@@ -52,14 +48,18 @@ namespace Surge.Game
                 eventProcessor = controlInfo.eventProcessor,
                 timeProvider = controlInfo.timeProvider
             };
-            gameTools = new(gameVersion, toolsInfo, log.SubLog("GameTools"));
+            Tools = new(gameVersion, toolsInfo, log.SubLog("GameTools"));
         }
+
+        public GameTools Tools { get; }
+
+        public Game? Game { get; private set; }
 
         public (ITransport, ITransport) CreateTransports()
         {
             //var (ClientTransport, _) = MemoryTransportFactory.CreateClientAndHostTransport();
             var hostTransport = new Server(32000, log.SubLog("HostTransport"));
-            var clientTransport = new Client("localhost", 32000);
+            var clientTransport = new Client("localhost", 32000, log.SubLog("ClientTransport"));
 
             return (clientTransport, hostTransport);
         }
@@ -83,32 +83,34 @@ namespace Surge.Game
             };
         }
 
-        public void StartHostAndClient()
+        public void StartHostAndClient(Action<ConnectionToClient> onCreatedConnection)
         {
-            if (game is not null)
+            if (Game is not null)
             {
-                throw new Exception("Game has already been started");
+                throw new("Game has already been started");
             }
 
-            game = new(CreateGameInfo(), gameTools.RawSnapshotReplayRecorder, log.SubLog("Game"));
+            Game = new(CreateGameInfo(), Tools.RawSnapshotReplayRecorder, onCreatedConnection, GameMode.HostAndClient,
+                log.SubLog("Game"));
         }
 
         public void StartClient()
         {
-            if (game is not null)
+            if (Game is not null)
             {
-                throw new Exception("Game has already been started");
+                throw new("Game has already been started");
             }
 
-            game = new(CreateGameInfo(), gameTools.RawSnapshotReplayRecorder, log.SubLog("Game"));
+            Game = new(CreateGameInfo(), Tools.RawSnapshotReplayRecorder, null, GameMode.ClientOnly,
+                log.SubLog("Game"));
         }
 
         public void Update()
         {
             var now = controlInfo.timeProvider.TimeInMs;
-            gameTools.Update(now);
+            Tools.Update(now);
 
-            game?.Update(now);
+            Game?.Update(now);
         }
     }
 }

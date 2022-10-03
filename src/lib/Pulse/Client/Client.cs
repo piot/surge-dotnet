@@ -63,7 +63,7 @@ namespace Piot.Surge.Pulse.Client
                     info.snapshotPlaybackNotify, info.targetDeltaTimeMs,
                     log.SubLog("SnapshotPlayback"));
 
-            datagramReceiver = new(transportClient, info.compression, deltaSnapshotPlayback,
+            datagramReceiver = new(transportClient, info.compression, deltaSnapshotPlayback, OnFirstSnapshot,
                 localInputFetchAndSend, log);
             statsTicker = new(new(0), StatsOutput, new(1000), log.SubLog("Stats"));
         }
@@ -133,6 +133,13 @@ namespace Piot.Surge.Pulse.Client
             datagramReceiver.Serialize(writer);
             OctetMarker.WriteMarker(writer, 0xaf);
             deltaSnapshotPlayback.Serialize(writer);
+        }
+
+        void OnFirstSnapshot(TickId last)
+        {
+            log.Info("Got first snapshot {TickId}", last);
+            deltaSnapshotPlayback.PlaybackTickId = last;
+            localInputFetchAndSend.TickId = last;
         }
 
         public EntityPredictor? FindPredictorFor(IEntity completeEntity)

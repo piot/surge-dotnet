@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using System;
 using Piot.Flood;
 
 namespace Piot.Surge.Tick.Serialization
@@ -17,8 +18,20 @@ namespace Piot.Surge.Tick.Serialization
         public static void Write(IOctetWriter writer, TickIdRange tickIdRange)
         {
             TickIdWriter.Write(writer, tickIdRange.lastTickId);
-            writer.WriteUInt8(
-                (byte)(tickIdRange.lastTickId.tickId - tickIdRange.startTickId.tickId));
+
+            var count = 0u;
+            if (tickIdRange.startTickId.tickId != 0)
+            {
+                count = (uint)((int)tickIdRange.lastTickId.tickId - (int)tickIdRange.startTickId.tickId);
+#if DEBUG
+                if (count > 255)
+                {
+                    throw new InvalidOperationException($"range is too big {tickIdRange} for serialization");
+                }
+#endif
+            }
+
+            writer.WriteUInt8((byte)count);
         }
     }
 }

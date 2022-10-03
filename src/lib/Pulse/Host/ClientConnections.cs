@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using System;
 using System.Collections.Generic;
 using Piot.Clog;
 using Piot.Flood;
@@ -19,12 +20,20 @@ namespace Piot.Surge.Pulse.Host
         readonly ITransport hostTransport;
         readonly ILog log;
         readonly SnapshotSyncer notifySnapshotSyncer;
+        readonly Action<ConnectionToClient> onCreatedConnection;
         readonly List<ConnectionToClient> orderedConnections = new();
 
-        public ClientConnections(ITransport hostTransport, SnapshotSyncer notifySnapshotSyncer, ILog log)
+        public ClientConnections(ITransport hostTransport, SnapshotSyncer notifySnapshotSyncer,
+            Action<ConnectionToClient> onCreatedConnection, ILog log)
         {
             this.hostTransport = hostTransport;
             this.notifySnapshotSyncer = notifySnapshotSyncer;
+            if (onCreatedConnection is null)
+            {
+                throw new ArgumentNullException(nameof(onCreatedConnection));
+            }
+
+            this.onCreatedConnection = onCreatedConnection;
             this.log = log;
         }
 
@@ -63,6 +72,8 @@ namespace Piot.Surge.Pulse.Host
                         new(clientId, syncer, log.SubLog($"Client/{clientId.Value}"));
                     orderedConnections.Add(connectionToClient);
                     connections.Add(clientId.Value, connectionToClient);
+
+                    onCreatedConnection(connectionToClient);
                 }
 
                 var datagramReader = new OctetReader(datagram.ToArray());

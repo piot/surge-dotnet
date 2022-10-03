@@ -6,6 +6,7 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
+using Piot.Clog;
 using Piot.Transport;
 
 namespace Piot.UdpServer
@@ -13,13 +14,15 @@ namespace Piot.UdpServer
     public class Client : ITransport
     {
         readonly byte[] octetsArray = new byte[1200];
+        readonly EndPoint serverEndPoint;
         readonly Socket socket;
-        readonly IPEndPoint serverEndPoint;
+        readonly ILog log;
 
-        public Client(string hostname, ushort listenPort)
+        public Client(string hostname, ushort listenPort, ILog log)
         {
+            this.log = log;
             var hostEntry = Dns.GetHostByName(hostname);
-            serverEndPoint = new(hostEntry.AddressList[0], listenPort);
+            serverEndPoint = new IPEndPoint(hostEntry.AddressList[0], listenPort);
 
             //var bindEndPoint = new IPEndPoint(IPAddress.Any, 0);
             var bindEndPoint = new IPEndPoint(IPAddress.IPv6Any, 0);
@@ -43,17 +46,20 @@ namespace Piot.UdpServer
 
         public ReadOnlySpan<byte> Receive(out EndpointId endpointId)
         {
-            var foundPoint = new IPEndPoint(IPAddress.IPv6Any, 0);
-            var castFoundPoint = (EndPoint)foundPoint;
+            //var foundPoint = new IPEndPoint(IPAddress.IPv6Any, 0);
+            var castFoundPoint = serverEndPoint;
 
+            var octetCountReceived = 0;
             try
             {
-                var octetCountReceived = socket.ReceiveFrom(octetsArray, ref castFoundPoint);
+                octetCountReceived = socket.ReceiveFrom(octetsArray, ref castFoundPoint);
                 if (octetCountReceived == 0)
                 {
                     endpointId = new(0);
                     return ReadOnlySpan<byte>.Empty;
                 }
+
+                log.DebugLowLevel("received {Length} from {Endpoint}", octetCountReceived, castFoundPoint);
             }
             catch (SocketException e)
             {
@@ -67,7 +73,7 @@ namespace Piot.UdpServer
                 throw;
             }
 
-            if (castFoundPoint != serverEndPoint)
+            if (!castFoundPoint.Equals(serverEndPoint))
             {
                 endpointId = new(0);
                 return ReadOnlySpan<byte>.Empty;
@@ -75,7 +81,7 @@ namespace Piot.UdpServer
 
             endpointId = new(0);
 
-            return octetsArray;
+            return octetsArray.AsSpan().Slice(0, octetCountReceived);
         }
 
         public void SendToEndpoint(EndpointId endpointId, ReadOnlySpan<byte> payload)
@@ -84,12 +90,14 @@ namespace Piot.UdpServer
             {
                 return;
             }
-            
+
             var sentOctets = socket.SendTo(payload.ToArray(), serverEndPoint);
             if (sentOctets != payload.Length)
             {
                 throw new("could not send");
             }
+
+            log.DebugLowLevel("sent {Length} to {Endpoint}", payload.Length, serverEndPoint);
         }
     }
 }

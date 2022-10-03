@@ -24,7 +24,7 @@ namespace Piot.Surge.TimeTick
             if (deltaTimeMs.ms <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(deltaTimeMs), deltaTimeMs.ms,
-                    $"illegal monotonic time <= 0 {deltaTimeMs}");
+                    $"illegal fixed delta time <= 0 {deltaTimeMs}");
             }
 
             Tick = action;
@@ -77,6 +77,11 @@ namespace Piot.Surge.TimeTick
             }
 
             var iterationCount = (now.ms - lastTick.ms) / deltaTimeMs;
+            if (iterationCount > 30)
+            {
+                throw new($"Time is so much in the future, that we can not keep up {now.ms} vs {lastTick.ms}");
+            }
+
             switch (iterationCount)
             {
                 case <= 0:

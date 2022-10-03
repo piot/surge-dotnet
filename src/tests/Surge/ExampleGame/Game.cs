@@ -41,6 +41,8 @@ public sealed class Game
                 compression = compression,
                 compressorIndex = DefaultMultiCompressor.DeflateCompressionIndex,
                 authoritativeWorld = world,
+                onConnectionCreated = OnConnectionCreated,
+                targetDeltaTimeMs = delta,
                 now = now
             };
             Host = new(hostInfo, log.SubLog("Host"));
@@ -112,7 +114,6 @@ public sealed class Game
         };
     }
 
-
     public Host? Host { get; }
     public Client? Client { get; }
 
@@ -120,6 +121,11 @@ public sealed class Game
     public GeneratedHostEntitySpawner GeneratedHostEntitySpawner { get; }
 
     public GeneratedNotifyEntityCreation GeneratedNotifyEntityCreation { get; }
+
+    void OnConnectionCreated(ConnectionToClient connectionToClient)
+    {
+        // intentionally blank
+    }
 
     public void Update(TimeMs now)
     {

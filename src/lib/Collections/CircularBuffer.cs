@@ -79,7 +79,7 @@ namespace Piot.Collections
         {
             if (index < 0 || index > Count)
             {
-                throw new ArgumentOutOfRangeException(nameof(index));
+                throw new ArgumentOutOfRangeException(nameof(index), $"index {index} should be between 0 and {Count}");
             }
 
             SetAt(index, item);

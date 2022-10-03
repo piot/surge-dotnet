@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using System;
 using System.Collections.Generic;
 using Piot.Clog;
 using Piot.Collections;
@@ -15,6 +16,7 @@ using Piot.Surge.MonotonicTimeLowerBits;
 using Piot.Surge.OrderedDatagrams;
 using Piot.Surge.SnapshotProtocol.Fragment;
 using Piot.Surge.SnapshotProtocol.In;
+using Piot.Surge.Tick;
 using Piot.Surge.Tick.Serialization;
 using Piot.Transport;
 
@@ -34,13 +36,17 @@ namespace Piot.Surge.Pulse.Client
         readonly StatCountThreshold statsRoundTripTime = new(10);
         readonly ITransportClient transportClient;
         readonly HoldPositive weAreSkippingAhead = new(25);
+        bool hasReceivedFirstSnapshot;
         long lastReceivedRoundTripTimeMs;
+        readonly Action<TickId> onFirstSnapshot;
 
         public ClientDatagramReceiver(ITransportClient transportClient, IMultiCompressor compression,
-            ClientDeltaSnapshotPlayback notifyPlayback, ClientLocalInputFetchAndSend notifyLocalInputFetchAndSend,
+            ClientDeltaSnapshotPlayback notifyPlayback, Action<TickId> onFirstSnapshot,
+            ClientLocalInputFetchAndSend notifyLocalInputFetchAndSend,
             ILog log)
         {
             this.log = log;
+            this.onFirstSnapshot = onFirstSnapshot;
             this.compression = compression;
             this.notifyPlayback = notifyPlayback;
             this.notifyLocalInputFetchAndSend = notifyLocalInputFetchAndSend;
@@ -123,6 +129,13 @@ namespace Piot.Surge.Pulse.Client
             if (!notifyPlayback.WantsSnapshotWithTickIdRange(tickIdRange))
             {
                 return;
+            }
+
+
+            if (!hasReceivedFirstSnapshot)
+            {
+                hasReceivedFirstSnapshot = true;
+                onFirstSnapshot(tickIdRange.Last);
             }
 
             var snapshotWithCorrections =

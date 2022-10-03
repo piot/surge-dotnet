@@ -45,10 +45,16 @@ namespace Piot.Surge.Pulse.Client
             this.inputPackFetch = inputPackFetch;
             fixedSimulationDeltaTimeMs = targetDeltaTimeMs;
             bundleAndSendOutInput = new(transportClient, log.SubLog("BundleInputAndSend"));
+            log.Info("target delta {time}", targetDeltaTimeMs);
             fetchInputTicker = new(now, FetchAndStoreInputTick, targetDeltaTimeMs,
                 log.SubLog("FetchAndStoreInputTick"));
         }
 
+        public TickId TickId
+        {
+            set => inputTickId = value;
+            get => inputTickId;
+        }
 
         public TickId LastSeenSnapshotTickId
         {
@@ -175,7 +181,7 @@ namespace Piot.Surge.Pulse.Client
                 }
             }
 
-            log.Debug(
+            log.DebugLowLevel(
                 "New Input Fetch Speed {tickId} {TickIdThatWeShouldSendNow} {InputDiffInTicks} {NewDeltaTimeMs} based on {RoundTripTimeMs}",
                 inputTickId.tickId, tickIdThatWeShouldSendNow, inputDiffInTicks, newDeltaTimeMs, roundTripTimeMs);
 
@@ -211,7 +217,7 @@ namespace Piot.Surge.Pulse.Client
         {
             var now = fetchInputTicker.Now;
 
-            log.Debug("--- Fetch And Store Input Tick {TickId}", inputTickId);
+            log.DebugLowLevel("--- Fetch And Store Input Tick {TickId}", inputTickId);
 
             var localPlayerInputsArray = LocalPlayerInputs.Values.ToArray();
 
