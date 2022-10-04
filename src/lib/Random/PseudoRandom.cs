@@ -11,6 +11,10 @@ namespace Piot.Random
 
         public PseudoRandom(ulong seed)
         {
+            if (seed == 0)
+            {
+                throw new($"seed can not be zero");
+            }
             value = seed;
         }
 
