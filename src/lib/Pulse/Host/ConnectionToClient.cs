@@ -135,7 +135,7 @@ namespace Piot.Surge.Pulse.Host
             var shouldBeReceived = orderedDatagramsIn.ReadAndCheck(reader);
             if (!shouldBeReceived)
             {
-                log.Notice("skipping datagram {OrderedDatagramsSequenceId}", orderedDatagramsIn.LastValue);
+                log.Notice("skipping datagram {OrderedDatagramsSequenceId} {EncounteredSequenceId}", orderedDatagramsIn.LastValue, orderedDatagramsIn.DebugLastReadValue);
                 return;
             }
 

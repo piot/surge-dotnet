@@ -26,9 +26,14 @@ namespace Piot.Surge.OrderedDatagrams
 
         public OrderedDatagramsSequenceId LastValue { get; private set; } = new(0xff);
 
+        public OrderedDatagramsSequenceId DebugLastReadValue { get; private set; } = new(0xff);
+
         public bool ReadAndCheck(IOctetReader reader)
         {
             var readValue = OrderedDatagramsSequenceIdReader.Read(reader);
+#if DEBUG
+            DebugLastReadValue = readValue;
+#endif
             if (!hasReceivedInitialValue)
             {
                 LastValue = readValue;

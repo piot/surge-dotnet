@@ -2,10 +2,13 @@
  *  Copyright (c) Peter Bjorklund. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+#nullable enable
 
 using System;
 using Piot.Clog;
+using Piot.Hazy;
 using Piot.MonotonicTime;
+using Piot.Random;
 using Piot.SerializableVersion;
 using Piot.Surge;
 using Piot.Surge.Event;
@@ -33,6 +36,7 @@ namespace Surge.Game
         readonly ControlInfo controlInfo;
         readonly ILog log;
         SemanticVersion gameVersion;
+        IUpdateTransport? hazyClientTransport;
 
         public Net(SemanticVersion gameVersion, ControlInfo controlInfo, ILog log)
         {
@@ -57,11 +61,17 @@ namespace Surge.Game
 
         public (ITransport, ITransport) CreateTransports()
         {
-            //var (ClientTransport, _) = MemoryTransportFactory.CreateClientAndHostTransport();
             var hostTransport = new Server(32000, log.SubLog("HostTransport"));
             var clientTransport = new Client("localhost", 32000, log.SubLog("ClientTransport"));
+            var clientHazyTransport = new InternetSimulatorTransport(clientTransport, controlInfo.timeProvider,
+                new PseudoRandom(97), log.SubLog("Hazy"));
 
-            return (clientTransport, hostTransport);
+            clientHazyTransport.In.Decision.SetChances(0.00002d, 0, 0.01d, 0.001d);
+            clientHazyTransport.Out.Decision.SetChances(0.00002d, 0, 0.01d, 0.001d);
+
+            hazyClientTransport = clientHazyTransport;
+            
+            return (hazyClientTransport, hostTransport);
         }
 
         GameInfo CreateGameInfo()
@@ -111,7 +121,7 @@ namespace Surge.Game
         {
             var now = controlInfo.timeProvider.TimeInMs;
             Tools.Update(now);
-
+            hazyClientTransport?.Update();
             Game?.Update(now);
         }
     }

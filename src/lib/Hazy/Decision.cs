@@ -31,7 +31,7 @@ namespace Piot.Hazy
 
         public override string ToString()
         {
-            return $"[pptt {parts} out of {Divisor}  ({parts/(float)Divisor}]";
+            return $"[pptt {parts} out of {Divisor}  ({parts / (float)Divisor}]";
         }
     }
 

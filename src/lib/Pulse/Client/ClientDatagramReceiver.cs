@@ -162,9 +162,10 @@ namespace Piot.Surge.Pulse.Client
         void ReceiveDatagramFromHost(IOctetReader reader, TimeMs now)
         {
             if (!orderedDatagramsInChecker.ReadAndCheck(reader))
+                
             {
-                log.Notice("ordered datagram in wrong order, discarding datagram {OrderedDatagramsSequenceId}",
-                    orderedDatagramsInChecker);
+                log.Notice("ordered datagram in wrong order, discarding datagram. Waiting for {OrderedDatagramsSequenceId} but encountered {EncounteredSequenceId}",
+                    orderedDatagramsInChecker.LastValue, orderedDatagramsInChecker.DebugLastReadValue);
                 return;
             }
 
