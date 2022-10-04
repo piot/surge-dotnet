@@ -19,6 +19,7 @@ namespace Piot.Hazy
     {
         readonly ILog log;
         readonly IRandom random;
+        int debugCounter;
         bool isSpiking;
         long lastUpdate;
         long latencyInMs;
@@ -45,7 +46,7 @@ namespace Piot.Hazy
             latencyInMs = targetLatencyInMs;
         }
 
-        public TimeMs LatencyInMs => new(latencyInMs);
+        public DeltaTimeMs LatencyInMs => new((uint)latencyInMs);
 
         public void SetLatencyRange(int minimumLatency, int maximumLatency)
         {
@@ -120,6 +121,11 @@ namespace Piot.Hazy
             var adjustment = diff * (timePassed / 100.0f);
             latencyInMs += (long)adjustment;
             latencyInMs = Math.Clamp(latencyInMs, minLatency, maxLatency);
+            debugCounter++;
+            if (debugCounter % 60 == 0)
+            {
+                log.DebugLowLevel("latency: {latencyInMs}", latencyInMs);
+            }
         }
     }
 }

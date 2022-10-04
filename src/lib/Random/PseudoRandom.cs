@@ -13,13 +13,19 @@ namespace Piot.Random
         {
             if (seed == 0)
             {
-                throw new($"seed can not be zero");
+                throw new("seed can not be zero");
             }
+
             value = seed;
         }
 
         public int Random(int max)
         {
+            if (max == 0)
+            {
+                return 0;
+            }
+
             uint randomValue;
 
             (value, randomValue) = PseudoRandomNext.Next(value);

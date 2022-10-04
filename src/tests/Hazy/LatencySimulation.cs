@@ -33,7 +33,7 @@ public sealed class LatencySimulationTests
             var now = new TimeMs(i);
             latencySimulation.Update(now);
             log.DebugLowLevel("Latency {Latency}", latencySimulation.LatencyInMs);
-            Assert.InRange(latencySimulation.LatencyInMs.ms, 20, 95);
+            Assert.InRange(latencySimulation.LatencyInMs.ms, 20u, 95u);
         }
     }
 }

@@ -2,6 +2,7 @@
  *  Copyright (c) Peter Bjorklund. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+
 #nullable enable
 
 using System;
@@ -65,12 +66,17 @@ namespace Surge.Game
             var clientTransport = new Client("localhost", 32000, log.SubLog("ClientTransport"));
             var clientHazyTransport = new InternetSimulatorTransport(clientTransport, controlInfo.timeProvider,
                 new PseudoRandom(97), log.SubLog("Hazy"));
+            const int minHalfLatency = 35 / 2;
+            const int maxHalfLatency = 45 / 2;
+
+            clientHazyTransport.In.LatencySimulator.SetLatencyRange(minHalfLatency, maxHalfLatency);
+            clientHazyTransport.Out.LatencySimulator.SetLatencyRange(minHalfLatency, maxHalfLatency);
 
             clientHazyTransport.In.Decision.SetChances(0.00002d, 0, 0.01d, 0.001d);
             clientHazyTransport.Out.Decision.SetChances(0.00002d, 0, 0.01d, 0.001d);
 
             hazyClientTransport = clientHazyTransport;
-            
+
             return (hazyClientTransport, hostTransport);
         }
 

@@ -172,7 +172,7 @@ namespace Piot.Surge.Pulse.Client
             };
 
             var maxInputCount = MaxPredictedInputQueueCount();
-            if (maxInputCount > 25)
+            if (maxInputCount > 32)
             {
                 var localPlayerInputsArray = LocalPlayerInputs.Values.ToArray();
                 foreach (var localPlayerInput in localPlayerInputsArray)

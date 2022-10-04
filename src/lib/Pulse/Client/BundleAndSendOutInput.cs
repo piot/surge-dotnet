@@ -53,7 +53,7 @@ namespace Piot.Surge.Pulse.Client
                 droppedSnapshotCount,
                 now, logicalInputForAllPlayers);
 
-            log.Info(
+            log.DebugLowLevel(
                 "Sending inputs to host {FirstInputTickId} {HighestInputTickId} {NextExpectedSnapshotTickId} {DroppedCount}",
                 logicalInputForAllPlayers.debugFirstId, logicalInputForAllPlayers.debugLastId,
                 nextExpectedSnapshotTickId, droppedSnapshotCount);

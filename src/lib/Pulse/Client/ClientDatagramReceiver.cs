@@ -76,7 +76,7 @@ namespace Piot.Surge.Pulse.Client
                 roundTripTimeMs = now.ms - pongTime.ms;
                 lastReceivedRoundTripTimeMs = roundTripTimeMs;
                 statsRoundTripTime.Add((int)roundTripTimeMs);
-                log.Debug("RoundTripTime {Now} {PongTime} {RoundTripTimeMs} {AverageRoundTripTimeMs}", now.ms,
+                log.DebugLowLevel("RoundTripTime {Now} {PongTime} {RoundTripTimeMs} {AverageRoundTripTimeMs}", now.ms,
                     pongTime.ms,
                     roundTripTimeMs,
                     statsRoundTripTime.Stat.average);
@@ -162,9 +162,10 @@ namespace Piot.Surge.Pulse.Client
         void ReceiveDatagramFromHost(IOctetReader reader, TimeMs now)
         {
             if (!orderedDatagramsInChecker.ReadAndCheck(reader))
-                
+
             {
-                log.Notice("ordered datagram in wrong order, discarding datagram. Waiting for {OrderedDatagramsSequenceId} but encountered {EncounteredSequenceId}",
+                log.Notice(
+                    "ordered datagram in wrong order, discarding datagram. Waiting for {OrderedDatagramsSequenceId} but encountered {EncounteredSequenceId}",
                     orderedDatagramsInChecker.LastValue, orderedDatagramsInChecker.DebugLastReadValue);
                 return;
             }

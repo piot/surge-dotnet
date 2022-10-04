@@ -109,6 +109,7 @@ namespace Piot.Surge.Pulse.Client
 
         public void Reset()
         {
+            indexInCircularBuffer = -1;
             items.Clear();
         }
 

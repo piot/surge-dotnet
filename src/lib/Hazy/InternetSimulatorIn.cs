@@ -44,6 +44,7 @@ namespace Piot.Hazy
 
         public void Update()
         {
+            LatencySimulator.Update(timeProvider.TimeInMs);
             for (var i = 0; i < 30; ++i)
             {
                 var octets = wrappedTransport.Receive(out var endpoint);

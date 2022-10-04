@@ -36,6 +36,7 @@ namespace Piot.Hazy
         public void Update()
         {
             var now = timeProvider.TimeInMs;
+            internetSimulator.Update(now);
             while (internetSimulator.PacketQueuePop.Dequeue(now, out var packet))
             {
                 wrappedTransport.SendToEndpoint(packet.endPoint, packet.payload.Span);

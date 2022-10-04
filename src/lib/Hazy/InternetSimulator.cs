@@ -32,6 +32,11 @@ namespace Piot.Hazy
 
         public IPacketQueuePop PacketQueuePop => packetQueue;
 
+        public void Update(TimeMs now)
+        {
+            LatencySimulator.Update(now);
+        }
+
         public void HandlePacket(EndpointId endpointId, ReadOnlySpan<byte> octets)
         {
             var chance = (uint)random.Random((int)PartsPerTenThousand.Divisor);
