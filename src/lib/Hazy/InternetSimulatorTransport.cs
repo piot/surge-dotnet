@@ -11,11 +11,14 @@ using Piot.Transport;
 
 namespace Piot.Hazy
 {
-    public sealed class InternetSimulatorTransport : ITransport
+    public sealed class InternetSimulatorTransport : IUpdateTransport
     {
         readonly InternetSimulatorIn simulatorIn;
         readonly InternetSimulatorOut simulatorOut;
 
+        public InternetSimulatorIn In => simulatorIn;
+        public InternetSimulatorOut Out => simulatorOut;
+        
         public InternetSimulatorTransport(ITransport wrapped, IMonotonicTimeMs timeProvider, IRandom random,
             ILog log)
         {
