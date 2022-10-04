@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
+using Piot.MonotonicTime;
 
 namespace Piot.Transport
 {
@@ -19,6 +20,11 @@ namespace Piot.Transport
 
     public interface ITransport : ITransportReceive, ITransportSend
     {
+    }
+
+    public interface IUpdateTransport : ITransport
+    {
+        public void Update();
     }
 
     public interface ITransportEnqueue
