@@ -28,6 +28,11 @@ namespace Piot.Hazy
         }
 
         public uint Value => parts;
+
+        public override string ToString()
+        {
+            return $"[pptt {parts} out of {Divisor}  ({parts/(float)Divisor}]";
+        }
     }
 
     public enum PacketAction
@@ -56,6 +61,7 @@ namespace Piot.Hazy
 
         public void SetChances(double dropChance, double tamperChance, double duplicateChance, double reorderChance)
         {
+            thresholds.Clear();
             var drop = new PartsPerTenThousand(dropChance).Value;
             var tamper = new PartsPerTenThousand(tamperChance).Value;
             var duplicate = new PartsPerTenThousand(duplicateChance).Value;
