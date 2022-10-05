@@ -49,14 +49,18 @@ namespace Piot.Surge.Pulse.Client
         {
             AssignedAvatar.CompleteEntity.RollMode = EntityRollMode.Predict;
 
-            if (AssignedAvatar.CompleteEntity is not IInputDeserialize inputDeserialize)
+            if (AssignedAvatar.CompleteEntity is not IInputDeserialize inputTarget)
             {
                 throw new(
                     $"It is not possible to control Entity {AssignedAvatar.Id}, it has no IDeserializeInput interface");
             }
 
             var inputReader = new OctetReader(logicalInput.payload.Span);
-            inputDeserialize.SetInput(inputReader);
+            if (doActualPrediction)
+            {
+                inputTarget.SetInput(inputReader);
+            }
+
             log.DebugLowLevel("Set input so it can result in {TickId}", logicalInput.appliedAtTickId.Next);
 
             CachedUndoWriter.Reset();
