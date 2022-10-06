@@ -60,14 +60,18 @@ namespace Surge.Game
 
         public Game? Game { get; private set; }
 
-        public (ITransport, ITransport) CreateTransports()
+        public ITransport CreateHostTransport()
         {
-            var hostTransport = new Server(32000, log.SubLog("HostTransport"));
+            return new Server(32000, log.SubLog("HostTransport"));
+        }
+        
+        public ITransport CreateClientTransport()
+        {
             var clientTransport = new Client("localhost", 32000, log.SubLog("ClientTransport"));
             var clientHazyTransport = new InternetSimulatorTransport(clientTransport, controlInfo.timeProvider,
                 new PseudoRandom(97), log.SubLog("Hazy"));
-            const int minHalfLatency = 35 / 2;
-            const int maxHalfLatency = 45 / 2;
+            const int minHalfLatency = 350 / 2;
+            const int maxHalfLatency = 450 / 2;
 
             clientHazyTransport.In.LatencySimulator.SetLatencyRange(minHalfLatency, maxHalfLatency);
             clientHazyTransport.Out.LatencySimulator.SetLatencyRange(minHalfLatency, maxHalfLatency);
@@ -75,14 +79,19 @@ namespace Surge.Game
             clientHazyTransport.In.Decision.SetChances(0.00002d, 0, 0.01d, 0.001d);
             clientHazyTransport.Out.Decision.SetChances(0.00002d, 0, 0.01d, 0.001d);
 
-            hazyClientTransport = clientHazyTransport;
-
-            return (hazyClientTransport, hostTransport);
+            return clientTransport;
         }
 
-        GameInfo CreateGameInfo()
+       
+        GameInfo CreateGameInfo(bool createHostTransport)
         {
-            var (clientTransport, hostTransport) = CreateTransports();
+            ITransport hostTransport = null;
+            if (createHostTransport)
+            {
+                hostTransport = CreateHostTransport();
+            }
+
+            var clientTransport = CreateClientTransport();
 
             return new()
             {
@@ -105,7 +114,7 @@ namespace Surge.Game
                 throw new("Game has already been started");
             }
 
-            Game = new(CreateGameInfo(), Tools.RawSnapshotReplayRecorder, onCreatedConnection, GameMode.HostAndClient,
+            Game = new(CreateGameInfo(true), Tools.RawSnapshotReplayRecorder, onCreatedConnection, GameMode.HostAndClient,
                 log.SubLog("Game"));
         }
 
@@ -116,7 +125,7 @@ namespace Surge.Game
                 throw new("Game has already been started");
             }
 
-            var gameInfo = CreateGameInfo();
+            var gameInfo = CreateGameInfo(false);
             gameInfo.clientWorld = controlInfo.playbackWorld;
 
             Game = new(gameInfo, Tools.RawSnapshotReplayRecorder, null, GameMode.ClientOnly,

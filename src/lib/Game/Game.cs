@@ -80,7 +80,7 @@ namespace Surge.Game
             Client = new(clientInfo, log.SubLog("Client"))
             {
                 ShouldApplyIncomingSnapshotsToWorld = mode == GameMode.ClientOnly,
-                UsePrediction = false // mode == GameMode.ClientOnly
+                UsePrediction = mode == GameMode.ClientOnly
             };
         }
 

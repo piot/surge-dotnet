@@ -102,7 +102,9 @@ namespace Piot.Surge.TimeTick
 
         public void Reset(TimeMs now)
         {
+            #if DEBUG
             lastUpdateTime = now;
+            #endif
             lastTick = now;
         }
     }
