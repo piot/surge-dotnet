@@ -64,7 +64,7 @@ namespace Surge.Game
         {
             return new Server(32000, log.SubLog("HostTransport"));
         }
-        
+
         public ITransport CreateClientTransport()
         {
             var clientTransport = new Client("localhost", 32000, log.SubLog("ClientTransport"));
@@ -82,10 +82,10 @@ namespace Surge.Game
             return clientTransport;
         }
 
-       
+
         GameInfo CreateGameInfo(bool createHostTransport)
         {
-            ITransport hostTransport = null;
+            ITransport? hostTransport = null;
             if (createHostTransport)
             {
                 hostTransport = CreateHostTransport();
@@ -114,7 +114,8 @@ namespace Surge.Game
                 throw new("Game has already been started");
             }
 
-            Game = new(CreateGameInfo(true), Tools.RawSnapshotReplayRecorder, onCreatedConnection, GameMode.HostAndClient,
+            Game = new(CreateGameInfo(true), Tools.RawSnapshotReplayRecorder, onCreatedConnection,
+                GameMode.HostAndClient,
                 log.SubLog("Game"));
         }
 

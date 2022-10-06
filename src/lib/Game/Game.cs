@@ -18,7 +18,7 @@ namespace Surge.Game
 {
     public struct GameInfo
     {
-        public ITransport hostTransport;
+        public ITransport? hostTransport;
         public ITransport clientTransport;
         public IEventProcessor eventProcessor;
         public IEntityContainerWithDetectChanges authoritativeWorld;
@@ -53,7 +53,7 @@ namespace Surge.Game
             {
                 var hostInfo = new HostInfo
                 {
-                    hostTransport = info.hostTransport,
+                    hostTransport = info.hostTransport!,
                     compression = compressor,
                     compressorIndex = DefaultMultiCompressor.DeflateCompressionIndex,
                     authoritativeWorld = info.authoritativeWorld,
