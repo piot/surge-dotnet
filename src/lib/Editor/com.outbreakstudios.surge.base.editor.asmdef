@@ -1,0 +1,19 @@
+{
+  "name": "com.outbreakstudios.surge.base.editor",
+  "references": [
+    "com.outbreakstudios.surge.base"
+  ],
+  "dependencies": {
+    "com.outbreakstudios.surge.base": "0.0.1"
+  },
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [
+  ],
+  "noEngineReferences": false
+}

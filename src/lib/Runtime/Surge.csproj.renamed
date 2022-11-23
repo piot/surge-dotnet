@@ -13,16 +13,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="ClrHeapAllocationAnalyzer" Version="3.0.0" />
+        <PackageReference Include="ClrHeapAllocationAnalyzer" Version="3.0.0"/>
     </ItemGroup>
 
     <ItemGroup>
-        <Reference Include="Mono.CecilEx">
-            <HintPath>Editor\Plugins\Mono.Cecil\Mono.CecilEx.dll</HintPath>
-        </Reference>
-        <Reference Include="Mono.CecilEx.Rocks">
-            <HintPath>Editor\Plugins\Mono.Cecil\Mono.CecilEx.Rocks.dll</HintPath>
-        </Reference>
+        <Folder Include="DeltaSnapshot\EntityMask\Serialization"/>
     </ItemGroup>
 
 </Project>

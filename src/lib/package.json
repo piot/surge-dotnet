@@ -1,0 +1,13 @@
+{
+  "name": "com.outbreakstudios.surge.base",
+  "version": "0.0.1",
+  "description": "Surge Network Engine",
+  "displayName": "Surge Network",
+  "unity": "2021.3",
+  "author": {
+    "name": "Outbreak Studios",
+    "email": "info@outbreakstudios.com",
+    "url": "https://outbreakstudios.com"
+  },
+  "license": "MIT"
+}
