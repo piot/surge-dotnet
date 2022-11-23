@@ -16,5 +16,5 @@ jobs:
       - name: Build dotnet
         run: dotnet build src/lib
 
-      - name: Test dotnet
-        run: dotnet test src/tests
+      # - name: Test dotnet
+      #  run: dotnet test src/tests
