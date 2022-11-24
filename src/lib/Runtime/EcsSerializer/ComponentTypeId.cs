@@ -8,7 +8,7 @@ namespace Piot.Surge
     {
         public readonly ushort id;
 
-        public static ushort NoneValue = 0x00;
+        public static readonly ushort NoneValue = 0x00;
         public static ComponentTypeId None = new(NoneValue);
 
         public ComponentTypeId(ushort id)

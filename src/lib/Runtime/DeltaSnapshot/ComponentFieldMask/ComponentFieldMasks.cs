@@ -22,26 +22,4 @@ namespace Piot.Surge.DeltaSnapshot.ComponentFieldMask
         }
     }
 
-    /// <summary>
-    ///     <see cref="FieldMask" /> for all the entities that changed this tick.
-    /// </summary>
-    public sealed class ComponentFieldMasks
-    {
-        public ComponentFieldMasks(Dictionary<ushort, ulong> toFieldMask)
-        {
-            FieldMasks = toFieldMask;
-        }
-
-        public ComponentFieldMasks(ComponentFieldMasksMutable mutable)
-        {
-            FieldMasks = mutable.FieldMasks;
-        }
-
-        public Dictionary<ushort, ulong> FieldMasks { get; }
-
-        public ulong FetchComponentFieldMask(ComponentTypeId componentTypeId)
-        {
-            return FieldMasks[componentTypeId.id];
-        }
-    }
 }

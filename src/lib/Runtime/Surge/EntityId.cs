@@ -9,7 +9,7 @@ namespace Piot.Surge
     {
         public ushort Value;
 
-        public static ushort NoneValue = 0x00;
+        public static readonly ushort NoneValue = 0x00;
         public static EntityId None = new(NoneValue);
 
         public EntityId(ushort value)

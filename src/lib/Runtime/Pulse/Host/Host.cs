@@ -104,13 +104,6 @@ namespace Piot.Surge.Pulse.Host
         public void PostTick()
         {
             StoreChangesMadeToTheWorld();
-            /* TODO:
-var (masks, deltaSnapshotPack) = StoreWorldChanges.StoreWorldChangesToPackContainer(AuthoritativeWorld,
-ShortLivedEventStream, authoritativeTickId, SnapshotStreamType.BitStream, cachedSnapshotWriter,
-cachedSnapshotBitWriter);
-
-snapshotSyncer.SendSnapshot(masks, deltaSnapshotPack, AuthoritativeWorld, ShortLivedEventStream);
-*/
             cachedSnapshotBitWriter.Reset();
             snapshotSyncer.SendSnapshotToClients(dataSender, ShortLivedEventStream, authoritativeTickId);
         }

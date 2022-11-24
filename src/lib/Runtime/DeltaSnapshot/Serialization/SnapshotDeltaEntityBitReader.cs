@@ -24,8 +24,6 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
                 var entityId = new EntityId();
                 EntityIdReader.Read(reader, ref entityId);
 
-                log.Debug("Read {EntityId}", entityId.Value);
-
                 if (entityId.Value == EntityId.NoneValue)
                 {
                     break;
@@ -36,19 +34,16 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
                     var componentTypeId = ComponentTypeIdReader.Read(reader);
                     if (componentTypeId.id == ComponentTypeId.NoneValue)
                     {
-                        log.Debug("End of components");
                         break;
                     }
 
                     var isAlive = reader.ReadBits(1) != 0;
                     if (isAlive)
                     {
-                        log.Debug("Receive component update {EntityId} {ComponentTypeId}", entityId, componentTypeId);
                         DataStreamReceiver.ReceiveUpdate(reader, entityId.Value, componentTypeId.id, entityGhostContainerWithCreator);
                     }
                     else
                     {
-                        log.Debug("Receive component destroy {EntityId} {ComponentTypeId}", entityId, componentTypeId);
                         DataStreamReceiver.ReceiveDestroy(entityId.Value, componentTypeId.id, entityGhostContainerWithCreator);
                     }
                 }

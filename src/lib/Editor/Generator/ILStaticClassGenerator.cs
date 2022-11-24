@@ -450,26 +450,39 @@ namespace Piot.Surge.Core.Generator
             var processor = deserializeMethod.Body.GetILProcessor();
 
             var maskBitCount = dataTypeInfo.resolvedDataStructType.Fields.Count;
+            var shouldUseBitMaskChecks = maskBitCount > 1;
 
-            processor.Emit(OpCodes.Ldarg_0);
-            EmitCallMethodWithBitCount(processor, readBitsMethod, maskBitCount);
+            if (shouldUseBitMaskChecks)
+            {
+                processor.Emit(OpCodes.Ldarg_0);
+                EmitCallMethodWithBitCount(processor, readBitsMethod, maskBitCount);
+            }
+            else
+            {
+                // mask = 0/1 for return later on
+                processor.Emit(maskBitCount == 0 ? OpCodes.Ldc_I4_0 : OpCodes.Ldc_I4_1);
+            }
 
             var index = 0;
             Instruction? skipLabel = null;
             foreach (var field in dataTypeInfo.resolvedDataStructType.Fields)
             {
-                if (skipLabel is not null)
+                if (shouldUseBitMaskChecks && skipLabel is not null)
                 {
                     processor.Append(skipLabel);
                 }
 
-                processor.Emit(OpCodes.Dup);
+                if (shouldUseBitMaskChecks)
+                {
+                    // Duplicate mask value since it is removed by And operation and needed for next check
+                    processor.Emit(OpCodes.Dup);
 
-                var valueToCheck = 1 << index;
-                processor.Emit(OpCodes.Ldc_I4, valueToCheck);
-                processor.Emit(OpCodes.And);
-                skipLabel = processor.Create(OpCodes.Nop);
-                processor.Emit(OpCodes.Brfalse_S, skipLabel);
+                    var valueToCheck = 1 << index;
+                    processor.Emit(OpCodes.Ldc_I4, valueToCheck);
+                    processor.Emit(OpCodes.And);
+                    skipLabel = processor.Create(OpCodes.Nop);
+                    processor.Emit(OpCodes.Brfalse_S, skipLabel);
+                }
 
                 EmitDataTypeReader(processor, field, false, log);
 
@@ -991,28 +1004,36 @@ namespace Piot.Surge.Core.Generator
 
             var maskBitCount = dataTypeInfo.resolvedDataStructType.Fields.Count;
 
-            processor.Emit(OpCodes.Ldarg_0);
-            processor.Emit(OpCodes.Ldarg_2);
-            processor.Emit(OpCodes.Ldc_I4, maskBitCount);
-            processor.Emit(OpCodes.Callvirt, writeBitsMethod);
+            var shouldUseBitMaskChecks = maskBitCount > 1;
+            
+            if (shouldUseBitMaskChecks)
+            {
+                processor.Emit(OpCodes.Ldarg_0);
+                processor.Emit(OpCodes.Ldarg_2);
+                processor.Emit(OpCodes.Ldc_I4, maskBitCount);
+                processor.Emit(OpCodes.Callvirt, writeBitsMethod);
+            }
 
             var index = 0;
             Instruction? skipLabel = null;
             foreach (var field in dataTypeInfo.resolvedDataStructType.Fields)
             {
-                if (skipLabel is not null)
+                if (shouldUseBitMaskChecks && skipLabel is not null)
                 {
                     processor.Append(skipLabel);
                 }
 
-                // Load fieldMask
-                processor.Emit(OpCodes.Ldarg_2);
+                if (shouldUseBitMaskChecks)
+                {
+                    // Load fieldMask
+                    processor.Emit(OpCodes.Ldarg_2);
 
-                var valueToCheck = 1 << index;
-                processor.Emit(OpCodes.Ldc_I4, valueToCheck);
-                processor.Emit(OpCodes.And);
-                skipLabel = processor.Create(OpCodes.Nop);
-                processor.Emit(OpCodes.Brfalse, skipLabel);
+                    var valueToCheck = 1 << index;
+                    processor.Emit(OpCodes.Ldc_I4, valueToCheck);
+                    processor.Emit(OpCodes.And);
+                    skipLabel = processor.Create(OpCodes.Nop);
+                    processor.Emit(OpCodes.Brfalse, skipLabel);
+                }
 
 
                 // IBitWriter
@@ -1156,45 +1177,49 @@ namespace Piot.Surge.Core.Generator
 
             // generate: uint mask = 0;
             processor.Emit(OpCodes.Ldc_I4_0);
-            processor.Emit(OpCodes.Stloc_0);
 
-            var index = 0;
-
-            var skipLabel = processor.Create(OpCodes.Ldarg_0);
-            foreach (var field in dataTypeInfo.resolvedDataStructType.Fields)
+            if (dataTypeInfo.resolvedDataStructType.Fields.Count != 0)
             {
-                processor.Append(skipLabel);
-
-
-                var modifyMaskLabel = processor.Create(OpCodes.Ldloc_0);
-                if (IsAllowedPrimitive(field.FieldType))
-                {
-                    processor.Emit(OpCodes.Ldfld, field);
-
-                    processor.Emit(OpCodes.Ldarg_1);
-                    processor.Emit(OpCodes.Ldfld, field);
-
-                }
-                else
-                {
-                    EmitCompareStructFields(processor, field, modifyMaskLabel, log);
-                }
-
-                var isLastField = index == dataTypeInfo.resolvedDataStructType.Fields.Count - 1;
-                skipLabel = processor.Create(isLastField ? OpCodes.Ldloc_0 : OpCodes.Ldarg_0);
-
-                processor.Emit(OpCodes.Beq_S, skipLabel);
-
-                var maskValue = 1 << index;
-                processor.Append(modifyMaskLabel);
-                processor.Emit(OpCodes.Ldc_I4, maskValue);
-                processor.Emit(OpCodes.Or);
                 processor.Emit(OpCodes.Stloc_0);
 
-                index++;
+                var index = 0;
+
+                var skipLabel = processor.Create(OpCodes.Ldarg_0);
+                foreach (var field in dataTypeInfo.resolvedDataStructType.Fields)
+                {
+                    processor.Append(skipLabel);
+
+
+                    var modifyMaskLabel = processor.Create(OpCodes.Ldloc_0);
+                    if (IsAllowedPrimitive(field.FieldType))
+                    {
+                        processor.Emit(OpCodes.Ldfld, field);
+
+                        processor.Emit(OpCodes.Ldarg_1);
+                        processor.Emit(OpCodes.Ldfld, field);
+
+                    }
+                    else
+                    {
+                        EmitCompareStructFields(processor, field, modifyMaskLabel, log);
+                    }
+
+                    var isLastField = index == dataTypeInfo.resolvedDataStructType.Fields.Count - 1;
+                    skipLabel = processor.Create(isLastField ? OpCodes.Ldloc_0 : OpCodes.Ldarg_0);
+
+                    processor.Emit(OpCodes.Beq_S, skipLabel);
+
+                    var maskValue = 1 << index;
+                    processor.Append(modifyMaskLabel);
+                    processor.Emit(OpCodes.Ldc_I4, maskValue);
+                    processor.Emit(OpCodes.Or);
+                    processor.Emit(OpCodes.Stloc_0);
+
+                    index++;
+                }
+                processor.Append(skipLabel);
             }
 
-            processor.Append(skipLabel);
             processor.Emit(OpCodes.Ret);
 
             currentData!.diffMethodReference = diffMethod;

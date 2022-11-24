@@ -7,15 +7,26 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Piot.Clog;
 using Piot.Surge.Core;
 
 namespace Ecs2
 {
+    public struct ChangeInformation
+    {
+        public uint[] createdEntityIds;
+        public uint[] destroyedEntityIds;
+        public uint[] modifiedEntityIds;
+    }
     public class EcsWorldClient : IEcsWorldFetcher, IDataReceiver
     {
         readonly Dictionary<uint, ClientEntityInfo> entities = new();
         readonly ILog log;
+
+        readonly List<uint> createdEntities = new();
+        readonly List<uint> deletedEntities = new();
+        readonly HashSet<uint> modifiedEntities = new();
 
         public EcsWorldClient(ILog log)
         {
@@ -26,6 +37,8 @@ namespace Ecs2
         public void Update<T>(uint mask, uint entityId, T data) where T : struct
         {
             log.Debug($"Received an update : entity {entityId} data: {data} with mask {mask}");
+            modifiedEntities.Add(entityId);
+
             entities[entityId].Set(data);
         }
 
@@ -40,8 +53,6 @@ namespace Ecs2
             return entityInfo.Grab<T>();
         }
 
-
-
         public void ReceiveNew<T>(uint entityId, T data) where T : struct
         {
             log.Debug($"Received Full entityId: {entityId} data:{data}");
@@ -51,8 +62,9 @@ namespace Ecs2
             {
                 existingEntityInfo = new();
                 entities[entityId] = existingEntityInfo;
+                createdEntities.Add(entityId);
             }
-
+            modifiedEntities.Add(entityId);
             existingEntityInfo.Set(data);
         }
 
@@ -63,7 +75,12 @@ namespace Ecs2
             entityInfo.DestroyComponent<T>();
             if (entityInfo.components.Count == 0)
             {
+                deletedEntities.Add(entityId);
                 entities.Remove(entityId);
+            }
+            else
+            {
+                modifiedEntities.Add(entityId);
             }
         }
 
@@ -71,6 +88,19 @@ namespace Ecs2
         {
             entities.Clear();
         }
+        
+        public ChangeInformation Changes()
+        {
+            var change = new ChangeInformation
+            {
+                createdEntityIds = createdEntities.ToArray(), destroyedEntityIds = deletedEntities.ToArray(), modifiedEntityIds = modifiedEntities.ToArray()
+            };
+            createdEntities.Clear();
+            deletedEntities.Clear();
+            modifiedEntities.Clear();
+            return change;
+        }
+        
         public IEnumerable<object> Components { get; }
 
         T? IEcsWorldFetcher.Get<T>(uint entityId)
@@ -86,7 +116,13 @@ namespace Ecs2
 
         public bool HasComponent<T>(uint entityId) where T : struct
         {
-            throw new NotImplementedException();
+            var foundExistingEntity = entities.TryGetValue(entityId, out var existingEntityInfo);
+            if (!foundExistingEntity || existingEntityInfo is null)
+            {
+                return false;
+            }
+            
+            return existingEntityInfo.HasComponent<T>();
         }
     }
 }

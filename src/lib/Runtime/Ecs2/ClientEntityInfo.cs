@@ -70,6 +70,12 @@ namespace Ecs2
             components.Remove(DataIdLookup<T>.value);
         }
 
+        public bool HasComponent<T>() where T : struct
+        {
+            var found = components.TryGetValue(DataIdLookup<T>.value, out _);
+            return found;
+        }
+
         public class ComponentInfo
         {
             public object? data;

@@ -97,6 +97,24 @@ namespace Ecs2
             var hostEntityInfo = FindHostEntityInfo(entityId);
             return hostEntityInfo?.Get<T>();
         }
+        
+        
+        public T Grab<T>(uint entityId) where T : struct
+        {
+            var hostEntityInfo = FindHostEntityInfo(entityId);
+            if (hostEntityInfo is null)
+            {
+                throw new Exception("entity id was not there");
+            }
+            var component = hostEntityInfo.Get<T>();
+            if (component is null)
+            {
+                throw new Exception("component was not there");
+            }
+
+            return component.Value;
+        }
+        
         ushort[] IEcsContainer.AllEntities => entities.Keys.Select(x => (ushort)x).ToArray();
 
 
@@ -111,10 +129,8 @@ namespace Ecs2
         {
             var allChanges = new AllEntitiesChangesThisTick();
 
-            log.Debug("find changes");
             foreach (var changedEntityId in modifiedEntities)
             {
-                log.Debug("Changed {EntityId}", changedEntityId);
                 var entityInfo = entities[changedEntityId];
                 var entityTarget = new EntityChangesForOneEntity(new((ushort)changedEntityId));
                 allChanges.EntitiesComponentChanges.Add(changedEntityId, entityTarget);
@@ -123,12 +139,7 @@ namespace Ecs2
                     if (componentInfoPair.Value.changedFieldMask != 0)
                     {
                         entityTarget.Add(new((ushort)componentInfoPair.Key), new(componentInfoPair.Value.changedFieldMask));
-                        log.Debug($"adding changes {componentInfoPair.Key} mask {componentInfoPair.Value.changedFieldMask}");
                         componentInfoPair.Value.changedFieldMask = 0;
-                    }
-                    else
-                    {
-                        log.Debug($"skipping {componentInfoPair.Key} no changes");
                     }
                 }
             }

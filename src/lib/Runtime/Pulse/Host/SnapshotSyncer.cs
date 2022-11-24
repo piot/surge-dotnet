@@ -129,8 +129,6 @@ namespace Piot.Surge.Pulse.Host
         {
             var deltaSnapshotPack = CreateDeltaSnapshotPack(connection, world, eventStream, hostTickId);
 
-            log.Debug("created raw {Snapshot}", deltaSnapshotPack);
-
             log.DebugLowLevel("Sending assigned physics correction {LocalPlayerCount}",
                 connection.AssignedPredictedEntityForLocalPlayers.Keys.Count);
 

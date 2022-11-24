@@ -42,17 +42,14 @@ namespace Piot.Surge.DeltaSnapshot.Pack.Convert
             foreach (var changeForOneEntity in allChanges.EntitiesComponentChanges)
             {
                 var entityId = changeForOneEntity.Value.entityId;
-                log.Debug("considering {EntityId}", entityId);
                 var haveWrittenEntityId = false;
                 var isClientSidePredicted = clientSidePredictedEntities.Contains(entityId.Value);
                 foreach (var componentChange in changeForOneEntity.Value.componentChangesMasks)
                 {
-                    log.Debug("considering {EntityId} and {ComponentTypeId} {ComponentChange}", entityId, componentChange.Key, componentChange.Value);
                     var componentTypeId = new ComponentTypeId(componentChange.Key);
                     var isLogicComponent = DataInfo.logicComponentTypeIds!.Contains(componentTypeId.id);
                     if (isClientSidePredicted)
                     {
-                        log.Debug("this is client side predicted");
                         if (!isLogicComponent)
                         {
                             continue;
@@ -62,27 +59,22 @@ namespace Piot.Surge.DeltaSnapshot.Pack.Convert
                     {
                         if (isLogicComponent)
                         {
-                            log.Debug("skipping logic component {componentTypeId}", componentTypeId.id);
-
                             continue;
                         }
                     }
 
                     if (!haveWrittenEntityId)
                     {
-                        log.Debug("writing {EntityId}", entityId);
                         EntityIdWriter.Write(writer, entityId);
                         haveWrittenEntityId = true;
                     }
 
-                    log.Debug("considering {ComponentTypeId}", componentTypeId);
                     ComponentTypeIdWriter.Write(writer, componentTypeId);
                     var changedFieldMask = componentChange.Value;
                     var wasDeleted = changedFieldMask == ChangedFieldsMask.DeletedMaskBit;
                     writer.WriteBits(wasDeleted ? 0U : 1U, 1);
                     if (!wasDeleted)
                     {
-                        log.Debug("writing {ComponentTypeId {Mask:x4}", componentTypeId, changedFieldMask);
                         dataSender.WriteMask(writer, entityId.Value, componentTypeId.id, changedFieldMask);
                     }
                 }
