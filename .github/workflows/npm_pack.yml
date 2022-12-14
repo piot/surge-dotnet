@@ -1,0 +1,26 @@
+name: Npm Pack
+on:
+  push:
+    tags:
+      - '*'
+jobs:
+  pack:
+    name: Pack Version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set Npm Version from tag
+        run: npm version ${{  github.ref_name }}
+        working-directory: src/lib
+
+      - name: Pack
+        run: npm pack
+        working-directory: src/lib
+
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: package
+          path: src/lib/*.tgz
