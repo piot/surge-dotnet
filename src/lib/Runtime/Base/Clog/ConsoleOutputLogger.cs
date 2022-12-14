@@ -4,7 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace Piot.Clog
 {
@@ -12,9 +15,10 @@ namespace Piot.Clog
     {
         const string ResetColor = "\x1b[0m";
 
+
         public void Log(LogLevel level, string prefix, string message, object[] args)
         {
-            var strings = args.Select(static x => x.ToString());
+            var strings = args.Select(Utils.ArgumentValueToString);
             var values = args.Length > 0 ? $"({string.Join(", ", strings)})" : "";
             var color = ColorStringFromLogLevel(level);
 

@@ -11,7 +11,7 @@ using System.Linq;
 using Piot.Clog;
 using Piot.Surge.Core;
 
-namespace Ecs2
+namespace Piot.Surge.Ecs2
 {
     public struct ChangeInformation
     {
@@ -51,6 +51,16 @@ namespace Ecs2
             }
 
             return entityInfo.Grab<T>();
+        }
+        public T GrabOrCreate<T>(uint entityId) where T : struct
+        {
+            var foundExistingEntity = entities.TryGetValue(entityId, out var entityInfo);
+            if (!foundExistingEntity || entityInfo is null)
+            {
+                entityInfo = new ClientEntityInfo();
+                entities[entityId] = entityInfo;
+            }
+            return entityInfo.GrabOrCreate<T>();
         }
 
         public void ReceiveNew<T>(uint entityId, T data) where T : struct

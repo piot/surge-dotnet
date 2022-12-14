@@ -5,7 +5,7 @@
 
 using System;
 
-namespace Piot.Surge.Input
+namespace Piot.Surge.Types
 {
     public struct Axis
     {

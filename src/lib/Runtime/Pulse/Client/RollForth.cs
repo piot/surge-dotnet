@@ -5,13 +5,14 @@
 
 using Piot.Clog;
 using Piot.Flood;
+using Piot.Surge.Ecs2;
 
 namespace Piot.Surge.Pulse.Client
 {
     public static class RollForth
     {
         public static void Rollforth(EntityId predictedEntity, PredictCollection predictCollection,
-            IOctetWriterWithResult undoScratchWriter, ILog log
+            IDataSender writeFromWorld, IOctetWriterWithResult undoScratchWriter, ILog log
         )
         {
             /* TODO:
@@ -35,8 +36,8 @@ namespace Piot.Surge.Pulse.Client
                     new LogicalInput.LogicalInput(new(0), predictedInput.tickId.Previous,
                         predictedInput.inputPackSetBeforeThisTick.Span);
                 log.Info("Set input and about to rollforth to {TickId}", predictedInput.tickId);
-                PredictAndSaver.PredictAndSave(predictedEntity, predictCollection, tempInput, undoScratchWriter,
-                    PredictMode.RollingForth, true);
+                PredictAndSaver.PredictAndSave(predictedEntity, predictCollection, tempInput, writeFromWorld, undoScratchWriter,
+                    PredictMode.RollingForth, true, log);
             }
         }
     }

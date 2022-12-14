@@ -9,9 +9,9 @@ namespace Piot.Surge.LocalPlayer.Serialization
 {
     public static class LocalPlayerIndexWriter
     {
-        public static void Write(LocalPlayerIndex playerIndex, IOctetWriter writer)
+        public static void Write(LocalPlayerIndex playerIndex, IBitWriter writer)
         {
-            writer.WriteUInt8(playerIndex.Value);
+            writer.WriteBits(playerIndex.Value, 4);
         }
     }
 }

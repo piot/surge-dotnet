@@ -5,7 +5,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Ecs2;
+using Piot.Surge.Ecs2;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.Surge.CompleteSnapshot;
@@ -30,7 +30,7 @@ namespace Piot.Surge.Pulse.Host
         readonly OctetWriter cachedCompressionWriter = new(12 * 1024);
         readonly OctetWriter cachedDatagramsWriter = new(Transport.Constants.MaxDatagramOctetSize);
         readonly OctetWriter cachedSinglePredictionHeaderWriter = new(1024);
-        readonly OctetWriter cachedSnapshotWithPredictionHeaderWriter = new(10 * 1024);
+        readonly BitWriter cachedPlayerSlotAssignmentWriter = new(10 * 1024);
         readonly IMultiCompressor compression;
         readonly CompressorIndex compressorIndex;
         readonly ILog log;
@@ -118,7 +118,7 @@ namespace Piot.Surge.Pulse.Host
 
             cachedBitWriterForSnapshots.Reset();
 
-            var clientSidePredictedEntities = connection.AssignedPredictedEntityForLocalPlayers.Values.Select(x => (uint)x.Value).ToArray();
+            var clientSidePredictedEntities = connection.AssignedPredictedEntityForLocalPlayers.Values.Where(x => x.shouldPredict).Select(x => (uint)x.entityToControl.Value).ToArray();
             return DeltaSnapshotToBitPack.ToDeltaSnapshotPack(world, eventsForThisRange, clientSidePredictedEntities, combinedMasks,
                 rangeToSend, cachedBitWriterForSnapshots, log);
         }
@@ -132,22 +132,8 @@ namespace Piot.Surge.Pulse.Host
             log.DebugLowLevel("Sending assigned physics correction {LocalPlayerCount}",
                 connection.AssignedPredictedEntityForLocalPlayers.Keys.Count);
 
-            cachedSnapshotWithPredictionHeaderWriter.Reset();
-            cachedSnapshotWithPredictionHeaderWriter.WriteUInt8((byte)connection.AssignedPredictedEntityForLocalPlayers.Keys
-                .Count);
-
-            foreach (var localPlayerAssignedPredictedEntity in connection.AssignedPredictedEntityForLocalPlayers)
-            {
-                cachedSinglePredictionHeaderWriter.Reset();
-                var correctionEntity = localPlayerAssignedPredictedEntity.Value;
-                // TODO: correctionEntity.CompleteEntity.SerializeCorrectionState(cachedSinglePhysicsCorrectionWriter);
-
-                ClientPredictorHeaderWriter.Write(correctionEntity,
-                    new((byte)localPlayerAssignedPredictedEntity.Key),
-                    cachedSnapshotWithPredictionHeaderWriter);
-                cachedSnapshotWithPredictionHeaderWriter.WriteOctets(cachedSinglePredictionHeaderWriter.Octets);
-            }
-
+            cachedPlayerSlotAssignmentWriter.Reset();
+            PlayerSlotAssignmentWriter.Write(connection.AssignedPredictedEntityForLocalPlayers, cachedPlayerSlotAssignmentWriter);
 
             cachedCompleteCompressedDeltaSnapshotPackWriter.Reset();
             cachedCompressionWriter.Reset();

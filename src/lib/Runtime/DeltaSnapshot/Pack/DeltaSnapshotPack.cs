@@ -39,7 +39,13 @@ namespace Piot.Surge.DeltaSnapshot.Pack
 
         public override string ToString()
         {
-            var octetString = OctetArrayToString(payload.Span.Slice(0, payload.Length > 32 ? 32 : payload.Length));
+            var truncate = payload.Length > 8 ? 8 : payload.Length;
+            var wasTruncated = truncate < payload.Length;
+            var octetString = OctetArrayToString(payload.Span.Slice(0, truncate));
+            if (wasTruncated)
+            {
+                octetString += "...";
+            }
             return $"[snapshotDeltaPack tickId: {tickIdRange} type:{SnapshotType}  payload length: {payload.Length} octets:{octetString}]";
         }
     }

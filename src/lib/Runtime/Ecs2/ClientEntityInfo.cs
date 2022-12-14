@@ -5,10 +5,11 @@
 
 
 
+using System;
 using System.Collections.Generic;
 using Piot.Surge.Core;
 
-namespace Ecs2
+namespace Piot.Surge.Ecs2
 {
     public class ClientEntityInfo
     {
@@ -17,7 +18,38 @@ namespace Ecs2
 
         public T Grab<T>() where T : struct
         {
-            return (T)components[DataIdLookup<T>.value].data!;
+            var found = components.TryGetValue(DataIdLookup<T>.value, out var foundComponentInfo);
+            if (!found)
+            {
+                throw new Exception($"could not grab componentInfo {DataIdLookup<T>.value}");
+            }
+
+            if (foundComponentInfo is null)
+            {
+                throw new Exception($"could not grab componentInfo {DataIdLookup<T>.value}");
+            }
+
+            if (foundComponentInfo.data is null)
+            {
+                throw new Exception($"internal error. data is null for component");
+            }
+            
+            return (T)foundComponentInfo.data;
+        }
+        
+        public T GrabOrCreate<T>() where T : struct
+        {
+            var found = components.TryGetValue(DataIdLookup<T>.value, out var foundComponentInfo);
+            if (found && foundComponentInfo is not null)
+            {
+                return (T)foundComponentInfo.data;
+            }
+
+            foundComponentInfo = new();
+            foundComponentInfo.data = new T();
+            components.Add(DataIdLookup<T>.value, foundComponentInfo);
+
+            return (T)foundComponentInfo.data;
         }
 
         public T? Get<T>() where T : struct
@@ -31,6 +63,11 @@ namespace Ecs2
             if (foundComponentInfo is null)
             {
                 return null;
+            }
+            
+            if (foundComponentInfo.data is null)
+            {
+                throw new Exception($"internal error. Get<T>.  {typeof(T).FullName} data is null for component");
             }
 
             return (T)foundComponentInfo.data!;
@@ -61,6 +98,11 @@ namespace Ecs2
             {
                 data = data
             };
+            
+            if (componentInfo.data is null)
+            {
+                throw new Exception($"internal error. Set<T> {typeof(T).FullName}. data is null for component");
+            }
 
             components.Add(dataId, componentInfo);
         }

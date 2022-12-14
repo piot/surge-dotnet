@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System.Collections.Generic;
-using Ecs2;
+using Piot.Surge.Ecs2;
 using Piot.Clog;
 using Piot.MonotonicTime;
 using Piot.Surge.Compress;
@@ -20,8 +20,8 @@ namespace Piot.Surge.Pulse.Client
     {
         public TimeMs now;
         public FixedDeltaTimeMs targetDeltaTimeMs;
-        public IDataReceiver worldWithGhostCreator;
-        public IDataSender componentsWriter;
+        public IDataReceiver fromHostDataReceiver;
+        public IDataSender clientToHostDataSender;
         public IEventReceiver eventProcessor;
         public ITransport assignedTransport;
         public IMultiCompressor compression;
@@ -43,19 +43,19 @@ namespace Piot.Surge.Pulse.Client
         {
             this.log = log;
 
-            World = info.worldWithGhostCreator;
+            World = info.fromHostDataReceiver;
 
             transportWithStats = new(info.assignedTransport, info.now);
             transportClient = new TransportClient(transportWithStats);
-            clientPredictor = new(log.SubLog("ClientPredictor"));
+            clientPredictor = new(info.clientToHostDataSender, log.SubLog("ClientPredictor"));
             const bool usePrediction = true;
             localInputFetchAndSend = new(clientPredictor, usePrediction,
                 transportClient, info.now,
                 info.targetDeltaTimeMs,
-                info.worldWithGhostCreator, info.componentsWriter,
+                info.fromHostDataReceiver, info.clientToHostDataSender,
                 log.SubLog("InputFetchAndSend"));
             deltaSnapshotPlayback =
-                new(info.now, info.worldWithGhostCreator, info.eventProcessor, localInputFetchAndSend,
+                new(info.now, info.fromHostDataReceiver, info.eventProcessor, localInputFetchAndSend,
                     info.snapshotPlaybackNotify, info.targetDeltaTimeMs,
                     log.SubLog("SnapshotPlayback"));
 
@@ -146,7 +146,7 @@ namespace Piot.Surge.Pulse.Client
         {
             log.Info("Got first snapshot {TickId}", last);
             deltaSnapshotPlayback.PlaybackTickId = last;
-            localInputFetchAndSend.TickId = last;
+            localInputFetchAndSend.StartPredictionFromTickId(last);
         }
 
         public EntityPredictor? FindPredictorFor(EntityId completeEntity)

@@ -4,11 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
-using Ecs2;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.Surge.Compress;
+using Piot.Surge.Ecs2;
 using Piot.Surge.Event;
 using Piot.Surge.LocalPlayer;
 using Piot.Surge.Tick;
@@ -30,6 +30,7 @@ namespace Piot.Surge.Pulse.Host
         public FixedDeltaTimeMs targetDeltaTimeMs;
         public IDataSender dataSender;
         public IEntityManagerReceiver entityManagerReceiver;
+        public Action simulationTickRunSystems;
     }
 
     public sealed class Host
@@ -39,14 +40,18 @@ namespace Piot.Surge.Pulse.Host
         readonly IDataSender dataSender;
         readonly IEntityManagerReceiver entityManagerReceiver;
         readonly ILog log;
+        readonly ILog inputLog;
         readonly SnapshotSyncer snapshotSyncer;
         readonly TimeTicker statsTicker;
         readonly ITransport transport;
         readonly TransportStatsBoth transportWithStats;
         TickId authoritativeTickId;
+        readonly Action simulationTickRunSystems;
 
         public Host(HostInfo info, ILog log)
         {
+            inputLog = log.SubLog("Input");
+            simulationTickRunSystems = info.simulationTickRunSystems;
             transportWithStats = new(info.hostTransport, info.now);
             transport = transportWithStats;
             snapshotSyncer = new(transport, info.compression, info.compressorIndex, log.SubLog("SnapshotSyncer"));
@@ -74,12 +79,17 @@ namespace Piot.Surge.Pulse.Host
 
         public TransportStats Stats => transportWithStats.Stats;
 
-        public void AssignPredictEntity(EndpointId connectionId, LocalPlayerIndex localPlayerIndex,
-            EntityId entity)
+        public void AssignEntityToControl(EndpointId connectionId, LocalPlayerIndex localPlayerIndex,
+            EntityId entity, bool shouldPredict)
         {
-            clientConnections.AssignPredictEntity(connectionId, localPlayerIndex, entity);
+            clientConnections.AssignEntityToControl(connectionId, localPlayerIndex, entity, shouldPredict);
         }
 
+        public void AssignPlayerSlotEntity(EndpointId connectionId, LocalPlayerIndex localPlayerIndex,
+            EntityId entity)
+        {
+            clientConnections.AssignPlayerSlotEntity(connectionId, localPlayerIndex, entity);
+        }
 
         void StatsOutput()
         {
@@ -98,7 +108,12 @@ namespace Piot.Surge.Pulse.Host
             ShortLivedEventStream.EndOfTick(authoritativeTickId);
             //log.Debug("== Simulation Tick post! {TickId}", authoritativeTickId);
 
-            SetInputFromClients.SetInputsFromClientsToEntities(clientConnections.Connections, authoritativeTickId, entityManagerReceiver, log);
+            SetInputFromClients.SetInputsFromClientsToEntities(clientConnections.Connections, authoritativeTickId, entityManagerReceiver, inputLog);
+        }
+
+        public void Tick()
+        {
+            simulationTickRunSystems();
         }
 
         public void PostTick()

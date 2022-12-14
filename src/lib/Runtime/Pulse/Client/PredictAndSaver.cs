@@ -3,15 +3,18 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using System;
+using Piot.Clog;
 using Piot.Flood;
+using Piot.Surge.Ecs2;
 
 namespace Piot.Surge.Pulse.Client
 {
     public static class PredictAndSaver
     {
         public static void PredictAndSave(EntityId assignedAvatar, PredictCollection predictCollection,
-            LogicalInput.LogicalInput logicalInputSetBeforePrediction, IOctetWriterWithResult undoWriter,
-            PredictMode predictMode, bool doActualPrediction)
+            LogicalInput.LogicalInput logicalInputSetBeforePrediction, IDataSender saveFromWorld, IOctetWriterWithResult undoWriter,
+            PredictMode predictMode, bool doActualPrediction, ILog log)
         {
             var tickIdAfterPredictTick = logicalInputSetBeforePrediction.appliedAtTickId.Next;
             if (doActualPrediction)
@@ -20,8 +23,13 @@ namespace Piot.Surge.Pulse.Client
                     undoWriter);
             }
 
-            PredictStateSerializer.SavePredictedState(assignedAvatar, tickIdAfterPredictTick, undoWriter.Octets,
-                logicalInputSetBeforePrediction.payload.Span, predictCollection);
+            if (logicalInputSetBeforePrediction.payload.IsEmpty)
+            {
+                throw new Exception("we should provide some input");
+            }
+
+            PredictStateSerializer.SavePredictedState(assignedAvatar, tickIdAfterPredictTick, saveFromWorld, undoWriter.Octets,
+                logicalInputSetBeforePrediction.payload.Span, predictCollection, doActualPrediction, log);
         }
     }
 }

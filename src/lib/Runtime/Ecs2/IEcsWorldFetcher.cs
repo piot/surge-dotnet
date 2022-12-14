@@ -7,7 +7,7 @@
 
 using System.Collections.Generic;
 
-namespace Ecs2
+namespace Piot.Surge.Ecs2
 {
     public interface IEcsWorldFetcher
     {

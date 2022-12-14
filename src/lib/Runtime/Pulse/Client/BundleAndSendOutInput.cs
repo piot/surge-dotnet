@@ -10,6 +10,7 @@ using Piot.Surge.LogicalInput.Serialization;
 using Piot.Surge.OrderedDatagrams;
 using Piot.Surge.Tick;
 using Piot.Transport;
+using Constants = Piot.Transport.Constants;
 
 namespace Piot.Surge.Pulse.Client
 {
@@ -39,7 +40,7 @@ namespace Piot.Surge.Pulse.Client
             set => nextExpectedSnapshotTickId = value;
         }
 
-        public void BundleAndSendInputDatagram(LocalPlayerInput[] localPlayerInputs, TimeMs now)
+        public void BundleAndSendInputDatagram(LocalPlayerInput[] localPlayerInputs, TimeMs now, ILog log)
         {
             var logicalInputForAllPlayers =
                 LocalPlayerLogicalInputBundler.BundleInputForAllLocalPlayers(localPlayerInputs);
@@ -51,14 +52,21 @@ namespace Piot.Surge.Pulse.Client
 
             LogicInputDatagramSerialize.Serialize(cachedDatagramWriter, datagramsOut.Value, nextExpectedSnapshotTickId,
                 droppedSnapshotCount,
-                now, logicalInputForAllPlayers);
+                now, logicalInputForAllPlayers, log);
 
             log.DebugLowLevel(
                 "Sending inputs to host {FirstInputTickId} {HighestInputTickId} {NextExpectedSnapshotTickId} {DroppedCount}",
                 logicalInputForAllPlayers.debugFirstId, logicalInputForAllPlayers.debugLastId,
                 nextExpectedSnapshotTickId, droppedSnapshotCount);
 
-            transportClient.SendToHost(cachedDatagramWriter.Octets);
+            var completePayload = cachedDatagramWriter.Octets;
+            
+            log.Debug(
+                "Sending inputs to host {OctetCount} {FirstInputTickId} {HighestInputTickId} {NextExpectedSnapshotTickId} {DroppedCount}",
+                completePayload.Length, logicalInputForAllPlayers.debugFirstId, logicalInputForAllPlayers.debugLastId,
+                nextExpectedSnapshotTickId, droppedSnapshotCount);
+
+            transportClient.SendToHost(completePayload);
 
             datagramsOut.Increase();
         }

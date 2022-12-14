@@ -44,7 +44,27 @@ namespace Piot.Surge.Pulse.Host
             // TODO: Send information to client about that input was too late, and is guessed by host
         }
 
-        public void AssignPredictEntityToPlayer(LocalPlayerIndex localPlayerIndex, EntityId entity)
+        public void AssignEntityToControlToPlayer(LocalPlayerIndex localPlayerIndex, EntityId predictEntity, bool shouldPredict)
+        {
+            ConnectionPlayer connectionPlayer;
+
+            if (!ConnectionPlayers.ContainsKey(localPlayerIndex.Value))
+            {
+                connectionPlayer = new(Id, localPlayerIndex);
+                ConnectionPlayers[localPlayerIndex.Value] = connectionPlayer;
+            }
+            else
+            {
+                connectionPlayer = ConnectionPlayers[localPlayerIndex.Value];
+            }
+            
+            log.Debug("Set assigned {PredictEntity} for {LocalPlayerIndex}", predictEntity, localPlayerIndex);
+
+            connectionPlayer.AssignedPredictEntity = predictEntity;
+            syncer.SetEntityToControl(localPlayerIndex, predictEntity, shouldPredict);
+        }
+        
+        public void AssignPlayerSlotEntityToPlayer(LocalPlayerIndex localPlayerIndex, EntityId playerSlotEntity)
         {
             ConnectionPlayer connectionPlayer;
 
@@ -58,8 +78,10 @@ namespace Piot.Surge.Pulse.Host
                 connectionPlayer = ConnectionPlayers[localPlayerIndex.Value];
             }
 
-            connectionPlayer.AssignedPredictEntity = entity;
-            syncer.SetAssignedPredictedEntity(localPlayerIndex, entity);
+            log.Debug("Set assigned {PlayerSlotEntity} for {LocalPlayerIndex}", playerSlotEntity, localPlayerIndex);
+            
+            connectionPlayer.PlayerSlotEntity = playerSlotEntity;
+            syncer.SetAssignedPlayerSlotEntity(localPlayerIndex, playerSlotEntity);
         }
 
         void ReceivePredictedInputs(IOctetReader reader, TickId serverIsAtTickId)

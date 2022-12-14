@@ -22,7 +22,7 @@ namespace Piot.Surge.CompleteSnapshot
             while (true)
             {
                 var entityId = new EntityId();
-                EntityIdReader.Read(reader, ref entityId);
+                EntityIdReader.Read(reader, out entityId);
 
                 log.Debug("Complete State Read {EntityId}", entityId.Value);
 

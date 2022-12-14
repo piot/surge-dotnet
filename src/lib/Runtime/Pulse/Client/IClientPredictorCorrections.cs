@@ -4,12 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
+using Piot.Flood;
 
 namespace Piot.Surge.Pulse.Client
 {
     public interface IClientPredictorCorrections
     {
         //public void AssignAvatarAndReadCorrections(TickId tickId, ReadOnlySpan<byte> snapshotReader);
-        public void ReadPredictEntityIdsForLocalPlayers(ReadOnlySpan<byte> physicsCorrectionPayload);
+        public void ReadPredictEntityIdsForLocalPlayers(IBitReader bitReader);
     }
 }

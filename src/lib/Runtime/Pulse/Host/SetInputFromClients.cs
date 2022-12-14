@@ -14,7 +14,7 @@ namespace Piot.Surge.Pulse.Host
 
     public interface IEntityManagerReceiver
     {
-        void ReceiveMultipleComponentsFullFiltered(IBitReader bitReader, uint entityId, uint[] dataTypeIds);
+        void ReceiveMultipleComponentsFullFiltered(IBitReader bitReader, uint entityId, uint[] componentTypeIdFilters);
     }
 
     public static class SetInputFromClients
@@ -27,12 +27,13 @@ namespace Piot.Surge.Pulse.Host
                 log.DebugLowLevel("checking inputs from connection {Connection}", connection);
                 foreach (var connectionPlayer in connection.ConnectionPlayers.Values)
                 {
+                    log.Debug("checking inputs for connection {Connection} {ConnectionPlayer}", connection, connectionPlayer);
                     var logicalInputQueue = connectionPlayer.LogicalInputQueue;
                     if (!logicalInputQueue.HasInputForTickId(authoritativeTickId))
                     {
                         // The old data on the input is intentionally kept
-                        log.Notice("connection {Connection} didn't have an input for tick {AuthoritativeTickId}",
-                            connection, authoritativeTickId);
+                        log.Notice("connection {Connection} {connectionPlayer} didn't have an input for tick {AuthoritativeTickId}",
+                            connection, connectionPlayer, authoritativeTickId);
                         connection.NotifyThatInputWasTooLate(authoritativeTickId);
                         continue;
                     }
@@ -41,7 +42,7 @@ namespace Piot.Surge.Pulse.Host
 
                     var input = logicalInputQueue.Dequeue();
 
-                    log.DebugLowLevel("dequeued logical input {ConnectionPlayer} {Input}", connectionPlayer, input);
+                    log.Debug("dequeued logical input {ConnectionPlayer} {Input}", connectionPlayer, input);
 
                     {
                         var targetEntity =
@@ -49,13 +50,13 @@ namespace Piot.Surge.Pulse.Host
                                 .AssignedPredictEntity;
                         if (targetEntity.Value == 0)
                         {
-                            log.Notice("target entity is null, can not apply input");
+                            log.Notice("TargetEntity is not set for {ConnectionPlayer}, can not apply {Input}", connectionPlayer, input);
                             continue;
                         }
 
 
                         var inputReader = new BitReader(input.payload.Span, input.payload.Length * 8);
-                        log.DebugLowLevel("setting input for {TickId} {PlayerIndex} {Entity}", input.appliedAtTickId,
+                        log.Debug("setting input for {TickId} {PlayerIndex} {Entity}", input.appliedAtTickId,
                             connectionPlayer.LocalPlayerIndex, targetEntity);
 
                         entityManagerReceiver.ReceiveMultipleComponentsFullFiltered(inputReader, connectionPlayer.AssignedPredictEntity.Value, DataInfo.inputComponentTypeIds!);

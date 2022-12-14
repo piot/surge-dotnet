@@ -17,6 +17,7 @@ namespace Piot.Surge.Pulse.Host
     {
         readonly EndpointId connectionId;
         public EntityId AssignedPredictEntity;
+        public EntityId PlayerSlotEntity;
 
         public ConnectionPlayer(EndpointId connectionId, LocalPlayerIndex localPlayerIndex)
         {

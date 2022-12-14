@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System.Linq;
-using Ecs2;
+using Piot.Surge.Ecs2;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.Surge.Core;
@@ -47,6 +47,14 @@ namespace Piot.Surge.DeltaSnapshot.Pack.Convert
                 foreach (var componentChange in changeForOneEntity.Value.componentChangesMasks)
                 {
                     var componentTypeId = new ComponentTypeId(componentChange.Key);
+
+                    var isInputComponent = DataInfo.inputComponentTypeIds!.Contains(componentTypeId.id);
+                    // Input is only coming from Client to Host and never the other way around
+                    if (isInputComponent)
+                    {
+                        continue;
+                    }
+                    
                     var isLogicComponent = DataInfo.logicComponentTypeIds!.Contains(componentTypeId.id);
                     if (isClientSidePredicted)
                     {
@@ -72,6 +80,8 @@ namespace Piot.Surge.DeltaSnapshot.Pack.Convert
                     ComponentTypeIdWriter.Write(writer, componentTypeId);
                     var changedFieldMask = componentChange.Value;
                     var wasDeleted = changedFieldMask == ChangedFieldsMask.DeletedMaskBit;
+                    var foundInfo = DataMetaInfo.GetMeta(componentTypeId);
+                    log.Debug("Writing Component to Client {EntityId} {ComponentTypeId}", entityId.Value, foundInfo!);
                     writer.WriteBits(wasDeleted ? 0U : 1U, 1);
                     if (!wasDeleted)
                     {

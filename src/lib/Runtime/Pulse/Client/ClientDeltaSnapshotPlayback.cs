@@ -178,9 +178,9 @@ namespace Piot.Surge.Pulse.Client
                 return;
             }
 
-            var deltaSnapshotIncludingCorrections = snapshotsQueue.Dequeue();
+            var deltaSnapshotIncludingPredictAssignmentHeader = snapshotsQueue.Dequeue();
 
-            log.DebugLowLevel("dequeued snapshot {DeltaSnapshotEntityIds}", deltaSnapshotIncludingCorrections);
+            log.DebugLowLevel("dequeued snapshot {DeltaSnapshotEntityIds}", deltaSnapshotIncludingPredictAssignmentHeader);
 
             LastPlaybackSnapshotWasSkipAhead = false; // TODO: deltaSnapshotIncludingCorrectionsItem.IsSkippedAheadSnapshot;
             LastPlaybackSnapshotWasMerged = false; // TODO: deltaSnapshotIncludingCorrections.tickIdRange.IsOverlappingAndMerged;
@@ -192,15 +192,19 @@ namespace Piot.Surge.Pulse.Client
 
             var isMergedAndOverlapping = false; // TODO: deltaSnapshotIncludingCorrectionsItem.IsMergedAndOverlapping
 
-            var deltaSnapshotPack = new DeltaSnapshotPack(deltaSnapshotIncludingCorrections.tickIdRange,
-                deltaSnapshotIncludingCorrections.payload.Span, deltaSnapshotIncludingCorrections.SnapshotType);
+            var deltaSnapshotPack = new DeltaSnapshotPack(deltaSnapshotIncludingPredictAssignmentHeader.tickIdRange,
+                deltaSnapshotIncludingPredictAssignmentHeader.payload.Span, deltaSnapshotIncludingPredictAssignmentHeader.SnapshotType);
 
             snapshotPlaybackNotify?.Invoke(snapshotPlaybackTicker.Now, playbackTick, deltaSnapshotPack);
 
+            // TODO: Serialize exact bit count
+            var bitSnapshotReader =
+                new BitReader(deltaSnapshotPack.payload.Span, deltaSnapshotPack.payload.Length * 8);
+            
             try
             {
                 log.Debug("Playback {Snapshot}", deltaSnapshotPack);
-                expectedEventSequenceId = ApplyDeltaSnapshotToWorld.Apply(deltaSnapshotPack, clientWorld,
+                expectedEventSequenceId = ApplyDeltaSnapshotToWorld.Apply(bitSnapshotReader, deltaSnapshotPack.SnapshotType, clientWorld,
                     eventProcessor, expectedEventSequenceId,
                     isMergedAndOverlapping, log);
             }
@@ -209,13 +213,15 @@ namespace Piot.Surge.Pulse.Client
                 log.Notice(e.Message);
             }
 
-            // predictor.ReadPredictEntityIdsForLocalPlayers();//AssignAvatarAndReadCorrections(deltaSnapshotIncludingCorrections.tickIdRange.Last);
+            predictor.ReadPredictEntityIdsForLocalPlayers(bitSnapshotReader);
 
             if (!ShouldTickAndNotifySnapshots)
             {
                 // Just to save some performance of Tick and Notify for a client running on a host
                 return;
             }
+            
+            
 
             log.DebugLowLevel("tick ghost logics. we are now at state with {TickId}",
                 playbackTick);

@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
-using Ecs2;
+using Piot.Surge.Ecs2;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;

@@ -22,6 +22,9 @@ namespace Piot.Surge.Types
         public const float PitchMax = (float)Math.PI / 2.0f - 0.1f;
 
         public UnitVector2 YawDirection => UnitVector2.FromFloats((float)Math.Cos(Yaw), (float)Math.Sin(Yaw));
+        
+        public UnitVector2 Forward => UnitVector2.FromFloats((float)Math.Sin(Yaw), (float)Math.Cos(Yaw));
+        public UnitVector2 Right => UnitVector2.FromFloats((float)Math.Cos(Yaw), (float)-Math.Sin(Yaw));
 
         public bool Equals(Aiming other)
         {

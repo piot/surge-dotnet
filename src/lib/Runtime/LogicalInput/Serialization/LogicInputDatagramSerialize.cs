@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.Surge.DatagramType.Serialization;
@@ -23,14 +24,14 @@ namespace Piot.Surge.LogicalInput.Serialization
         /// <param name="inputs"></param>
         public static void Serialize(IOctetWriter writer, OrderedDatagramsSequenceId sequenceOut,
             TickId lastReceivedSnapshot, byte droppedSnapshotCount, TimeMs now,
-            LogicalInputsForAllLocalPlayers inputs)
+            LogicalInputsForAllLocalPlayers inputs, ILog log)
         {
             OrderedDatagramsSequenceIdWriter.Write(writer, sequenceOut);
             DatagramTypeWriter.Write(writer, DatagramType.DatagramType.PredictedInputs);
             MonotonicTimeLowerBitsWriter.Write(
                 new((ushort)(now.ms & 0xffff)), writer);
             SnapshotReceiveStatusWriter.Write(writer, lastReceivedSnapshot, droppedSnapshotCount);
-            LogicalInputSerialize.Serialize(writer, inputs);
+            LogicalInputSerialize.Serialize(writer, inputs, log);
         }
     }
 }

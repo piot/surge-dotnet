@@ -4,11 +4,18 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System.Runtime.CompilerServices;
+using Piot.Clog;
 using Piot.Flood;
 using Piot.Surge.Tick.Serialization;
 
 namespace Piot.Surge.LogicalInput.Serialization
 {
+
+    public static class Constants
+    {
+        public const byte InputHeaderMarker = 0xdb;
+        public const byte InputPayloadHeaderMarker = 0xdc;
+    }
     public static class LogicalInputSerialize
     {
         /// <summary>
@@ -17,8 +24,15 @@ namespace Piot.Surge.LogicalInput.Serialization
         ///     sent each network tick in order to handle packet drops.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Serialize(IOctetWriter writer, LogicalInputsForAllLocalPlayers inputsForLocalPlayers)
+        public static void Serialize(IOctetWriter writer, LogicalInputsForAllLocalPlayers inputsForLocalPlayers, ILog log)
         {
+            OctetMarker.WriteMarker(writer, Constants.InputHeaderMarker);
+
+            if (inputsForLocalPlayers.inputForEachPlayerInSequence.Length == 0)
+            {
+                log.Notice("no input to serialize!");
+            }
+            
             writer.WriteUInt8((byte)inputsForLocalPlayers.inputForEachPlayerInSequence.Length);
 
             foreach (var inputsForPlayer in inputsForLocalPlayers.inputForEachPlayerInSequence)
@@ -29,6 +43,12 @@ namespace Piot.Surge.LogicalInput.Serialization
                     throw new("too many inputs to serialize");
                 }
 
+                if (tickCount == 0)
+                {
+                    log.Notice("no input (tickCount is zero) to serialize!");
+                }
+
+                
                 writer.WriteUInt8((byte)tickCount);
                 if (tickCount == 0)
                 {
@@ -47,6 +67,7 @@ namespace Piot.Surge.LogicalInput.Serialization
                         throw new(
                             $"logical input in wrong order in collection. Expected {expectedTickIdValue} but received {logicalInput.appliedAtTickId.tickId}");
                     }
+                    OctetMarker.WriteMarker(writer, Constants.InputPayloadHeaderMarker);
 
                     writer.WriteUInt8((byte)logicalInput.payload.Length);
                     writer.WriteOctets(logicalInput.payload.Span);

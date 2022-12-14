@@ -15,7 +15,7 @@ namespace Piot.Surge.Corrections.Serialization
         public static (EntityId, LocalPlayerIndex) Read(IBitReader reader)
         {
             var targetEntityId = new EntityId();
-            EntityIdReader.Read(reader, ref targetEntityId);
+            EntityIdReader.Read(reader, out targetEntityId);
             var localPlayerIndexReader = LocalPlayerIndexReader.Read(reader);
 
             return (targetEntityId, localPlayerIndexReader);

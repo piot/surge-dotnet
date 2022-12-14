@@ -7,6 +7,7 @@ using System;
 using System.Text;
 using Piot.Clog;
 using Piot.Flood;
+using Piot.Surge.Ecs2;
 using Piot.Surge.Tick;
 
 namespace Piot.Surge.Pulse.Client
@@ -16,12 +17,14 @@ namespace Piot.Surge.Pulse.Client
         readonly ILog log;
         readonly bool shouldPredictGoingForward = true;
         bool shouldPredict = true;
+        IDataSender writeFromWorld;
 
-        public AvatarPredictor(uint debugIndex, EntityId assignedAvatar, ILog log)
+        public AvatarPredictor(uint debugIndex, IDataSender writeFromWorld, EntityId assignedAvatar, ILog log)
         {
             this.log = log;
+            this.writeFromWorld = writeFromWorld;
             LocalPlayerIndex = debugIndex;
-            EntityPredictor = new(assignedAvatar, log.SubLog("EntityPredictor"));
+            EntityPredictor = new(writeFromWorld, assignedAvatar, log.SubLog("EntityPredictor"));
         }
 
         public uint LocalPlayerIndex { get; }
@@ -48,8 +51,7 @@ namespace Piot.Surge.Pulse.Client
             return item;
         }
 
-        public bool WeDidPredictTheFutureCorrectly(PredictItem v, ReadOnlySpan<byte> logicPayload,
-            ReadOnlySpan<byte> physicsCorrectionPayload)
+        public bool WeDidPredictTheFutureCorrectly(PredictItem v, ReadOnlySpan<byte> logicPayload)
         {
             var encounteredLogicPayloadChecksum = Fnv.Fnv.ToFnv(logicPayload);
             var isLogicEqual = PredictionStateChecksum.IsEqual(v.logicStateFnvChecksum, v.logicStatePack.Span,
@@ -61,18 +63,8 @@ namespace Piot.Surge.Pulse.Client
                     logicPayload.Length);
             }
 
-            var encounteredPhysicsChecksum = Fnv.Fnv.ToFnv(physicsCorrectionPayload);
-            var isPhysicsEqual = PredictionStateChecksum.IsEqual(v.physicsStateFnvChecksum,
-                v.physicsStatePack.Span,
-                physicsCorrectionPayload, encounteredPhysicsChecksum);
-            if (!isPhysicsEqual)
-            {
-                log.Notice("Physics: {StateChecksum:x4} {StateLength} {EncounteredChecksum:x4} {EncounteredLength}",
-                    v.physicsStateFnvChecksum, v.physicsStatePack.Length, encounteredPhysicsChecksum,
-                    physicsCorrectionPayload.Length);
-            }
 
-            return isLogicEqual && isPhysicsEqual;
+            return isLogicEqual;
         }
 
 
@@ -133,7 +125,7 @@ namespace Piot.Surge.Pulse.Client
                 log.Info($"complete {correctedFullSerialization.Octets.Length} {v.logicStatePack.Length}");
             }
 
-            if (WeDidPredictTheFutureCorrectly(v, correctedFullSerialization.Octets, physicsCorrectionPayload))
+            if (WeDidPredictTheFutureCorrectly(v, correctedFullSerialization.Octets))
             {
                 var reader = new OctetReader(EntityPredictor.LastItem!.Value.logicStatePack.Span);
                 // TODO: assignedAvatar.CompleteEntity.DeserializeAll(reader);
@@ -166,7 +158,7 @@ namespace Piot.Surge.Pulse.Client
             {
                 EntityPredictor.CachedUndoWriter.Reset();
                 RollForth.Rollforth(assignedAvatar, EntityPredictor.PredictCollection,
-                    EntityPredictor.CachedUndoWriter, log);
+                    writeFromWorld, EntityPredictor.CachedUndoWriter, log);
             }
 #endif
             // TODO: assignedAvatar.CompleteEntity.RollMode = EntityRollMode.Predict;

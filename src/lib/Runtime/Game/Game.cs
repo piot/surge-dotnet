@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
-using Ecs2;
+using Piot.Surge.Ecs2;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
@@ -13,6 +13,7 @@ using Piot.Surge.Compress;
 using Piot.Surge.Core;
 using Piot.Surge.Pulse.Client;
 using Piot.Surge.Pulse.Host;
+using Piot.Surge.Types.Serialization;
 using Piot.Transport;
 
 namespace Surge.Game
@@ -24,6 +25,7 @@ namespace Surge.Game
         public IEventReceiver eventProcessor;
         public IEntityContainerWithDetectChanges hostDetectChanges;
         public IDataSender hostDataSender;
+        public IDataReceiver hostDataReceiver;
 
         public IDataReceiver clientDataReceiver;
         public IMonotonicTimeMs timeProvider;
@@ -38,9 +40,36 @@ namespace Surge.Game
 
     public class NullEntityManagerReceiver : IEntityManagerReceiver
     {
-
-        public void ReceiveMultipleComponentsFullFiltered(IBitReader bitReader, uint entityId, uint[] dataTypeIds)
+        public void ReceiveMultipleComponentsFullFiltered(IBitReader bitReader, uint entityId, uint[] componentTypeIdFilters)
         {
+        }
+    }
+
+    public class WrappedInputManagerReceiver : IEntityManagerReceiver
+    {
+        readonly IDataReceiver dataReceiver;
+        readonly ILog log;
+
+        public WrappedInputManagerReceiver(IDataReceiver dataReceiver, ILog log)
+        {
+            this.dataReceiver = dataReceiver;
+            this.log = log;
+        }
+        
+        public void ReceiveMultipleComponentsFullFiltered(IBitReader bitReader, uint entityId, uint[] componentTypeIdFilters)
+        {
+            while (true)
+            {
+                var componentTypeId = ComponentTypeIdReader.Read(bitReader);
+                if (componentTypeId.id == ComponentTypeId.NoneValue)
+                {
+                    break;
+                }
+                
+                log.Debug("Received input {Entity} {Component}. Let set it to Host World", entityId, componentTypeId);
+
+                DataStreamReceiver.ReceiveNew(bitReader, entityId, componentTypeId.id, dataReceiver);
+            }
         }
     }
 
@@ -50,7 +79,7 @@ namespace Surge.Game
         ILog log;
 
         public Game(GameInfo info, ClientDeltaSnapshotPlayback.SnapshotPlaybackDelegate? snapshotPlaybackNotify,
-            Action<ConnectionToClient>? onCreatedConnection, GameMode mode, ILog log)
+            Action<ConnectionToClient>? onCreatedConnection, Action? hostSimulationTickRunSystem, GameMode mode, ILog log)
         {
             this.log = log;
             var compressor = DefaultMultiCompressor.Create();
@@ -67,9 +96,10 @@ namespace Surge.Game
                     detectChanges = info.hostDetectChanges,
                     now = now,
                     onConnectionCreated = onCreatedConnection!,
+                    simulationTickRunSystems = hostSimulationTickRunSystem!,
                     targetDeltaTimeMs = info.targetDeltaTimeMs,
                     dataSender = info.hostDataSender,
-                    entityManagerReceiver = new NullEntityManagerReceiver()
+                    entityManagerReceiver = new WrappedInputManagerReceiver(info.hostDataReceiver, log.SubLog("InputDataReceiver"))
                 };
 
                 Host = new(hostInfo, log.SubLog("Host"));
@@ -79,8 +109,8 @@ namespace Surge.Game
             {
                 now = info.timeProvider.TimeInMs,
                 targetDeltaTimeMs = info.targetDeltaTimeMs,
-                worldWithGhostCreator = info.clientDataReceiver,
-                componentsWriter = info.hostDataSender,
+                fromHostDataReceiver = info.clientDataReceiver,
+                clientToHostDataSender = info.hostDataSender,
                 eventProcessor = info.eventProcessor,
                 assignedTransport = info.clientTransport,
                 compression = compressor,
@@ -99,6 +129,11 @@ namespace Surge.Game
         public void PreTick()
         {
             Host?.PreTick();
+        }
+
+        public void Tick()
+        {
+            Host?.Tick();
         }
         public void Update(TimeMs now)
         {

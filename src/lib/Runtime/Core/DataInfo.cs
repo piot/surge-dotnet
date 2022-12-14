@@ -3,7 +3,10 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using System;
 
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable FieldCanBeMadeReadOnly.Global
 
 namespace Piot.Surge.Core
 {
@@ -19,11 +22,43 @@ namespace Piot.Surge.Core
         Logic,
         Ghost,
         Input,
-        Client
     }
 
-    public static class DataMetaInfo<T> where T : struct
+    public struct MetaInfo
+    {
+        public DataType dataType;
+        public Type type;
+
+        public MetaInfo(DataType dataType, Type type)
+        {
+            this.type = type;
+            this.dataType = dataType;
+        }
+
+        public override string ToString()
+        {
+            return $"[Meta {type.FullName} ({dataType})]";
+        }
+    }
+
+    public static class DataTypeInfo<T> where T : struct
     {
         public static DataType dataType;
+    }
+
+    public static class DataMetaInfo
+    {
+        public static MetaInfo[] infos;
+
+        public static MetaInfo? GetMeta(ComponentTypeId componentTypeId)
+        {
+            var value = componentTypeId.id;
+            if (value >= infos.Length)
+            {
+                return null;
+            }
+
+            return infos[value];
+        }
     }
 }

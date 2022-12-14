@@ -10,12 +10,10 @@ using Piot.Surge.Types.Serialization;
 
 namespace Piot.Surge.Corrections.Serialization
 {
-    public static class ClientPredictorHeaderWriter
+    public static class PlayerSlotAssignmentHeaderWriter
     {
-        public static void Write(EntityId targetEntityId, LocalPlayerIndex localPlayerIndex, IOctetWriter writer)
+        public static void Write(EntityId targetEntityId, LocalPlayerIndex localPlayerIndex, IBitWriter writer)
         {
-            EntityIdWriter.WriteOctets(writer, targetEntityId);
-            LocalPlayerIndexWriter.Write(localPlayerIndex, writer);
         }
     }
 }

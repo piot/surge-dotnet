@@ -22,6 +22,7 @@ namespace Piot.Surge.LogicalInput.Serialization
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static LogicalInputsForAllLocalPlayers Deserialize(IOctetReader reader)
         {
+            OctetMarker.AssertMarker(reader, Constants.InputHeaderMarker);
             var localPlayerCount = reader.ReadUInt8();
             if (localPlayerCount == 0)
             {
@@ -43,6 +44,8 @@ namespace Piot.Surge.LogicalInput.Serialization
 
                 for (var i = 0; i < inputCount; ++i)
                 {
+                    OctetMarker.AssertMarker(reader, Constants.InputPayloadHeaderMarker);
+
                     var payloadOctetCount = reader.ReadUInt8();
                     if (payloadOctetCount > 70)
                     {

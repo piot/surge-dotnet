@@ -5,6 +5,7 @@
 
 using Piot.Clog;
 using Piot.Flood;
+using Piot.Surge.Ecs2;
 using Piot.Surge.Tick;
 
 namespace Piot.Surge.Pulse.Client
@@ -12,11 +13,13 @@ namespace Piot.Surge.Pulse.Client
     public class EntityPredictor
     {
         readonly ILog log;
+        IDataSender writeFromWorld;
 
-        public EntityPredictor(EntityId assignedAvatar, ILog log)
+        public EntityPredictor(IDataSender writeFromWorld, EntityId assignedAvatar, ILog log)
         {
             AssignedAvatar = assignedAvatar;
             this.log = log;
+            this.writeFromWorld = writeFromWorld;
         }
 
         public EntityId AssignedAvatar { get; }
@@ -71,8 +74,8 @@ namespace Piot.Surge.Pulse.Client
             log.Info("Set input so it can result in {TickId}", logicalInput.appliedAtTickId.Next);
 
             CachedUndoWriter.Reset();
-            PredictAndSaver.PredictAndSave(AssignedAvatar, PredictCollection, logicalInput, CachedUndoWriter,
-                PredictMode.Predicting, doActualPrediction);
+            PredictAndSaver.PredictAndSave(AssignedAvatar, PredictCollection, logicalInput, writeFromWorld, CachedUndoWriter,
+                PredictMode.Predicting, doActualPrediction, log);
         }
     }
 }

@@ -18,10 +18,8 @@ namespace Piot.Surge.Pulse.Client
         public TickId tickId;
         public ReadOnlyMemory<byte> undoPack;
         public ReadOnlyMemory<byte> logicStatePack;
-        public ReadOnlyMemory<byte> physicsStatePack;
         public ReadOnlyMemory<byte> inputPackSetBeforeThisTick;
         public uint logicStateFnvChecksum;
-        public uint physicsStateFnvChecksum;
     }
 
     public class PredictCollection : IEnumerable<PredictItem>
@@ -83,7 +81,7 @@ namespace Piot.Surge.Pulse.Client
         }
 
         public void EnqueuePredict(TickId tickId, ReadOnlySpan<byte> undoPack, ReadOnlySpan<byte> inputPack,
-            ReadOnlySpan<byte> logicStatePack, ReadOnlySpan<byte> physicsStatePack)
+            ReadOnlySpan<byte> logicStatePack)
         {
             if (logicStatePack.Length == 0)
             {
@@ -108,7 +106,7 @@ namespace Piot.Surge.Pulse.Client
             {
                 if (items[before].tickId != tickId.Previous)
                 {
-                    throw new($"Must have increasing previous {items[before].tickId} but expected {tickId.Previous}");
+                    throw new($"Must have increasing expected {items[before].tickId} but received {tickId.Previous}");
                 }
             }
 
@@ -117,10 +115,8 @@ namespace Piot.Surge.Pulse.Client
                 tickId = tickId,
                 undoPack = undoPack.ToArray(),
                 logicStatePack = logicStatePack.ToArray(),
-                physicsStatePack = physicsStatePack.ToArray(),
                 inputPackSetBeforeThisTick = inputPack.ToArray(),
                 logicStateFnvChecksum = Fnv.Fnv.ToFnv(logicStatePack),
-                physicsStateFnvChecksum = Fnv.Fnv.ToFnv(physicsStatePack)
             });
         }
 

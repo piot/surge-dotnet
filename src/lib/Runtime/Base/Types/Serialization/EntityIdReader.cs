@@ -9,8 +9,7 @@ namespace Piot.Surge.Types.Serialization
 {
     public static class EntityIdReader
     {
-
-        public static void Read(IBitReader reader, ref EntityId id)
+        public static void Read(IBitReader reader, out EntityId id)
         {
             BitMarker.AssertMarker(reader, 0xaf);
             id.Value = (ushort)reader.ReadBits(16);

@@ -69,7 +69,7 @@ namespace Piot.Clog
                 var formatting = parts.Length > 1 ? parts[1] : "";
 
                 var valueObject = arguments[index];
-                var value = valueObject.ToString()!;
+                var value = Utils.ArgumentValueToString(valueObject);
 
                 if (formatting.Length > 0)
                 {

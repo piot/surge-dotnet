@@ -38,7 +38,23 @@ namespace Piot.Surge.Pulse.Host
 
         public IEnumerable<ConnectionToClient> Connections => orderedConnections;
 
-        public void AssignPredictEntity(EndpointId connectionId, LocalPlayerIndex localPlayerIndex,
+        public void AssignEntityToControl(EndpointId connectionId, LocalPlayerIndex localPlayerIndex,
+            EntityId entity, bool shouldPredict)
+        {
+            if (!connections.ContainsKey(connectionId.Value))
+            {
+                var snapshotSyncerClient = notifySnapshotSyncer.Create(connectionId);
+                var preparedConnection = new ConnectionToClient(connectionId, snapshotSyncerClient,
+                    log.SubLog($"Connection{connectionId.Value}"));
+                //preparedConnection.AssignPredictEntityToPlayer(new LocalPlayerIndex(1), entity);
+                connections[connectionId.Value] = preparedConnection;
+                orderedConnections.Add(preparedConnection);
+            }
+
+            connections[connectionId.Value].AssignEntityToControlToPlayer(localPlayerIndex, entity, shouldPredict);
+        }
+        
+        public void AssignPlayerSlotEntity(EndpointId connectionId, LocalPlayerIndex localPlayerIndex,
             EntityId entity)
         {
             if (!connections.ContainsKey(connectionId.Value))
@@ -51,8 +67,9 @@ namespace Piot.Surge.Pulse.Host
                 orderedConnections.Add(preparedConnection);
             }
 
-            connections[connectionId.Value].AssignPredictEntityToPlayer(localPlayerIndex, entity);
+            connections[connectionId.Value].AssignPlayerSlotEntityToPlayer(localPlayerIndex, entity);
         }
+        
 
         public void ReceiveFromClients(TickId serverTickId)
         {

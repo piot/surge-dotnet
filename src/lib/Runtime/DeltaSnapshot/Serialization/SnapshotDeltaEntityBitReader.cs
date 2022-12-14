@@ -22,7 +22,7 @@ namespace Piot.Surge.SnapshotDeltaPack.Serialization
             while (true)
             {
                 var entityId = new EntityId();
-                EntityIdReader.Read(reader, ref entityId);
+                EntityIdReader.Read(reader, out entityId);
 
                 if (entityId.Value == EntityId.NoneValue)
                 {

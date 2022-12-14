@@ -14,10 +14,12 @@ using Mono.CecilEx.Rocks;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.Surge.Generator;
-using Piot.Surge.Input;
 using Piot.Surge.Types;
 using Piot.Surge.Types.Serialization;
+using UnityEngine;
 using MethodAttributes = Mono.CecilEx.MethodAttributes;
+using OpCode = Mono.CecilEx.Cil.OpCode;
+using OpCodes = Mono.CecilEx.Cil.OpCodes;
 using ParameterAttributes = Mono.CecilEx.ParameterAttributes;
 using TypeAttributes = Mono.CecilEx.TypeAttributes;
 
@@ -32,12 +34,11 @@ namespace Piot.Surge.Core.Generator
         readonly TypeReference bitWriterInterfaceReference;
         readonly MethodReference dataReceiverCreateNewMethodReference;
         readonly MethodReference dataReceiverDestroyMethodReference;
-        readonly MethodReference dataReceiverGetMethodReference;
+        readonly MethodReference dataReceiverGrabOrCreateMethodReference;
 
 
         readonly TypeReference dataReceiverInterfaceReference;
         readonly MethodReference dataReceiverUpdateMethodReference;
-        readonly List<DataTypeInfo> dataTypeInfos = new();
         readonly TypeDefinition generatedStaticClass;
         readonly MethodReference genericDataStreamReaderCreateAndReadReference;
         readonly MethodReference genericDataStreamReaderReadMaskMethodReference;
@@ -50,7 +51,10 @@ namespace Piot.Surge.Core.Generator
 
         DataClassMeta? currentData;
 
-        public readonly List<DataClassMeta> dataClassMetas = new();
+        public readonly List<DataClassMeta> dataTypeInfos = new();
+        IEnumerable<DataClassMeta> logics;
+        IEnumerable<DataClassMeta> ghosts;
+        IEnumerable<DataClassMeta> inputs;
 
         TypeReference dataStreamReaderReadMaskMethodReference;
 
@@ -103,8 +107,8 @@ namespace Piot.Surge.Core.Generator
             dataReceiverDestroyMethodReference = moduleDefinition.ImportReference(dataReceiverDestroyMethodInfo);
 
 
-            var dataReceiverGetMethodInfo = typeof(IDataReceiver).GetMethod(nameof(IDataReceiver.Grab));
-            dataReceiverGetMethodReference = moduleDefinition.ImportReference(dataReceiverGetMethodInfo);
+            var dataReceiverGetMethodInfo = typeof(IDataReceiver).GetMethod(nameof(IDataReceiver.GrabOrCreate));
+            dataReceiverGrabOrCreateMethodReference = moduleDefinition.ImportReference(dataReceiverGetMethodInfo);
 
 
             var dataStreamReaderCreateAndReadMethodInfo = typeof(DataStreamReader).GetMethod(nameof(DataStreamReader.CreateAndRead));
@@ -115,26 +119,36 @@ namespace Piot.Surge.Core.Generator
             var dataStreamReaderReadMaskMethodInfo = typeof(DataStreamReader).GetMethod(nameof(DataStreamReader.ReadMask));
             genericDataStreamReaderReadMaskMethodReference = moduleDefinition.ImportReference(dataStreamReaderReadMaskMethodInfo);
             dataStreamReaderReadMaskMethodReference = genericDataStreamReaderReadMaskMethodReference.DeclaringType;
-
         }
 
-        public void GenerateDataTypes(IEnumerable<TypeDefinition> dataTypeReferences, ILog log)
+
+        public void GenerateDataTypes(IEnumerable<TypeDefinition> logics, IEnumerable<TypeDefinition> ghosts, IEnumerable<TypeDefinition> inputs, ILog log)
         {
-            foreach (var dataTypeReference in dataTypeReferences)
-            {
-                GenerateDataType(dataTypeReference, log);
-            }
+            this.logics = GenerateDataTypes(logics, log);
+            this.ghosts = GenerateDataTypes(ghosts, log);
+            this.inputs = GenerateDataTypes(inputs, log);
 
             CreateDataReceiveNew(dataTypeInfos, log);
             CreateDataReceiveUpdate(dataTypeInfos, log);
             CreateDataReceiveDestroy(dataTypeInfos, log);
         }
 
-        void GenerateDataType(TypeDefinition dataTypeReference, ILog log)
+        IEnumerable<DataClassMeta> GenerateDataTypes(IEnumerable<TypeDefinition> dataTypeReferences, ILog log)
         {
-            var dataTypeInfo = SetupDataTypeInfo(dataTypeReference, log);
-            dataTypeInfos.Add(dataTypeInfo);
+            var metas = new List<DataClassMeta>();
+            foreach (var typedef in dataTypeReferences)
+            {
+                var dataClassMeta = GenerateDataType(typedef, log);    
+                metas.Add(dataClassMeta);
+            }
 
+            return metas;
+        }
+
+        DataClassMeta GenerateDataType(TypeDefinition dataTypeReference, ILog log)
+        {
+            var dataTypeInfo = CreateDataClassMeta(dataTypeReference, log);
+            
             CreateDeserializeAllMethod(dataTypeInfo, log);
             CreateDeserializeAllRefMethod(dataTypeInfo, log);
             CreateDeserializeMaskRefMethod(dataTypeInfo, log);
@@ -143,6 +157,8 @@ namespace Piot.Surge.Core.Generator
             CreateSerializeFullMethod(dataTypeInfo, log);
 
             CreateDifferMethod(dataTypeInfo, log);
+
+            return dataTypeInfo;
         }
 
         public void Close()
@@ -191,10 +207,26 @@ namespace Piot.Surge.Core.Generator
             var name = fieldType.Name;
             var allowed = new[]
             {
-                nameof(Byte), nameof(SByte), nameof(UInt16), nameof(Int16), nameof(UInt32), nameof(Int32), nameof(UInt64), nameof(Int64)
+                nameof(Boolean), nameof(Byte), nameof(SByte), nameof(UInt16), nameof(Int16), nameof(UInt32), nameof(Int32), nameof(UInt64), nameof(Int64)
             };
 
             return fieldType.IsPrimitive && allowed.Contains(name) || fieldType.Resolve().IsEnum;
+        }
+
+        static int CountToBits(uint count)
+        {
+            int i;
+
+            if (count == 0)
+            {
+                return 0;
+            }
+
+            count--;
+            for (i = -1; count != 0; i++)
+                count >>= 1;
+
+            return i == -1 ? 0 + 1 : i + 1;
         }
 
         static int BitCountFromType(TypeReference fieldType, ILog log)
@@ -231,6 +263,15 @@ namespace Piot.Surge.Core.Generator
                         log.Error("Unknown {Primitive} type", fieldTypeName);
                         throw new($"Unknown primitive type {fieldTypeName}");
                 }
+            }
+            else if (fieldType.Resolve().IsEnum)
+            {
+                var resolved = fieldType.Resolve();
+                bitCount = CountToBits((uint)resolved.Fields.Count);
+            }
+            else
+            {
+                throw new Exception($"Unknown type {fieldType.FullName}");
             }
 
             return bitCount;
@@ -307,7 +348,7 @@ namespace Piot.Surge.Core.Generator
             }
         }
 
-        public DataTypeInfo SetupDataTypeInfo(TypeReference dataClassType, ILog log)
+        public DataClassMeta CreateDataClassMeta(TypeReference dataClassType, ILog log)
         {
             var resolvedDataStructType = dataClassType.Resolve();
             VerifyDataClassType(resolvedDataStructType, log);
@@ -317,14 +358,12 @@ namespace Piot.Surge.Core.Generator
 
             currentData = new()
             {
-                uniqueId = lastUniqueId, typeReference = dataClassType, typeByReference = new(resolvedDataStructType)
-            };
-            dataClassMetas.Add(currentData);
-
-            return new()
-            {
+                uniqueId = lastUniqueId, typeReference = dataClassType, typeByReference = new(resolvedDataStructType),
                 resolvedDataStructType = resolvedDataStructType, dataStructTypeReference = dataClassType, resolvedDataStructTypeByReference = new(resolvedDataStructType)
             };
+            dataTypeInfos.Add(currentData);
+
+            return currentData;
         }
 
         static string GenerateSafeFullName(TypeDefinition typeDefinition)
@@ -376,7 +415,7 @@ namespace Piot.Surge.Core.Generator
 
         }
 
-        public MethodDefinition CreateDeserializeAllMethod(DataTypeInfo dataTypeInfo, ILog log)
+        public MethodDefinition CreateDeserializeAllMethod(DataClassMeta dataTypeInfo, ILog log)
         {
             var deserializeMethod = CreatePublicStaticMethodForType("Deserialize", dataTypeInfo.resolvedDataStructType);
 
@@ -408,7 +447,7 @@ namespace Piot.Surge.Core.Generator
             return deserializeMethod;
         }
 
-        public MethodDefinition CreateDeserializeAllRefMethod(DataTypeInfo dataTypeInfo, ILog log)
+        public MethodDefinition CreateDeserializeAllRefMethod(DataClassMeta dataTypeInfo, ILog log)
         {
             var deserializeMethod = CreatePublicStaticMethodForTypeVoidReturn("DeserializeAllRef", dataTypeInfo.resolvedDataStructType);
 
@@ -436,7 +475,7 @@ namespace Piot.Surge.Core.Generator
         }
 
 
-        public MethodDefinition CreateDeserializeMaskRefMethod(DataTypeInfo dataTypeInfo, ILog log)
+        public MethodDefinition CreateDeserializeMaskRefMethod(DataClassMeta dataTypeInfo, ILog log)
         {
             var deserializeMethod = CreatePublicStaticMethodForTypeUInt32Return("DeserializeMaskRef", dataTypeInfo.resolvedDataStructType);
 
@@ -669,7 +708,7 @@ namespace Piot.Surge.Core.Generator
 
             var genericValueFieldRef = moduleDefinition.ImportReference(targetValueFieldInfo);
 
-            foreach (var dataMeta in dataClassMetas)
+            foreach (var dataMeta in dataTypeInfos)
             {
                 processor.Emit(OpCodes.Ldc_I4, (int)dataMeta.uniqueId);
                 var specializedDataIdInstanceType = genericDataIdLookupDef.MakeGenericInstanceType(dataMeta.typeReference);
@@ -698,8 +737,9 @@ namespace Piot.Surge.Core.Generator
             var diffDelegateFieldInfo = typeof(DataDiffer<>).GetField(nameof(DataDiffer<AnyStruct>.diff));
             var diffDelegateFieldReference = moduleDefinition.ImportReference(diffDelegateFieldInfo);
 
-            foreach (var dataMeta in dataClassMetas)
+            foreach (var dataMeta in dataTypeInfos)
             {
+                Debug.Log($"dataMeta {dataMeta.uniqueId} {dataMeta.typeReference.FullName}");
                 {
                     CreateFuncDelegateBitReaderToDataType(processor, dataMeta.readFullMethodReference!, dataMeta.typeReference!);
 
@@ -734,7 +774,7 @@ namespace Piot.Surge.Core.Generator
             }
 
 
-            foreach (var dataMeta in dataClassMetas)
+            foreach (var dataMeta in dataTypeInfos)
             {
                 CreateDataDifferDelegateInstance(processor, dataMeta.diffMethodReference!, dataMeta.typeReference!);
                 var specializedDataDifferForDataType = genericDataDifferStaticClassReference.MakeGenericInstanceType(dataMeta.typeReference);
@@ -766,12 +806,55 @@ namespace Piot.Surge.Core.Generator
                 processor.Emit(OpCodes.Stsfld, dataStreamReceiverReceiveDestroyField);
             }
 
-            var ghostComponentTypeIdsFieldInfo = typeof(DataInfo).GetField(nameof(DataInfo.ghostComponentTypeIds));
-            var ghostComponentTypeIdsFieldReference = moduleDefinition.ImportReference(ghostComponentTypeIdsFieldInfo);
+            GenerateInputIdArrays(processor);
+            GenerateGhostIdArrays(processor);
+            GenerateLogicsIdArrays(processor);
 
             processor.Emit(OpCodes.Ret);
 
             AddGeneratedMethod(initOnLoadMethod);
+        }
+
+        void GenerateInputIdArrays(ILProcessor processor)
+        {
+            GenerateIdArrayAndSet(processor, typeof(DataInfo).GetField(nameof(DataInfo.inputComponentTypeIds)),
+                inputs.Select(dataClassMeta => dataClassMeta.uniqueId).ToArray());
+        }
+
+        void GenerateGhostIdArrays(ILProcessor processor)
+        {
+            GenerateIdArrayAndSet(processor, typeof(DataInfo).GetField(nameof(DataInfo.ghostComponentTypeIds)),
+                ghosts.Select(dataClassMeta => dataClassMeta.uniqueId).ToArray());
+        }
+
+        void GenerateLogicsIdArrays(ILProcessor processor)
+        {
+            GenerateIdArrayAndSet(processor, typeof(DataInfo).GetField(nameof(DataInfo.logicComponentTypeIds)),
+                logics.Select(dataClassMeta => dataClassMeta.uniqueId).ToArray());
+        }
+
+        void GenerateIdArrayAndSet(ILProcessor processor, FieldInfo fieldInfo, IReadOnlyCollection<uint> dataIds)
+        {
+            AddDataIdsArray(processor, dataIds);
+
+            var ghostComponentTypeIdsFieldReference = moduleDefinition.ImportReference(fieldInfo);
+            processor.Emit(OpCodes.Stsfld, ghostComponentTypeIdsFieldReference);
+        }
+
+        void AddDataIdsArray(ILProcessor processor, IReadOnlyCollection<uint> dataIds)
+        {
+            processor.Emit(OpCodes.Ldc_I4, dataIds.Count);
+            processor.Emit(OpCodes.Newarr, moduleDefinition.TypeSystem.UInt32);
+
+            var index = 0;
+            foreach (var dataId in dataIds)
+            {
+                processor.Emit(OpCodes.Dup);
+                processor.Emit(OpCodes.Ldc_I4, index);
+                processor.Emit(OpCodes.Ldc_I4, (int)dataId);
+                processor.Emit(OpCodes.Stelem_Any, moduleDefinition.TypeSystem.UInt32);
+                index++;
+            }
         }
 
         MethodDefinition? CheckIfUserDefinedStaticBitReaderMethodExists(TypeReference dataTypeReference)
@@ -853,6 +936,7 @@ namespace Piot.Surge.Core.Generator
                 return null;
             }
 
+
             var surgeWriteMethod = dataTypeReference.Name switch
             {
                 nameof(Position3) => typeof(Position3Reader).GetMethod(nameof(Position3Reader.Read)),
@@ -894,10 +978,10 @@ namespace Piot.Surge.Core.Generator
             var userWriteMethod = CheckIfUserDefinedStaticBitReaderMethodExists(dataTypeReference);
             if (userWriteMethod is null)
             {
-                throw new("couldn't find user provided bit writer");
+                return null;
             }
 
-            return userWriteMethod;
+            return moduleDefinition.ImportReference(userWriteMethod);
         }
 
         void EmitDataTypeWriter(ILProcessor processor, TypeReference fieldType, ILog log)
@@ -962,7 +1046,7 @@ namespace Piot.Surge.Core.Generator
                 var foundMethod = FindStaticBitReaderMethod(fieldType);
                 if (foundMethod is null)
                 {
-                    throw new($"couldnt find a bit serializer for {fieldType.FullName}");
+                    throw new($"couldnt find a bit serializer for {fieldType.FullName} {fieldReference.Name}");
                 }
 
                 // IBitReader
@@ -986,7 +1070,7 @@ namespace Piot.Surge.Core.Generator
             }
         }
 
-        public MethodDefinition CreateSerializeMaskRefMethod(DataTypeInfo dataTypeInfo, ILog log)
+        public MethodDefinition CreateSerializeMaskRefMethod(DataClassMeta dataTypeInfo, ILog log)
         {
             var serializeMaskMethod = CreatePublicStaticMethodForTypeVoidReturn("SerializeMaskRef", dataTypeInfo.resolvedDataStructType);
 
@@ -1005,7 +1089,7 @@ namespace Piot.Surge.Core.Generator
             var maskBitCount = dataTypeInfo.resolvedDataStructType.Fields.Count;
 
             var shouldUseBitMaskChecks = maskBitCount > 1;
-            
+
             if (shouldUseBitMaskChecks)
             {
                 processor.Emit(OpCodes.Ldarg_0);
@@ -1066,7 +1150,7 @@ namespace Piot.Surge.Core.Generator
             return serializeMaskMethod;
         }
 
-        MethodDefinition CreateSerializeFullMethod(DataTypeInfo dataTypeInfo, ILog log)
+        MethodDefinition CreateSerializeFullMethod(DataClassMeta dataTypeInfo, ILog log)
         {
             var serializeFullMethod = CreatePublicStaticMethodForTypeVoidReturn("SerializeFull", dataTypeInfo.resolvedDataStructType);
 
@@ -1077,6 +1161,8 @@ namespace Piot.Surge.Core.Generator
             serializeFullMethod.Body.InitLocals = true;
 
             var processor = serializeFullMethod.Body.GetILProcessor();
+
+            VerifyDataStruct(dataTypeInfo.resolvedDataStructType, log);
 
             var index = 0;
             foreach (var field in dataTypeInfo.resolvedDataStructType.Fields)
@@ -1108,24 +1194,45 @@ namespace Piot.Surge.Core.Generator
             return serializeFullMethod;
         }
 
+        void VerifyDataStruct(TypeDefinition typeRef, ILog log)
+        {
+            if (typeRef.HasProperties)
+            {
+                log.Notice("We discourage having properties on {Struct}", typeRef.FullName);
+            }
+
+            if (typeRef.HasEvents)
+            {
+                log.Error("Not allowed to have events {Struct}", typeRef.FullName);
+                throw new Exception($"not allowed to have events {typeRef.FullName}");
+            }
+
+            if (typeRef.HasMethods)
+            {
+                log.Notice("we discourage having methods on a data struct {Struct}", typeRef.FullName);
+            }
+
+            if (!typeRef.IsSealed)
+            {
+                log.Debug("we recommend having structs sealed");
+            }
+        }
+
         void EmitCompareStructFields(ILProcessor processor, FieldReference getRootFieldReference, Instruction modifyMaskLabel, ILog log)
         {
             var rootFieldTypeReference = moduleDefinition.ImportReference(getRootFieldReference.FieldType);
             var resolvedFieldType = rootFieldTypeReference.Resolve();
             var writtenFirst = false;
+
+            VerifyDataStruct(resolvedFieldType, log);
+
             foreach (var fieldDefinition in resolvedFieldType.Fields)
             {
-                if (!fieldDefinition.IsPublic)
+                if (!VerifyDataField(fieldDefinition, log))
                 {
-                    log.Warn("Should not have private fields in {Type} {FieldType} {Name}", resolvedFieldType.FullName, fieldDefinition.FieldType.FullName, fieldDefinition.FullName);
                     continue;
                 }
 
-                if (fieldDefinition.IsStatic)
-                {
-                    log.Warn("Should not have constants or static fields in {Type} {FieldType} {Name}", resolvedFieldType.FullName, fieldDefinition.FieldType.FullName, fieldDefinition.FullName);
-                    continue;
-                }
 
                 if (!IsAllowedPrimitive(fieldDefinition.FieldType))
                 {
@@ -1154,7 +1261,7 @@ namespace Piot.Surge.Core.Generator
             }
         }
 
-        public MethodDefinition CreateDifferMethod(DataTypeInfo dataTypeInfo, ILog log)
+        public MethodDefinition CreateDifferMethod(DataClassMeta dataTypeInfo, ILog log)
         {
             var uint32Reference = moduleDefinition.ImportReference(typeof(uint));
             var generatedMethodName = GenerateSafeFullNameWithPrefix("Differ", dataTypeInfo.resolvedDataStructType);
@@ -1178,6 +1285,8 @@ namespace Piot.Surge.Core.Generator
             // generate: uint mask = 0;
             processor.Emit(OpCodes.Ldc_I4_0);
 
+            VerifyDataStruct(dataTypeInfo.resolvedDataStructType, log);
+
             if (dataTypeInfo.resolvedDataStructType.Fields.Count != 0)
             {
                 processor.Emit(OpCodes.Stloc_0);
@@ -1189,6 +1298,11 @@ namespace Piot.Surge.Core.Generator
                 {
                     processor.Append(skipLabel);
 
+
+                    if (!VerifyDataField(field, log))
+                    {
+                        continue;
+                    }
 
                     var modifyMaskLabel = processor.Create(OpCodes.Ldloc_0);
                     if (IsAllowedPrimitive(field.FieldType))
@@ -1217,6 +1331,7 @@ namespace Piot.Surge.Core.Generator
 
                     index++;
                 }
+
                 processor.Append(skipLabel);
             }
 
@@ -1227,6 +1342,35 @@ namespace Piot.Surge.Core.Generator
             AddGeneratedMethod(diffMethod);
 
             return diffMethod;
+        }
+        bool VerifyDataField(FieldDefinition field, ILog log)
+        {
+            if (field.IsLiteral && field.IsStatic)
+            {
+                log.Debug("literal is discouraged, but works for now {Field}", field.FullName);
+                return false;
+            }
+
+            if (!field.IsDefinition)
+            {
+                log.Debug("this is not a definition {Field}", field.FullName);
+                return false;
+            }
+
+            if (field.IsStatic)
+            {
+                log.Debug($"static fields are discouraged, but works for now {field.FullName}");
+                return false;
+            }
+
+
+            if (field.IsPrivate)
+            {
+                log.Error("can not have private fields {Field}", field.FullName);
+                throw new Exception($"not allowed to have private fields {field.FullName}");
+            }
+
+            return field.IsPublic;
         }
 
         public MethodDefinition CreateCommonDataReceiveMethod(string generatedMethodName)
@@ -1253,7 +1397,7 @@ namespace Piot.Surge.Core.Generator
             return dataReceiveNewMethod;
         }
 
-        public MethodDefinition CreateDataReceiveNew(IEnumerable<DataTypeInfo> dataTypeInfos, ILog log)
+        public MethodDefinition CreateDataReceiveNew(IEnumerable<DataClassMeta> dataClassMetas, ILog log)
         {
             var dataReceiveNewMethod = CreateCommonDataReceiveMethod("DataReceiveNew");
 
@@ -1262,13 +1406,13 @@ namespace Piot.Surge.Core.Generator
             // load dataTypeId
             processor.Emit(OpCodes.Ldarg_2);
 
-            var (labels, defaultLabel) = CreateEnumAndReturnLabels(dataTypeInfos, processor, OpCodes.Ldarg_3, OpCodes.Ret);
+            var (labels, defaultLabel) = CreateEnumAndReturnLabels(dataClassMetas, processor, OpCodes.Ldarg_3, OpCodes.Ret);
 
             processor.Emit(OpCodes.Ret);
 
             var index = 0;
 
-            foreach (var dataTypeInfo in dataTypeInfos)
+            foreach (var dataTypeInfo in dataClassMetas)
             {
                 processor.Append(labels[index]);
 
@@ -1299,13 +1443,13 @@ namespace Piot.Surge.Core.Generator
             return dataReceiveNewMethod;
         }
 
-        public MethodDefinition CreateDataReceiveUpdate(IEnumerable<DataTypeInfo> dataTypeInfos, ILog log)
+        public MethodDefinition CreateDataReceiveUpdate(IEnumerable<DataClassMeta> dataClassMetas, ILog log)
         {
             var dataReceiveNewMethod = CreateCommonDataReceiveMethod("DataReceiveUpdate");
 
             var processor = dataReceiveNewMethod.Body.GetILProcessor();
 
-            foreach (var dataTypeInfo in dataTypeInfos)
+            foreach (var dataTypeInfo in dataClassMetas)
             {
                 var specificLocal = new VariableDefinition(dataTypeInfo.dataStructTypeReference);
                 processor.Body.Variables.Add(specificLocal);
@@ -1314,13 +1458,13 @@ namespace Piot.Surge.Core.Generator
             // load dataTypeId
             processor.Emit(OpCodes.Ldarg_2);
 
-            var (labels, defaultLabel) = CreateEnumAndReturnLabels(dataTypeInfos, processor, OpCodes.Ldarg_3, OpCodes.Ret);
+            var (labels, defaultLabel) = CreateEnumAndReturnLabels(dataClassMetas, processor, OpCodes.Ldarg_3, OpCodes.Ret);
 
             processor.Emit(OpCodes.Ret);
 
             var index = 0;
 
-            foreach (var dataTypeInfo in dataTypeInfos)
+            foreach (var dataTypeInfo in dataClassMetas)
             {
                 processor.Append(labels[index]); // LdArg_3 // IDataReceiver
 
@@ -1331,7 +1475,7 @@ namespace Piot.Surge.Core.Generator
                 // EntityId
                 processor.Emit(OpCodes.Ldarg_1);
 
-                var specializedDataReceiverGetMethodReference = SpecializeMethod(dataReceiverGetMethodReference, dataTypeInfo.dataStructTypeReference);
+                var specializedDataReceiverGetMethodReference = SpecializeMethod(dataReceiverGrabOrCreateMethodReference, dataTypeInfo.dataStructTypeReference);
                 processor.Emit(OpCodes.Callvirt, specializedDataReceiverGetMethodReference);
 
                 // The stack now has the DataType struct on top of the stack
@@ -1381,15 +1525,15 @@ namespace Piot.Surge.Core.Generator
             return dataReceiveNewMethod;
         }
 
-        (Instruction[], Instruction) CreateEnumAndReturnLabels(IEnumerable<DataTypeInfo> dataTypeInfos, ILProcessor processor, OpCode startLabelOpCode, OpCode startDefaultOpCode)
+        (Instruction[], Instruction) CreateEnumAndReturnLabels(IEnumerable<DataClassMeta> dataClassMetas, ILProcessor processor, OpCode startLabelOpCode, OpCode startDefaultOpCode)
         {
-            var labels = new Instruction[dataTypeInfos.Count() + 1];
+            var labels = new Instruction[dataClassMetas.Count() + 1];
             var labelIndex = 0;
 
             var defaultLabel = processor.Create(OpCodes.Ret);
             labels[labelIndex++] = defaultLabel;
 
-            foreach (var dataTypeInfo in dataTypeInfos)
+            foreach (var dataTypeInfo in dataClassMetas)
             {
                 // Load `receiver`
                 labels[labelIndex] = processor.Create(startLabelOpCode);
@@ -1401,7 +1545,7 @@ namespace Piot.Surge.Core.Generator
             return (labels.Skip(1).ToArray(), defaultLabel);
         }
 
-        public MethodDefinition CreateDataReceiveDestroy(IEnumerable<DataTypeInfo> dataTypeInfos, ILog log)
+        public MethodDefinition CreateDataReceiveDestroy(IEnumerable<DataClassMeta> dataClassMetas, ILog log)
         {
             var uint32Reference = moduleDefinition.ImportReference(typeof(uint));
             var voidReturnReference = moduleDefinition.ImportReference(typeof(void));
@@ -1425,21 +1569,21 @@ namespace Piot.Surge.Core.Generator
             // load dataTypeId
             processor.Emit(OpCodes.Ldarg_1);
 
-            var (labels, defaultLabel) = CreateEnumAndReturnLabels(dataTypeInfos, processor, OpCodes.Ldarg_2, OpCodes.Ret);
+            var (labels, defaultLabel) = CreateEnumAndReturnLabels(dataClassMetas, processor, OpCodes.Ldarg_2, OpCodes.Ret);
 
             processor.Emit(OpCodes.Ret);
 
             var index = 0;
 
-            foreach (var dataTypeInfo in dataTypeInfos)
+            foreach (var dataTypeInfo in dataClassMetas)
             {
                 processor.Append(labels[index]); // LdArg_2 // IDataReceiver
 
                 // EntityId
                 processor.Emit(OpCodes.Ldarg_0);
 
-                var specializedDataReceiverGetMethodReference = SpecializeMethod(dataReceiverDestroyMethodReference, dataTypeInfo.dataStructTypeReference);
-                processor.Emit(OpCodes.Callvirt, specializedDataReceiverGetMethodReference);
+                var specializedDataReceiverDestroyMethodReference = SpecializeMethod(dataReceiverDestroyMethodReference, dataTypeInfo.dataStructTypeReference);
+                processor.Emit(OpCodes.Callvirt, specializedDataReceiverDestroyMethodReference);
 
                 processor.Emit(OpCodes.Ret);
                 index++;
@@ -1454,16 +1598,13 @@ namespace Piot.Surge.Core.Generator
             return dataReceiveDestroyMethod;
         }
 
-        public struct DataTypeInfo
+
+        public class DataClassMeta
         {
             public TypeDefinition resolvedDataStructType;
             public TypeReference dataStructTypeReference;
             public ByReferenceType resolvedDataStructTypeByReference;
-        }
 
-
-        public class DataClassMeta
-        {
             public MethodReference? diffMethodReference;
             public MethodReference? readFullMethodReference;
             public MethodReference? readMaskMethodReference;

@@ -16,8 +16,10 @@ namespace Piot.Surge.FieldMask
 #if DEBUG
             if ((first & ChangedFieldsMask.DeletedMaskBit) != 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(first),
-                    $"Can not merge anything into a previously deleted mask {first:08X} {second:08X}");
+                if ((second & ChangedFieldsMask.DeletedMaskBit) == 0)
+                {
+                    return second;
+                }
             }
 #endif
             if (second == ChangedFieldsMask.DeletedMaskBit)

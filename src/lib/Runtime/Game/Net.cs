@@ -6,7 +6,7 @@
 #nullable enable
 
 using System;
-using Ecs2;
+using Piot.Surge.Ecs2;
 using Piot.Clog;
 using Piot.Hazy;
 using Piot.MonotonicTime;
@@ -32,6 +32,7 @@ namespace Surge.Game
         public IMonotonicTimeMs timeProvider;
         public FixedDeltaTimeMs targetDeltaTimeMs;
         public IDataSender hostDataSender;
+        public IDataReceiver hostDataReceiver;
         public IDataReceiver clientDataReceiver;
         public IEntityContainerWithDetectChanges hostDetectChanges;
     }
@@ -53,9 +54,10 @@ namespace Surge.Game
             {
                 eventProcessor = controlInfo.eventProcessor, timeProvider = controlInfo.timeProvider
             };
-
+            
+            log.Debug("Surge Net is started");
+            
             // HACK!!!! TODO:
-
             //Tools = new(gameVersion, toolsInfo, log.SubLog("GameTools"));
         }
 
@@ -73,8 +75,8 @@ namespace Surge.Game
             var clientTransport = new Client("localhost", 32000, log.SubLog("ClientTransport"));
             var clientHazyTransport = new InternetSimulatorTransport(clientTransport, controlInfo.timeProvider,
                 new PseudoRandom(97), log.SubLog("Hazy"));
-            const int minHalfLatency = 350 / 2;
-            const int maxHalfLatency = 450 / 2;
+            const int minHalfLatency = 0 / 2;
+            const int maxHalfLatency = 10 / 2;
 
             clientHazyTransport.In.LatencySimulator.SetLatencyRange(minHalfLatency, maxHalfLatency);
             clientHazyTransport.Out.LatencySimulator.SetLatencyRange(minHalfLatency, maxHalfLatency);
@@ -105,19 +107,20 @@ namespace Surge.Game
                 timeProvider = controlInfo.timeProvider,
                 targetDeltaTimeMs = controlInfo.targetDeltaTimeMs,
                 hostDataSender = controlInfo.hostDataSender,
+                hostDataReceiver = controlInfo.hostDataReceiver,
                 hostDetectChanges = controlInfo.hostDetectChanges,
                 clientDataReceiver = controlInfo.clientDataReceiver
             };
         }
 
-        public void StartHostAndClient(Action<ConnectionToClient> onCreatedConnection)
+        public void StartHostAndClient(Action<ConnectionToClient> onCreatedConnection, Action hostSimulationTickRunSystems)
         {
             if (Game is not null)
             {
                 throw new("Game has already been started");
             }
 
-            Game = new(CreateGameInfo(true), Tools is null ? OnSnapshotPlayback : Tools.RawSnapshotReplayRecorder.SnapshotPlaybackNotify, onCreatedConnection,
+            Game = new(CreateGameInfo(true), Tools is null ? OnSnapshotPlayback : Tools.RawSnapshotReplayRecorder.SnapshotPlaybackNotify, onCreatedConnection, hostSimulationTickRunSystems,
                 GameMode.HostAndClient,
                 log.SubLog("Game"));
         }
@@ -136,7 +139,7 @@ namespace Surge.Game
 
             var gameInfo = CreateGameInfo(false);
 
-            Game = new(gameInfo, Tools is null ? null : Tools.RawSnapshotReplayRecorder.SnapshotPlaybackNotify, null, GameMode.ClientOnly,
+            Game = new(gameInfo, Tools is null ? null : Tools.RawSnapshotReplayRecorder.SnapshotPlaybackNotify, null, null, GameMode.ClientOnly,
                 log.SubLog("Game"));
         }
 
@@ -144,6 +147,7 @@ namespace Surge.Game
         public void PreTick()
         {
             Game?.PreTick();
+            Game?.Tick();
         }
 
         public void Update()

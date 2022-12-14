@@ -15,15 +15,11 @@ namespace Piot.Surge.SnapshotProtocol.In
 {
     public static class ApplyDeltaSnapshotToWorld
     {
-        public static EventSequenceId Apply(DeltaSnapshotPack pack, IDataReceiver world,
+        public static EventSequenceId Apply(IBitReader bitSnapshotReader, SnapshotType snapshotType, IDataReceiver world,
             IEventReceiver eventProcessor, EventSequenceId expectedEventSequenceId,
             bool isOverlappingMergedSnapshot, ILog log)
         {
-            // TODO: Serialize exact bit count
-            var bitSnapshotReader =
-                new BitReader(pack.payload.Span, pack.payload.Length * 8);
-
-            if (pack.SnapshotType == SnapshotType.DeltaSnapshot)
+            if (snapshotType == SnapshotType.DeltaSnapshot)
             {
                 expectedEventSequenceId = SnapshotDeltaBitReader.ReadAndApply(bitSnapshotReader, world,
                     eventProcessor,

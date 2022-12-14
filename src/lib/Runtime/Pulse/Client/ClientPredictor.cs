@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using Piot.Clog;
+using Piot.Surge.Ecs2;
 using Piot.Surge.LocalPlayer;
 using Piot.Surge.Tick;
 
@@ -15,15 +16,17 @@ namespace Piot.Surge.Pulse.Client
     {
         readonly Dictionary<byte, AvatarPredictor> localAvatarPredictors = new();
         readonly ILog log;
+        IDataSender writeFromWorld;
 
-        public ClientPredictor(ILog log)
+        public ClientPredictor(IDataSender writeFromWorld, ILog log)
         {
+            this.writeFromWorld = writeFromWorld;
             this.log = log;
         }
 
         public AvatarPredictor CreateAvatarPredictor(LocalPlayerIndex localPlayerIndex, EntityId assignedEntity)
         {
-            var avatarPredictor = new AvatarPredictor(localPlayerIndex.Value, assignedEntity, log);
+            var avatarPredictor = new AvatarPredictor(localPlayerIndex.Value, writeFromWorld, assignedEntity, log);
             localAvatarPredictors[localPlayerIndex.Value] = avatarPredictor;
 
             return avatarPredictor;
