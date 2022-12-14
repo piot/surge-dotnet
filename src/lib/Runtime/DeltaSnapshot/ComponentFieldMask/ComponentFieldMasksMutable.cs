@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using Piot.Surge.FieldMask;
 using Piot.Surge.Tick;
-using UnityEngine;
 
 namespace Piot.Surge.DeltaSnapshot.ComponentFieldMask
 {
