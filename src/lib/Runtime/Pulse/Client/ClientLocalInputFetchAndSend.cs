@@ -17,7 +17,6 @@ using Piot.Surge.Tick;
 using Piot.Surge.TimeTick;
 using Piot.Surge.Types.Serialization;
 using Piot.Transport;
-using UnityEngine;
 
 namespace Piot.Surge.Pulse.Client
 {
@@ -230,7 +229,7 @@ namespace Piot.Surge.Pulse.Client
                 }
             }
             
-            Debug.Log($"Client Local Input Tick {inputTickId}");
+            log.Debug("Client Local Input Tick {InputTickId}", inputTickId);
 
             if (weHaveReceivedInitialSnapshot)
             {

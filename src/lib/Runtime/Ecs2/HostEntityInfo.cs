@@ -12,7 +12,6 @@ using Piot.Flood;
 using Piot.Surge.Core;
 using Piot.Surge.FieldMask;
 using Surge.Types;
-using UnityEngine;
 
 namespace Piot.Surge.Ecs2
 {
@@ -59,7 +58,6 @@ namespace Piot.Surge.Ecs2
             if (componentInfo.changedFieldMask == ChangedFieldsMask.DeletedMaskBit)
             {
                 // It was previously deleted, but lets wake it up again
-                Debug.Log($"Was previously deleted, but waking it up again");
                 componentInfo.changedFieldMask = 0;
                 componentInfo.Data = new T();
                 if (componentInfo.Data is null)
@@ -77,7 +75,7 @@ namespace Piot.Surge.Ecs2
 
             if (componentInfo.Data is null)
             {
-                Debug.LogError($"ComponentInfo.Data is null {componentInfo.changedFieldMask}");
+                //Debug.LogError($"ComponentInfo.Data is null {componentInfo.changedFieldMask}");
             }
             
             var fieldChangeMask = DataDiffer<T>.diff!.Invoke(data, (T)componentInfo.Data!);
@@ -171,7 +169,7 @@ namespace Piot.Surge.Ecs2
 
             foundComponent.changedFieldMask = ChangedFieldsMask.DeletedMaskBit;
             //foundComponent.Data = null;
-            Debug.Log($"Destroyed component {DataIdLookup<T>.value}, setting data to null and mask to {foundComponent.changedFieldMask}");
+            //Debug.Log($"Destroyed component {DataIdLookup<T>.value}, setting data to null and mask to {foundComponent.changedFieldMask}");
         }
 
         public void DestroyAll()

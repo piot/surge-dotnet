@@ -16,7 +16,6 @@ using Piot.Flood;
 using Piot.Surge.Generator;
 using Piot.Surge.Types;
 using Piot.Surge.Types.Serialization;
-using UnityEngine;
 using MethodAttributes = Mono.CecilEx.MethodAttributes;
 using OpCode = Mono.CecilEx.Cil.OpCode;
 using OpCodes = Mono.CecilEx.Cil.OpCodes;
@@ -739,7 +738,6 @@ namespace Piot.Surge.Core.Generator
 
             foreach (var dataMeta in dataTypeInfos)
             {
-                Debug.Log($"dataMeta {dataMeta.uniqueId} {dataMeta.typeReference.FullName}");
                 {
                     CreateFuncDelegateBitReaderToDataType(processor, dataMeta.readFullMethodReference!, dataMeta.typeReference!);
 

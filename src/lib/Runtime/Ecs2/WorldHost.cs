@@ -10,15 +10,11 @@ using System.Collections.Generic;
 using System.Linq;
 using Piot.Clog;
 using Piot.Flood;
-using Piot.Surge;
 using Piot.Surge.CompleteSnapshot;
 using Piot.Surge.Core;
 using Piot.Surge.DeltaSnapshot.ComponentFieldMask;
-using Piot.Surge.FieldMask;
-using Piot.Surge.Types;
 using Surge.Game;
 using Surge.Types;
-using UnityEngine.UI;
 
 namespace Piot.Surge.Ecs2
 {
