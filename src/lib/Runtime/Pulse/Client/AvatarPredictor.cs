@@ -7,6 +7,7 @@ using System;
 using System.Text;
 using Piot.Clog;
 using Piot.Flood;
+using Piot.Surge.Core;
 using Piot.Surge.Ecs2;
 using Piot.Surge.Tick;
 
@@ -18,13 +19,19 @@ namespace Piot.Surge.Pulse.Client
         readonly bool shouldPredictGoingForward = true;
         bool shouldPredict = true;
         IDataSender writeFromWorld;
+        IEcsWorldSetter ecsWorldClient;
+        IDataReceiver ecsWorldClientReceiver;
+        Action<EntityId> clientPredictTickMethod;
 
-        public AvatarPredictor(uint debugIndex, IDataSender writeFromWorld, EntityId assignedAvatar, ILog log)
+        public AvatarPredictor(uint debugIndex, IDataSender writeFromWorld, IDataReceiver ecsWorldClientReceiver, IEcsWorldSetter ecsWorldClient, Action<EntityId> clientPredictTickMethod, EntityId assignedAvatar, ILog log)
         {
             this.log = log;
             this.writeFromWorld = writeFromWorld;
+            this.ecsWorldClient = ecsWorldClient;
+            this.ecsWorldClientReceiver = ecsWorldClientReceiver;
+            this.clientPredictTickMethod = clientPredictTickMethod;
             LocalPlayerIndex = debugIndex;
-            EntityPredictor = new(writeFromWorld, assignedAvatar, log.SubLog("EntityPredictor"));
+            EntityPredictor = new(writeFromWorld, assignedAvatar, clientPredictTickMethod, log.SubLog("EntityPredictor"));
         }
 
         public uint LocalPlayerIndex { get; }
@@ -158,7 +165,7 @@ namespace Piot.Surge.Pulse.Client
             {
                 EntityPredictor.CachedUndoWriter.Reset();
                 RollForth.Rollforth(assignedAvatar, EntityPredictor.PredictCollection,
-                    writeFromWorld, EntityPredictor.CachedUndoWriter, log);
+                    writeFromWorld, ecsWorldClientReceiver, ecsWorldClient, clientPredictTickMethod, EntityPredictor.CachedUndoWriter, log);
             }
 #endif
             // TODO: assignedAvatar.CompleteEntity.RollMode = EntityRollMode.Predict;

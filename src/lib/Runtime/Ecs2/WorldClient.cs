@@ -19,7 +19,7 @@ namespace Piot.Surge.Ecs2
         public uint[] destroyedEntityIds;
         public uint[] modifiedEntityIds;
     }
-    public class EcsWorldClient : IEcsWorldFetcher, IDataReceiver
+    public class EcsWorldClient : IEcsWorldFetcher, IEcsWorldSetter, IDataReceiver
     {
         readonly Dictionary<uint, ClientEntityInfo> entities = new();
         readonly ILog log;
@@ -63,10 +63,8 @@ namespace Piot.Surge.Ecs2
             return entityInfo.GrabOrCreate<T>();
         }
 
-        public void ReceiveNew<T>(uint entityId, T data) where T : struct
+        public void Set<T>(uint entityId, T data) where T : struct
         {
-            log.Debug($"Received Full entityId: {entityId} data:{data}");
-
             var foundExistingEntity = entities.TryGetValue(entityId, out var existingEntityInfo);
             if (!foundExistingEntity || existingEntityInfo is null)
             {
@@ -76,6 +74,12 @@ namespace Piot.Surge.Ecs2
             }
             modifiedEntities.Add(entityId);
             existingEntityInfo.Set(data);
+        }
+
+        public void ReceiveNew<T>(uint entityId, T data) where T : struct
+        {
+            log.Debug($"Received Full entityId: {entityId} data:{data}");
+            Set(entityId, data);
         }
 
         public void DestroyComponent<T>(uint entityId) where T : struct

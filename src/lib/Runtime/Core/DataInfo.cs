@@ -48,7 +48,7 @@ namespace Piot.Surge.Core
 
     public static class DataMetaInfo
     {
-        public static MetaInfo[] infos;
+        public static MetaInfo[] infos = Array.Empty<MetaInfo>();
 
         public static MetaInfo? GetMeta(ComponentTypeId componentTypeId)
         {

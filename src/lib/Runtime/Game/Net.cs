@@ -35,6 +35,7 @@ namespace Surge.Game
         public IDataReceiver hostDataReceiver;
         public IDataReceiver clientDataReceiver;
         public IEntityContainerWithDetectChanges hostDetectChanges;
+        public IEcsWorldSetter clientWorldSetter;
     }
 
     public sealed class Net
@@ -104,6 +105,7 @@ namespace Surge.Game
                 hostTransport = hostTransport,
                 clientTransport = clientTransport,
                 eventProcessor = controlInfo.eventProcessor,
+                clientWorldSetter = controlInfo.clientWorldSetter,
                 timeProvider = controlInfo.timeProvider,
                 targetDeltaTimeMs = controlInfo.targetDeltaTimeMs,
                 hostDataSender = controlInfo.hostDataSender,
@@ -113,7 +115,7 @@ namespace Surge.Game
             };
         }
 
-        public void StartHostAndClient(Action<ConnectionToClient> onCreatedConnection, Action hostSimulationTickRunSystems)
+        public void StartHostAndClient(Action<ConnectionToClient> onCreatedConnection, Action hostSimulationTickRunSystems, Action<EntityId> predictTickMethod)
         {
             if (Game is not null)
             {
@@ -121,7 +123,7 @@ namespace Surge.Game
             }
 
             Game = new(CreateGameInfo(true), Tools is null ? OnSnapshotPlayback : Tools.RawSnapshotReplayRecorder.SnapshotPlaybackNotify, onCreatedConnection, hostSimulationTickRunSystems,
-                GameMode.HostAndClient,
+                predictTickMethod,GameMode.HostAndClient,
                 log.SubLog("Game"));
         }
 
@@ -130,7 +132,7 @@ namespace Surge.Game
 
         }
 
-        public void StartClient()
+        public void StartClient(Action<EntityId> predictTickMethod)
         {
             if (Game is not null)
             {
@@ -139,7 +141,7 @@ namespace Surge.Game
 
             var gameInfo = CreateGameInfo(false);
 
-            Game = new(gameInfo, Tools is null ? null : Tools.RawSnapshotReplayRecorder.SnapshotPlaybackNotify, null, null, GameMode.ClientOnly,
+            Game = new(gameInfo, Tools is null ? null : Tools.RawSnapshotReplayRecorder.SnapshotPlaybackNotify, null, null, predictTickMethod, GameMode.ClientOnly,
                 log.SubLog("Game"));
         }
 

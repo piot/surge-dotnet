@@ -13,14 +13,12 @@ namespace Piot.Surge.Pulse.Client
     public static class PredictAndSaver
     {
         public static void PredictAndSave(EntityId assignedAvatar, PredictCollection predictCollection,
-            LogicalInput.LogicalInput logicalInputSetBeforePrediction, IDataSender saveFromWorld, IOctetWriterWithResult undoWriter,
-            PredictMode predictMode, bool doActualPrediction, ILog log)
+            LogicalInput.LogicalInput logicalInputSetBeforePrediction, IDataSender saveFromWorld, IOctetWriterWithResult undoWriter, Action<EntityId> predictTickMethod, bool doActualPrediction, ILog log)
         {
             var tickIdAfterPredictTick = logicalInputSetBeforePrediction.appliedAtTickId.Next;
             if (doActualPrediction)
             {
-                PredictionTicker.Predict(assignedAvatar, predictMode,
-                    undoWriter);
+                predictTickMethod(assignedAvatar);
             }
 
             if (logicalInputSetBeforePrediction.payload.IsEmpty)

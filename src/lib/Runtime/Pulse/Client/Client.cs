@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using System;
 using System.Collections.Generic;
 using Piot.Surge.Ecs2;
 using Piot.Clog;
@@ -26,6 +27,8 @@ namespace Piot.Surge.Pulse.Client
         public ITransport assignedTransport;
         public IMultiCompressor compression;
         public ClientDeltaSnapshotPlayback.SnapshotPlaybackDelegate snapshotPlaybackNotify;
+        public IEcsWorldSetter clientWorldSetter;
+        public Action<EntityId> predictTickMethod;
     }
 
     public sealed class Client //: IOctetSerializable
@@ -47,7 +50,7 @@ namespace Piot.Surge.Pulse.Client
 
             transportWithStats = new(info.assignedTransport, info.now);
             transportClient = new TransportClient(transportWithStats);
-            clientPredictor = new(info.clientToHostDataSender, log.SubLog("ClientPredictor"));
+            clientPredictor = new(info.clientToHostDataSender, info.fromHostDataReceiver, info.clientWorldSetter , info.predictTickMethod, log.SubLog("ClientPredictor"));
             const bool usePrediction = true;
             localInputFetchAndSend = new(clientPredictor, usePrediction,
                 transportClient, info.now,

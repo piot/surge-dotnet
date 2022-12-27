@@ -48,7 +48,7 @@ namespace Piot.Surge.Pulse.Host
             }
 
             var wasFound = AssignedPredictedEntityForLocalPlayers.TryGetValue(localPlayerIndex, out var existingAssignment);
-            if (!wasFound)
+            if (!wasFound || existingAssignment is null)
             {
                 throw new Exception($"can not set an predicted entity for {localPlayerIndex} before player slot entity Id is assigned");
             }

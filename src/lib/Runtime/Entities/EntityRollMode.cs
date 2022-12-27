@@ -5,6 +5,11 @@
 
 namespace Piot.Surge.Entities
 {
+    public struct RollMode
+    {
+        public EntityRollMode mode;
+    }
+    
     public enum EntityRollMode
     {
         Rollback,

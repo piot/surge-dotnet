@@ -51,9 +51,9 @@ namespace Piot.Surge.Core.Generator
         DataClassMeta? currentData;
 
         public readonly List<DataClassMeta> dataTypeInfos = new();
-        IEnumerable<DataClassMeta> logics;
-        IEnumerable<DataClassMeta> ghosts;
-        IEnumerable<DataClassMeta> inputs;
+        IEnumerable<DataClassMeta> logics = ArraySegment<DataClassMeta>.Empty;
+        IEnumerable<DataClassMeta> ghosts = ArraySegment<DataClassMeta>.Empty;
+        IEnumerable<DataClassMeta> inputs = ArraySegment<DataClassMeta>.Empty;
 
         TypeReference dataStreamReaderReadMaskMethodReference;
 

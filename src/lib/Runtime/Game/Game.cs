@@ -30,6 +30,7 @@ namespace Surge.Game
         public IDataReceiver clientDataReceiver;
         public IMonotonicTimeMs timeProvider;
         public FixedDeltaTimeMs targetDeltaTimeMs;
+        public IEcsWorldSetter clientWorldSetter;
     }
 
     public enum GameMode
@@ -79,7 +80,7 @@ namespace Surge.Game
         ILog log;
 
         public Game(GameInfo info, ClientDeltaSnapshotPlayback.SnapshotPlaybackDelegate? snapshotPlaybackNotify,
-            Action<ConnectionToClient>? onCreatedConnection, Action? hostSimulationTickRunSystem, GameMode mode, ILog log)
+            Action<ConnectionToClient>? onCreatedConnection, Action? hostSimulationTickRunSystem, Action<EntityId>? predictTickMethod, GameMode mode, ILog log)
         {
             this.log = log;
             var compressor = DefaultMultiCompressor.Create();
@@ -113,6 +114,8 @@ namespace Surge.Game
                 clientToHostDataSender = info.hostDataSender,
                 eventProcessor = info.eventProcessor,
                 assignedTransport = info.clientTransport,
+                predictTickMethod = predictTickMethod!,
+                clientWorldSetter = info.clientWorldSetter,
                 compression = compressor,
                 snapshotPlaybackNotify = snapshotPlaybackNotify!
             };

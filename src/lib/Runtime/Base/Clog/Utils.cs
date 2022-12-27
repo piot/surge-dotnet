@@ -12,21 +12,24 @@ namespace Piot.Clog
     {
         public static string ArgumentValueToString(object arg)
         {
-            if (arg is string)
+            switch (arg)
             {
-                return arg.ToString();
+                case null:
+                    return "null";
+                case string:
+                    return arg.ToString()!;
             }
-            
+
             if (arg is not IEnumerable enumerable)
             {
-                return arg.ToString();
+                return arg.ToString()!;
             }
 
             var stringArray = new List<string>();
             var x = enumerable.GetEnumerator();
             while (x.MoveNext())
             {
-                stringArray.Add(x.Current.ToString());
+                stringArray.Add(x.Current.ToString()!);
             }
 
             var result = $"[ {string.Join(",", stringArray)} ]";

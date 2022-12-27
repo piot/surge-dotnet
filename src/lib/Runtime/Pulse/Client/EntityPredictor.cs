@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using System;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.Surge.Ecs2;
@@ -14,10 +15,12 @@ namespace Piot.Surge.Pulse.Client
     {
         readonly ILog log;
         IDataSender writeFromWorld;
+        Action<EntityId> predictTickMethod;
 
-        public EntityPredictor(IDataSender writeFromWorld, EntityId assignedAvatar, ILog log)
+        public EntityPredictor(IDataSender writeFromWorld, EntityId assignedAvatar, Action<EntityId> predictTickMethod, ILog log)
         {
             AssignedAvatar = assignedAvatar;
+            this.predictTickMethod = predictTickMethod;
             this.log = log;
             this.writeFromWorld = writeFromWorld;
         }
@@ -75,7 +78,7 @@ namespace Piot.Surge.Pulse.Client
 
             CachedUndoWriter.Reset();
             PredictAndSaver.PredictAndSave(AssignedAvatar, PredictCollection, logicalInput, writeFromWorld, CachedUndoWriter,
-                PredictMode.Predicting, doActualPrediction, log);
+                predictTickMethod, doActualPrediction, log);
         }
     }
 }

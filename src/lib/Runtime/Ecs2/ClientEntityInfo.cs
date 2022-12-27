@@ -42,7 +42,7 @@ namespace Piot.Surge.Ecs2
             var found = components.TryGetValue(DataIdLookup<T>.value, out var foundComponentInfo);
             if (found && foundComponentInfo is not null)
             {
-                return (T)foundComponentInfo.data;
+                return (T)foundComponentInfo.data!;
             }
 
             foundComponentInfo = new();
