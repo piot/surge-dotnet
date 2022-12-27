@@ -5,7 +5,7 @@
 
 namespace Piot.MonotonicTime
 {
-#if !UNITY_STANDALONE
+#if NET48_OR_GREATER
     public sealed class MonotonicTimeEnvironmentMs : IMonotonicTimeMs
     {
         /// <summary>

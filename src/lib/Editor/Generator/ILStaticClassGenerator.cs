@@ -355,11 +355,8 @@ namespace Piot.Surge.Core.Generator
 
             lastUniqueId++;
 
-            currentData = new()
-            {
-                uniqueId = lastUniqueId, typeReference = dataClassType, typeByReference = new(resolvedDataStructType),
-                resolvedDataStructType = resolvedDataStructType, dataStructTypeReference = dataClassType, resolvedDataStructTypeByReference = new(resolvedDataStructType)
-            };
+            currentData = new(lastUniqueId, dataClassType, resolvedDataStructType);
+
             dataTypeInfos.Add(currentData);
 
             return currentData;
@@ -710,7 +707,7 @@ namespace Piot.Surge.Core.Generator
             foreach (var dataMeta in dataTypeInfos)
             {
                 processor.Emit(OpCodes.Ldc_I4, (int)dataMeta.uniqueId);
-                var specializedDataIdInstanceType = genericDataIdLookupDef.MakeGenericInstanceType(dataMeta.typeReference);
+                var specializedDataIdInstanceType = genericDataIdLookupDef.MakeGenericInstanceType(dataMeta.dataStructTypeReference);
                 var specializeField = SpecializeField(genericValueFieldRef, specializedDataIdInstanceType);
                 processor.Emit(OpCodes.Stsfld, specializeField);
             }
@@ -739,33 +736,33 @@ namespace Piot.Surge.Core.Generator
             foreach (var dataMeta in dataTypeInfos)
             {
                 {
-                    CreateFuncDelegateBitReaderToDataType(processor, dataMeta.readFullMethodReference!, dataMeta.typeReference!);
+                    CreateFuncDelegateBitReaderToDataType(processor, dataMeta.readFullMethodReference!, dataMeta.dataStructTypeReference);
 
-                    var specializedDataReaderForDataType = genericDataReaderStaticClassReference.MakeGenericInstanceType(dataMeta.typeReference);
+                    var specializedDataReaderForDataType = genericDataReaderStaticClassReference.MakeGenericInstanceType(dataMeta.dataStructTypeReference);
                     var specializedDataReaderField = SpecializeField(readDelegateFieldReference, specializedDataReaderForDataType);
                     processor.Emit(OpCodes.Stsfld, specializedDataReaderField);
                 }
 
                 {
-                    CreateFuncDelegateBitReaderToDataTypeAndMask(processor, dataMeta.readMaskMethodReference!, dataMeta.typeReference!, dataMeta.typeByReference!);
+                    CreateFuncDelegateBitReaderToDataTypeAndMask(processor, dataMeta.readMaskMethodReference!, dataMeta.dataStructTypeReference, dataMeta.resolvedDataStructTypeByReference);
 
-                    var specializedDataReaderForDataType = genericDataReaderStaticClassReference.MakeGenericInstanceType(dataMeta.typeReference);
+                    var specializedDataReaderForDataType = genericDataReaderStaticClassReference.MakeGenericInstanceType(dataMeta.dataStructTypeReference);
                     var specializedDataReaderField = SpecializeField(readMaskDelegateFieldReference, specializedDataReaderForDataType);
                     processor.Emit(OpCodes.Stsfld, specializedDataReaderField);
                 }
 
                 {
-                    CreateActionDelegateBitWriterToDataType(processor, dataMeta.writeFullMethodReference!, dataMeta.typeReference!);
+                    CreateActionDelegateBitWriterToDataType(processor, dataMeta.writeFullMethodReference!, dataMeta.dataStructTypeReference);
 
-                    var specializedDataWriterForDataType = genericDataWriterStaticClassReference.MakeGenericInstanceType(dataMeta.typeReference);
+                    var specializedDataWriterForDataType = genericDataWriterStaticClassReference.MakeGenericInstanceType(dataMeta.dataStructTypeReference);
                     var specializedDataWriterField = SpecializeField(writeFullDelegateFieldReference, specializedDataWriterForDataType);
                     processor.Emit(OpCodes.Stsfld, specializedDataWriterField);
                 }
 
                 {
-                    CreateActionDelegateBitWriterToDataTypeAndMask(processor, dataMeta.writeMaskMethodReference!, dataMeta.typeReference!);
+                    CreateActionDelegateBitWriterToDataTypeAndMask(processor, dataMeta.writeMaskMethodReference!, dataMeta.dataStructTypeReference);
 
-                    var specializedDataWriterForDataType = genericDataWriterStaticClassReference.MakeGenericInstanceType(dataMeta.typeReference);
+                    var specializedDataWriterForDataType = genericDataWriterStaticClassReference.MakeGenericInstanceType(dataMeta.dataStructTypeReference);
                     var specializedDataWriteMaskField = SpecializeField(writeMaskDelegateFieldReference, specializedDataWriterForDataType);
                     processor.Emit(OpCodes.Stsfld, specializedDataWriteMaskField);
                 }
@@ -774,8 +771,8 @@ namespace Piot.Surge.Core.Generator
 
             foreach (var dataMeta in dataTypeInfos)
             {
-                CreateDataDifferDelegateInstance(processor, dataMeta.diffMethodReference!, dataMeta.typeReference!);
-                var specializedDataDifferForDataType = genericDataDifferStaticClassReference.MakeGenericInstanceType(dataMeta.typeReference);
+                CreateDataDifferDelegateInstance(processor, dataMeta.diffMethodReference!, dataMeta.dataStructTypeReference);
+                var specializedDataDifferForDataType = genericDataDifferStaticClassReference.MakeGenericInstanceType(dataMeta.dataStructTypeReference);
                 var specializedDataReaderField = SpecializeField(diffDelegateFieldReference, specializedDataDifferForDataType);
                 processor.Emit(OpCodes.Stsfld, specializedDataReaderField);
             }
@@ -815,19 +812,19 @@ namespace Piot.Surge.Core.Generator
 
         void GenerateInputIdArrays(ILProcessor processor)
         {
-            GenerateIdArrayAndSet(processor, typeof(DataInfo).GetField(nameof(DataInfo.inputComponentTypeIds)),
+            GenerateIdArrayAndSet(processor, typeof(DataInfo).GetField(nameof(DataInfo.inputComponentTypeIds))!,
                 inputs.Select(dataClassMeta => dataClassMeta.uniqueId).ToArray());
         }
 
         void GenerateGhostIdArrays(ILProcessor processor)
         {
-            GenerateIdArrayAndSet(processor, typeof(DataInfo).GetField(nameof(DataInfo.ghostComponentTypeIds)),
+            GenerateIdArrayAndSet(processor, typeof(DataInfo).GetField(nameof(DataInfo.ghostComponentTypeIds))!,
                 ghosts.Select(dataClassMeta => dataClassMeta.uniqueId).ToArray());
         }
 
         void GenerateLogicsIdArrays(ILProcessor processor)
         {
-            GenerateIdArrayAndSet(processor, typeof(DataInfo).GetField(nameof(DataInfo.logicComponentTypeIds)),
+            GenerateIdArrayAndSet(processor, typeof(DataInfo).GetField(nameof(DataInfo.logicComponentTypeIds))!,
                 logics.Select(dataClassMeta => dataClassMeta.uniqueId).ToArray());
         }
 
@@ -976,7 +973,7 @@ namespace Piot.Surge.Core.Generator
             var userWriteMethod = CheckIfUserDefinedStaticBitReaderMethodExists(dataTypeReference);
             if (userWriteMethod is null)
             {
-                return null;
+                throw new Exception($"unknown bit reader method for {dataTypeReference}");
             }
 
             return moduleDefinition.ImportReference(userWriteMethod);
@@ -1599,18 +1596,26 @@ namespace Piot.Surge.Core.Generator
 
         public class DataClassMeta
         {
-            public TypeDefinition resolvedDataStructType;
-            public TypeReference dataStructTypeReference;
-            public ByReferenceType resolvedDataStructTypeByReference;
+            public readonly TypeReference dataStructTypeReference;
+            public readonly TypeDefinition resolvedDataStructType;
+            public readonly ByReferenceType resolvedDataStructTypeByReference;
+
+            public readonly uint uniqueId;
 
             public MethodReference? diffMethodReference;
             public MethodReference? readFullMethodReference;
             public MethodReference? readMaskMethodReference;
-            public ByReferenceType? typeByReference;
-            public TypeReference? typeReference;
-            public uint uniqueId;
             public MethodReference? writeFullMethodReference;
             public MethodReference? writeMaskMethodReference;
+
+            public DataClassMeta( uint uniqueId, TypeReference typeReference, TypeDefinition resolvedDataStructType)
+            {
+                this.uniqueId = uniqueId;
+                dataStructTypeReference = typeReference;
+                
+                this.resolvedDataStructType = resolvedDataStructType;
+                resolvedDataStructTypeByReference = new(resolvedDataStructType);
+            }
         }
 
         struct AnyStruct

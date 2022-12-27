@@ -111,13 +111,13 @@ namespace Piot.Surge.Ecs2
         public void WriteMask(IBitWriter writer, uint entityId, ushort componentTypeId, ulong mask)
         {
             var componentInfo = GetComponentInfo(entityId, componentTypeId);
-            componentInfo.componentWriter.WriteMask(writer, mask);
+            componentInfo.componentWriter!.WriteMask(writer, mask);
         }
 
         public void WriteFull(IBitWriter writer, uint entityId, ushort componentTypeId)
         {
             var componentInfo = GetComponentInfo(entityId, componentTypeId);
-            componentInfo.componentWriter.WriteFull(writer);
+            componentInfo.componentWriter!.WriteFull(writer);
         }
 
         public IEnumerable<object> Components { get; }

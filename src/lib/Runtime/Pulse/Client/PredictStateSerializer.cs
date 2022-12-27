@@ -20,7 +20,7 @@ namespace Piot.Surge.Pulse.Client
         {
             var savePredictedStateWriter = new BitWriter(1200);
             var count = 0;
-            foreach (var logicComponentTypeId in DataInfo.logicComponentTypeIds)
+            foreach (var logicComponentTypeId in DataInfo.logicComponentTypeIds!)
             {
                 if (!sender.HasComponentTypeId(predictedEntity.Value, (ushort)logicComponentTypeId))
                 {

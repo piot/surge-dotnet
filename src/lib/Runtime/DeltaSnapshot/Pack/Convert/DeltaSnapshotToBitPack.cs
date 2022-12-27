@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using System;
 using System.Linq;
 using Piot.Clog;
 using Piot.Flood;
@@ -81,7 +82,12 @@ namespace Piot.Surge.DeltaSnapshot.Pack.Convert
                     var changedFieldMask = componentChange.Value;
                     var wasDeleted = changedFieldMask == ChangedFieldsMask.DeletedMaskBit;
                     var foundInfo = DataMetaInfo.GetMeta(componentTypeId);
-                    log.Debug("Writing Component to Client {EntityId} {ComponentTypeId}", entityId.Value, foundInfo!);
+                    if (foundInfo is null)
+                    {
+                        throw new Exception($"internal error. can not find meta info for {componentTypeId}");
+                    }
+
+                    log.Debug("Writing Component to Client {EntityId} {ComponentTypeId}", entityId.Value, foundInfo is null ? new() : foundInfo.Value);
                     writer.WriteBits(wasDeleted ? 0U : 1U, 1);
                     if (!wasDeleted)
                     {

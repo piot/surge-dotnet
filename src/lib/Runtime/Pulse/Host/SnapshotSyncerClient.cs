@@ -65,7 +65,7 @@ namespace Piot.Surge.Pulse.Host
             }
 
             var wasFound = AssignedPredictedEntityForLocalPlayers.TryGetValue(localPlayerIndex, out var existingAssignment);
-            if (!wasFound)
+            if (!wasFound || existingAssignment is null)
             {
                 existingAssignment = new(playerSlotEntity);
                 AssignedPredictedEntityForLocalPlayers.Add(localPlayerIndex, existingAssignment);
