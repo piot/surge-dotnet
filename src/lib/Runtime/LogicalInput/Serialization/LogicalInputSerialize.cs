@@ -16,6 +16,7 @@ namespace Piot.Surge.LogicalInput.Serialization
         public const byte InputHeaderMarker = 0xdb;
         public const byte InputPayloadHeaderMarker = 0xdc;
     }
+
     public static class LogicalInputSerialize
     {
         /// <summary>
@@ -32,7 +33,7 @@ namespace Piot.Surge.LogicalInput.Serialization
             {
                 log.Notice("no input to serialize!");
             }
-            
+
             writer.WriteUInt8((byte)inputsForLocalPlayers.inputForEachPlayerInSequence.Length);
 
             foreach (var inputsForPlayer in inputsForLocalPlayers.inputForEachPlayerInSequence)
@@ -48,7 +49,7 @@ namespace Piot.Surge.LogicalInput.Serialization
                     log.Notice("no input (tickCount is zero) to serialize!");
                 }
 
-                
+
                 writer.WriteUInt8((byte)tickCount);
                 if (tickCount == 0)
                 {
@@ -67,6 +68,7 @@ namespace Piot.Surge.LogicalInput.Serialization
                         throw new(
                             $"logical input in wrong order in collection. Expected {expectedTickIdValue} but received {logicalInput.appliedAtTickId.tickId}");
                     }
+
                     OctetMarker.WriteMarker(writer, Constants.InputPayloadHeaderMarker);
 
                     writer.WriteUInt8((byte)logicalInput.payload.Length);

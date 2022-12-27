@@ -9,7 +9,7 @@ namespace Piot.Surge.Entities
     {
         public EntityRollMode mode;
     }
-    
+
     public enum EntityRollMode
     {
         Rollback,

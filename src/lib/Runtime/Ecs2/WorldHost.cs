@@ -3,8 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -52,6 +50,40 @@ namespace Piot.Surge.Ecs2
         }
 
 
+        void IDataReceiver.Reset()
+        {
+            throw new NotImplementedException();
+        }
+        void IDataReceiver.ReceiveNew<T>(uint entityId, T data)
+        {
+            var foundExistingEntity = entities.TryGetValue(entityId, out var existingEntityInfo);
+            if (!foundExistingEntity || existingEntityInfo is null)
+            {
+                existingEntityInfo = new();
+                entities[entityId] = existingEntityInfo;
+            }
+
+            modifiedEntities.Add(entityId);
+            existingEntityInfo.Set(data);
+        }
+        void IDataReceiver.Update<T>(uint mask, uint entityId, T data)
+        {
+            entities[entityId].Set(data);
+        }
+        T IDataReceiver.GrabOrCreate<T>(uint entityId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DestroyComponent<T>(uint entityId) where T : struct
+        {
+            var hostEntityInfo = GetHostEntityInfo(entityId);
+
+            hostEntityInfo.Destroy<T>();
+            modifiedEntities.Add(entityId);
+        }
+
+
         public uint[] AllEntities()
         {
             return entities.Keys.ToArray();
@@ -88,18 +120,12 @@ namespace Piot.Surge.Ecs2
             componentInfo.componentWriter.WriteFull(writer);
         }
 
-        public void SetName(uint entityId, String64 name)
-        {
-            var hostEntityInfo = GetHostEntityInfo(entityId);
-            hostEntityInfo.Name = name;
-        }
-
         public IEnumerable<object> Components { get; }
 
         public bool HasComponent<T>(uint entityId) where T : struct
         {
             var existing = GetHostEntityInfo(entityId);
-            
+
 
             return existing.HasComponent<T>();
         }
@@ -109,45 +135,21 @@ namespace Piot.Surge.Ecs2
             var hostEntityInfo = FindHostEntityInfo(entityId);
             return hostEntityInfo?.Get<T>();
         }
-
-
-        void IDataReceiver.Reset()
-        {
-            throw new NotImplementedException();
-        }
-        void IDataReceiver.ReceiveNew<T>(uint entityId, T data)
-        {
-            var foundExistingEntity = entities.TryGetValue(entityId, out var existingEntityInfo);
-            if (!foundExistingEntity || existingEntityInfo is null)
-            {
-                existingEntityInfo = new();
-                entities[entityId] = existingEntityInfo;
-            }
-            modifiedEntities.Add(entityId);
-            existingEntityInfo.Set(data);
-        }
-        void IDataReceiver.Update<T>(uint mask, uint entityId, T data)
-        {
-            entities[entityId].Set(data);
-        }
         public T Grab<T>(uint entityId) where T : struct
         {
             var hostEntityInfo = FindHostEntityInfo(entityId);
             if (hostEntityInfo is null)
             {
-                throw new Exception("entity id was not there");
+                throw new("entity id was not there");
             }
+
             var component = hostEntityInfo.Get<T>();
             if (component is null)
             {
-                throw new Exception("component was not there");
+                throw new("component was not there");
             }
 
             return component.Value;
-        }
-        T IDataReceiver.GrabOrCreate<T>(uint entityId)
-        {
-            throw new NotImplementedException();
         }
 
         ushort[] IEcsContainer.AllEntities => entities.Keys.Select(x => (ushort)x).ToArray();
@@ -169,8 +171,8 @@ namespace Piot.Surge.Ecs2
                 var entityInfo = entities[changedEntityId];
                 var entityTarget = new EntityChangesForOneEntity(new((ushort)changedEntityId));
                 allChanges.EntitiesComponentChanges.Add(changedEntityId, entityTarget);
-                
-                
+
+
                 foreach (var componentInfoPair in entityInfo.components)
                 {
                     if (componentInfoPair.Value.changedFieldMask != 0)
@@ -180,13 +182,19 @@ namespace Piot.Surge.Ecs2
                     }
                 }
 
- 
+
             }
 
             // TODO: Assemble everything
             ClearChanges();
 
             return allChanges;
+        }
+
+        public void SetName(uint entityId, String64 name)
+        {
+            var hostEntityInfo = GetHostEntityInfo(entityId);
+            hostEntityInfo.Name = name;
         }
 
         public EntityId CreateEntity()
@@ -219,13 +227,13 @@ namespace Piot.Surge.Ecs2
             var hostEntity = FindHostEntityInfo(entityId);
             if (hostEntity is null)
             {
-                throw new Exception($"could not find component {componentTypeId} on entity {entityId}. Entity does not exist");
+                throw new($"could not find component {componentTypeId} on entity {entityId}. Entity does not exist");
             }
 
             var foundComponent = hostEntity.GetComponent(componentTypeId);
             if (foundComponent is null)
             {
-                throw new Exception($"could not find component {componentTypeId}  on entity {entityId}");
+                throw new($"could not find component {componentTypeId}  on entity {entityId}");
             }
 
             return foundComponent;
@@ -262,20 +270,12 @@ namespace Piot.Surge.Ecs2
             hostEntityInfo.Set(data);
         }
 
-        public void DestroyComponent<T>(uint entityId) where T : struct
-        {
-            var hostEntityInfo = GetHostEntityInfo(entityId);
-
-            hostEntityInfo.Destroy<T>();
-            modifiedEntities.Add(entityId);
-        }
-
         public uint[] DestroyedComponents(uint entityId)
         {
             var hostEntityInfo = GetHostEntityInfo(entityId);
             return hostEntityInfo.DestroyedComponents();
         }
-        
+
         public void DestroyEntity(uint entityId)
         {
             var hostEntityInfo = GetHostEntityInfo(entityId);
@@ -283,7 +283,7 @@ namespace Piot.Surge.Ecs2
             hostEntityInfo.DestroyAll();
         }
 
-        
+
         public void WriteFull(IBitWriter writer, uint entityId)
         {
             /*

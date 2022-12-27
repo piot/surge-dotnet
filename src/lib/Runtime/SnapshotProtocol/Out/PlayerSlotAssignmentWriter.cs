@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+
+
 using System.Collections.Generic;
 using Piot.Flood;
 using Piot.Surge.LocalPlayer;
@@ -19,7 +21,7 @@ namespace Piot.Surge.SnapshotProtocol.Out
 
         public LocalPlayerAssignments()
         {
-            
+
         }
 
         public LocalPlayerAssignments(EntityId playerSlotEntity)
@@ -27,7 +29,7 @@ namespace Piot.Surge.SnapshotProtocol.Out
             this.playerSlotEntity = playerSlotEntity;
         }
     }
-    
+
     public static class PlayerSlotAssignmentWriter
     {
         public static void Write(Dictionary<LocalPlayerIndex, LocalPlayerAssignments> playerSlotAssignmentForLocalPlayers, IBitWriter writer)
@@ -38,7 +40,7 @@ namespace Piot.Surge.SnapshotProtocol.Out
             foreach (var localPlayerAssignedPredictedEntity in playerSlotAssignmentForLocalPlayers)
             {
                 LocalPlayerIndexWriter.Write(localPlayerAssignedPredictedEntity.Key, writer);
-                
+
                 var predictionEntity = localPlayerAssignedPredictedEntity.Value;
                 EntityIdWriter.Write(writer, predictionEntity.playerSlotEntity);
                 EntityIdWriter.Write(writer, predictionEntity.entityToControl);

@@ -23,7 +23,7 @@ namespace Piot.Surge.Pulse.Client
 
             if (logicalInputSetBeforePrediction.payload.IsEmpty)
             {
-                throw new Exception("we should provide some input");
+                throw new("we should provide some input");
             }
 
             PredictStateSerializer.SavePredictedState(assignedAvatar, tickIdAfterPredictTick, saveFromWorld, undoWriter.Octets,

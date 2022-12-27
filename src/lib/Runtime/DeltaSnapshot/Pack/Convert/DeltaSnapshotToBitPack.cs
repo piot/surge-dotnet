@@ -4,11 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System.Linq;
-using Piot.Surge.Ecs2;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.Surge.Core;
 using Piot.Surge.DeltaSnapshot.ComponentFieldMask;
+using Piot.Surge.Ecs2;
 using Piot.Surge.Event;
 using Piot.Surge.Event.Serialization;
 using Piot.Surge.FieldMask;
@@ -54,7 +54,7 @@ namespace Piot.Surge.DeltaSnapshot.Pack.Convert
                     {
                         continue;
                     }
-                    
+
                     var isLogicComponent = DataInfo.logicComponentTypeIds!.Contains(componentTypeId.id);
                     if (isClientSidePredicted)
                     {

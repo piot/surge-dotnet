@@ -21,7 +21,7 @@ namespace Piot.Surge.Core
     {
         Logic,
         Ghost,
-        Input,
+        Input
     }
 
     public struct MetaInfo

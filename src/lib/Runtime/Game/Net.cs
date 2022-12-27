@@ -6,7 +6,6 @@
 #nullable enable
 
 using System;
-using Piot.Surge.Ecs2;
 using Piot.Clog;
 using Piot.Hazy;
 using Piot.MonotonicTime;
@@ -15,6 +14,7 @@ using Piot.SerializableVersion;
 using Piot.Surge;
 using Piot.Surge.Core;
 using Piot.Surge.DeltaSnapshot.Pack;
+using Piot.Surge.Ecs2;
 using Piot.Surge.Pulse.Host;
 using Piot.Surge.Tick;
 using Piot.Transport;
@@ -55,9 +55,9 @@ namespace Surge.Game
             {
                 eventProcessor = controlInfo.eventProcessor, timeProvider = controlInfo.timeProvider
             };
-            
+
             log.Debug("Surge Net is started");
-            
+
             // HACK!!!! TODO:
             //Tools = new(gameVersion, toolsInfo, log.SubLog("GameTools"));
         }
@@ -123,7 +123,7 @@ namespace Surge.Game
             }
 
             Game = new(CreateGameInfo(true), Tools is null ? OnSnapshotPlayback : Tools.RawSnapshotReplayRecorder.SnapshotPlaybackNotify, onCreatedConnection, hostSimulationTickRunSystems,
-                predictTickMethod,GameMode.HostAndClient,
+                predictTickMethod, GameMode.HostAndClient,
                 log.SubLog("Game"));
         }
 

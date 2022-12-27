@@ -3,9 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-
-
-using System;
 using System.Collections.Generic;
 using Piot.Surge.Core;
 
@@ -21,22 +18,22 @@ namespace Piot.Surge.Ecs2
             var found = components.TryGetValue(DataIdLookup<T>.value, out var foundComponentInfo);
             if (!found)
             {
-                throw new Exception($"could not grab componentInfo {DataIdLookup<T>.value}");
+                throw new($"could not grab componentInfo {DataIdLookup<T>.value}");
             }
 
             if (foundComponentInfo is null)
             {
-                throw new Exception($"could not grab componentInfo {DataIdLookup<T>.value}");
+                throw new($"could not grab componentInfo {DataIdLookup<T>.value}");
             }
 
             if (foundComponentInfo.data is null)
             {
-                throw new Exception($"internal error. data is null for component");
+                throw new("internal error. data is null for component");
             }
-            
+
             return (T)foundComponentInfo.data;
         }
-        
+
         public T GrabOrCreate<T>() where T : struct
         {
             var found = components.TryGetValue(DataIdLookup<T>.value, out var foundComponentInfo);
@@ -64,10 +61,10 @@ namespace Piot.Surge.Ecs2
             {
                 return null;
             }
-            
+
             if (foundComponentInfo.data is null)
             {
-                throw new Exception($"internal error. Get<T>.  {typeof(T).FullName} data is null for component");
+                throw new($"internal error. Get<T>.  {typeof(T).FullName} data is null for component");
             }
 
             return (T)foundComponentInfo.data!;
@@ -98,10 +95,10 @@ namespace Piot.Surge.Ecs2
             {
                 data = data
             };
-            
+
             if (componentInfo.data is null)
             {
-                throw new Exception($"internal error. Set<T> {typeof(T).FullName}. data is null for component");
+                throw new($"internal error. Set<T> {typeof(T).FullName}. data is null for component");
             }
 
             components.Add(dataId, componentInfo);

@@ -3,8 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System.Collections.Generic;
-
 namespace Piot.Surge.DeltaSnapshot.ComponentFieldMask
 {
     public readonly struct ComponentChangedFieldMask

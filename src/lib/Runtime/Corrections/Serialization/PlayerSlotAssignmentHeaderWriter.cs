@@ -5,8 +5,6 @@
 
 using Piot.Flood;
 using Piot.Surge.LocalPlayer;
-using Piot.Surge.LocalPlayer.Serialization;
-using Piot.Surge.Types.Serialization;
 
 namespace Piot.Surge.Corrections.Serialization
 {

@@ -5,10 +5,10 @@
 
 using System;
 using System.Collections.Generic;
-using Piot.Surge.Ecs2;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.Surge.Core;
+using Piot.Surge.Ecs2;
 using Piot.Surge.Tick;
 using Piot.Surge.Types.Serialization;
 

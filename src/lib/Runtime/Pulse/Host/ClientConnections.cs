@@ -53,7 +53,7 @@ namespace Piot.Surge.Pulse.Host
 
             connections[connectionId.Value].AssignEntityToControlToPlayer(localPlayerIndex, entity, shouldPredict);
         }
-        
+
         public void AssignPlayerSlotEntity(EndpointId connectionId, LocalPlayerIndex localPlayerIndex,
             EntityId entity)
         {
@@ -69,7 +69,7 @@ namespace Piot.Surge.Pulse.Host
 
             connections[connectionId.Value].AssignPlayerSlotEntityToPlayer(localPlayerIndex, entity);
         }
-        
+
 
         public void ReceiveFromClients(TickId serverTickId)
         {

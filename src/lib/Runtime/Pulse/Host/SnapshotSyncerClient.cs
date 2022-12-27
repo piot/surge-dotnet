@@ -50,7 +50,7 @@ namespace Piot.Surge.Pulse.Host
             var wasFound = AssignedPredictedEntityForLocalPlayers.TryGetValue(localPlayerIndex, out var existingAssignment);
             if (!wasFound || existingAssignment is null)
             {
-                throw new Exception($"can not set an predicted entity for {localPlayerIndex} before player slot entity Id is assigned");
+                throw new($"can not set an predicted entity for {localPlayerIndex} before player slot entity Id is assigned");
             }
 
             existingAssignment.entityToControl = predictEntityId;
@@ -75,7 +75,7 @@ namespace Piot.Surge.Pulse.Host
                 existingAssignment.entityToControl = playerSlotEntity;
             }
 
-            
+
         }
 
         public void SetExpectedTickIdByRemote(TickId tickId, uint droppedCount)

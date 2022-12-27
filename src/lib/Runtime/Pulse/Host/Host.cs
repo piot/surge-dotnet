@@ -39,14 +39,14 @@ namespace Piot.Surge.Pulse.Host
         readonly ClientConnections clientConnections;
         readonly IDataSender dataSender;
         readonly IEntityManagerReceiver entityManagerReceiver;
-        readonly ILog log;
         readonly ILog inputLog;
+        readonly ILog log;
+        readonly Action simulationTickRunSystems;
         readonly SnapshotSyncer snapshotSyncer;
         readonly TimeTicker statsTicker;
         readonly ITransport transport;
         readonly TransportStatsBoth transportWithStats;
         TickId authoritativeTickId;
-        readonly Action simulationTickRunSystems;
 
         public Host(HostInfo info, ILog log)
         {

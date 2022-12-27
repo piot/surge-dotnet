@@ -17,12 +17,12 @@ namespace Piot.Surge.Pulse.Client
     {
         readonly Dictionary<byte, AvatarPredictor> localAvatarPredictors = new();
         readonly ILog log;
-        IDataSender writeFromWorld;
-        Action<EntityId> predictTickMethod;
-        IEcsWorldSetter worldClient;
-        IDataReceiver worldClientReceiver;
-        
-        public ClientPredictor(IDataSender writeFromWorld, IDataReceiver worldClientReceiver,  IEcsWorldSetter worldClient, Action<EntityId> predictTickMethod, ILog log)
+        readonly Action<EntityId> predictTickMethod;
+        readonly IEcsWorldSetter worldClient;
+        readonly IDataReceiver worldClientReceiver;
+        readonly IDataSender writeFromWorld;
+
+        public ClientPredictor(IDataSender writeFromWorld, IDataReceiver worldClientReceiver, IEcsWorldSetter worldClient, Action<EntityId> predictTickMethod, ILog log)
         {
             this.writeFromWorld = writeFromWorld;
             this.worldClientReceiver = worldClientReceiver;

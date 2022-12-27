@@ -46,6 +46,7 @@ namespace Piot.Surge.DeltaSnapshot.Pack
             {
                 octetString += "...";
             }
+
             return $"[snapshotDeltaPack tickId: {tickIdRange} type:{SnapshotType}  payload length: {payload.Length} octets:{octetString}]";
         }
     }

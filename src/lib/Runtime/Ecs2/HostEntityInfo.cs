@@ -3,9 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-
-
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Piot.Flood;
@@ -21,7 +18,7 @@ namespace Piot.Surge.Ecs2
         public readonly HashSet<uint> destroyedComponents = new();
 
         public String64 Name { get; set; } = new("");
-        
+
 
         public uint[] DestroyedComponents()
         {
@@ -29,7 +26,7 @@ namespace Piot.Surge.Ecs2
             destroyedComponents.Clear();
             return array;
         }
-        
+
         public void Set<T>(T data) where T : struct
         {
 
@@ -62,13 +59,13 @@ namespace Piot.Surge.Ecs2
                 componentInfo.Data = new T();
                 if (componentInfo.Data is null)
                 {
-                    throw new Exception($"internal error. we just set the data, but it is still null, {componentInfo.changedFieldMask}");
+                    throw new($"internal error. we just set the data, but it is still null, {componentInfo.changedFieldMask}");
                 }
             }
 
             if (componentInfo.Data is null)
             {
-                throw new Exception($"internal error. data is null, but it has been set before {componentInfo.changedFieldMask}");
+                throw new($"internal error. data is null, but it has been set before {componentInfo.changedFieldMask}");
             }
 
             componentInfo.componentWriter!.Data = data;
@@ -77,7 +74,7 @@ namespace Piot.Surge.Ecs2
             {
                 //Debug.LogError($"ComponentInfo.Data is null {componentInfo.changedFieldMask}");
             }
-            
+
             var fieldChangeMask = DataDiffer<T>.diff!.Invoke(data, (T)componentInfo.Data!);
 
             componentInfo.changedFieldMask |= fieldChangeMask;
@@ -98,8 +95,9 @@ namespace Piot.Surge.Ecs2
         {
             if (!components.ContainsKey(componentTypeId))
             {
-                throw new Exception($"{componentTypeId} {mask}");
+                throw new($"{componentTypeId} {mask}");
             }
+
             components[componentTypeId].componentWriter!.WriteMask(writer, mask);
         }
 
@@ -113,7 +111,7 @@ namespace Piot.Surge.Ecs2
 
             return componentInfo;
         }
-        
+
         public T? Get<T>() where T : struct
         {
             var lookup = components.TryGetValue(DataIdLookup<T>.value, out var foundComponent);
@@ -143,11 +141,12 @@ namespace Piot.Surge.Ecs2
             {
                 return false;
             }
+
             if (lookup.changedFieldMask == ChangedFieldsMask.DeletedMaskBit)
             {
                 return false;
             }
-            
+
             data = (T)lookup.Data!;
 
             return true;
@@ -165,7 +164,7 @@ namespace Piot.Surge.Ecs2
             {
                 throw new($"internal error. component is already deleted null {DataIdLookup<T>.value}");
             }
-            
+
 
             foundComponent.changedFieldMask = ChangedFieldsMask.DeletedMaskBit;
             //foundComponent.Data = null;
@@ -178,6 +177,7 @@ namespace Piot.Surge.Ecs2
             {
                 destroyedComponents.Add(component.Key);
             }
+
             components.Clear();
         }
 

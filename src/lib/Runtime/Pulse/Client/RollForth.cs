@@ -20,8 +20,11 @@ namespace Piot.Surge.Pulse.Client
         )
         {
             log.Info("Rollforth to end");
-            
-            clientWorld.Set(predictedEntity.Value, new RollMode { mode = EntityRollMode.Rollforth });
+
+            clientWorld.Set(predictedEntity.Value, new RollMode
+            {
+                mode = EntityRollMode.Rollforth
+            });
 
             foreach (var predictItem in predictCollection.RemainingItems())
             {
@@ -34,10 +37,10 @@ namespace Piot.Surge.Pulse.Client
                     {
                         break;
                     }
-                    
+
                     DataStreamReceiver.ReceiveNew(inputBitReader, predictedEntity.Value, componentTypeId.id, clientReceiver);
                 }
-                
+
                 var sameInputAsPrevious =
                     new LogicalInput.LogicalInput(new(0), predictItem.tickId.Previous,
                         predictItem.inputPackSetBeforeThisTick.Span);

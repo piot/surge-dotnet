@@ -4,13 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
-using Piot.Surge.Ecs2;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.SerializableVersion;
 using Piot.Surge.CompleteSnapshot;
 using Piot.Surge.DeltaSnapshot.Pack;
+using Piot.Surge.Ecs2;
 using Piot.Surge.Replay.Serialization;
 using Piot.Surge.Tick;
 using Constants = Piot.Surge.SnapshotProtocol.Constants;

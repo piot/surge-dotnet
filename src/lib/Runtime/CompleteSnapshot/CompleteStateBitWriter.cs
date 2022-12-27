@@ -4,10 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
-using Piot.Surge.Ecs2;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.Surge.Core;
+using Piot.Surge.Ecs2;
 using Piot.Surge.Event;
 using Piot.Surge.Event.Serialization;
 using Piot.Surge.Types.Serialization;

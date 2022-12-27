@@ -3,8 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,13 +17,14 @@ namespace Piot.Surge.Ecs2
         public uint[] destroyedEntityIds;
         public uint[] modifiedEntityIds;
     }
+
     public class EcsWorldClient : IEcsWorldFetcher, IEcsWorldSetter, IDataReceiver
     {
-        readonly Dictionary<uint, ClientEntityInfo> entities = new();
-        readonly ILog log;
 
         readonly List<uint> createdEntities = new();
         readonly List<uint> deletedEntities = new();
+        readonly Dictionary<uint, ClientEntityInfo> entities = new();
+        readonly ILog log;
         readonly HashSet<uint> modifiedEntities = new();
 
         public EcsWorldClient(ILog log)
@@ -41,39 +40,16 @@ namespace Piot.Surge.Ecs2
 
             entities[entityId].Set(data);
         }
-
-        public T Grab<T>(uint entityId) where T : struct
-        {
-            var foundExistingEntity = entities.TryGetValue(entityId, out var entityInfo);
-            if (!foundExistingEntity || entityInfo is null)
-            {
-                throw new($"could not find existing {entityId}");
-            }
-
-            return entityInfo.Grab<T>();
-        }
         public T GrabOrCreate<T>(uint entityId) where T : struct
         {
             var foundExistingEntity = entities.TryGetValue(entityId, out var entityInfo);
             if (!foundExistingEntity || entityInfo is null)
             {
-                entityInfo = new ClientEntityInfo();
+                entityInfo = new();
                 entities[entityId] = entityInfo;
             }
-            return entityInfo.GrabOrCreate<T>();
-        }
 
-        public void Set<T>(uint entityId, T data) where T : struct
-        {
-            var foundExistingEntity = entities.TryGetValue(entityId, out var existingEntityInfo);
-            if (!foundExistingEntity || existingEntityInfo is null)
-            {
-                existingEntityInfo = new();
-                entities[entityId] = existingEntityInfo;
-                createdEntities.Add(entityId);
-            }
-            modifiedEntities.Add(entityId);
-            existingEntityInfo.Set(data);
+            return entityInfo.GrabOrCreate<T>();
         }
 
         public void ReceiveNew<T>(uint entityId, T data) where T : struct
@@ -102,19 +78,18 @@ namespace Piot.Surge.Ecs2
         {
             entities.Clear();
         }
-        
-        public ChangeInformation Changes()
+
+        public T Grab<T>(uint entityId) where T : struct
         {
-            var change = new ChangeInformation
+            var foundExistingEntity = entities.TryGetValue(entityId, out var entityInfo);
+            if (!foundExistingEntity || entityInfo is null)
             {
-                createdEntityIds = createdEntities.ToArray(), destroyedEntityIds = deletedEntities.ToArray(), modifiedEntityIds = modifiedEntities.ToArray()
-            };
-            createdEntities.Clear();
-            deletedEntities.Clear();
-            modifiedEntities.Clear();
-            return change;
+                throw new($"could not find existing {entityId}");
+            }
+
+            return entityInfo.Grab<T>();
         }
-        
+
         public IEnumerable<object> Components { get; }
 
         T? IEcsWorldFetcher.Get<T>(uint entityId)
@@ -135,8 +110,34 @@ namespace Piot.Surge.Ecs2
             {
                 return false;
             }
-            
+
             return existingEntityInfo.HasComponent<T>();
+        }
+
+        public void Set<T>(uint entityId, T data) where T : struct
+        {
+            var foundExistingEntity = entities.TryGetValue(entityId, out var existingEntityInfo);
+            if (!foundExistingEntity || existingEntityInfo is null)
+            {
+                existingEntityInfo = new();
+                entities[entityId] = existingEntityInfo;
+                createdEntities.Add(entityId);
+            }
+
+            modifiedEntities.Add(entityId);
+            existingEntityInfo.Set(data);
+        }
+
+        public ChangeInformation Changes()
+        {
+            var change = new ChangeInformation
+            {
+                createdEntityIds = createdEntities.ToArray(), destroyedEntityIds = deletedEntities.ToArray(), modifiedEntityIds = modifiedEntities.ToArray()
+            };
+            createdEntities.Clear();
+            deletedEntities.Clear();
+            modifiedEntities.Clear();
+            return change;
         }
     }
 }

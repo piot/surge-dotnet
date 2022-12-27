@@ -57,13 +57,13 @@ namespace Piot.Surge.Pulse.Host
             {
                 connectionPlayer = ConnectionPlayers[localPlayerIndex.Value];
             }
-            
+
             log.Debug("Set assigned {PredictEntity} for {LocalPlayerIndex}", predictEntity, localPlayerIndex);
 
             connectionPlayer.AssignedPredictEntity = predictEntity;
             syncer.SetEntityToControl(localPlayerIndex, predictEntity, shouldPredict);
         }
-        
+
         public void AssignPlayerSlotEntityToPlayer(LocalPlayerIndex localPlayerIndex, EntityId playerSlotEntity)
         {
             ConnectionPlayer connectionPlayer;
@@ -79,7 +79,7 @@ namespace Piot.Surge.Pulse.Host
             }
 
             log.Debug("Set assigned {PlayerSlotEntity} for {LocalPlayerIndex}", playerSlotEntity, localPlayerIndex);
-            
+
             connectionPlayer.PlayerSlotEntity = playerSlotEntity;
             syncer.SetAssignedPlayerSlotEntity(localPlayerIndex, playerSlotEntity);
         }

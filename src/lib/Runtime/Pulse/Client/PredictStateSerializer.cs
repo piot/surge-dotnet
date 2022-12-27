@@ -26,6 +26,7 @@ namespace Piot.Surge.Pulse.Client
                 {
                     continue;
                 }
+
                 ComponentTypeIdWriter.Write(savePredictedStateWriter, new((ushort)logicComponentTypeId));
                 log.Debug("writing {EntityId} {ComponentTypeId}", predictedEntity, logicComponentTypeId);
                 sender.WriteFull(savePredictedStateWriter, predictedEntity.Value, (ushort)logicComponentTypeId);
@@ -36,7 +37,7 @@ namespace Piot.Surge.Pulse.Client
 
             if (count == 0 && isPredicting)
             {
-                throw new Exception($"there were no state to save on the predicted {predictedEntity}");
+                throw new($"there were no state to save on the predicted {predictedEntity}");
             }
 
             log.Debug("Storing predict input for {TickId}", tickIdAfterPrediction);

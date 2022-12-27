@@ -3,14 +3,13 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using Piot.Surge.Ecs2;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.Surge.Core;
+using Piot.Surge.Ecs2;
 using Piot.Surge.LocalPlayer;
 using Piot.Surge.LocalPlayer.Serialization;
 using Piot.Surge.Tick;
@@ -27,15 +26,15 @@ namespace Piot.Surge.Pulse.Client
     public sealed class ClientLocalInputFetchAndSend : IClientPredictorCorrections
     {
         readonly BundleAndSendOutInput bundleAndSendOutInput;
-        readonly IDataSender toHostDataSender;
         readonly TimeTicker fetchInputTicker;
         readonly FixedDeltaTimeMs fixedSimulationDeltaTimeMs;
         readonly ILog log;
         readonly ClientPredictor notifyPredictor;
+        readonly IDataSender toHostDataSender;
         readonly IDataReceiver world;
-        bool weHaveReceivedInitialSnapshot = false;
 
         TickId inputTickId = new(1); // HACK: We need it to start ahead of the host
+        bool weHaveReceivedInitialSnapshot;
 
         public ClientLocalInputFetchAndSend(ClientPredictor notifyPredictor,
             bool usePrediction, ITransportClient transportClient,
@@ -54,18 +53,11 @@ namespace Piot.Surge.Pulse.Client
 
             var localPlayerIndex = new LocalPlayerIndex(1);
             var fakeAvatarPredictor = notifyPredictor.CreateAvatarPredictor(localPlayerIndex, new(53));
-            LocalPlayerInputs.Add(localPlayerIndex.Value, new (localPlayerIndex, fakeAvatarPredictor, log));
-            
-            
+            LocalPlayerInputs.Add(localPlayerIndex.Value, new(localPlayerIndex, fakeAvatarPredictor, log));
+
+
         }
 
-        public void StartPredictionFromTickId(TickId tickId)
-        {
-            log.Debug("Starting actual prediction input since we have received first snapshot");
-            TickId = tickId;
-            weHaveReceivedInitialSnapshot = true;
-        }
-        
 
         public TickId TickId
         {
@@ -88,6 +80,34 @@ namespace Piot.Surge.Pulse.Client
         public bool ShouldStoreInputToPrediction { get; set; } = true;
 
         public Dictionary<byte, LocalPlayerInput> LocalPlayerInputs { get; } = new();
+
+        public void ReadPredictEntityIdsForLocalPlayers(IBitReader snapshotReader)
+        {
+            var localPlayerInformationCount = snapshotReader.ReadBits(4);
+
+            for (var i = 0; i < localPlayerInformationCount; ++i)
+            {
+                var localPlayerIndex = LocalPlayerIndexReader.Read(snapshotReader);
+                EntityIdReader.Read(snapshotReader, out var targetEntityId);
+
+                var wasFound = LocalPlayerInputs.TryGetValue(localPlayerIndex.Value, out var localPlayerInput);
+                if (!wasFound || localPlayerInput is null)
+                {
+                    log.Debug("assigned an avatar to {LocalPlayer} {EntityId}", localPlayerIndex, targetEntityId);
+
+                    var createdPredictor = notifyPredictor.CreateAvatarPredictor(localPlayerIndex, targetEntityId);
+                    localPlayerInput = new(localPlayerIndex, createdPredictor, log);
+                    LocalPlayerInputs[localPlayerIndex.Value] = localPlayerInput;
+                }
+            }
+        }
+
+        public void StartPredictionFromTickId(TickId tickId)
+        {
+            log.Debug("Starting actual prediction input since we have received first snapshot");
+            TickId = tickId;
+            weHaveReceivedInitialSnapshot = true;
+        }
 
 
 
@@ -117,27 +137,6 @@ namespace Piot.Surge.Pulse.Client
                 }
             }
 
-        }
-
-        public void ReadPredictEntityIdsForLocalPlayers(IBitReader snapshotReader)
-        {
-            var localPlayerInformationCount = snapshotReader.ReadBits(4);
-
-            for (var i = 0; i < localPlayerInformationCount; ++i)
-            {
-                var localPlayerIndex = LocalPlayerIndexReader.Read(snapshotReader);
-                EntityIdReader.Read(snapshotReader, out var targetEntityId);
-                
-                var wasFound = LocalPlayerInputs.TryGetValue(localPlayerIndex.Value, out var localPlayerInput);
-                if (!wasFound || localPlayerInput is null)
-                {
-                    log.Debug("assigned an avatar to {LocalPlayer} {EntityId}", localPlayerIndex, targetEntityId);
-
-                    var createdPredictor = notifyPredictor.CreateAvatarPredictor(localPlayerIndex, targetEntityId);
-                    localPlayerInput = new(localPlayerIndex, createdPredictor, log);
-                    LocalPlayerInputs[localPlayerIndex.Value] = localPlayerInput;
-                }
-            }
         }
 
         public void AdjustInputTickSpeed(TickId lastReceivedServerTickId, uint roundTripTimeMs)
@@ -205,8 +204,7 @@ namespace Piot.Surge.Pulse.Client
             var now = fetchInputTicker.Now;
 
             log.Debug("--- Fetch And Store Input Tick {TickId}", inputTickId);
-            
-            
+
 
             var localPlayerInputsArray = LocalPlayerInputs.Values.ToArray();
 
@@ -228,7 +226,7 @@ namespace Piot.Surge.Pulse.Client
                     return;
                 }
             }
-            
+
             log.Debug("Client Local Input Tick {InputTickId}", inputTickId);
 
             if (weHaveReceivedInitialSnapshot)
@@ -239,7 +237,7 @@ namespace Piot.Surge.Pulse.Client
 
                 if (inputsPackThisTick.Length != localPlayerInputsArray.Length)
                 {
-                    throw new Exception("internal error, needs to have one input pack for each local input player");
+                    throw new("internal error, needs to have one input pack for each local input player");
                 }
 
                 log.Debug("--- Fetch And Store Input Tick result {LocalCount} {TickId} {InputsPackThisTick}", localPlayerInputsArray.Length, inputTickId, inputsPackThisTick);

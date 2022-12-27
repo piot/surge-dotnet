@@ -60,7 +60,7 @@ namespace Piot.Surge.Pulse.Client
                 nextExpectedSnapshotTickId, droppedSnapshotCount);
 
             var completePayload = cachedDatagramWriter.Octets;
-            
+
             log.Debug(
                 "Sending inputs to host {OctetCount} {FirstInputTickId} {HighestInputTickId} {NextExpectedSnapshotTickId} {DroppedCount}",
                 completePayload.Length, logicalInputForAllPlayers.debugFirstId, logicalInputForAllPlayers.debugLastId,

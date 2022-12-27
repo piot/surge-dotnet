@@ -14,8 +14,8 @@ namespace Piot.Surge.Pulse.Client
     public class EntityPredictor
     {
         readonly ILog log;
-        IDataSender writeFromWorld;
-        Action<EntityId> predictTickMethod;
+        readonly Action<EntityId> predictTickMethod;
+        readonly IDataSender writeFromWorld;
 
         public EntityPredictor(IDataSender writeFromWorld, EntityId assignedAvatar, Action<EntityId> predictTickMethod, ILog log)
         {

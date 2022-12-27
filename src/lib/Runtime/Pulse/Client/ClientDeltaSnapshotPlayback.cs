@@ -200,7 +200,7 @@ namespace Piot.Surge.Pulse.Client
             // TODO: Serialize exact bit count
             var bitSnapshotReader =
                 new BitReader(deltaSnapshotPack.payload.Span, deltaSnapshotPack.payload.Length * 8);
-            
+
             try
             {
                 log.Debug("Playback {Snapshot}", deltaSnapshotPack);
@@ -220,8 +220,7 @@ namespace Piot.Surge.Pulse.Client
                 // Just to save some performance of Tick and Notify for a client running on a host
                 return;
             }
-            
-            
+
 
             log.DebugLowLevel("tick ghost logics. we are now at state with {TickId}",
                 playbackTick);

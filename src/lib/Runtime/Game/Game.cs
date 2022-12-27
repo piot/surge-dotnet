@@ -4,13 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
-using Piot.Surge.Ecs2;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.MonotonicTime;
 using Piot.Surge;
 using Piot.Surge.Compress;
 using Piot.Surge.Core;
+using Piot.Surge.Ecs2;
 using Piot.Surge.Pulse.Client;
 using Piot.Surge.Pulse.Host;
 using Piot.Surge.Types.Serialization;
@@ -56,7 +56,7 @@ namespace Surge.Game
             this.dataReceiver = dataReceiver;
             this.log = log;
         }
-        
+
         public void ReceiveMultipleComponentsFullFiltered(IBitReader bitReader, uint entityId, uint[] componentTypeIdFilters)
         {
             while (true)
@@ -66,7 +66,7 @@ namespace Surge.Game
                 {
                     break;
                 }
-                
+
                 log.Debug("Received input {Entity} {Component}. Let set it to Host World", entityId, componentTypeId);
 
                 DataStreamReceiver.ReceiveNew(bitReader, entityId, componentTypeId.id, dataReceiver);

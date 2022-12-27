@@ -5,15 +5,14 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Piot.Surge.Ecs2;
 using Piot.Clog;
 using Piot.Flood;
 using Piot.Surge.CompleteSnapshot;
 using Piot.Surge.Compress;
-using Piot.Surge.Corrections.Serialization;
 using Piot.Surge.DeltaSnapshot.ComponentFieldMask;
 using Piot.Surge.DeltaSnapshot.Pack;
 using Piot.Surge.DeltaSnapshot.Pack.Convert;
+using Piot.Surge.Ecs2;
 using Piot.Surge.Event;
 using Piot.Surge.SnapshotProtocol;
 using Piot.Surge.SnapshotProtocol.Out;
@@ -29,8 +28,8 @@ namespace Piot.Surge.Pulse.Host
         readonly OctetWriter cachedCompleteCompressedDeltaSnapshotPackWriter = new(12 * 1024);
         readonly OctetWriter cachedCompressionWriter = new(12 * 1024);
         readonly OctetWriter cachedDatagramsWriter = new(Transport.Constants.MaxDatagramOctetSize);
-        readonly OctetWriter cachedSinglePredictionHeaderWriter = new(1024);
         readonly BitWriter cachedPlayerSlotAssignmentWriter = new(10 * 1024);
+        readonly OctetWriter cachedSinglePredictionHeaderWriter = new(1024);
         readonly IMultiCompressor compression;
         readonly CompressorIndex compressorIndex;
         readonly ILog log;

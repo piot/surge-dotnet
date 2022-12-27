@@ -3,8 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-
-
 // ReSharper disable UnassignedField.Global
 namespace Piot.Surge.Core
 {

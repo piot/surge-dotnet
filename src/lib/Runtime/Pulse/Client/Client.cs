@@ -5,11 +5,11 @@
 
 using System;
 using System.Collections.Generic;
-using Piot.Surge.Ecs2;
 using Piot.Clog;
 using Piot.MonotonicTime;
 using Piot.Surge.Compress;
 using Piot.Surge.Core;
+using Piot.Surge.Ecs2;
 using Piot.Surge.Tick;
 using Piot.Surge.TimeTick;
 using Piot.Transport;
@@ -50,7 +50,7 @@ namespace Piot.Surge.Pulse.Client
 
             transportWithStats = new(info.assignedTransport, info.now);
             transportClient = new TransportClient(transportWithStats);
-            clientPredictor = new(info.clientToHostDataSender, info.fromHostDataReceiver, info.clientWorldSetter , info.predictTickMethod, log.SubLog("ClientPredictor"));
+            clientPredictor = new(info.clientToHostDataSender, info.fromHostDataReceiver, info.clientWorldSetter, info.predictTickMethod, log.SubLog("ClientPredictor"));
             const bool usePrediction = true;
             localInputFetchAndSend = new(clientPredictor, usePrediction,
                 transportClient, info.now,

@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+
+
 using System.Collections.Generic;
 using Piot.Flood;
 using Piot.Surge.LocalPlayer;
@@ -18,7 +20,7 @@ namespace Piot.Surge.SnapshotProtocol.In
         {
             var count = reader.ReadBits(3);
             var localPlayerAssignmentDictionary = new Dictionary<LocalPlayerIndex, LocalPlayerAssignments>();
-            for (var i=0; i<count;++i)
+            for (var i = 0; i < count; ++i)
             {
                 var localPlayerIndex = LocalPlayerIndexReader.Read(reader);
                 var assignment = new LocalPlayerAssignments();

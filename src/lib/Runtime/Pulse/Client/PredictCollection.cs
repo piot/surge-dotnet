@@ -116,7 +116,7 @@ namespace Piot.Surge.Pulse.Client
                 undoPack = undoPack.ToArray(),
                 logicStatePack = logicStatePack.ToArray(),
                 inputPackSetBeforeThisTick = inputPack.ToArray(),
-                logicStateFnvChecksum = Fnv.Fnv.ToFnv(logicStatePack),
+                logicStateFnvChecksum = Fnv.Fnv.ToFnv(logicStatePack)
             });
         }
 
